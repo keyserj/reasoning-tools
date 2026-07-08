@@ -565,15 +565,17 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 ###### Notes
 
-- guides weights can chain the same way causal weights do, to prioritize questions within the question hierarchy: e.g. if Q2 guides[7] Q1 and Q1 guides[8] the topic, Q2's priority relative to the topic multiplies (and attenuates) through the chain
-- prioritizing a question in relation to arbitrary nodes (see Clarifies notes below) seems to make less sense for guides: guiding questions only relate to the topic node / other guiding questions, so there's no causal chain connecting them to specific concept nodes - their relevance to a specific node would come from map content that exploring the question hasn't produced yet
+- `guides` weights can chain the same way causal weights do, to prioritize questions within the question hierarchy: e.g. if Q2 guides[7] Q1 and Q1 guides[8] the topic, Q2's priority relative to the topic multiplies (and attenuates) through the chain
+- the chaining can also extend through causal edges to prioritize a guiding question in relation to any node (see Clarifies notes below), since topic nodes are concepts in the causal web
+	- especially relevant if multiple topic nodes are allowed in the future (e.g. a topic "build a wall" that reduces a topic "illegal immigration" - separate topics would allow people to focus on "build a wall" specifically, as opposed to generally looking at "illegal immigration")
 
 ##### Clarifies
 
 ###### Notes
 
+- `clarifies` scores indicate uncertainty about the clarified node (until the question is answered)
 - enables prioritizing a question in relation to _any_ node in the map, not just the node it directly clarifies, using the same multiply-along-edges machinery as causal chains (see Causes notes above)
-	- e.g. for a question clarifying C, where A causes B causes C: multiplying C's scored importance x the causal chain weights (A causes B, B causes C) x the clarifies weight conveys how much impact the question has on A
+	- e.g. for a question clarifying C, where A causes B causes C: multiplying C's scored importance x the causal chain weights (A causes B, B causes C) x the clarifies weight conveys how much impact the question has on A (how uncertain we are about it)
 
 ##### Mentions
 

@@ -104,7 +104,7 @@
 	- `&some-id`: sets an id on the node/edge it follows
 	- `$some-id`: references an id
   	- the node on the other end of an edge can be specified inline this way (e.g. `> reduces[3] $illegal-immig`) instead of nesting it
-		- `= $some-id`: references the implied claim behind that node's/edge's score, so it can be supported/critiqued
+		- `= $some-id`: references the implied claim behind that node's/edge's score, so it can be supported/critiqued/clarified
 	- `#tag`: explicitly specifies a subtype - subtypes like category/component/option/goal/criterion are implied by their edges so aren't tagged
 	- `~`: a note relevant to its parent line - it would show visually if this were rendered
 	- `/`: a meta comment about the example, noting something about its parent line - it wouldn't show if rendered
@@ -163,8 +163,8 @@
       / guiding question guiding another guiding question
 
 ? How do most people illegally enter the US? &how-enter
-  / clarifying question (fact-requesting about a specific node)
-  > clarifies[7] $wall
+  / clarifying question (fact-requesting); it clarifies an edge, via the edge's implied claim
+  > clarifies[7] $wall-achieves
   < answers[8]
     =[3] Most enter by crossing the border on foot between ports of entry &enter-on-foot
       / claim option
@@ -245,7 +245,7 @@
 		- Criterion: `inexpensive` / `quick` / `humane` (criterion for the `best-ways` question); `more-admin` / `fewer-requirements` fulfil `inexpensive` directly, while `wall` fulfils it via a causal-fulfils chain (`wall` causes `wall-cost`, which fulfils[-7] `inexpensive`)
 	- Question
 		- Guiding Question: `best-ways` guides the topic; `why-immigrate` guides `best-ways`
-		- Clarifying Question: `how-enter` clarifies `wall`
+		- Clarifying Question: `how-enter` clarifies the `wall-achieves` edge, via the edge's implied claim
 	- Claim
 		- All: `easy-climb` supports `climb-over`; `unclimbable` supports[-4] (i.e. critiques) `climb-over`
 		- Statistic: `texas-stat`
@@ -475,6 +475,10 @@
 ##### Clarifying Question
 
 - Clarifying Question clarifies Node ?
+
+###### Notes
+
+- questions should be able to clarify edges too - easiest way seems to be having the question clarify the edge's implied claim (implied claims are nodes, so `clarifies Node` already covers this); see `how-enter` in the [Example](#Example)
 
 #### Claim
 

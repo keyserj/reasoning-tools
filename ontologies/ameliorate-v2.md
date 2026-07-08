@@ -166,7 +166,7 @@
     =[7] Most enter legally and overstay visas &visa-overstay
       / claim option
 
-/ --- Criteria: for evaluating the options (3 criteria × 3 options = a minimal tradeoffs table) ---
+/ --- Criteria: for evaluating the options (3 criteria x 3 options = a minimal tradeoffs table) ---
 
 *[7] Inexpensive &inexpensive
   / criterion: worded so that more of it is good
@@ -177,7 +177,7 @@
   < fulfils[-7]
     *[-2] Billions of dollars of construction and maintenance spending &wall-cost
       < causes[9] $wall
-        / the wall's fulfilment of "inexpensive" comes via this causal-fulfils chain (causes[9] × fulfils[-7])
+        / the wall's fulfilment of "inexpensive" comes via this causal-fulfils chain (causes[9] x fulfils[-7])
 
 *[5] Quick to implement &quick
   / fulfils edges omitted for brevity - only "inexpensive" shows them
@@ -381,7 +381,7 @@
 
 ###### Purpose
 
-- Enable a tradeoffs table: options along one axis, criteria along the other; each option's value = sum over criteria of (how much the option fulfils the criterion) × (how important the criterion is, -9 to 9)
+- Enable a tradeoffs table: options along one axis, criteria along the other; each option's value = sum over criteria of (how much the option fulfils the criterion) x (how important the criterion is, -9 to 9)
 	- In theory, this table could be created just by looking all the things caused/reduced by a solution, but generally it's much easier to think about through a smaller set of common criteria
 - Provide a way for "causing too much of a thing" to create negative value (e.g. a solution that creates excess would poorly fulfil "avoids excess")
 

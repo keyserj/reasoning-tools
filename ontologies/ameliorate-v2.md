@@ -287,6 +287,11 @@
 
 #### Concept
 
+##### Purpose
+
+1. Enable breaking down arguments into smaller pieces, so that discussions can be more precise
+2. Model real-world relations, so that discussions are better-grounded in reality
+
 ##### Topic
 
 ###### Meaning
@@ -447,6 +452,14 @@
 		- kind of nice to allow sources to have different credibility based on the topic
 
 ### Individual: Scores
+
+#### Purpose
+
+There are a few different kinds of scores, as specified below. The reasons for these scores are mainly to:
+
+1. allow individual opinions to be succinctly and precisely expressed, making it easy to identify agreement and disagreement
+2. allow individual opinions to be specified separately from reasoning, so that the shared map structure can capture all reasons without perspective-based conflict
+3. allow views to be generated automatically based on specific individuals' perspectives
 
 #### Concept scoring semantics: desirability/importance?
 

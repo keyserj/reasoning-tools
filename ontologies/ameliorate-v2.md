@@ -63,8 +63,8 @@
 		- Goal? - Concept achieves {Concept} ?
 		- Criterion - Concept fulfils {Concept}; {Concept} criterion for Question ?
 	- Question
-		- Guiding Question - Guiding Question informs Topic/Guiding-Question ?
-		- Clarifying Question - Clarifying Question informs Node ?
+		- Guiding Question - Guiding Question guides Topic/Guiding-Question ?
+		- Clarifying Question - Clarifying Question clarifies Node
 	- Claim
 		- note: all scores have an implied claim, where supporting claims support a higher score, critiquing claims support a lower score
 		- All - Claim supports/critiques Claim
@@ -81,7 +81,8 @@
 		- causes (opposite: reduces/impedes): how much the source moves the target: -9 = strongly reduces it, 0 = doesn't move it at all, 9 = strongly increases it
 		- achieves?
 		- fulfils: -9 = actively works against it, 0 = doesn't fulfil it at all, 9 = fully fulfils it
-		- informs: 0 = ?, 9 = ?
+		- guides: how much exploring the question would advance the target topic/question: 0 = tangential to it, 9 = central to it (most progress on the target runs through this question)
+		- clarifies: how contingent the target node is on the answer: 0 = answer wouldn't change anything about it, 9 = answer could completely reshape how we see/score it
 		- answers: 0 = doesn't answer, 4-5 = kind of answers, 9 = fully answers
 		- mentions: 0 = doesn't mention, 4-5 = kind of implies, 9 = definitely mentions
 		- supports (opposite: critiques): -9 = strongly critiques, 0 = doesn't relate / hard to say, 9 = strongly supports
@@ -93,7 +94,8 @@
 - Based on arguments about "The US should 'build a wall' to reduce illegal immigration"; tries to show off one of each piece from [Structure](#Structure)
 - Syntax legend:
 	- `*`: Concept node type
-	- `?`: Question node type - guiding vs clarifying is implied by what it informs (a topic/guiding-question vs a specific node)
+	- `?`: Question node type
+  	- guiding vs clarifying is implied by edge type: `guides` (agenda-setting) vs `clarifies` (fact-requesting)
 	- `=`: Claim node type
 	- `@`: Source node type
 	- `<`: edge whose source is the child (nested) line and target is the parent line
@@ -154,15 +156,15 @@
 / --- Questions ---
 
 ? What are the most effective ways to reduce illegal immigration? &best-ways
-  / guiding question
-  > informs[8] $illegal-immig
-  < informs[7]
+  / guiding question (agenda-setting)
+  > guides[8] $illegal-immig
+  < guides[7]
     ? Why do people immigrate illegally? &why-immigrate
-      / guiding question informing a guiding question
+      / guiding question guiding another guiding question
 
 ? How do most people illegally enter the US? &how-enter
-  / clarifying question (informs a specific node)
-  > informs[7] $wall
+  / clarifying question (fact-requesting about a specific node)
+  > clarifies[7] $wall
   < answers[8]
     =[3] Most enter by crossing the border on foot between ports of entry &enter-on-foot
       / claim option
@@ -242,8 +244,8 @@
 		- Goal: `less-illegal-immig` (it's achieved by the options)
 		- Criterion: `inexpensive` / `quick` / `humane` (criterion for the `best-ways` question); `more-admin` / `fewer-requirements` fulfil `inexpensive` directly, while `wall` fulfils it via a causal-fulfils chain (`wall` causes `wall-cost`, which fulfils[-7] `inexpensive`)
 	- Question
-		- Guiding Question: `best-ways` informs the topic; `why-immigrate` informs `best-ways`
-		- Clarifying Question: `how-enter` informs `wall`
+		- Guiding Question: `best-ways` guides the topic; `why-immigrate` guides `best-ways`
+		- Clarifying Question: `how-enter` clarifies `wall`
 	- Claim
 		- All: `easy-climb` supports `climb-over`; `unclimbable` supports[-4] (i.e. critiques) `climb-over`
 		- Statistic: `texas-stat`
@@ -254,7 +256,7 @@
 	- Scores
 		- Concept score: e.g. `*[-8]` on `danger`
 		- Claim truth score: e.g. `=[8]` on `texas-stat`
-		- Edge weight score: causes[6], reduces[3], impedes[6], achieves[3], fulfils[7]/[-7], informs[8], answers[8], mentions[9], supports[7]/[-6]
+		- Edge weight score: causes[6], reduces[3], impedes[6], achieves[3], fulfils[7]/[-7], guides[8], clarifies[7], answers[8], mentions[9], supports[7]/[-6]
 		- Unscored edges: categorizes, has, criterion for
 		- Implied claims behind scores: `= $wait-causes-illegal-immig` (a causes edge's score), `= $illegal-immig` (a concept's score), `= $murder-supports-worse-score` (a supports edge's score)
 	- note: argument-map "reuse" (same claim in multiple arguments) falls out naturally from the graph: `visa-overstay` both answers `how-enter` and critiques `wall-achieves`
@@ -411,6 +413,19 @@
 
 ##### Questions - Unanswered
 
+- how should guiding vs clarifying questions be scored?
+  - clarifying seems better scored via edge because a question can relate to different nodes in different amounts of relevance
+  - if there's no edge for guiding, then scoring to prioritize a guiding question will be different than scoring a clarifying question
+  - a guiding edge does seem like its importance is to a topic, and we therefore have a similar problem to [TODO: link to section where we talk about node scores being all relative to topic and it not being worth moving these into an edge relation to the topic because there'd be too many edges]
+- "guiding" vs "driving" verbiage?
+  - "driving"
+    - + strong, like "motivating"
+    - - on its own can make people think of cars rather than reasoning
+  - "guiding"
+    - - doesn't imply "motivating" so much
+
+##### Questions - Kind of answered
+
 - can a guiding question have a parent that _isn't_ the topic itself?
   - hmm potentially guiding questions can be broken into further guiding questions? hard to say
     - in this case though, the child "guiding question" probably wouldn't make sense to be displayed in the root set of "guiding questions" for a topic
@@ -419,14 +434,10 @@
     - e.g. "concept: cars going too fast" < informs "question: how fast do cars go on average here?"
     - I guess this means we can't just distinguish guiding vs clarifying via looking at what the parent is
   - for now it seems like we could say that guiding questions will "guide" either the topic node or another guiding question
-- how should guiding vs clarifying questions be scored?
-  - clarifying seems better scored via edge because a question can relate to different nodes in different amounts of relevance
-  - if there's no edge for guiding, then scoring to prioritize a guiding question will be different than scoring a clarifying question
-  - a guiding edge does seem like its importance is to a topic, and we therefore have a similar problem to [TODO: link to section where we talk about node scores being all relative to topic and it not being worth moving these into an edge relation to the topic because there'd be too many edges]
+  - note: this is somewhat similar to the idea that all node scores are relative to the topic (see [Topic](#Topic)'s "how to relate all relevant nodes to the Topic?"). but guiding questions having an edge to topic/question nodes doesn't seem like it'd be too many edges, compared to all nodes having edges to the topic
 - how to distinguish Guiding vs Clarifying questions?
-  - definitely want to distinguish these - "guiding" help drive our understanding of the topic, clarifying are simpler, usually narrower / about something specific
-  - note: guiding questions will want the ability to select from a list (e.g. "what causes this node?", "what addresses this node?", these generally can have automatic views created for them) OR be custom - clarifying questions should generally be custom (e.g. "are there any studies about this?")
-  - option 1: edge type "informs" = guiding, "clarifies" = clarifying
+  - definitely want to distinguish these - guiding questions are agenda-setting (they help drive our understanding of the topic), clarifying questions are fact-requesting (simpler, usually narrower / about something specific)
+  - option 1: edge type "guides" = guiding, "clarifies" = clarifying
     - + "clarifies" is clear
     - - "informs" doesn't really exclude "clarifies"
       - "guides"? seems ok
@@ -436,30 +447,34 @@
         - maybe making a topic node could be a requirement...? or instead of "topic" we could say "core" node, so that multiple nodes can be important for a single topic...?
   - option 2: manually specify "guiding" question (e.g. checkbox)
   - option 3: no edge = guiding, "informs" ("clarifies"?) = clarifying
+    - - conflicts with guiding questions being able to guide other guiding questions (they'd need an edge)
   - option 4: ?
-- "guiding" vs "driving" verbiage?
-  - "driving"
-    - + strong, like "motivating"
-    - - on its own can make people think of cars rather than reasoning
-  - "guiding"
-    - - doesn't imply "motivating" so much
+  - trying: option 1 - distinguish via edge type: "guides" = guiding (agenda-setting), "clarifies" = clarifying (fact-requesting)
 
 ##### Guiding Question
 
-- Guiding Question informs?/guides?/relevant for? Topic/Guiding-Question ?
+- Guiding Question guides Topic/Guiding-Question ?
+
+###### Notes
+
+- guiding questions will want the ability to select from a list (e.g. "what causes this node?", "what addresses this node?", these generally can have automatic views created for them) OR be custom - clarifying questions should generally be custom (e.g. "are there any studies about this?")
 
 ###### Questions - Unanswered
 
 - better name?
 	- "driving question" - initially invokes idea of driving as in "driving a car", like a driving exam
+
+###### Questions - Kind of answered
+
 - what edge name to use?
 	- "informs" seems to imply that there's uncertainty in the topic if the question isn't answered, but that doesn't seem right
 	- hmm if questions themselves are scored by importance, the edge may not matter?
 		- could also do "important for" ...?
+	- trying: "guides" - self-documenting since it matches the subtype name
 
 ##### Clarifying Question
 
-- Clarifying Question informs Node ?
+- Clarifying Question clarifies Node ?
 
 #### Claim
 

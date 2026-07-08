@@ -318,6 +318,7 @@
 
 ###### Questions - Unanswered
 
+- [Do all topics have a topic node? Can there be multiple topic nodes?](#Do%20all%20topics%20have%20a%20topic%20node?%20Can%20there%20be%20multiple%20topic%20nodes?)
 - how to relate all relevant nodes to the Topic?
 	- there would be so many more edges stored if every node had to have an edge to the Topic
 		- these edges don't make sense to be argued or anything like that either
@@ -452,8 +453,7 @@
       - "guides"? seems ok
     - ? would questions themselves still need scoring, or just the edges then?
     - ? do all topics have a "topic node"?
-      - seems like some topics might not have a single node for them, in which case this relation reliance wouldn't work
-        - maybe making a topic node could be a requirement...? or instead of "topic" we could say "core" node, so that multiple nodes can be important for a single topic...?
+      - promoted to a big open question: [Do all topics have a topic node? Can there be multiple topic nodes?](#Do%20all%20topics%20have%20a%20topic%20node?%20Can%20there%20be%20multiple%20topic%20nodes?)
   - option 2: manually specify "guiding" question (e.g. checkbox)
   - option 3: no edge = guiding, "informs" ("clarifies"?) = clarifying
     - - conflicts with guiding questions being able to guide other guiding questions (they'd need an edge)
@@ -733,5 +733,21 @@ There are a few different kinds of scores, as specified below. The reasons for t
 		* maybe we could generate wording / pro/con based on cause/effect to deal with this
 	- - it definitely seems like we should be able to support moving from ungrounded arguments _towards_ grounded arguments (i.e. cause-effect)
 - e.g. driving/guiding questions
+
+### Do all topics have a topic node? Can there be multiple topic nodes?
+
+- current leaning: ?
+- context: some structure relies on topic node(s) existing
+	- guiding questions guide the topic node (or other guiding questions)
+	- node scores are assumed to be relative to the topic
+	- question prioritization can chain through causal edges because topic nodes are concepts in the causal web (see Guides/Clarifies notes under [Edge weight score](#Edge%20weight%20score))
+- do all topics have a topic node?
+	- seems like some topics might not have a single node that represents them, in which case relations that rely on a topic node wouldn't work
+		- maybe making a topic node could be a requirement...?
+		- or instead of "topic" we could say "core" node, so that multiple nodes can be important for a single topic...?
+- can there be multiple topic nodes?
+	- multiple topic nodes could be useful for focusing: e.g. a topic "build a wall" that reduces a topic "illegal immigration" - separate topics would allow people to focus on "build a wall" specifically, as opposed to generally looking at "illegal immigration"
+		- perhaps these would be considered "subtopics", but sticking with "topic" terminology for now
+	- note: the "core" nodes idea above feels similar to allowing multiple topic nodes
 
 # Archive

@@ -405,6 +405,41 @@
 
 #### Question
 
+##### Questions - Unanswered
+
+- can a guiding question have a parent that _isn't_ the topic itself?
+  - hmm potentially guiding questions can be broken into further guiding questions? hard to say
+    - in this case though, the child "guiding question" probably wouldn't make sense to be displayed in the root set of "guiding questions" for a topic
+      - hmm maybe it wouldn't necessarily be more important than the parent but it could be more important than other root questions. e.g. "Why do people immigrate illegally?" guides "What are the most effective ways to reduce illegal immigration?", yet is also pretty important to the topic of illegal immigration
+  - clarifying questions _do_ seem like they could have a topic parent
+    - e.g. "concept: cars going too fast" < informs "question: how fast do cars go on average here?"
+    - I guess this means we can't just distinguish guiding vs clarifying via looking at what the parent is
+  - for now it seems like we could say that guiding questions will "guide" either the topic node or another guiding question
+- how should guiding vs clarifying questions be scored?
+  - clarifying seems better scored via edge because a question can relate to different nodes in different amounts of relevance
+  - if there's no edge for guiding, then scoring to prioritize a guiding question will be different than scoring a clarifying question
+  - a guiding edge does seem like its importance is to a topic, and we therefore have a similar problem to [TODO: link to section where we talk about node scores being all relative to topic and it not being worth moving these into an edge relation to the topic because there'd be too many edges]
+- how to distinguish Guiding vs Clarifying questions?
+  - definitely want to distinguish these - "guiding" help drive our understanding of the topic, clarifying are simpler, usually narrower / about something specific
+  - note: guiding questions will want the ability to select from a list (e.g. "what causes this node?", "what addresses this node?", these generally can have automatic views created for them) OR be custom - clarifying questions should generally be custom (e.g. "are there any studies about this?")
+  - option 1: edge type "informs" = guiding, "clarifies" = clarifying
+    - + "clarifies" is clear
+    - - "informs" doesn't really exclude "clarifies"
+      - "guides"? seems ok
+    - ? would questions themselves still need scoring, or just the edges then?
+    - ? do all topics have a "topic node"?
+      - seems like some topics might not have a single node for them, in which case this relation reliance wouldn't work
+        - maybe making a topic node could be a requirement...? or instead of "topic" we could say "core" node, so that multiple nodes can be important for a single topic...?
+  - option 2: manually specify "guiding" question (e.g. checkbox)
+  - option 3: no edge = guiding, "informs" ("clarifies"?) = clarifying
+  - option 4: ?
+- "guiding" vs "driving" verbiage?
+  - "driving"
+    - + strong, like "motivating"
+    - - on its own can make people think of cars rather than reasoning
+  - "guiding"
+    - - doesn't imply "motivating" so much
+
 ##### Guiding Question
 
 - Guiding Question informs?/guides?/relevant for? Topic/Guiding-Question ?

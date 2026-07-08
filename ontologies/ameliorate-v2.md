@@ -145,6 +145,10 @@
         / has doesn't take a score
         *[1] Barbed wire along the top &barbed-wire
           / component
+      < clarifies[4]
+        ? How tall is the proposed wall design? &how-tall
+          / clarifying question about a plain node (vs how-enter, which clarifies an edge)
+
   < achieves[6]
     *[5] Increased administrative resources for processing immigration &more-admin
       > reduces[7] $long-wait
@@ -245,7 +249,7 @@
 		- Criterion: `inexpensive` / `quick` / `humane` (criterion for the `best-ways` question); `more-admin` / `fewer-requirements` fulfil `inexpensive` directly, while `wall` fulfils it via a causal-fulfils chain (`wall` causes `wall-cost`, which fulfils[-7] `inexpensive`)
 	- Question
 		- Guiding Question: `best-ways` guides the topic; `why-immigrate` guides `best-ways`
-		- Clarifying Question: `how-enter` clarifies the `wall-achieves` edge, via the edge's implied claim
+		- Clarifying Question: `how-tall` clarifies the `wall` node; `how-enter` clarifies the `wall-achieves` edge, via the edge's implied claim
 	- Claim
 		- All: `easy-climb` supports `climb-over`; `unclimbable` supports[-4] (i.e. critiques) `climb-over`
 		- Statistic: `texas-stat`
@@ -556,6 +560,20 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- and this, combined with [Concept scoring semantics: ?](#Concept%20scoring%20semantics%20?): "how much does node B _matter to_ node A?"
 		- by multiplying causal score by concept score e.g. goodness
 - avoid duplicate edges when a chain already conveys the relation (e.g. A causes B and B causes C, plus a direct A causes C edge) - the duplicate would double-count in calculations
+
+##### Guides
+
+###### Notes
+
+- guides weights can chain the same way causal weights do, to prioritize questions within the question hierarchy: e.g. if Q2 guides[7] Q1 and Q1 guides[8] the topic, Q2's priority relative to the topic multiplies (and attenuates) through the chain
+- prioritizing a question in relation to arbitrary nodes (see Clarifies notes below) seems to make less sense for guides: guiding questions only relate to the topic node / other guiding questions, so there's no causal chain connecting them to specific concept nodes - their relevance to a specific node would come from map content that exploring the question hasn't produced yet
+
+##### Clarifies
+
+###### Notes
+
+- enables prioritizing a question in relation to _any_ node in the map, not just the node it directly clarifies, using the same multiply-along-edges machinery as causal chains (see Causes notes above)
+	- e.g. for a question clarifying C, where A causes B causes C: multiplying C's scored importance x the causal chain weights (A causes B, B causes C) x the clarifies weight conveys how much impact the question has on A
 
 ##### Mentions
 

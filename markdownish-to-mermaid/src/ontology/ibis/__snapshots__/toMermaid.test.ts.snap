@@ -1,0 +1,33 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`toMermaid > matches the generated-mermaid snapshot for the bundled sample 1`] = `
+"flowchart BT
+  q1{{"❓ How should we handle session storage?"}}:::question
+  i1["💡 Use Redis"]:::idea
+  n1["✅ Fast, battle-tested"]:::pro
+  c1["⛔ Another service to operate"]:::con
+  n2["⛔ We have many services already, we're efficient at setting up another one"]:::con
+  i2["💡 Use Postgres rows"]:::idea
+  n3["✅ One less dependency"]:::pro
+  n4["⛔ Slower for hot reads"]:::con
+  q2{{"❓ How do we run background jobs?"}}:::question
+  n5["💡 Use a worker queue"]:::idea
+  n6[/"📝 worker queues hit the same operational cost"/]:::note
+  q3{{"❓ Which broker?"}}:::question
+  i1 --> q1
+  n1 --> i1
+  c1 --> i1
+  n2 --> c1
+  i2 --> q1
+  n3 --> i2
+  n4 --> i2
+  n5 --> q2
+  n6 -.-> n5
+  q3 --> n5
+  c1 --> n5
+  classDef question fill:#ede9fe,stroke:#7c3aed,color:#2e1065,stroke-width:1.5px
+  classDef idea fill:#dbeafe,stroke:#2563eb,color:#0c1e3e,stroke-width:1.5px
+  classDef pro fill:#dcfce7,stroke:#16a34a,color:#052e16,stroke-width:1.5px
+  classDef con fill:#fee2e2,stroke:#dc2626,color:#450a0a,stroke-width:1.5px
+  classDef note fill:#fef9c3,stroke:#ca8a04,color:#422006,stroke-width:1.5px"
+`;

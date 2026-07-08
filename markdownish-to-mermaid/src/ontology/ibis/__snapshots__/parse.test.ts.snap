@@ -1,0 +1,125 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parse > matches the parsed-graph snapshot for the bundled sample 1`] = `
+{
+  "edges": [
+    {
+      "from": "i1",
+      "to": "q1",
+      "type": "idea",
+    },
+    {
+      "from": "n1",
+      "to": "i1",
+      "type": "pro",
+    },
+    {
+      "from": "c1",
+      "to": "i1",
+      "type": "con",
+    },
+    {
+      "from": "n2",
+      "to": "c1",
+      "type": "con",
+    },
+    {
+      "from": "i2",
+      "to": "q1",
+      "type": "idea",
+    },
+    {
+      "from": "n3",
+      "to": "i2",
+      "type": "pro",
+    },
+    {
+      "from": "n4",
+      "to": "i2",
+      "type": "con",
+    },
+    {
+      "from": "n5",
+      "to": "q2",
+      "type": "idea",
+    },
+    {
+      "from": "n6",
+      "to": "n5",
+      "type": "note",
+    },
+    {
+      "from": "q3",
+      "to": "n5",
+      "type": "question",
+    },
+    {
+      "from": "c1",
+      "to": "n5",
+      "type": "con",
+    },
+  ],
+  "nodes": [
+    {
+      "id": "q1",
+      "text": "How should we handle session storage?",
+      "type": "question",
+    },
+    {
+      "id": "i1",
+      "text": "Use Redis",
+      "type": "idea",
+    },
+    {
+      "id": "n1",
+      "text": "Fast, battle-tested",
+      "type": "pro",
+    },
+    {
+      "id": "c1",
+      "text": "Another service to operate",
+      "type": "con",
+    },
+    {
+      "id": "n2",
+      "text": "We have many services already, we're efficient at setting up another one",
+      "type": "con",
+    },
+    {
+      "id": "i2",
+      "text": "Use Postgres rows",
+      "type": "idea",
+    },
+    {
+      "id": "n3",
+      "text": "One less dependency",
+      "type": "pro",
+    },
+    {
+      "id": "n4",
+      "text": "Slower for hot reads",
+      "type": "con",
+    },
+    {
+      "id": "q2",
+      "text": "How do we run background jobs?",
+      "type": "question",
+    },
+    {
+      "id": "n5",
+      "text": "Use a worker queue",
+      "type": "idea",
+    },
+    {
+      "id": "n6",
+      "text": "worker queues hit the same operational cost",
+      "type": "note",
+    },
+    {
+      "id": "q3",
+      "text": "Which broker?",
+      "type": "question",
+    },
+  ],
+}
+`;

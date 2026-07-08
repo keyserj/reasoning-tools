@@ -411,6 +411,11 @@
 
 #### Question
 
+##### Notes
+
+- the subtypes differ on the answer side: clarifying questions are generally answered by claims (via `answers` edges), while guiding questions generally don't have a concrete answer - they make sense to be "answered" by a view, probably generated based on relevant causal nodes (e.g. a tradeoffs-table view for "what are the most effective ways to reduce illegal immigration?")
+  - this can double as a sanity check: a "guiding" question that accumulates `answers` claims was probably clarifying all along
+
 ##### Questions - Unanswered
 
 - how should guiding vs clarifying questions be scored?

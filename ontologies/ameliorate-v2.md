@@ -92,16 +92,20 @@
 
 - Based on arguments about "The US should 'build a wall' to reduce illegal immigration"; tries to show off one of each piece from [Structure](#Structure)
 - Syntax legend:
-	- node types: `*` concept, `?` question, `=` claim, `@` source
-	- edges: `<` edge whose source is the child and target is the parent, `>` is edge whose source is the parent and target is the child
-		- node can also be specified inline via `$id`
-	- `&some-id` sets an id; `$some-id` references one
-		- `= $some-id` references the implied claim behind that node's/edge's score, so it can be supported/critiqued
-	- `[X]` is a score - node scores appear after the node type character (e.g. `*[-4]`), edge scores appear after the edge type (e.g. `causes[6]`)
-	- `#tag` explicitly specifies a subtype; subtypes like category/component/option/goal/criterion are implied by their edges so aren't tagged
-	- comments go on their own line, nested under the line they're about
-		- `~` is a note relevant to its parent line - it would show visually if this were rendered
-		- `/` is a meta comment about the example - it wouldn't show if rendered
+	- `*`: Concept node type
+	- `?`: Question node type - guiding vs clarifying is implied by what it informs (a topic/guiding-question vs a specific node)
+	- `=`: Claim node type
+	- `@`: Source node type
+	- `<`: edge whose source is the child (nested) line and target is the parent line
+	- `>`: edge whose source is the parent line and target is the child (nested) line
+	- `[X]`: a score - node scores appear after the node type character (e.g. `*[-4]`), edge scores appear after the edge type (e.g. `causes[6]`)
+	- `&some-id`: sets an id on the node/edge it follows
+	- `$some-id`: references an id
+  	- the node on the other end of an edge can be specified inline this way (e.g. `> reduces[3] $illegal-immig`) instead of nesting it
+		- `= $some-id`: references the implied claim behind that node's/edge's score, so it can be supported/critiqued
+	- `#tag`: explicitly specifies a subtype - subtypes like category/component/option/goal/criterion are implied by their edges so aren't tagged
+	- `~`: a note relevant to its parent line - it would show visually if this were rendered
+	- `/`: a meta comment about the example, noting something about its parent line - it wouldn't show if rendered
 
 #### "Build a wall"
 

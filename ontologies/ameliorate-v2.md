@@ -92,6 +92,7 @@
 #### Context
 
 - Based on arguments about "The US should 'build a wall' to reduce illegal immigration"; tries to show off one of each piece from [Structure](#Structure)
+- Scores convey three users' perspectives via the `Perspectives` line - the main nodes are scored by everyone, some things by only some people, and some by nobody
 - Syntax legend:
 	- `*`: Concept node type
 	- `?`: Question node type
@@ -100,10 +101,13 @@
 	- `@`: Source node type
 	- `<`: edge whose source is the child (nested) line and target is the parent line
 	- `>`: edge whose source is the parent line and target is the child (nested) line
-	- `[X]`: a score - node scores appear after the node type character (e.g. `*[-4]`), edge scores appear after the edge type (e.g. `causes[6]`)
+	- `Perspectives: [person1, person2, person3]`: declares whose scores appear in the example
+	- `[X,Y,Z]`: scores, one slot per person in the `Perspectives` order - node scores appear after the node type character (e.g. `*[-4,0,-9]`), edge scores appear after the edge type (e.g. `causes[6,2,-]`)
+		- `-` in a slot: that person didn't score it
+		- a scoreable node/edge with no brackets at all: nobody scored it
 	- `&some-id`: sets an id on the node/edge it follows
 	- `$some-id`: references an id
-  	- the node on the other end of an edge can be specified inline this way (e.g. `> reduces[3] $illegal-immig`) instead of nesting it
+  	- the node on the other end of an edge can be specified inline this way (e.g. `> reduces[3,7,1] $illegal-immig`) instead of nesting it
 		- `= $some-id`: references the implied claim behind that node's/edge's score, so it can be supported/critiqued/clarified
 	- `#tag`: explicitly specifies a subtype - subtypes like category/component/option/goal/criterion are implied by their edges so aren't tagged
 	- `~`: a note relevant to its parent line - it would show visually if this were rendered
@@ -112,128 +116,131 @@
 #### "Build a wall"
 
 ```
+Perspectives: [alice, bob, casey]
+  / rough personas so the scores tell a story: alice is moderate, bob doubts illegal immigration is a big problem and opposes the wall, casey wants illegal immigration reduced hard and favors the wall
+
 / --- Concepts: the causal core ---
 
-*[-4] Illegal immigration into the US &illegal-immig #topic
-  < causes[6] &wait-causes-illegal-immig
-    *[-6] Long legal processing times &long-wait
-      < causes[7]
-        *[-5] Administrative burden of enforcing immigration requirements &admin-burden
+*[-4,0,-9] Illegal immigration into the US &illegal-immig #topic
+  < causes[6,2,-] &wait-causes-illegal-immig
+    *[-6,-3,-7] Long legal processing times &long-wait
+      < causes[7,-,8]
+        *[-5,-,-6] Administrative burden of enforcing immigration requirements &admin-burden
 
-*[7] Legal immigration into the US &legal-immig
-  > reduces[3] $illegal-immig
-  < impedes[6] $long-wait
+*[7,9,2] Legal immigration into the US &legal-immig
+  > reduces[3,7,1] $illegal-immig
+  < impedes[6,8,-] $long-wait
 
-*[0] Motivations to immigrate illegally &motivations
+*[0,-,-] Motivations to immigrate illegally &motivations
   > categorizes
     / categorizes doesn't take a score
-    *[-2] Saving money by skipping the legal process &save-money
-      > causes[4] $illegal-immig
+    *[-2,-,-5] Saving money by skipping the legal process &save-money
+      > causes[4,-,7] $illegal-immig
   > categorizes
-    *[-3] Wanting to "disappear" (avoid government records) &disappear
-      > causes[2] $illegal-immig
+    *[-3,-,-] Wanting to "disappear" (avoid government records) &disappear
+      > causes[2,-,6] $illegal-immig
   > categorizes
-    *[-8] Danger in home countries &danger
-      > causes[7] $illegal-immig
+    *[-8,-9,-6] Danger in home countries &danger
+      > causes[7,9,3] $illegal-immig
 
-*[8] Reduced illegal immigration &less-illegal-immig
+*[8,2,9] Reduced illegal immigration &less-illegal-immig
   / goal (it's achieved by the options below)
-  < achieves[3] &wall-achieves
-    *[2] Border wall along the southern US border &wall
+  < achieves[3,1,8] &wall-achieves
+    *[2,-7,8] Border wall along the southern US border &wall
       / option
       > has
         / has doesn't take a score
-        *[1] Barbed wire along the top &barbed-wire
-          / component
-      < clarifies[4]
+        * Barbed wire along the top &barbed-wire
+          / component; nobody scored it, so no score brackets at all
+      < clarifies
         ? How tall is the proposed wall design? &how-tall
           / clarifying question about a plain node (vs how-enter, which clarifies an edge)
 
-  < achieves[6]
-    *[5] Increased administrative resources for processing immigration &more-admin
-      > reduces[7] $long-wait
-  < achieves[5]
-    *[3] Reduced immigration requirements &fewer-requirements
+  < achieves[6,7,3]
+    *[5,8,2] Increased administrative resources for processing immigration &more-admin
+      > reduces[7,8,-] $long-wait
+  < achieves[5,6,-2]
+    *[3,7,-4] Reduced immigration requirements &fewer-requirements
       ~ ambiguous: it wasn't stated which requirements would be reduced
-      > reduces[6] $admin-burden
+      > reduces[6,7,-] $admin-burden
 
 / --- Questions ---
 
 ? What are the most effective ways to reduce illegal immigration? &best-ways
   / guiding question (agenda-setting)
-  > guides[8] $illegal-immig
-  < guides[7]
+  > guides[8,6,9] $illegal-immig
+  < guides[7,9,2]
     ? Why do people immigrate illegally? &why-immigrate
       / guiding question guiding another guiding question
 
 ? How do most people illegally enter the US? &how-enter
   / clarifying question (fact-requesting); it clarifies an edge, via the edge's implied claim
-  > clarifies[7] $wall-achieves
-  < answers[8]
-    =[3] Most enter by crossing the border on foot between ports of entry &enter-on-foot
+  > clarifies[7,-,4] $wall-achieves
+  < answers[8,-,7]
+    =[3,-3,8] Most enter by crossing the border on foot between ports of entry &enter-on-foot
       / claim option
-  < answers[8]
-    =[7] Most enter legally and overstay visas &visa-overstay
+  < answers[8,9,-]
+    =[7,8,-2] Most enter legally and overstay visas &visa-overstay
       / claim option
 
 / --- Criteria: for evaluating the options (3 criteria x 3 options = a minimal tradeoffs table) ---
 
-*[7] Inexpensive &inexpensive
+*[7,9,2] Inexpensive &inexpensive
   / criterion: worded so that more of it is good
   > criterion for $best-ways
     / criterion for doesn't take a score
-  < fulfils[-3] $more-admin
-  < fulfils[7] $fewer-requirements
-  < fulfils[-7]
-    *[-2] Billions of dollars of construction and maintenance spending &wall-cost
-      < causes[9] $wall
-        / the wall's fulfilment of "inexpensive" comes via this causal-fulfils chain (causes[9] x fulfils[-7])
+  < fulfils[-3,-4,-] $more-admin
+  < fulfils[7,-,6] $fewer-requirements
+  < fulfils[-7,-8,-2]
+    *[-2,-4,-] Billions of dollars of construction and maintenance spending &wall-cost
+      < causes[9,9,9] $wall
+        / the wall's fulfilment of "inexpensive" comes via this causal-fulfils chain (causes[9,9,9] x fulfils[-7,-8,-2]); everyone agrees the wall costs money
 
-*[5] Quick to implement &quick
+*[5,3,8] Quick to implement &quick
   / fulfils edges omitted for brevity - only "inexpensive" shows them
   > criterion for $best-ways
 
-*[8] Humane treatment of immigrants &humane
+*[8,9,3] Humane treatment of immigrants &humane
   / fulfils edges omitted for brevity - only "inexpensive" shows them
   > criterion for $best-ways
 
 / --- Claims: arguing about scores ---
 
-=[6] $wait-causes-illegal-immig
-  / implied claim behind the "long waits cause illegal immigration" edge score
-  < supports[-4]
-    =[6] Even with instant processing, people would still immigrate illegally to save money or "disappear" &still-immigrate
+=[6,2,-] $wait-causes-illegal-immig
+  / implied claim behind the "long waits cause illegal immigration" edge score; slots match the edge's slots, so person3 has "-" here too
+  < supports[-4,-,-6]
+    =[6,-,8] Even with instant processing, people would still immigrate illegally to save money or "disappear" &still-immigrate
 
-=[3] $wall-achieves
+=[3,1,8] $wall-achieves
   / implied claim behind the "wall achieves reduced illegal immigration" edge score
-  < supports[7]
-    =[8] A wall physically stops crossings without needing continuous surveillance &physical-barrier
-  < supports[-6]
-    =[6] People will find a way over the barrier &climb-over
-      < supports[5]
-        =[8] It's easy to climb a fence &easy-climb
-      < supports[-4]
-        =[5] The wall design is tall, without handholds, and topped with barbed wire &unclimbable
-  < supports[-5] $visa-overstay
+  < supports[7,-,9]
+    =[8,-,9] A wall physically stops crossings without needing continuous surveillance &physical-barrier
+  < supports[-6,-8,-]
+    =[6,8,-2] People will find a way over the barrier &climb-over
+      < supports[5,7,-]
+        =[8,9,-] It's easy to climb a fence &easy-climb
+      < supports[-4,-,-8]
+        =[5,-,9] The wall design is tall, without handholds, and topped with barbed wire &unclimbable
+  < supports[-5,-8,-] $visa-overstay
     / reuse: the same claim answers a question above and critiques this edge
 
-=[-4] $illegal-immig
+=[-4,0,-9] $illegal-immig
   / implied claim behind the topic's concept score (supports argue it should be scored higher, critiques lower)
-  < supports[5]
-    =[7] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
-  < supports[-4] &murder-supports-worse-score
-    =[3] An illegal immigrant murdered a baby in cold blood last year &baby-murder #anecdote
+  < supports[5,8,-]
+    =[7,9,-2] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
+  < supports[-4,-,-8] &murder-supports-worse-score
+    =[3,-,9] An illegal immigrant murdered a baby in cold blood last year &baby-murder #anecdote
 
-=[-4] $murder-supports-worse-score
+=[-4,-,-8] $murder-supports-worse-score
   / implied claim behind the anecdote's support edge score
-  < supports[-7]
-    =[8] In Texas 2012-2018, illegal immigrants were arrested for violent crimes at half the rate of native-born citizens &texas-stat #statistic
+  < supports[-7,-,-3]
+    =[8,-,4] In Texas 2012-2018, illegal immigrants were arrested for violent crimes at half the rate of native-born citizens &texas-stat #statistic
       ~ rates vary by year and state; Texas is used because it tracks immigration status in arrest data
 
 / --- Sources ---
 
 @ House Judiciary hearing document, Jan 2025 (docs.house.gov) &house-doc
-  > mentions[9] $texas-stat
+  > mentions[9,-,-] $texas-stat
 ```
 
 #### Structure coverage
@@ -246,22 +253,26 @@
 		- Component: `wall` has `barbed-wire`
 		- Option: `wall`, `more-admin`, `fewer-requirements` (they achieve the goal)
 		- Goal: `less-illegal-immig` (it's achieved by the options)
-		- Criterion: `inexpensive` / `quick` / `humane` (criterion for the `best-ways` question); `more-admin` / `fewer-requirements` fulfil `inexpensive` directly, while `wall` fulfils it via a causal-fulfils chain (`wall` causes `wall-cost`, which fulfils[-7] `inexpensive`)
+		- Criterion: `inexpensive` / `quick` / `humane` (criterion for the `best-ways` question); `more-admin` / `fewer-requirements` fulfil `inexpensive` directly, while `wall` fulfils it via a causal-fulfils chain (`wall` causes `wall-cost`, which fulfils[-7,-8,-2] `inexpensive`)
 	- Question
 		- Guiding Question: `best-ways` guides the topic; `why-immigrate` guides `best-ways`
 		- Clarifying Question: `how-tall` clarifies the `wall` node; `how-enter` clarifies the `wall-achieves` edge, via the edge's implied claim
 	- Claim
-		- All: `easy-climb` supports `climb-over`; `unclimbable` supports[-4] (i.e. critiques) `climb-over`
+		- All: `easy-climb` supports `climb-over`; `unclimbable` supports[-4,-,-8] (i.e. critiques) `climb-over`
 		- Statistic: `texas-stat`
 		- Anecdote: `baby-murder`
 		- Option: `enter-on-foot` / `visa-overstay` answer `how-enter`
 	- Source
 		- All: `house-doc` mentions `texas-stat`
 	- Scores
-		- Concept score: e.g. `*[-8]` on `danger`
-		- Claim truth score: e.g. `=[8]` on `texas-stat`
-		- Edge weight score: causes[6], reduces[3], impedes[6], achieves[3], fulfils[7]/[-7], guides[8], clarifies[7], answers[8], mentions[9], supports[7]/[-6]
-		- Unscored edges: categorizes, has, criterion for
+		- Perspectives: score brackets hold one slot per person, in the `Perspectives: [alice, bob, casey]` order
+			- scored by everyone: the main nodes, e.g. `*[-4,0,-9]` on the topic, `*[2,-7,8]` on `wall`
+			- scored by some (`-` = that person didn't score): e.g. `*[-2,-,-5]` on `save-money`, `mentions[9,-,-]`
+			- scored by nobody (brackets omitted): `barbed-wire`, the `clarifies` edge from `how-tall`
+		- Concept score: e.g. `*[-8,-9,-6]` on `danger`
+		- Claim truth score: e.g. `=[8,-,4]` on `texas-stat`
+		- Edge weight score: one on each scoreable edge type - causes, reduces, impedes, achieves, fulfils, guides, clarifies, answers, mentions, supports
+		- Unscored edges (never take scores): categorizes, has, criterion for
 		- Implied claims behind scores: `= $wait-causes-illegal-immig` (a causes edge's score), `= $illegal-immig` (a concept's score), `= $murder-supports-worse-score` (a supports edge's score)
 	- note: argument-map "reuse" (same claim in multiple arguments) falls out naturally from the graph: `visa-overstay` both answers `how-enter` and critiques `wall-achieves`
 
@@ -272,8 +283,8 @@
 #### Questions - Kind of answered
 
 - should an implied claim's score just _be_ the score of the node/edge it wraps, or is it a separate truth score?
-		- it should just _be_ the same score (shown matching here, e.g. `causes[6]` and `=[6] $wait-causes-illegal-immig`)
-		- still open: is there a good way to show the score in only one of the two spots? it seems relevant in both
+  - it should just _be_ the same score (shown matching here, e.g. `causes[6,2,-]` and `=[6,2,-] $wait-causes-illegal-immig`)
+  - still open: is there a good way to show the score in only one of the two spots? it seems relevant in both
 
 #### Questions - Answered
 

@@ -35,6 +35,7 @@
 	- "causal map" because the core of the structure is: concepts (as nodes) with causal relations (as edges) between them
 - This overview's [Structure](#Structure) and [Example](#Example) sections are probably the best for quickly grasping the ontology
 	- [Structure Details](#Structure%20Details) has more information (e.g. meaning, purpose, open questions) about each piece of the structure
+	- [Core features](#Core%20features) goes deeper into what the structure + scores enable (e.g. calculated arguments)
 	- [Big open questions](#Big%20open%20questions) has details about open questions that have more significant impact on the ontology than the "open questions" in the structure details section
 
 #### Questions - Unanswered
@@ -66,6 +67,7 @@
 		- Clarifying Question - Clarifying Question clarifies Node
 	- Claim
 		- note: all scores have an implied claim, where supporting claims support a higher score, critiquing claims support a lower score
+		- note: many arguments about a score can be _calculated_ from causation instead of manually claimed (see [Calculated arguments](#Calculated%20arguments))
 		- All - Claim supports/critiques Claim
 		- Statistic
 		- Anecdote
@@ -305,6 +307,9 @@ Perspectives: [alice, bob, casey]
 
 ### Benefits / goals
 
+- significantly improved maintenance of the contested information
+  - many arguments don't need to be manually written or maintained - they can be calculated from causation + individual scores - see [Calculated arguments](#Calculated%20arguments)
+
 ### Downsides / known missing things
 
 - downsides
@@ -529,6 +534,7 @@ Perspectives: [alice, bob, casey]
 ##### Notes
 
 - See [More advanced claim modeling](#More%20advanced%20claim%20modeling)
+- Non-causal arguments - e.g. evidence about truth (statistics, anecdotes, source mentions), definitional disputes, pure value assertions - make sense to exist via explicit claims. But causal arguments are ideally converted into causal form (concepts + causal edges) so that they're _calculated_ into the argument map instead of manually maintained (see [Calculated arguments](#Calculated%20arguments)).
 
 ##### Questions - Unanswered
 
@@ -619,6 +625,50 @@ There are a few different kinds of scores, as specified below. The reasons for t
 - Does this make more sense as a 0 or 1 score? Mentions or doesn't?
 	- in between could be nice for arguing whether something is ambiguously implied
 		- but this seems somewhat of a niche thing to take advantage of - I'd guess that most times there's just a direct quote provided, and the Claim is a summary or direct text from that quote
+
+## Core features
+
+- features enabled by the structure
+- other candidates that could migrate here from notes elsewhere: the tradeoffs table (see [Criterion](#Criterion)), question prioritization via guides/clarifies chaining (see [Edge weight score](#Edge%20weight%20score)), "how good is a solution" calculation
+
+### Calculated arguments
+
+#### Meaning
+
+- many of the arguments in an argument map about a node's score can be _calculated_ based on causation to/from the node, rather than manually maintained as claims:
+	- arguments supporting a higher score: nodes with positive score that this node causes, nodes with negative score that this node reduces
+	- arguments supporting a lower score: nodes with negative score that this node causes, nodes with positive score that this node reduces, nodes that impede this node ? (see questions - not sure if impediments should be included - should "change importance" include attainability?)
+- e.g. in the [Example](#Example), "the wall costs billions" doesn't need to be a manual claim critiquing the wall's score - `wall causes[9,9,9] wall-cost`, combined with `wall-cost`'s negative scores, _is_ that con, calculably
+- this reuses the "multiply edge weights by concept scores" machinery from "how good is a solution" (see Causes notes under [Edge weight score](#Edge%20weight%20score)) - the argument map is that calculation decomposed per-neighbor, displayed as pros/cons
+
+#### Purpose
+
+1. make the contested information easier to maintain: causes are often reused across many arguments, so updating a few cause-effect relations (or concept scores) automatically updates every calculated argument they participate in - in a manual argument map, each affected argument would have to be found and edited by hand
+	- e.g. `long-wait` feeds calculated arguments in multiple places (its `causes` edge argues about the topic's score; `more-admin reduces long-wait` argues for `more-admin`) - one update to `long-wait`'s score or edges flows to all of them
+2. keep the shared structure more side-free in wording
+  - "X causes Y" just models reality, and calculated arguments can use standardized wording - manual claim wording usually reads as taking a side (e.g. "people will find a way over the barrier")
+	- the side of the calculated argument is also based on the viewer's own scores rather than baked into the shared structure; though non-causal supports edges using a -9 to 9 score also allows claim pro/con status to be calculated
+
+#### Notes
+
+- claim lifecycle: claims can temporarily be manually added to an argument chain, but ideally they're then converted into causal form (concepts + causal edges) and thereby calculated into the argument map instead
+	- some arguments aren't causal and stay as manual claims - candidates: evidence about truth (statistics, anecdotes, source mentions), definitional disputes, pure value assertions
+	- the [Example](#Example)'s claims sort accordingly: `physical-barrier` / `climb-over` / `visa-overstay` / `still-immigrate` / `fleeing-danger` are causal at heart (promotable), while `texas-stat` / `baby-murder` / `unclimbable` are evidence/specifics that stay manual
+- arguments about a causal _edge's_ weight seem partly calculable too:
+	- competing causes: `still-immigrate` (critiquing `wait-causes-illegal-immig`) is essentially pointing at the sibling causes of `illegal-immig` (`save-money`, `disappear`) as competing explanations
+	- mechanism decomposition: `climb-over` and `visa-overstay` critique `wall-reduces`; decomposing that edge into its mechanism (wall reduces "crossings on foot between ports of entry", which causes `illegal-immig`) turns them into ordinary causal arguments about the intermediate node ("people climb over" reduces the wall's effect on it; "most enter via visa overstay" caps its weight on `illegal-immig`)
+
+#### Questions - Unanswered
+
+- do _incoming_ edges argue about a node's score?
+	- "Y impedes X": an impediment seems to speak to how attainable X is, not how important it is to change X - e.g. `long-wait impedes legal-immig` doesn't seem to argue that `legal-immig` should be scored lower (alice and bob score it high while fully agreeing it's impeded)
+  	- but attainability _does_ seem to relate to "is this is a good option?" because if it's easier to attain then that's a plus. perhaps the impedance should show up in the tradeoffs table but not in the arguments about "is X important to increase?"
+	- "Y causes X": `danger causes illegal-immig` feels like it carries the `fleeing-danger` argument ("they're fleeing danger" supports a less-negative topic score), but strictly the argument's causal content is an _outgoing_ edge that doesn't exist yet (illegal immigration reduces the harm those people face) - should promotion prefer creating that outgoing edge, or should sympathetic/incriminating incoming causes count as arguments somehow?
+- which arguments are irreducibly non-causal, beyond the candidates in the notes above?
+- how should scores migrate when a claim is promoted to causal form?
+  - do old truth score + supports weight map 1:1 onto the new concept score + causal edge weight?
+    - seems like they may be different-but-related judgments
+    - when something has been promoted, could prompt prior scorers to re-score
 
 ## Big open questions
 
@@ -763,10 +813,11 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 - e.g. ungrounded arguments
 	- - arguments can motivate discussion, but they also inherently "take a side", which seems inaccurate vs modeling reality (cause-effect)
-		* maybe we could generate pro/con based on cause/effect to deal with this
+		- maybe we could generate pro/con based on cause/effect + perspective scores to deal with this (fleshed out in [Calculated arguments](#Calculated%20arguments))
 	- - arguments are often how people think naturally, e.g. "we should do X because ..."
-		* maybe we could generate wording / pro/con based on cause/effect to deal with this
+		- maybe we could generate wording / pro/con based on cause/effect + perspective scores to complement this
 	- - it definitely seems like we should be able to support moving from ungrounded arguments _towards_ grounded arguments (i.e. cause-effect)
+		- see the claim lifecycle notes in [Calculated arguments](#Calculated%20arguments)
 - e.g. driving/guiding questions
 
 ### Do all topics have a topic node? Can there be multiple topic nodes?

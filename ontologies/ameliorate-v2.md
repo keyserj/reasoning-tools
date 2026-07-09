@@ -107,7 +107,8 @@
 		- a scoreable node/edge with no brackets at all: nobody scored it
 	- `&some-id`: sets an id on the node/edge it follows
 	- `$some-id`: references an id
-		- `= $some-id`: references the implied claim behind that node's/edge's score, so it can be supported/critiqued/clarified
+		- references are prefixed with the referent's type character (e.g. `* $illegal-immig`, `? $best-ways`, `= $visa-overstay`)
+		- `= $some-id` on a concept's/edge's id: references the implied claim behind that thing's score, so it can be supported/critiqued/clarified
   		- implied claims have standard phrasing:
     		- concept's change-importance scores: `$node is important to increase`
     		- edge scores: `$source-node [edge type] $target-node` (edges are verbs that claim a relation between the source and target)
@@ -133,30 +134,30 @@ Perspectives: [alice, bob, casey]
 
 *[7,9,2] Legal immigration into the US &legal-immig
   > reduces[3,7,1]
-    $illegal-immig
+    * $illegal-immig
   < impedes[6,8,-]
-    $long-wait
+    * $long-wait
 
 *[0,-,-] Motivations to immigrate illegally &motivations
   > categorizes
     / categorizes doesn't take a score
     *[-2,-,-5] Saving money by skipping the legal process &save-money
       > causes[4,-,7]
-        $illegal-immig
+        * $illegal-immig
   > categorizes
     *[-3,-,-] Wanting to "disappear" (avoid government records) &disappear
       > causes[2,-,6]
-        $illegal-immig
+        * $illegal-immig
   > categorizes
     *[-8,-9,-6] Danger in home countries &danger
       > causes[7,9,3]
-        $illegal-immig
+        * $illegal-immig
 
 / --- Actions ---
 
 *[2,-7,8] Border wall along the southern US border &wall #action
   > reduces[3,1,8] &wall-reduces
-    $illegal-immig
+    * $illegal-immig
   > has
     / has doesn't take a score
     * Barbed wire along the top &barbed-wire
@@ -167,27 +168,27 @@ Perspectives: [alice, bob, casey]
 
 *[5,8,2] Increased administrative resources for processing immigration &more-admin #action
   > reduces[7,8,-]
-    $long-wait
+    * $long-wait
 
 *[3,7,-4] Reduced immigration requirements &fewer-requirements #action
   ~ ambiguous: it wasn't stated which requirements would be reduced
   > reduces[6,7,-]
-    $admin-burden
+    * $admin-burden
 
 / --- Questions ---
 
 ? What are the most effective ways to reduce illegal immigration? &best-ways
   / guiding question (agenda-setting)
   > guides[8,6,9]
-    $illegal-immig
+    * $illegal-immig
   < guides[7,9,2]
     ? Why do people immigrate illegally? &why-immigrate
       / guiding question guiding another guiding question
 
 ? How do most people illegally enter the US? &how-enter
-  / clarifying question (fact-requesting); it clarifies an edge, via the edge's implied claim
+  / clarifying question (fact-requesting); it clarifies an edge by targeting the edge's implied claim - note the `=` on the reference
   > clarifies[7,-,4]
-    $wall-reduces
+    = $wall-reduces
   < answers[8,-,7]
     =[3,-3,8] Most enter by crossing the border on foot between ports of entry &enter-on-foot
       / claim option
@@ -201,26 +202,26 @@ Perspectives: [alice, bob, casey]
   / criterion: worded so that more of it is good
   > criterion for
     / criterion for doesn't take a score
-    $best-ways
+    ? $best-ways
   < fulfils[-3,-4,-]
-    $more-admin
+    * $more-admin
   < fulfils[7,-,6]
-    $fewer-requirements
+    * $fewer-requirements
   < fulfils[-7,-8,-2]
     *[-2,-4,-] Billions of dollars of construction and maintenance spending &wall-cost
       < causes[9,9,9]
         / the wall's fulfilment of "inexpensive" comes via this causal-fulfils chain (causes[9,9,9] x fulfils[-7,-8,-2]); everyone agrees the wall costs money
-        $wall
+        * $wall
 
 *[5,3,8] Quick to implement &quick
   / fulfils edges omitted for brevity - only "inexpensive" shows them
   > criterion for
-    $best-ways
+    ? $best-ways
 
 *[8,9,3] Humane treatment of immigrants &humane
   / fulfils edges omitted for brevity - only "inexpensive" shows them
   > criterion for
-    $best-ways
+    ? $best-ways
 
 / --- Claims: arguing about scores ---
 
@@ -242,7 +243,7 @@ Perspectives: [alice, bob, casey]
         =[5,-,9] The wall design is tall, without handholds, and topped with barbed wire &unclimbable
   < supports[-5,-8,-]
     / reuse: the same claim answers a question above and critiques this edge
-    $visa-overstay
+    = $visa-overstay
 
 =[-4,0,-9] $illegal-immig is important to increase
   / implicit claim behind the topic's concept score, with standardized node-score wording; its score is the node's score, so alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
@@ -261,7 +262,7 @@ Perspectives: [alice, bob, casey]
 
 @ House Judiciary hearing document, Jan 2025 (docs.house.gov) &house-doc
   > mentions[9,-,-]
-    $texas-stat
+    = $texas-stat
 ```
 
 #### Structure coverage

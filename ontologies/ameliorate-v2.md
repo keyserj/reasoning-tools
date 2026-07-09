@@ -51,16 +51,15 @@
 - Shared: Nodes & Edges
 	- notes:
 		- a node can be only one of the types (Concept, Question, Claim, Source)
-			- but can be one or more of the subtypes e.g. a concept can be a topic and a goal
+			- but can be one or more of the subtypes e.g. a concept can be a topic and an action
 		- some subtypes can be determined based on the node's relations (e.g. Component)
-			- others need to be specified (e.g. Anecdote/Statistic?)
+			- others need to be specified (e.g. Action, Anecdote/Statistic?)
 	- Concept
 		- Topic?
 		- All - Concept causes/reduces/impedes Concept
 		- Category - {Concept} categorizes Concept
 		- Component - Concept has {Concept}
-		- Option - {Concept} achieves Concept ?
-		- Goal? - Concept achieves {Concept} ?
+		- Action - {Concept} tagged `#action`
 		- Criterion - Concept fulfils {Concept}; {Concept} criterion for Question ?
 	- Question
 		- Guiding Question - Guiding Question guides Topic/Guiding-Question ?
@@ -79,7 +78,6 @@
 	- Edge weight score
 		- note: scores don't make sense for these?: categorizes, has, criterion for
 		- causes (opposite: reduces/impedes): how much the source moves the target: -9 = strongly reduces it, 0 = doesn't move it at all, 9 = strongly increases it
-		- achieves?
 		- fulfils: -9 = actively works against it, 0 = doesn't fulfil it at all, 9 = fully fulfils it
 		- guides: how much exploring the question would advance the target topic/question: 0 = tangential to it, 9 = central to it (most progress on the target runs through this question)
 		- clarifies: how contingent the target node is on the answer: 0 = answer wouldn't change anything about it, 9 = answer could completely reshape how we see/score it
@@ -107,9 +105,8 @@
 		- a scoreable node/edge with no brackets at all: nobody scored it
 	- `&some-id`: sets an id on the node/edge it follows
 	- `$some-id`: references an id
-  	- the node on the other end of an edge can be specified inline this way (e.g. `> reduces[3,7,1] $illegal-immig`) instead of nesting it
 		- `= $some-id`: references the implied claim behind that node's/edge's score, so it can be supported/critiqued/clarified
-	- `#tag`: explicitly specifies a subtype - subtypes like category/component/option/goal/criterion are implied by their edges so aren't tagged
+	- `#tag`: explicitly specifies a subtype (e.g. `#action`) - subtypes like category/component/criterion are implied by their edges so aren't tagged
 	- `~`: a note relevant to its parent line - it would show visually if this were rendered
 	- `/`: a meta comment about the example, noting something about its parent line - it wouldn't show if rendered
 
@@ -128,54 +125,62 @@ Perspectives: [alice, bob, casey]
         *[-5,-,-6] Administrative burden of enforcing immigration requirements &admin-burden
 
 *[7,9,2] Legal immigration into the US &legal-immig
-  > reduces[3,7,1] $illegal-immig
-  < impedes[6,8,-] $long-wait
+  > reduces[3,7,1]
+    $illegal-immig
+  < impedes[6,8,-]
+    $long-wait
 
 *[0,-,-] Motivations to immigrate illegally &motivations
   > categorizes
     / categorizes doesn't take a score
     *[-2,-,-5] Saving money by skipping the legal process &save-money
-      > causes[4,-,7] $illegal-immig
+      > causes[4,-,7]
+        $illegal-immig
   > categorizes
     *[-3,-,-] Wanting to "disappear" (avoid government records) &disappear
-      > causes[2,-,6] $illegal-immig
+      > causes[2,-,6]
+        $illegal-immig
   > categorizes
     *[-8,-9,-6] Danger in home countries &danger
-      > causes[7,9,3] $illegal-immig
+      > causes[7,9,3]
+        $illegal-immig
 
-*[8,2,9] Reduced illegal immigration &less-illegal-immig
-  / goal (it's achieved by the options below)
-  < achieves[3,1,8] &wall-achieves
-    *[2,-7,8] Border wall along the southern US border &wall
-      / option
-      > has
-        / has doesn't take a score
-        * Barbed wire along the top &barbed-wire
-          / component; nobody scored it, so no score brackets at all
-      < clarifies
-        ? How tall is the proposed wall design? &how-tall
-          / clarifying question about a plain node (vs how-enter, which clarifies an edge)
+/ --- Actions ---
 
-  < achieves[6,7,3]
-    *[5,8,2] Increased administrative resources for processing immigration &more-admin
-      > reduces[7,8,-] $long-wait
-  < achieves[5,6,-2]
-    *[3,7,-4] Reduced immigration requirements &fewer-requirements
-      ~ ambiguous: it wasn't stated which requirements would be reduced
-      > reduces[6,7,-] $admin-burden
+*[2,-7,8] Border wall along the southern US border &wall #action
+  > reduces[3,1,8] &wall-reduces
+    $illegal-immig
+  > has
+    / has doesn't take a score
+    * Barbed wire along the top &barbed-wire
+      / component; nobody scored it, so no score brackets at all
+  < clarifies
+    ? How tall is the proposed wall design? &how-tall
+      / clarifying question about a plain node (vs how-enter, which clarifies an edge)
+
+*[5,8,2] Increased administrative resources for processing immigration &more-admin #action
+  > reduces[7,8,-]
+    $long-wait
+
+*[3,7,-4] Reduced immigration requirements &fewer-requirements #action
+  ~ ambiguous: it wasn't stated which requirements would be reduced
+  > reduces[6,7,-]
+    $admin-burden
 
 / --- Questions ---
 
 ? What are the most effective ways to reduce illegal immigration? &best-ways
   / guiding question (agenda-setting)
-  > guides[8,6,9] $illegal-immig
+  > guides[8,6,9]
+    $illegal-immig
   < guides[7,9,2]
     ? Why do people immigrate illegally? &why-immigrate
       / guiding question guiding another guiding question
 
 ? How do most people illegally enter the US? &how-enter
   / clarifying question (fact-requesting); it clarifies an edge, via the edge's implied claim
-  > clarifies[7,-,4] $wall-achieves
+  > clarifies[7,-,4]
+    $wall-reduces
   < answers[8,-,7]
     =[3,-3,8] Most enter by crossing the border on foot between ports of entry &enter-on-foot
       / claim option
@@ -187,22 +192,28 @@ Perspectives: [alice, bob, casey]
 
 *[7,9,2] Inexpensive &inexpensive
   / criterion: worded so that more of it is good
-  > criterion for $best-ways
+  > criterion for
     / criterion for doesn't take a score
-  < fulfils[-3,-4,-] $more-admin
-  < fulfils[7,-,6] $fewer-requirements
+    $best-ways
+  < fulfils[-3,-4,-]
+    $more-admin
+  < fulfils[7,-,6]
+    $fewer-requirements
   < fulfils[-7,-8,-2]
     *[-2,-4,-] Billions of dollars of construction and maintenance spending &wall-cost
-      < causes[9,9,9] $wall
+      < causes[9,9,9]
         / the wall's fulfilment of "inexpensive" comes via this causal-fulfils chain (causes[9,9,9] x fulfils[-7,-8,-2]); everyone agrees the wall costs money
+        $wall
 
 *[5,3,8] Quick to implement &quick
   / fulfils edges omitted for brevity - only "inexpensive" shows them
-  > criterion for $best-ways
+  > criterion for
+    $best-ways
 
 *[8,9,3] Humane treatment of immigrants &humane
   / fulfils edges omitted for brevity - only "inexpensive" shows them
-  > criterion for $best-ways
+  > criterion for
+    $best-ways
 
 / --- Claims: arguing about scores ---
 
@@ -211,8 +222,8 @@ Perspectives: [alice, bob, casey]
   < supports[-4,-,-6]
     =[6,-,8] Even with instant processing, people would still immigrate illegally to save money or "disappear" &still-immigrate
 
-=[3,1,8] $wall-achieves
-  / implied claim behind the "wall achieves reduced illegal immigration" edge score
+=[3,1,8] $wall-reduces
+  / implied claim behind the "wall reduces illegal immigration" edge score
   < supports[7,-,9]
     =[8,-,9] A wall physically stops crossings without needing continuous surveillance &physical-barrier
   < supports[-6,-8,-]
@@ -221,8 +232,9 @@ Perspectives: [alice, bob, casey]
         =[8,9,-] It's easy to climb a fence &easy-climb
       < supports[-4,-,-8]
         =[5,-,9] The wall design is tall, without handholds, and topped with barbed wire &unclimbable
-  < supports[-5,-8,-] $visa-overstay
+  < supports[-5,-8,-]
     / reuse: the same claim answers a question above and critiques this edge
+    $visa-overstay
 
 =[-4,0,-9] $illegal-immig
   / implied claim behind the topic's concept score (supports argue it should be scored higher, critiques lower)
@@ -240,7 +252,8 @@ Perspectives: [alice, bob, casey]
 / --- Sources ---
 
 @ House Judiciary hearing document, Jan 2025 (docs.house.gov) &house-doc
-  > mentions[9,-,-] $texas-stat
+  > mentions[9,-,-]
+    $texas-stat
 ```
 
 #### Structure coverage
@@ -251,12 +264,11 @@ Perspectives: [alice, bob, casey]
 		- All: causes (`long-wait` causes `illegal-immig`), reduces (`legal-immig` reduces `illegal-immig`), impedes (`long-wait` impedes `legal-immig`)
 		- Category: `motivations` categorizes `save-money` / `disappear` / `danger`
 		- Component: `wall` has `barbed-wire`
-		- Option: `wall`, `more-admin`, `fewer-requirements` (they achieve the goal)
-		- Goal: `less-illegal-immig` (it's achieved by the options)
+		- Action: `wall` / `more-admin` / `fewer-requirements` (tagged `#action`; each reduces the topic problem or one of its causes)
 		- Criterion: `inexpensive` / `quick` / `humane` (criterion for the `best-ways` question); `more-admin` / `fewer-requirements` fulfil `inexpensive` directly, while `wall` fulfils it via a causal-fulfils chain (`wall` causes `wall-cost`, which fulfils[-7,-8,-2] `inexpensive`)
 	- Question
 		- Guiding Question: `best-ways` guides the topic; `why-immigrate` guides `best-ways`
-		- Clarifying Question: `how-tall` clarifies the `wall` node; `how-enter` clarifies the `wall-achieves` edge, via the edge's implied claim
+		- Clarifying Question: `how-tall` clarifies the `wall` node; `how-enter` clarifies the `wall-reduces` edge, via the edge's implied claim
 	- Claim
 		- All: `easy-climb` supports `climb-over`; `unclimbable` supports[-4,-,-8] (i.e. critiques) `climb-over`
 		- Statistic: `texas-stat`
@@ -271,10 +283,10 @@ Perspectives: [alice, bob, casey]
 			- scored by nobody (brackets omitted): `barbed-wire`, the `clarifies` edge from `how-tall`
 		- Concept score: e.g. `*[-8,-9,-6]` on `danger`
 		- Claim truth score: e.g. `=[8,-,4]` on `texas-stat`
-		- Edge weight score: one on each scoreable edge type - causes, reduces, impedes, achieves, fulfils, guides, clarifies, answers, mentions, supports
+		- Edge weight score: one on each scoreable edge type - causes, reduces, impedes, fulfils, guides, clarifies, answers, mentions, supports
 		- Unscored edges (never take scores): categorizes, has, criterion for
 		- Implied claims behind scores: `= $wait-causes-illegal-immig` (a causes edge's score), `= $illegal-immig` (a concept's score), `= $murder-supports-worse-score` (a supports edge's score)
-	- note: argument-map "reuse" (same claim in multiple arguments) falls out naturally from the graph: `visa-overstay` both answers `how-enter` and critiques `wall-achieves`
+	- note: argument-map "reuse" (same claim in multiple arguments) falls out naturally from the graph: `visa-overstay` both answers `how-enter` and critiques `wall-reduces`
 
 #### Questions - Unanswered
 
@@ -376,21 +388,33 @@ Perspectives: [alice, bob, casey]
 
 ###### Purpose
 
-##### Option
+##### Action
 
-- Option - {Concept} achieves Concept ?
-
-###### Meaning
-
-###### Purpose
-
-##### Goal
-
-- Goal? - Concept achieves {Concept} ?
+- Action - {Concept} tagged `#action`
 
 ###### Meaning
 
+- Something that could be done about the situation - a potential intervention (e.g. building a wall)
+
 ###### Purpose
+
+- Identify the things a group could do, and become an option in a tradeoffs table (see [Criterion](#Criterion))
+
+###### Notes
+
+- a "what's the best solution?" Question's options are calculated: trace causal edges from the Question's target to find actions that reduce it
+  - e.g. `best-ways` guides `illegal-immig`, so its options are the actions whose causal paths reduce `illegal-immig`: `wall` / `more-admin` / `fewer-requirements`
+
+###### Questions - Unanswered
+
+- naming: "Action" vs "Option"?
+	- "Option" implies a decision/question that it's an option _for_, actions aren't always an option when they're first created
+	- using "Action" also frees "Option" to mean the question-relative role: an action can be an option for a question, mirroring how claims can be options for a clarifying question
+- when calculating a Question's options, which actions count?
+	- for a question like "what's the best solution?": actions whose causal paths reduce the question's target
+  	- but should actions scored as _causing_ the target be included too, since people can disagree about whether something causes or reduces it?
+			- potentially: include any action where at least one person's scores trace to reducing the target
+	- for other questions: not sure
 
 ##### Criterion
 
@@ -409,7 +433,7 @@ Perspectives: [alice, bob, casey]
 
 ###### Notes
 
-- the causal-fulfils edge chain from an Option to a Criterion determines how much the Option fulfils the Criterion
+- the causal-fulfils edge chain from an Action to a Criterion determines how much the Action fulfils the Criterion
 - criteria are typically pretty contextual to the thing they're criterion for, so they generally don't make sense to reuse across different decisions
 - the tradeoffs table uses the same "multiply edge weights by concept scores" calculation as "how good is a solution", viewed as a table restricted to Criterion nodes
 
@@ -760,5 +784,43 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- multiple topic nodes could be useful for focusing: e.g. a topic "build a wall" that reduces a topic "illegal immigration" - separate topics would allow people to focus on "build a wall" specifically, as opposed to generally looking at "illegal immigration"
 		- perhaps these would be considered "subtopics", but sticking with "topic" terminology for now
 	- note: the "core" nodes idea above feels similar to allowing multiple topic nodes
+
+### Should goals be explicitly modeled?
+
+- current leaning: no
+  - concepts with large positive/negative scores act as implicit goals, and Guiding Questions imply goals a little more explicitly
+  - seems like the explicit modeling is mostly duplicate
+- context: the example previously had a goal node `*[8,2,9] Reduced illegal immigration` with `achieves` edges from each option
+	- it duplicated the topic node ("Reduced illegal immigration" is just "Illegal immigration into the US" plus the desire to reduce it), with scores roughly the topic's inverted
+	- it ended up with no edge to the topic node at all - the options only connected to the causal web via their side effects (e.g. `more-admin` reduces `long-wait`) - suggesting `achieves` edges float alongside the causal structure rather than being part of it
+
+#### Option 1: implicit goals - no Goal nodes or achieves edges
+
+- what is it
+	- a "goal" is any concept whose score conveys a strong desire for change (e.g. the topic's `*[-4,0,-9]` implies the goal "reduce illegal immigration"); options connect to the causal web via ordinary causes/reduces/impedes edges
+- good
+	- fewer node/edge types to learn
+	- no duplicate "Reduced X" nodes splitting scores and discussion between them and "X"
+	- avoids `achieves` edges paralleling causal chains, which would double-count in calculations (same concern as the duplicate-edges note under Causes)
+	- arguing "does the wall achieve the goal?" becomes arguing about a causal edge (`wall-reduces`), which is exactly the grounded-in-mechanism discussion the ontology wants - notably, the example's achieves claims (`physical-barrier`, `climb-over`, `visa-overstay`) were all causal arguments anyway and transferred to the reduces edge unchanged
+- bad
+	- nothing explicitly declares "what we're trying to accomplish" - newcomers must infer it from scores
+		- mitigation: guiding questions carry the agenda (e.g. "What are the most effective ways to reduce illegal immigration?" states the goal pretty directly)
+	- Option loses its defining relation ("{Concept} achieves Concept") - what makes a concept an option, and where does a tradeoffs table get its list of options?
+		- resolved: manual `#action` tag (subtype renamed to [Action](#Action)); a question's options are calculated by tracing causal edges from the question's target (e.g. `best-ways` guides `illegal-immig`, so its options are the actions whose causal paths reduce `illegal-immig`)
+	- "how good is an option" is no longer anchored to a single goal node - it becomes a sum over every scored concept the option causally touches
+		- this seems more correct anyway (side effects automatically count), but it's a bigger calculation and harder to explain
+
+#### Option 2: explicit Goal nodes + achieves edges
+
+- what is it
+	- what the example previously had: options `achieves` a goal node representing the desired end state
+- good
+	- explicitly declares intent - a newcomer can see what the group wants at a glance
+	- gives Option a clean defining relation, and tradeoffs tables a clean anchor ("options = concepts with achieves edges to the goal")
+- bad
+	- goal nodes tend to be inversions of concepts already in the map, so they duplicate nodes and split scoring/discussion
+	- `achieves` edges shortcut causal chains, double-counting in calculations
+	- `achieves` invites ungrounded assertion ("the wall achieves the goal") where a causal edge would demand a mechanism
 
 # Archive

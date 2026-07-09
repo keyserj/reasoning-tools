@@ -108,6 +108,11 @@
 	- `&some-id`: sets an id on the node/edge it follows
 	- `$some-id`: references an id
 		- `= $some-id`: references the implied claim behind that node's/edge's score, so it can be supported/critiqued/clarified
+  		- implied claims have standard phrasing:
+    		- concept's change-importance scores: `$node is important to increase`
+    		- edge scores: `$source-node [edge type] $target-node` (edges are verbs that claim a relation between the source and target)
+    		- claims's truth score: `[node's text]` (claims are worded as evaluable statements already)
+			- explicit claims can have any text - ideally causal ones get promoted into the causal map and calculated instead (see [Calculated arguments](#Calculated%20arguments))
 	- `#tag`: explicitly specifies a subtype (e.g. `#action`) - subtypes like category/component/criterion are implied by their edges so aren't tagged
 	- `~`: a note relevant to its parent line - it would show visually if this were rendered
 	- `/`: a meta comment about the example, noting something about its parent line - it wouldn't show if rendered
@@ -223,9 +228,10 @@ Perspectives: [alice, bob, casey]
   / implied claim behind the "long waits cause illegal immigration" edge score; slots match the edge's slots, so person3 has "-" here too
   < supports[-4,-,-6]
     =[6,-,8] Even with instant processing, people would still immigrate illegally to save money or "disappear" &still-immigrate
+      / explicit claim, but causal: it's essentially pointing at the save-money/disappear causes edges, so it could be promoted and become a calculated argument
 
 =[3,1,8] $wall-reduces
-  / implied claim behind the "wall reduces illegal immigration" edge score
+  / implicit claim behind the "wall reduces illegal immigration" edge score
   < supports[7,-,9]
     =[8,-,9] A wall physically stops crossings without needing continuous surveillance &physical-barrier
   < supports[-6,-8,-]
@@ -238,8 +244,8 @@ Perspectives: [alice, bob, casey]
     / reuse: the same claim answers a question above and critiques this edge
     $visa-overstay
 
-=[-4,0,-9] $illegal-immig
-  / implied claim behind the topic's concept score (supports argue it should be scored higher, critiques lower)
+=[-4,0,-9] $illegal-immig is important to increase
+  / implicit claim behind the topic's concept score, with standardized node-score wording; its score is the node's score, so alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
   < supports[5,8,-]
     =[7,9,-2] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
   < supports[-4,-,-8] &murder-supports-worse-score
@@ -276,6 +282,7 @@ Perspectives: [alice, bob, casey]
 		- Statistic: `texas-stat`
 		- Anecdote: `baby-murder`
 		- Option: `enter-on-foot` / `visa-overstay` answer `how-enter`
+		- Implicit vs explicit: claim-tree roots are implicit (implied claims with standardized wording, e.g. `= $illegal-immig is important to increase`); free-text claims (e.g. `still-immigrate`) are explicit
 	- Source
 		- All: `house-doc` mentions `texas-stat`
 	- Scores

@@ -37,6 +37,7 @@
 	- [Structure Details](#Structure%20Details) has more information (e.g. meaning, purpose, open questions) about each piece of the structure
 	- [Core features](#Core%20features) goes deeper into what the structure + scores enable (e.g. calculated arguments)
 	- [Big open questions](#Big%20open%20questions) has details about open questions that have more significant impact on the ontology than the "open questions" in the structure details section
+- UX design for an app implementing this ontology lives in the sibling doc [UX-design](./UX-design.md) - its mockups are built from this doc's [Example](#Example)
 
 #### Questions - Unanswered
 

@@ -4,42 +4,54 @@
 - The central design question so far: when a user goes to view a topic, what should be shown?
 - Mockups are text-based so they're easy to diff and iterate on; they use the ontology's ["Build a wall" example](./ontology.md#Example) so that every screen shows real nodes/edges/scores
 	- mockups are viewed as **danny**: experienced with the app, new to this topic, no scores on it yet
+- Plan: once a few states stabilize, generate a clickable HTML wireframe from this spec to evaluate those; the spec stays the source of truth and the wireframe is regenerated from it, never hand-edited
 
-## Design principles (from discussion so far)
+## Design plan
+
+- What we're leaning toward. Not fully settled, but this section isn't for deep debate: minor open points sit in **Question** subsections below their decision; major ones move to [Open design questions](#open-design-questions).
+
+### Land on a generated topic brief, not the raw graph
 
 - Don't land users solely on the raw graph - land them on a generated **topic brief** assembled from the ontology's own prioritization signals (topic node, guiding-question weights, score spread, unanswered questions)
 	- everything in the brief is derived from structure + scores - no manual curation
+
+### Two asymmetric panes (agenda / structure)
+
 - Two panes with asymmetric jobs (avoid duplicate info between them):
 	- **Agenda pane**: text; owns everything ranked, aggregated, and explained - answers "what should I look at and why"
 	- **Structure pane**: diagram; owns relationships - answers "how does this fit together"
 	- keep node visuals light (text, score fill, contested badge) - cramming ranked/aggregated info into the diagram is how graph UIs become unreadable
-- The agenda pane is a master-detail stack: the brief is the root; clicking any node (in either pane) pushes a detail view with back navigation
-- The structure pane isn't a single static diagram - it hosts a few generated views (causal map, tradeoffs table, claim tree) and switches between them
-	- within a view, prefer spatial stability - selection should pan/highlight rather than re-layout; unclear how achievable this is yet, since focusing means filtering many nodes in/out; candidate techniques:
-		- lay out the view's full node set once; focusing dims/hides nodes and moves the camera, but surviving nodes never move (gaps where hidden nodes were are fine - they're what keeps the map recognizable)
-		- when revealing/hiding forces placement changes, pin the surviving nodes and only place the new ones (incremental layout, e.g. ELK's "interactive" mode)
-		- collapse-in-place (categories, components) instead of removing, so the map deforms locally instead of reshuffling globally
-		- when a real re-layout is unavoidable, animate nodes to their new positions so they can be visually tracked
-	- switching views is an explicit user action - selection alone never swaps the view
-- Score display when no perspective is selected: show the group aggregate + make contestedness visible (averages alone would hide the most interesting info, e.g. `wall` averaging ~1 looks "meh" when it's actually the most polarized node)
-	- candidate treatments (all color on a -9..9 scale; needs a colorblind-safe diverging palette, not red-green):
-		- avg + ⚡ badge (what these mockups use)
-		- pie-chart node background: a slice per user's score - shows distribution shape (e.g. bimodal vs uniform), not just spread
-		- gradient node background (or border): one equal-width band per scorer, sorted by score - consensus renders as a near-solid color, disagreement as a visible sweep; the node itself shows the disagreement, so no number needed until selection reveals detail
-			- / use hard stops between bands, not interpolation - interpolating invents middle colors nobody scored (e.g. wall's [-7,2,8] would sweep through muddy mid-tones); with many users the bands smooth out naturally
-			- / gradient likely beats pie for ordinal scores: it's a sorted strip (no order reconstruction), and it has no tiny wedges at small sizes
-			- / background vs border: background is more visible but puts text on multicolor; border keeps text clean but may vanish at overview zoom - prototype question
-		- edges: a gradient along the stroke would read as direction/flow (source color → target color), so the distribution strip probably belongs on the edge's label chip (which already shows type + weight) - same visual language as nodes
-	- a Perspectives selector can switch to any subset of people (one person, a faction, everyone); aggregates recompute over the selected subset
-- New-to-topic users are the primary focus for now; new-to-app users can get a tutorial later (out of scope here)
 
-## Layout
+### Agenda pane is a master-detail stack
+
+- The agenda pane is a master-detail stack: the brief is the root; clicking any node (in either pane) pushes a detail view with back navigation
+
+### Structure pane hosts switchable views
+
+- The structure pane isn't a single static diagram - it hosts a few generated views (causal map, tradeoffs table, claim tree) and switches between them
+- switching views is an explicit user action - selection alone never swaps the view
+- within a view, prefer spatial stability - selection should pan/highlight rather than re-layout; *how* to actually achieve it is a [top-level open question](#spatial-stability-how-to-achieve-it) with a lot to weigh
+
+### Perspectives selector
+
+- a Perspectives selector can switch to any subset of people (one person, a faction, everyone); aggregates recompute over the selected subset
+
+### Layout
 
 - Desktop: agenda pane = left half, structure pane = right half; selection syncs both ways
 - Mobile: agenda pane by default; a button/slide reveals the structure pane
 	- OK if the mobile diagram stays mediocre: mobile is for consuming/scoring/commenting (agenda-pane work); structural editing is desktop work
 
-## Mockup conventions
+#### Question: does mobile's slide-over diagram get used?
+
+- prototype would help feel out this question
+- does the slide-over diagram get used at all, or is agenda-only the real mobile experience?
+
+### Scope: new-to-topic users first
+
+- New-to-topic users are the primary focus for now; new-to-app users can get a tutorial later (out of scope here)
+
+## How to read this doc
 
 - `/` lines are meta comments (same convention as the ontology example): they explain why an element is shown or ranked where it is (usually: which calculation drives it); they wouldn't render
 - Flows are sequences of named states; each state after the first describes only its **delta** from the state it came from
@@ -53,7 +65,7 @@
 	- `avg X` = mean across the perspectives that scored the thing
 	- `⚡N` = contested indicator; N = spread (max minus min among scorers); shown when spread >= 8 (threshold TBD)
 
-## UX Flow Ideas (Desktop)
+## UX flow mockups (desktop)
 
 ### Experienced user viewing a topic for the first time
 
@@ -221,24 +233,98 @@ flowchart TD
 - State 5: danny submits their first scores → what changes? (e.g. a "you vs group" delta appears; calculated arguments re-derive from their perspective; prompt: "your reasoning isn't on the map yet - add it?")
 - State 6: scoring-walkthrough onboarding variant (the brief presented section-by-section, scoring as you read; by the end the app knows where danny diverges and whether their reasons are already captured)
 
-## Open questions
+## Open design questions
 
-- / these are answerable at the spec level, by argument or by trying alternatives in the mockups; contrast with [Needs a prototype to judge](#Needs%20a%20prototype%20to%20judge)
+- Bigger UX questions that likely need more than a small amount of debate and therefore would be too much for putting directly on the design plan.
+
+### Score display at overview (no perspective selected)
+
+- leaning: Option 3 (gradient) as the most promising; mockups use Option 1 (avg + ⚡) for now
+- prototype would help feel out which treatment stays legible at the zoom levels a half-width pane forces
+
+#### Notes
+
+- whatever the treatment, ideally show the aggregate *and* contestedness
+- all treatments color on a -9..9 scale; needs a colorblind-safe diverging palette, not red-green
+- edges: a gradient along the stroke would read as direction/flow (source color → target color), so the distribution strip probably belongs on the edge's label chip (which already shows type + weight) - same visual language as nodes
+
+#### Questions - Unanswered
+
+- node visual treatment: are the score treatments (score fill, pie or gradient backgrounds/borders, ⚡ badge) legible at the zoom levels a half-width pane forces? is text readable on a banded background, or does the border variant win? (prototype)
+
+#### Option 1: avg + ⚡ badge
+
+- what is it
+	- avg + ⚡ badge; what these mockups use
+
+#### Option 2: pie-chart node background
+
+- what is it
+	- a slice per user's score
+- good
+	- shows distribution shape (e.g. bimodal vs uniform), not just spread
+
+#### Option 3: gradient node background (or border)
+
+- what is it
+	- one equal-width band per scorer, sorted by score
+- good
+	- consensus renders as a near-solid color, disagreement as a visible sweep; the node itself shows the disagreement, so no number needed until selection reveals detail
+	- likely beats pie for ordinal scores: it's a sorted strip (no order reconstruction), and it has no tiny wedges at small sizes
+- notes
+	- use hard stops between bands, not interpolation - interpolating invents middle colors nobody scored (e.g. wall's [-7,2,8] would sweep through muddy mid-tones); with many users the bands smooth out naturally
+- questions
+	- background vs border: background is more visible but puts text on multicolor; border keeps text clean but may vanish at overview zoom - prototype question
+
+### Spatial stability: how to achieve it?
+
+- leaning: layer Options 1-4 in that order, (they compose)
+- prototype would help feel out what's ok
+
+#### Notes
+
+- hard because focusing filters many nodes in/out
+- animating node movement can help a little bit but doesn't help with building a mental model
+
+#### Questions - Unanswered
+
+- is there some non-diagram format that we could keep around as a visual aid that is easier to keep stable than a diagram?
+  - like Kialo's sunburst view, but with our node types (something like this https://www.figma.com/design/XqLnSqZrFxifevzznGgsKH/Focused-nodes-design?node-id=161-2&p=f&t=FRsDMDZLspne9eh0-0)
+
+#### Option 1: static full layout, camera-only focus
+
+- what is it
+	- lay out the view's full node set once; focusing dims/hides nodes and moves the camera, but surviving nodes never move
+- questions
+  - how to make it easy to read the undimmed nodes without having to zoom in/out a lot?
+    - mainly a concern when there are a lot of nodes showing, which seems like would be pretty often if we aren't filtering nodes out
+
+#### Option 2: incremental layout (pin survivors)
+
+- what is it
+	- when revealing/hiding forces placement changes, pin the surviving nodes and only place the new ones (e.g. ELK's "interactive" mode)
+
+### Disagreement metric & contested threshold
+
 - is spread the right disagreement metric (vs variance, vs bimodality), and is >= 8 the right contested threshold?
+
+### Rank "Where people disagree" by spread or centrality?
+
 - should "Where people disagree" weight by centrality/importance to the topic rather than raw spread?
+
+### Ranking "Open questions" (scored vs unscored)
+
 - how should "Open questions" rank unscored questions (like `how-tall`) against scored ones?
+
+### Degenerate topics with no brief spine
+
 - degenerate topics: no `#topic` node, no guiding questions → the brief has no spine
-	- fall back to most-scored / most-connected nodes, plus a nudge to add a guiding question
+- leaning: fall back to most-scored / most-connected nodes, plus a nudge to add a guiding question
 	- also consider asking "what's the main question you're trying to answer?" during topic creation, so the degenerate case stays rare
 
-## Needs a prototype to judge
+### Pane balance: does the structure pane earn 50% width?
 
-- / this spec answers "is the right information in the right order"; the things below are about *feel* and can't be judged from text - park them here so they don't stall spec iteration
-- / plan: once a few states stabilize, generate a clickable HTML wireframe from this spec to evaluate these; the spec stays the source of truth and the wireframe is regenerated from it, never hand-edited
-- pane balance: does the structure pane earn a full 50% width, or should the agenda pane dominate with the diagram expanding on interaction?
+- prototype would help feel out this question
+- does the structure pane earn a full 50% width, or should the agenda pane dominate with the diagram expanding on interaction?
 	- key observation to make: do users ever *initiate* from the diagram, or is it a passive echo of agenda-pane selection?
-- selection transitions: does pan/zoom + dim-in-place (State 1 → 2) read as "zooming into the same map", or still disorienting?
-- view switches (causal map → claim tree / tradeoffs table, States 3-4): how jarring is the swap, and would animating the transition help?
-- density: is opening the brief with the tradeoffs table too heavy as the very first thing a newcomer sees?
-- node visual treatment: are the score treatments (score fill, pie or gradient backgrounds/borders, ⚡ badge) legible at the zoom levels a half-width pane forces? is text readable on a banded background, or does the border variant win?
-- mobile: does the slide-over diagram get used at all, or is agenda-only the real mobile experience?
+

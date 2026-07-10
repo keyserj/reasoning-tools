@@ -14,11 +14,23 @@
 	- **Structure pane**: diagram; owns relationships - answers "how does this fit together"
 	- keep node visuals light (text, score fill, contested badge) - cramming ranked/aggregated info into the diagram is how graph UIs become unreadable
 - The agenda pane is a master-detail stack: the brief is the root; clicking any node (in either pane) pushes a detail view with back navigation
-- The structure pane is really a *view* pane: it switches between a few generated view types (causal map, tradeoffs table, claim tree)
-	- within a view type, layout stays spatially stable - selection pans/highlights, never re-layouts
-	- switching view types is an explicit animated transition
-- Score display when no perspective is selected: group aggregate + contested indicator (averages alone would hide the most interesting info, e.g. `wall` averaging ~1 looks "meh" when it's actually the most polarized node)
-	- a Perspectives selector can switch to a specific person's view
+- The structure pane isn't a single static diagram - it hosts a few generated views (causal map, tradeoffs table, claim tree) and switches between them
+	- within a view, prefer spatial stability - selection should pan/highlight rather than re-layout; unclear how achievable this is yet, since focusing means filtering many nodes in/out; candidate techniques:
+		- lay out the view's full node set once; focusing dims/hides nodes and moves the camera, but surviving nodes never move (gaps where hidden nodes were are fine - they're what keeps the map recognizable)
+		- when revealing/hiding forces placement changes, pin the surviving nodes and only place the new ones (incremental layout, e.g. ELK's "interactive" mode)
+		- collapse-in-place (categories, components) instead of removing, so the map deforms locally instead of reshuffling globally
+		- when a real re-layout is unavoidable, animate nodes to their new positions so they can be visually tracked
+	- switching views is an explicit user action - selection alone never swaps the view
+- Score display when no perspective is selected: show the group aggregate + make contestedness visible (averages alone would hide the most interesting info, e.g. `wall` averaging ~1 looks "meh" when it's actually the most polarized node)
+	- candidate treatments (all color on a -9..9 scale; needs a colorblind-safe diverging palette, not red-green):
+		- avg + ⚡ badge (what these mockups use)
+		- pie-chart node background: a slice per user's score - shows distribution shape (e.g. bimodal vs uniform), not just spread
+		- gradient node background (or border): one equal-width band per scorer, sorted by score - consensus renders as a near-solid color, disagreement as a visible sweep; the node itself shows the disagreement, so no number needed until selection reveals detail
+			- / use hard stops between bands, not interpolation - interpolating invents middle colors nobody scored (e.g. wall's [-7,2,8] would sweep through muddy mid-tones); with many users the bands smooth out naturally
+			- / gradient likely beats pie for ordinal scores: it's a sorted strip (no order reconstruction), and it has no tiny wedges at small sizes
+			- / background vs border: background is more visible but puts text on multicolor; border keeps text clean but may vanish at overview zoom - prototype question
+		- edges: a gradient along the stroke would read as direction/flow (source color → target color), so the distribution strip probably belongs on the edge's label chip (which already shows type + weight) - same visual language as nodes
+	- a Perspectives selector can switch to any subset of people (one person, a faction, everyone); aggregates recompute over the selected subset
 - New-to-topic users are the primary focus for now; new-to-app users can get a tutorial later (out of scope here)
 
 ## Layout
@@ -52,7 +64,7 @@
 - **Topic header**
 	- `* Illegal immigration into the US` - avg -4.3 ⚡9
 		- / the `#topic` node; contested because scores span -9..0
-	- `[score this]` - prompt for danny to add her own change-importance score
+	- `[score this]` - prompt for danny to add their own change-importance score
 - **The big question:** `? What are the most effective ways to reduce illegal immigration?`
 	- / guiding questions ranked by avg `guides` weight to the topic; `best-ways` at guides[8,6,9] (avg 7.7) is the top root question, so it headlines
 	- answered by a generated tradeoffs table:
@@ -141,7 +153,7 @@ flowchart TD
 	- / calculated arguments are perspective-relative (edge weights x the *viewer's* concept scores); danny has no scores yet, so group aggregates are used and labeled as such
 	- toward a higher score:
 		- reduces `* Illegal immigration into the US` (edge avg 4, node avg -4.3 ⚡9)
-			- / calculated pro: reducing a negatively-scored thing; note it flips per person - for bob (node 0, edge 1) this argues ~nothing, which is presumably why he's at -7
+			- / calculated pro: reducing a negatively-scored thing; note it flips per person - for bob (node 0, edge 1) this argues ~nothing, which is presumably why they scored a -7
 			- argued by 3 claims (1 supporting, 2 critiquing) - `[expand] → State 3 (claim tree)`
 	- toward a lower score:
 		- causes `* Billions of dollars of construction and maintenance spending` (edge avg 9, node avg -3)
@@ -206,8 +218,8 @@ flowchart TD
 
 - State 3: expand the claim thread on `wall-reduces` → structure pane switches to a **claim tree** view (first view-type switch; spec what that transition looks like)
 - State 4: click **The big question** / the tradeoffs table → structure pane switches to a **tradeoffs table** view (or is the table agenda-pane-only?)
-- State 5: danny submits her first scores → what changes? (e.g. a "you vs group" delta appears; calculated arguments re-derive from her perspective; prompt: "your reasoning isn't on the map yet - add it?")
-- State 6: scoring-walkthrough onboarding variant (the brief presented section-by-section, scoring as you read; by the end the app knows where danny diverges and whether her reasons are already captured)
+- State 5: danny submits their first scores → what changes? (e.g. a "you vs group" delta appears; calculated arguments re-derive from their perspective; prompt: "your reasoning isn't on the map yet - add it?")
+- State 6: scoring-walkthrough onboarding variant (the brief presented section-by-section, scoring as you read; by the end the app knows where danny diverges and whether their reasons are already captured)
 
 ## Open questions
 
@@ -226,7 +238,7 @@ flowchart TD
 - pane balance: does the structure pane earn a full 50% width, or should the agenda pane dominate with the diagram expanding on interaction?
 	- key observation to make: do users ever *initiate* from the diagram, or is it a passive echo of agenda-pane selection?
 - selection transitions: does pan/zoom + dim-in-place (State 1 → 2) read as "zooming into the same map", or still disorienting?
-- view-type switches (causal map → claim tree / tradeoffs table, States 3-4): how jarring is the re-layout, and does the animated transition carry enough continuity?
+- view switches (causal map → claim tree / tradeoffs table, States 3-4): how jarring is the swap, and would animating the transition help?
 - density: is opening the brief with the tradeoffs table too heavy as the very first thing a newcomer sees?
-- node visual treatment: are score fill + ⚡ badge legible at the zoom levels a half-width pane forces?
+- node visual treatment: are the score treatments (score fill, pie or gradient backgrounds/borders, ⚡ badge) legible at the zoom levels a half-width pane forces? is text readable on a banded background, or does the border variant win?
 - mobile: does the slide-over diagram get used at all, or is agenda-only the real mobile experience?

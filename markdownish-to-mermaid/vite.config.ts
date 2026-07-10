@@ -6,4 +6,8 @@ import tailwindcss from "@tailwindcss/vite";
 export default defineConfig({
   base: "/reasoning-tools/",
   plugins: [react(), tailwindcss()],
+  server: {
+    // Allow sharing local server through ngrok tunnels
+    allowedHosts: [".ngrok-free.app"],
+  },
 });

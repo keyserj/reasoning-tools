@@ -1,15 +1,15 @@
 ## What is this?
 
-- UX design explorations for an app that implements the sibling [ontology](ontology.md)
+- UX design explorations for an app that implements the sibling [ontology](./ontology.md)
 - The central design question so far: when a user goes to view a topic, what should be shown?
-- Mockups are text-based so they're easy to diff and iterate on; they use the ontology's ["Build a wall" example](ontology.md#Example) so that every screen shows real nodes/edges/scores
-	- mockups are viewed as **dana**: experienced with the app, new to this topic, no scores on it yet
+- Mockups are text-based so they're easy to diff and iterate on; they use the ontology's ["Build a wall" example](./ontology.md#Example) so that every screen shows real nodes/edges/scores
+	- mockups are viewed as **danny**: experienced with the app, new to this topic, no scores on it yet
 
 ## Design principles (from discussion so far)
 
-- Don't land users on the raw graph - land them on a generated **topic brief** assembled from the ontology's own prioritization signals (topic node, guiding-question weights, score spread, unanswered questions)
+- Don't land users solely on the raw graph - land them on a generated **topic brief** assembled from the ontology's own prioritization signals (topic node, guiding-question weights, score spread, unanswered questions)
 	- everything in the brief is derived from structure + scores - no manual curation
-- Two panes with asymmetric jobs (don't duplicate info between them):
+- Two panes with asymmetric jobs (avoid duplicate info between them):
 	- **Agenda pane**: text; owns everything ranked, aggregated, and explained - answers "what should I look at and why"
 	- **Structure pane**: diagram; owns relationships - answers "how does this fit together"
 	- keep node visuals light (text, score fill, contested badge) - cramming ranked/aggregated info into the diagram is how graph UIs become unreadable
@@ -19,16 +19,17 @@
 	- switching view types is an explicit animated transition
 - Score display when no perspective is selected: group aggregate + contested indicator (averages alone would hide the most interesting info, e.g. `wall` averaging ~1 looks "meh" when it's actually the most polarized node)
 	- a Perspectives selector can switch to a specific person's view
-- New-to-topic users are the primary case; new-to-app users can get a tutorial later (out of scope here)
+- New-to-topic users are the primary focus for now; new-to-app users can get a tutorial later (out of scope here)
 
 ## Layout
 
 - Desktop: agenda pane = left half, structure pane = right half; selection syncs both ways
 - Mobile: agenda pane by default; a button/slide reveals the structure pane
-	- intentionally OK if the mobile diagram stays mediocre: mobile is for consuming/scoring/commenting (agenda-pane work); structural editing is desktop work
+	- OK if the mobile diagram stays mediocre: mobile is for consuming/scoring/commenting (agenda-pane work); structural editing is desktop work
 
 ## Mockup conventions
 
+- `/` lines are meta comments (same convention as the ontology example): they explain why an element is shown or ranked where it is (usually: which calculation drives it); they wouldn't render
 - Flows are sequences of named states; each state after the first describes only its **delta** from the state it came from
 - Interactions are written as: `[interaction] → State N`
 - Agenda-pane mockups: nested markdown mirroring the UI hierarchy (nesting = containment, order = display order), with real content from the example
@@ -36,7 +37,6 @@
 	- / mermaid because it renders in GitHub/VSCode preview, so reviewers can process it visually; may switch to the ontology example's own (terser) syntax once the `to-mermaid` app supports it
 	- / mermaid can't express deltas, so these blocks are always full renderings - the prose delta bullets remain the authoritative statement of what changed between states
 	- / `%%` lines inside mermaid are meta comments (the equivalent of `/`)
-- `/` lines are meta comments (same convention as the ontology example): they explain why an element is shown or ranked where it is (usually: which calculation drives it); they wouldn't render
 - Score notation (semantics, not visual treatment - that's TBD):
 	- `avg X` = mean across the perspectives that scored the thing
 	- `⚡N` = contested indicator; N = spread (max minus min among scorers); shown when spread >= 8 (threshold TBD)
@@ -52,7 +52,7 @@
 - **Topic header**
 	- `* Illegal immigration into the US` - avg -4.3 ⚡9
 		- / the `#topic` node; contested because scores span -9..0
-	- `[score this]` - prompt for dana to add her own change-importance score
+	- `[score this]` - prompt for danny to add her own change-importance score
 - **The big question:** `? What are the most effective ways to reduce illegal immigration?`
 	- / guiding questions ranked by avg `guides` weight to the topic; `best-ways` at guides[8,6,9] (avg 7.7) is the top root question, so it headlines
 	- answered by a generated tradeoffs table:
@@ -135,10 +135,10 @@ flowchart TD
 
 - `[← back to brief]`
 - **Node card**: `* Border wall along the southern US border` `#action`
-	- scores: alice 2 · bob -7 · casey 8 (avg 1 ⚡15) · dana: `[score this]`
+	- scores: alice 2 · bob -7 · casey 8 (avg 1 ⚡15) · danny: `[score this]`
 - **Why these scores?**
 	- / arguments about the wall's change-importance score; calculated ones per ontology > Core features > Calculated arguments
-	- / calculated arguments are perspective-relative (edge weights x the *viewer's* concept scores); dana has no scores yet, so group aggregates are used and labeled as such
+	- / calculated arguments are perspective-relative (edge weights x the *viewer's* concept scores); danny has no scores yet, so group aggregates are used and labeled as such
 	- toward a higher score:
 		- reduces `* Illegal immigration into the US` (edge avg 4, node avg -4.3 ⚡9)
 			- / calculated pro: reducing a negatively-scored thing; note it flips per person - for bob (node 0, edge 1) this argues ~nothing, which is presumably why he's at -7
@@ -206,8 +206,8 @@ flowchart TD
 
 - State 3: expand the claim thread on `wall-reduces` → structure pane switches to a **claim tree** view (first view-type switch; spec what that transition looks like)
 - State 4: click **The big question** / the tradeoffs table → structure pane switches to a **tradeoffs table** view (or is the table agenda-pane-only?)
-- State 5: dana submits her first scores → what changes? (e.g. a "you vs group" delta appears; calculated arguments re-derive from her perspective; prompt: "your reasoning isn't on the map yet - add it?")
-- State 6: scoring-walkthrough onboarding variant (the brief presented section-by-section, scoring as you read; by the end the app knows where dana diverges and whether her reasons are already captured)
+- State 5: danny submits her first scores → what changes? (e.g. a "you vs group" delta appears; calculated arguments re-derive from her perspective; prompt: "your reasoning isn't on the map yet - add it?")
+- State 6: scoring-walkthrough onboarding variant (the brief presented section-by-section, scoring as you read; by the end the app knows where danny diverges and whether her reasons are already captured)
 
 ## Open questions
 

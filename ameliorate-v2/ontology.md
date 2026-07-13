@@ -77,15 +77,15 @@
 		- All - Source mentions Claim
 - Individual: Scores
 	- [Concept scoring semantics: desirability? importance? more-less vs good-bad?](#Concept%20scoring%20semantics%20desirability?%20importance?%20more-less%20vs%20good-bad?)
-	- Claim truth score
+	- Claim truth score: 1 = completely false, 5 = might be true or false, 9 = completely true
 	- Edge weight score
 		- note: scores don't make sense for these?: categorizes, has, criterion for
 		- causes (opposite: reduces/impedes): how much the source moves the target: -9 = strongly reduces it, 0 = doesn't move it at all, 9 = strongly increases it
 		- fulfils: -9 = actively works against it, 0 = doesn't fulfil it at all, 9 = fully fulfils it
-		- guides: how much exploring the question would advance the target topic/question: 0 = tangential to it, 9 = central to it (most progress on the target runs through this question)
-		- clarifies: how contingent the target node is on the answer: 0 = answer wouldn't change anything about it, 9 = answer could completely reshape how we see/score it
-		- answers: 0 = doesn't answer, 4-5 = kind of answers, 9 = fully answers
-		- mentions: 0 = doesn't mention, 4-5 = kind of implies, 9 = definitely mentions
+		- guides: how much exploring the question would advance the target topic/question: 1 = tangential to it, 9 = central to it (most progress on the target runs through this question)
+		- clarifies: how contingent the target node is on the answer: 1 = answer wouldn't change anything about it, 9 = answer could completely reshape how we see/score it
+		- answers: 1 = doesn't answer, 5 = kind of answers, 9 = fully answers
+		- mentions: 1 = doesn't mention, 5 = kind of implies, 9 = definitely mentions
 		- supports (opposite: critiques): -9 = strongly critiques, 0 = doesn't relate / hard to say, 9 = strongly supports
 
 ### Example
@@ -697,10 +697,10 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- having both scores seems like a lot to think through
 		- could it be easier if you specify a "how much we have this" score vs "how much we should have this" score?
 			- visually it could be as easy as clicking twice - first click is "how much does this currently exist?" "how much should this ideally exist?"
-			- "desirability" is akin to "how much should this ideally exist" - 0 "should exist" = -9 desirability, 9 "should exist" = 9 desirability, 5 "should exist" = 0 desirability...? not sure how 0 desirability is represented actually
+			- "desirability" is akin to "how much should this ideally exist" - 1 "should exist" = -9 desirability, 9 "should exist" = 9 desirability, 5 "should exist" = 0 desirability...? not sure how 0 desirability is represented actually
 			- "change score" is akin to "how much should we have this" minus "how much we have this"
 				- issue: change score should reflect _how important it is that this changes_, we don't really care as much about _how much (quantity) does this need to change_, which is what the subtraction conveys
-					- e.g. if "pedestrians die in car accidents" is a 1 and should be a 0, how do we know that the 1->0 is a critical change?
+					- e.g. if "pedestrians die in car accidents" is a 2 and should be a 1, how do we know that the 2->1 is a critical change?
 - things we might want to be able to identify via scores, because they're a source of misunderstanding / disagreement to discuss
 	1. how important is it for a thing to change?
 	2. how much ideally should a thing exist?

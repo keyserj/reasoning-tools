@@ -1,71 +1,115 @@
 ## What is this?
 
 - UX design explorations for an app that implements the sibling [ontology](./ontology.md)
-- The central design question so far: when a user goes to view a topic, what should be shown?
+- Central design question: when a user goes to view a topic, what should be shown?
 - Mockups are text-based so they're easy to diff and iterate on; they use the ontology's ["Build a wall" example](./ontology.md#Example) so that every screen shows real nodes/edges/scores
 	- mockups are viewed as **danny**: experienced with the app, new to this topic, no scores on it yet
+	- assumption: new-to-app users will get a tutorial of some kind
 - Plan: once a few states stabilize, generate a clickable HTML wireframe from this spec to evaluate those; the spec stays the source of truth and the wireframe is regenerated from it, never hand-edited
 
-## Design plan
+## High-level UX ideas
 
-- What we're leaning toward. Not fully settled, but this section isn't for deep debate: minor open points sit in **Question** subsections below their decision; major ones move to [Open design questions](#open-design-questions).
+- split panes: agenda pane on left, structure pane on right
+  - panes stay in sync based on interactions made in the other pane
+  - mobile might show just agenda pane, with swipe or button to get to the structure pane
+    - mobile is just for consuming/scoring/commenting, desktop is better for editing structure
+- perspectives selector can switch to any subset of people's scores (e.g. one person, a faction, everyone)
+  - group scores are averaged but node/edge-label borders are gradient-colored to convey score distribution
+    - option to show disagreement scores (standard deviation)
 
-### Land on a generated topic brief, not the raw graph
+### Agenda pane
 
-- Don't land users solely on the raw graph - land them on a generated **topic brief** assembled from the ontology's own prioritization signals (topic node, guiding-question weights, score spread, unanswered questions)
-	- everything in the brief is derived from structure + scores - no manual curation
+- text; owns everything ranked, aggregated, and explained - answers "what should I look at and why"
+- initially: a **topic brief** assembled from the ontology's own prioritization signals (node types / relations / scores)
+- master-detail stack: the brief is the root; clicking any node (in either pane) pushes a detail view with back/breadcrumb navigation
 
-### Two asymmetric panes (agenda / structure)
+### Structure pane
 
-- Two panes with asymmetric jobs (avoid duplicate info between them):
-	- **Agenda pane**: text; owns everything ranked, aggregated, and explained - answers "what should I look at and why"
-	- **Structure pane**: diagram; owns relationships - answers "how does this fit together"
-	- keep node visuals light (text, score fill, contested badge) - cramming ranked/aggregated info into the diagram is how graph UIs become unreadable
+- shows generally non-linear visuals (e.g. diagram/table) to help aid comprehension, answers "how does this fit together"
+- keep node visuals light (text, score colors?)
+- initially: show top scored nodes with relations between them
 
-### Agenda pane is a master-detail stack
+#### Questions
 
-- The agenda pane is a master-detail stack: the brief is the root; clicking any node (in either pane) pushes a detail view with back navigation
+- [How to keep diagram from re-layouting too much?](#how-to-keep-diagram-from-re-layouting-too-much)
 
-### Structure pane hosts switchable views
+### Score-based node/edge-label border gradients
 
-- The structure pane isn't a single static diagram - it hosts a few generated views (causal map, tradeoffs table, claim tree) and switches between them
-- switching views is an explicit user action - selection alone never swaps the view
-- within a view, prefer spatial stability - selection should pan/highlight rather than re-layout; *how* to actually achieve it is a [top-level open question](#spatial-stability-how-to-achieve-it) with a lot to weigh
+- what is it
+	- one equal-width band per scorer, sorted by score
+- good
+  - conveys score distributions
+	- consensus renders as a near-solid color, disagreement as a visible sweep
+	- the node itself shows the disagreement, so no number needed until selection reveals detail
+- notes
+	- use hard stops between bands rather than a smooth gradient, to avoid suggesting in-between scores that don't exist
+	- needs a colorblind-safe diverging palette, not red-green
 
-### Perspectives selector
+## High-level UX flow
 
-- a Perspectives selector can switch to any subset of people (one person, a faction, everyone); aggregates recompute over the selected subset
+### State 1: Initial entry to topic
 
-### Layout
+- Agenda pane
+  - note: each section here sorts items by score, and "show more/less" if there are any to show/hide
+  - note: all scores here should be scaled by distance to the topic node (see question in subsection for how)
+	- "Topic": topic node and description (one topic node should be selected)
+  	- "Guide me through the topic" (and ask me to score things)
+	- "Hottest Details": top 5 of all nodes/edges excluding topic node (normalized scores, see question in subsection for how)
+	- "Guiding Questions": top 5 guiding questions
+  	- if structure editing + < 5 items: "add guiding question"
+	- "Most important to change": top 5 (absolute value) concepts
+	- "Disagreement": top 5 std-deviation causal concepts/edges
+	- "Unknowns": top 5 unanswered clarifying questions
+- Structure pane
+  - probably just show top 10 important nodes to the Topic
 
-- Desktop: agenda pane = left half, structure pane = right half; selection syncs both ways
-- Mobile: agenda pane by default; a button/slide reveals the structure pane
-	- OK if the mobile diagram stays mediocre: mobile is for consuming/scoring/commenting (agenda-pane work); structural editing is desktop work
+#### Questions - unanswered
 
-#### Question: does mobile's slide-over diagram get used?
+- should the topic brief convey the scores via more than just sorting the items top-to-bottom?
+  - would be nice to show the scores colored with a pie-distribution background
+    - might even be good to use the backgrounds or borders to gradient-color it
+    - will have to see if these options make the visual too cluttered
 
-- prototype would help feel out this question
-- does the slide-over diagram get used at all, or is agenda-only the real mobile experience?
+#### Questions - kind of answered
 
-### Scope: new-to-topic users first
+- how to scale scores by distance to topic node?
+  - concept scores: can be multiplied across the causal scores until the path reaches the topic node
+  - "guides"/"clarifies" scores: multiply along path until reaching target concept node, then that node multiplies following "concept scores" strategy
+  - [TODO: rest of score types]
+  - how to do this for disagreement scores?
+- how should "guide me through the topic" work?
+  - maybe agenda pane shows the node/edge notes, comments, summary view aspects
+	- maybe structure pane shows top 10 "important to this node" nodes? ("show more"?)
+  	- maybe also the relation to the topic node and/or to the "important to topic node" nodes...?
+  - since importance scores (concepts, questions) are relative, should we show the highest/lowest of each first (and keep them showing after)?
+    - so that users can get a feel for the relativity
+    - this seems possible in the agenda pane
+- how to normalize scores?
+  - normalize to 0..1
+  - generally scores that are -9 to 9: divide by 9 + absolute value
+  - generally scores that are 1 to 9: subtract 1 + divide by 8
+  - for aggregates (multiple perspectives scored + showing):
+    - calculate normalized averages _and_ normalized _standard deviations_ - high deviation should normalize close to 1
 
-- New-to-topic users are the primary focus for now; new-to-app users can get a tutorial later (out of scope here)
+#### Questions - answered
 
-## How to read this doc
+- how should "Open questions" rank unscored questions (like `how-tall`) against scored ones?
+  - unscored questions can probably just use a default score of 5 (scale 1-9)
 
-- `/` lines are meta comments (same convention as the ontology example): they explain why an element is shown or ranked where it is (usually: which calculation drives it); they wouldn't render
+## UX flow example (desktop) [OUT OF DATE - IGNORE UNTIL "High-level UX flow" IS MORE SOLID!]
+
+- `/` lines are meta comments: they explain why an element is shown or ranked where it is; they don't render
 - Flows are sequences of named states; each state after the first describes only its **delta** from the state it came from
 - Interactions are written as: `[interaction] → State N`
-- Agenda-pane mockups: nested markdown mirroring the UI hierarchy (nesting = containment, order = display order), with real content from the example
+- Agenda-pane mockups: nested markdown mirroring the UI hierarchy (nesting = containment, order = display order), with real content from the "build a wall" example
 - Structure-pane mockups: a fenced mermaid diagram of what's visible, plus prose bullets for view type and behavior
-	- / mermaid because it renders in GitHub/VSCode preview, so reviewers can process it visually; may switch to the ontology example's own (terser) syntax once the `to-mermaid` app supports it
-	- / mermaid can't express deltas, so these blocks are always full renderings - the prose delta bullets remain the authoritative statement of what changed between states
-	- / `%%` lines inside mermaid are meta comments (the equivalent of `/`)
+	- mermaid because it renders in GitHub/VSCode preview, so reviewers can process it visually
+	- maybe switch to the ontology example's own (terser) syntax once the `to-mermaid` app supports it
+	- mermaid can't express deltas, so these blocks are always full renderings
+  	- the prose delta bullets remain the authoritative statement of what changed between states
 - Score notation (semantics, not visual treatment - that's TBD):
 	- `avg X` = mean across the perspectives that scored the thing
-	- `⚡N` = contested indicator; N = spread (max minus min among scorers); shown when spread >= 8 (threshold TBD)
-
-## UX flow mockups (desktop)
+	- `⚡N` = contested indicator; N = spread (max minus min among scorers); written when spread >= 8
 
 ### Experienced user viewing a topic for the first time
 
@@ -233,53 +277,17 @@ flowchart TD
 - State 5: danny submits their first scores → what changes? (e.g. a "you vs group" delta appears; calculated arguments re-derive from their perspective; prompt: "your reasoning isn't on the map yet - add it?")
 - State 6: scoring-walkthrough onboarding variant (the brief presented section-by-section, scoring as you read; by the end the app knows where danny diverges and whether their reasons are already captured)
 
-## Open design questions
+## Big open questions
 
-- Bigger UX questions that likely need more than a small amount of debate and therefore would be too much for putting directly on the design plan.
+### There are a lot of calculations that multiply scores across paths - how to keep this performant?
 
-### Score display at overview (no perspective selected)
+- not sure if there will be performance issues here
+- math is usually pretty performant but it seems like a lot of calculations need to be made
+  - there must be a way to effectively cache/reuse calculations, since many calculations are similar / across same paths
 
-- leaning: Option 3 (gradient) as the most promising; mockups use Option 1 (avg + ⚡) for now
-- prototype would help feel out which treatment stays legible at the zoom levels a half-width pane forces
+### How to keep diagram from re-layouting too much?
 
-#### Notes
-
-- whatever the treatment, ideally show the aggregate *and* contestedness
-- all treatments color on a -9..9 scale; needs a colorblind-safe diverging palette, not red-green
-- edges: a gradient along the stroke would read as direction/flow (source color → target color), so the distribution strip probably belongs on the edge's label chip (which already shows type + weight) - same visual language as nodes
-
-#### Questions - Unanswered
-
-- node visual treatment: are the score treatments (score fill, pie or gradient backgrounds/borders, ⚡ badge) legible at the zoom levels a half-width pane forces? is text readable on a banded background, or does the border variant win? (prototype)
-
-#### Option 1: avg + ⚡ badge
-
-- what is it
-	- avg + ⚡ badge; what these mockups use
-
-#### Option 2: pie-chart node background
-
-- what is it
-	- a slice per user's score
-- good
-	- shows distribution shape (e.g. bimodal vs uniform), not just spread
-
-#### Option 3: gradient node background (or border)
-
-- what is it
-	- one equal-width band per scorer, sorted by score
-- good
-	- consensus renders as a near-solid color, disagreement as a visible sweep; the node itself shows the disagreement, so no number needed until selection reveals detail
-	- likely beats pie for ordinal scores: it's a sorted strip (no order reconstruction), and it has no tiny wedges at small sizes
-- notes
-	- use hard stops between bands, not interpolation - interpolating invents middle colors nobody scored (e.g. wall's [-7,2,8] would sweep through muddy mid-tones); with many users the bands smooth out naturally
-- questions
-	- background vs border: background is more visible but puts text on multicolor; border keeps text clean but may vanish at overview zoom - prototype question
-
-### Spatial stability: how to achieve it?
-
-- leaning: layer Options 1-4 in that order, (they compose)
-- prototype would help feel out what's ok
+- leaning: ?
 
 #### Notes
 
@@ -303,28 +311,3 @@ flowchart TD
 
 - what is it
 	- when revealing/hiding forces placement changes, pin the surviving nodes and only place the new ones (e.g. ELK's "interactive" mode)
-
-### Disagreement metric & contested threshold
-
-- is spread the right disagreement metric (vs variance, vs bimodality), and is >= 8 the right contested threshold?
-
-### Rank "Where people disagree" by spread or centrality?
-
-- should "Where people disagree" weight by centrality/importance to the topic rather than raw spread?
-
-### Ranking "Open questions" (scored vs unscored)
-
-- how should "Open questions" rank unscored questions (like `how-tall`) against scored ones?
-
-### Degenerate topics with no brief spine
-
-- degenerate topics: no `#topic` node, no guiding questions → the brief has no spine
-- leaning: fall back to most-scored / most-connected nodes, plus a nudge to add a guiding question
-	- also consider asking "what's the main question you're trying to answer?" during topic creation, so the degenerate case stays rare
-
-### Pane balance: does the structure pane earn 50% width?
-
-- prototype would help feel out this question
-- does the structure pane earn a full 50% width, or should the agenda pane dominate with the diagram expanding on interaction?
-	- key observation to make: do users ever *initiate* from the diagram, or is it a passive echo of agenda-pane selection?
-

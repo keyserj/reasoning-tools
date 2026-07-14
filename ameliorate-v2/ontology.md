@@ -805,7 +805,8 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- multi-premise: seems like edges would need to become hyperedges...? with a list of source nodes and a list of target nodes e.g. A, B supports C
 		- potentially a claim could also be used as a "grouper" to combine other claims. instead of "A, B supports C", it could be "D supports C", "D has premise A" and "D has premise B"
 			- what would the text in this "grouper" be? I guess it probably makes sense to have _no_ text and just visually display it as a grouping around the other two claims...?
-			- not sure how "OR" logic could be supported distinctly from "AND" logic. maybe "OR" is the default e.g. if you have "A supports C" and "B supports C"?
+			- not sure how "OR" logic could be supported distinctly from "AND" logic. maybe "OR" is the default e.g. if you separately have "A supports C" and "B supports C"?
+  	- critically, it seems like causal relations might need to mirror whatever change is made here to claim relations - e.g. "A AND B causes C" as a modeling possibility rather than just "A causes C" and "B causese C"
 	- deductive: "concludes that"/"therefore" instead of "supports"? then "therefore" edge score should probably be 0 or 1, and chaining with "supports" should carry the fully "strength" of "supports"
 
 ### Should other things besides cause & effect be primary? If so, how?

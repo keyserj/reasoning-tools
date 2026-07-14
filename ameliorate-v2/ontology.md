@@ -673,6 +673,41 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 - these should be root-level so we can do something like e.g. "option 1" "option 2"
 
+### How should implied claim's score relate to the score on the parent that implies it?
+
+- concern: right now these lines imply a critical inconsistency:
+  - from structure definition: `Claim truth score: 1 = completely false, 5 = might be true or false, 9 = completely true`
+  - from the example: `*[-4,0,-9] Illegal immigration into the US &illegal-immig #topic`
+  - from the example: `=[-4,0,-9] $illegal-immig is important to increase`
+  - so claim truth scores are supposed to be 1 (false) to 9 (true), but implied claims can be about any node or edge, and node and edge scores can be -9 to 9 OR 1 to 9, depending on the type of node / edge.
+  - we also specify that the parent node/edge score should always match the implied claim score, being one in the same. due to the above, this is impossible.
+- thoughts
+  - we want concept scores to be -9 to 9; this is critical for allowing the map to switch between displaying opposites ("causes" vs "reduces") based on perspective
+  - truth scores don't make sense to be negative, because "false" doesn't mean "opposite of truth" any more than "absence of truth".
+    - hmm... technically this may be based on the context of the parent claim. if the parent is about "causes", then it may be appropriate for the claim to have an "opposite of true" (reduces) score value available separately from "absence of truth" (doesn't cause or reduce)
+      - it feels janky and overly/unnecessarily-complex though to allow claims to have different score meanings based on what the claim is about. does not seem appropriate.
+  - the core issue seems to be that the parent score (e.g. -9 important to decrease, 0 not important to change) includes different meaning than the implied score (e.g. X is important to increase):
+- ideas
+  - can we just convert the parent's score into a 1-9 claim range score?
+    - I don't think so. main issues with this:
+      - it seems like the score mismatch would be confusing... if I scored a -6 for the parent, why does the implied claim have e.g. a 3? I didn't score that!
+  - can we just have the implied claim score _in addition_ to the parent score?
+    - this is very suboptimal because:
+      - children supports/critiques make sense to be used for both scores
+      - the parent score will likely be confusing if the implied claim, with its children supports/critiques, does not directly tie to it
+
+#### Related concern: Is it ok that the three distinct concept score meanings can only have two distinct forms of justification?
+
+- what:
+  - a further-positive score means "important to increase", a further-negative score means "important to decrease", a lower absolute-value score means "not important to change"
+  - but the claim that's justified behind this score is technically "X is important to increase" - meaning critiques are ambiguous between meaning "important to decrease" vs "not important to change"
+- thoughts
+- ideas
+  - instead of one claim, should we have three claims - one for each meaning?
+    - no way - there would be a ton of overlap e.g. a support for "important to increase" would almost always be a critique for "important to decrease" and "not important to change"
+  - instead of one claim having "supports" / "critiques", can we have three edge types?
+    - same issue as above - even "supports increase" vs "supports decrease" vs "supports no change" seem to have some overlapping justification... e.g. a claim at the same time may "supports decrease" _and_ "supports no change" if the claim conveys that "critiques increase"
+
 ### Concept scoring semantics: desirability? importance? more-less vs good-bad?
 
 - current leaning: Option 4 (change importance), multiplied with causal weights to calculate "how good is a solution" (see Option 4's questions); desirability / current presence / ideal presence as optional clarifier scores when change scores conflict?

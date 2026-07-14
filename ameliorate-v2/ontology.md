@@ -1,13 +1,3 @@
-## TODO (meta)
-
-- [x] add "big open questions > desirability/more-less, desirability/good-bad, desirability/importance"
-- [x] put options into overview's structure, link their header to the "big open questions" section
-- [x] add overall purpose
-- [x] add border wall example in markdown-like syntax that shows off each part of the structure
-- flesh out Concept > Basic
-- [x] add Criterion to the Example
-- more fleshing out?
-
 ## Overview
 
 ### Purpose

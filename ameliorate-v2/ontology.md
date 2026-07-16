@@ -9,13 +9,13 @@
 	3.  Known processes for (a) getting up-to-speed; (b) identifying an individual's unique, valuable knowledge that hasn't been said yet; and (c) integrating that info into the current set of group knowledge; are nowhere near as effective as they could be.
 	4.  The way that information is organized and presented has profound impact on improving the processes in 3.
 	5.  Known ways of organizing and presenting information are nowhere near as effective as they could be.
-- TODO: [The value of scored causal structures for refining contested knowledge](The%20value%20of%20scored%20causal%20structures%20for%20refining%20contested%20knowledge.md)
+- TODO: [The value of scored causal structures for refining contested knowledge](The-value-of-scored-causal-structures-for-refining-contested-knowledge.md)
 
 #### Archive
 
 - It's hard to improve situations, especially when many people are involved, and more so when the situation is complex. Even with best effort, it's hard to effectively take into account everyone's points and counterpoints without some becoming drowned out, lost, outdated, forgotten.
 	- It's a good first step to use a document instead of a verbal discussion, but that gets messy very quickly.
-	- A good second step might be to use an argument map, but (TODO: [The value of scored causal structures for refining contested knowledge](The%20value%20of%20scored%20causal%20structures%20for%20refining%20contested%20knowledge.md))
+	- A good second step might be to use an argument map, but (TODO: [The value of scored causal structures for refining contested knowledge](The-value-of-scored-causal-structures-for-refining-contested-knowledge.md))
 
 ### What is this?
 
@@ -24,9 +24,9 @@
 	- "contested" because anyone can disagree about any of the details, via scoring and supporting, critiquing, questioning
 	- "causal map" because the core of the structure is: concepts (as nodes) with causal relations (as edges) between them
 - This overview's [Structure](#Structure) and [Example](#Example) sections are probably the best for quickly grasping the ontology
-	- [Structure Details](#Structure%20Details) has more information (e.g. meaning, purpose, open questions) about each piece of the structure
-	- [Core features](#Core%20features) goes deeper into what the structure + scores enable (e.g. calculated arguments)
-	- [Big open questions](#Big%20open%20questions) has details about open questions that have more significant impact on the ontology than the "open questions" in the structure details section
+	- [Structure Details](#structure-details) has more information (e.g. meaning, purpose, open questions) about each piece of the structure
+	- [Core features](#core-features) goes deeper into what the structure + scores enable (e.g. calculated arguments)
+	- [Big open questions](#big-open-questions) has details about open questions that have more significant impact on the ontology than the "open questions" in the structure details section
 - UX design for an app implementing this ontology lives in the sibling doc [UX-design](./UX-design.md) - its mockups are built from this doc's [Example](#Example)
 
 #### Questions - Unanswered
@@ -58,7 +58,7 @@
 		- Clarifying Question - Clarifying Question clarifies Node
 	- Claim
 		- note: all scores have an implied claim, where supporting claims support a higher score, critiquing claims support a lower score
-		- note: many arguments about a score can be _calculated_ from causation instead of manually claimed (see [Calculated arguments](#Calculated%20arguments))
+		- note: many arguments about a score can be _calculated_ from causation instead of manually claimed (see [Calculated arguments](#calculated-arguments))
 		- All - Claim supports/critiques Claim
 		- Statistic
 		- Anecdote
@@ -67,7 +67,7 @@
 		- All - Source mentions Claim
 - Individual: Scores
 	- note: all scores use one of two ranges - bipolar -8..8 (the scored thing has a meaningful opposite) or unipolar 0..8 (it doesn't); see [Score ranges](#Score-ranges) for more details
-	- [Concept scoring semantics: desirability? importance? more-less vs good-bad?](#Concept%20scoring%20semantics%20desirability?%20importance?%20more-less%20vs%20good-bad?)
+	- [Concept scoring semantics: desirability? importance? more-less vs good-bad?](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad)
 	- Claim truth score: -8 = completely opposite of true, 0 = completely absent of truth, 8 = completely true
 		- claims use only 0..8 scoring if "opposite" isn't defined
 	- Edge weight score
@@ -106,7 +106,7 @@
     		- concept's change-importance scores: `$node is important to increase`
     		- edge scores: `$source-node [edge type] $target-node` (edges are verbs that claim a relation between the source and target)
     		- claims's truth score: `[node's text]` (claims are worded as evaluable statements already)
-			- explicit claims can have any text - ideally causal ones get promoted into the causal map and calculated instead (see [Calculated arguments](#Calculated%20arguments))
+			- explicit claims can have any text - ideally causal ones get promoted into the causal map and calculated instead (see [Calculated arguments](#calculated-arguments))
 	- `#tag`: explicitly specifies a subtype (e.g. `#action`) - subtypes like category/component/criterion are implied by their edges so aren't tagged
 	- `~`: a note relevant to its parent line - it would show visually if this were rendered
 	- `/`: a meta comment about the example, noting something about its parent line - it wouldn't show if rendered
@@ -309,7 +309,7 @@ Perspectives: [alice, bob, casey]
 ### Benefits / goals
 
 - significantly improved maintenance of the contested information
-  - many arguments don't need to be manually written or maintained - they can be calculated from causation + individual scores - see [Calculated arguments](#Calculated%20arguments)
+  - many arguments don't need to be manually written or maintained - they can be calculated from causation + individual scores - see [Calculated arguments](#calculated-arguments)
 
 ### Downsides / known missing things
 
@@ -347,7 +347,7 @@ Perspectives: [alice, bob, casey]
 
 ###### Questions - Unanswered
 
-- [Do all topics have a topic node? Can there be multiple topic nodes?](#Do%20all%20topics%20have%20a%20topic%20node?%20Can%20there%20be%20multiple%20topic%20nodes?)
+- [Do all topics have a topic node? Can there be multiple topic nodes?](#do-all-topics-have-a-topic-node-can-there-be-multiple-topic-nodes)
 - how to relate all relevant nodes to the Topic?
 	- there would be so many more edges stored if every node had to have an edge to the Topic
 		- these edges don't make sense to be argued or anything like that either
@@ -494,7 +494,7 @@ Perspectives: [alice, bob, casey]
       - "guides"? seems ok
     - ? would questions themselves still need scoring, or just the edges then?
     - ? do all topics have a "topic node"?
-      - promoted to a big open question: [Do all topics have a topic node? Can there be multiple topic nodes?](#Do%20all%20topics%20have%20a%20topic%20node?%20Can%20there%20be%20multiple%20topic%20nodes?)
+      - promoted to a big open question: [Do all topics have a topic node? Can there be multiple topic nodes?](#do-all-topics-have-a-topic-node-can-there-be-multiple-topic-nodes)
   - option 2: manually specify "guiding" question (e.g. checkbox)
   - option 3: no edge = guiding, "informs" ("clarifies"?) = clarifying
     - - conflicts with guiding questions being able to guide other guiding questions (they'd need an edge)
@@ -534,8 +534,8 @@ Perspectives: [alice, bob, casey]
 
 ##### Notes
 
-- See [More advanced claim modeling](#More%20advanced%20claim%20modeling)
-- Non-causal arguments - e.g. evidence about truth (statistics, anecdotes, source mentions), definitional disputes, pure value assertions - make sense to exist via explicit claims. But causal arguments are ideally converted into causal form (concepts + causal edges) so that they're _calculated_ into the argument map instead of manually maintained (see [Calculated arguments](#Calculated%20arguments)).
+- See [More advanced claim modeling](#more-advanced-claim-modeling)
+- Non-causal arguments - e.g. evidence about truth (statistics, anecdotes, source mentions), definitional disputes, pure value assertions - make sense to exist via explicit claims. But causal arguments are ideally converted into causal form (concepts + causal edges) so that they're _calculated_ into the argument map instead of manually maintained (see [Calculated arguments](#calculated-arguments)).
 
 ##### Questions - Unanswered
 
@@ -597,7 +597,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 ##### Questions - Unanswered
 
-- [Concept scoring semantics: desirability? importance? more-less vs good-bad?](#Concept%20scoring%20semantics%20desirability?%20importance?%20more-less%20vs%20good-bad?)
+- [Concept scoring semantics: desirability? importance? more-less vs good-bad?](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad)
 - how to convey "I want to talk about this"?
 	- does this have value asynchronously? seems like conveying "I think this is important" is sufficient asynchronously
 	- synchronously, it seems like this could be handled by something like [Suggesting and voting on a new focus](https://github.com/amelioro/ameliorate/issues/314)
@@ -627,7 +627,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 - enables calculating "how much does node A cause node B?"
 	- by multiplying causal weight scores
 		- probably normalized to -1..1 (score / 8), so that chained causation attenuates rather than compounds
-	- and this, combined with [Concept scoring semantics: ?](#Concept%20scoring%20semantics%20?): "how much does node B _matter to_ node A?"
+	- and this, combined with [Concept scoring semantics](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad): "how much does node B _matter to_ node A?"
 		- by multiplying causal score by concept score e.g. goodness
 - avoid duplicate edges when a chain already conveys the relation (e.g. A causes B and B causes C, plus a direct A causes C edge) - the duplicate would double-count in calculations
 
@@ -658,7 +658,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 ## Core features
 
 - features enabled by the structure
-- other candidates that could migrate here from notes elsewhere: the tradeoffs table (see [Criterion](#Criterion)), question prioritization via guides/clarifies chaining (see [Edge weight score](#Edge%20weight%20score)), "how good is a solution" calculation
+- other candidates that could migrate here from notes elsewhere: the tradeoffs table (see [Criterion](#Criterion)), question prioritization via guides/clarifies chaining (see [Edge weight score](#edge-weight-score)), "how good is a solution" calculation
 
 ### Calculated arguments
 
@@ -668,7 +668,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- arguments supporting a higher score: nodes with positive score that this node causes, nodes with negative score that this node reduces
 	- arguments supporting a lower score: nodes with negative score that this node causes, nodes with positive score that this node reduces, nodes that impede this node ? (see questions - not sure if impediments should be included - should "change importance" include attainability?)
 - e.g. in the [Example](#Example), "the wall costs billions" doesn't need to be a manual claim critiquing the wall's score - `wall causes[8,8,8] wall-cost`, combined with `wall-cost`'s negative scores, _is_ that con, calculably
-- this reuses the "multiply edge weights by concept scores" machinery from "how good is a solution" (see Causes notes under [Edge weight score](#Edge%20weight%20score)) - the argument map is that calculation decomposed per-neighbor, displayed as pros/cons
+- this reuses the "multiply edge weights by concept scores" machinery from "how good is a solution" (see Causes notes under [Edge weight score](#edge-weight-score)) - the argument map is that calculation decomposed per-neighbor, displayed as pros/cons
 
 #### Purpose
 
@@ -715,7 +715,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
     - no way - there would be a ton of overlap e.g. a support for "important to increase" would almost always be a critique for "important to decrease" and "not important to change"
   - instead of one claim having "supports" / "critiques", can we have three edge types?
     - same issue as above - even "supports increase" vs "supports decrease" vs "supports no change" seem to have some overlapping justification... e.g. a claim at the same time may "supports decrease" _and_ "supports no change" if the claim conveys that "critiques increase"
-  - supports edge score might be able to indicate _which score_ the child claim supports in the parent - see the [Concept scoring semantics](#Concept%20scoring%20semantics%20desirability?%20importance?%20more-less%20vs%20good-bad?) unanswered question about a pro suggesting a precise score for its parent
+  - supports edge score might be able to indicate _which score_ the child claim supports in the parent - see the [Concept scoring semantics](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad) unanswered question about a pro suggesting a precise score for its parent
 
 ### Should claim truth scores be the _only_ possible scores?
 
@@ -859,7 +859,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 #### Option 1: relatively
 
 - i.e. pick a concept on a specific topic and score relatively to that one
-- somewhat depends on [Node scoring semantics: desirability? importance? more-less vs good-bad?](#Node%20scoring%20semantics%20desirability?%20importance?%20more-less%20vs%20good-bad?)
+- somewhat depends on [Node scoring semantics: desirability? importance? more-less vs good-bad?](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad)
 - good
 	- people are naturally better at relative scoring
 		- but: absolute scoring _can_ have examples at each score so that you can relatively score vs those
@@ -895,11 +895,11 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 - e.g. ungrounded arguments
 	- - arguments can motivate discussion, but they also inherently "take a side", which seems inaccurate vs modeling reality (cause-effect)
-		- maybe we could generate pro/con based on cause/effect + perspective scores to deal with this (fleshed out in [Calculated arguments](#Calculated%20arguments))
+		- maybe we could generate pro/con based on cause/effect + perspective scores to deal with this (fleshed out in [Calculated arguments](#calculated-arguments))
 	- - arguments are often how people think naturally, e.g. "we should do X because ..."
 		- maybe we could generate wording / pro/con based on cause/effect + perspective scores to complement this
 	- - it definitely seems like we should be able to support moving from ungrounded arguments _towards_ grounded arguments (i.e. cause-effect)
-		- see the claim lifecycle notes in [Calculated arguments](#Calculated%20arguments)
+		- see the claim lifecycle notes in [Calculated arguments](#calculated-arguments)
 - e.g. driving/guiding questions
 
 ### Do all topics have a topic node? Can there be multiple topic nodes?
@@ -908,7 +908,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 - context: some structure relies on topic node(s) existing
 	- guiding questions guide the topic node (or other guiding questions)
 	- node scores are assumed to be relative to the topic
-	- question prioritization can chain through causal edges because topic nodes are concepts in the causal web (see Guides/Clarifies notes under [Edge weight score](#Edge%20weight%20score))
+	- question prioritization can chain through causal edges because topic nodes are concepts in the causal web (see Guides/Clarifies notes under [Edge weight score](#edge-weight-score))
 - do all topics have a topic node?
 	- seems like some topics might not have a single node that represents them, in which case relations that rely on a topic node wouldn't work
 		- maybe making a topic node could be a requirement...?
@@ -971,13 +971,13 @@ There are a few different kinds of scores, as specified below. The reasons for t
 - answer: all scores become truth scores, and truth scores support "opposite" (-8..0) scoring so the full possible range of meanings is covered
   - see [Should claim truth scores be the _only_ possible scores?](#should-claim-truth-scores-be-the-only-possible-scores)
 	- AI summary of these thoughts:
-		1. claim truth scores became -8 = completely opposite of true, 0 = completely absent of truth, 8 = completely true (see [Claim truth score](#Claim%20truth%20score))
+		1. claim truth scores became -8 = completely opposite of true, 0 = completely absent of truth, 8 = completely true (see [Claim truth score](#claim-truth-score))
 		2. all scales shifted from -9..9 / 1..9 to -8..8 / 0..8, so their tops align and absence sits at 0 everywhere (see [Score ranges](#Score-ranges))
 		- with those, the parent-score-to-claim-score mapping is the identity for every parent scale:
 			- concept change-importance: `$X is important to increase` scored -8 = the opposite is true ("important to decrease"), 0 = absent of truth ("not important to change"), 8 = completely true
 			- bipolar edges (causes/fulfils/supports): `$A causes $B` scored -8 = the opposite relation holds (reduces), 0 = no relation, 8 = fully holds
 			- unipolar edges (guides/clarifies/answers/mentions): the implied claim just never uses the negative half
-		- explicit claims default to 0..8 unless "opposite"/"absent" phrasings are defined for them, so the negative half only exists where it's meaningful (see [Claim truth score](#Claim%20truth%20score))
+		- explicit claims default to 0..8 unless "opposite"/"absent" phrasings are defined for them, so the negative half only exists where it's meaningful (see [Claim truth score](#claim-truth-score))
 - thoughts
   - we want concept scores to be -9 to 9; this is critical for allowing the map to switch between displaying opposites ("causes" vs "reduces") based on perspective
   - truth scores don't make sense to be negative, because "false" doesn't mean "opposite of truth" any more than "absence of truth".

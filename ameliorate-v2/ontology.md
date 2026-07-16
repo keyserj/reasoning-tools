@@ -89,11 +89,13 @@
 - Syntax legend:
 	- `*`: Concept node type
 	- `?`: Question node type
-  	- guiding vs clarifying is implied by edge type: `guides` (agenda-setting) vs `clarifies` (fact-requesting)
+		- guiding vs clarifying is implied by edge type: `guides` (agenda-setting) vs `clarifies` (fact-requesting)
 	- `=`: Claim node type
 	- `@`: Source node type
 	- `<`: edge whose source is the child (nested) line and target is the parent line
 	- `>`: edge whose source is the parent line and target is the child (nested) line
+	- `%[key]: [value]`: key-value property definition for the parent line
+  	- `Claim` property `opposite`: indicates phrasing for the opposite meaning of the claim. Enables -8..8 scale for explicit claim's truth score, rather than 0..8.
 	- `Perspectives: [person1, person2, person3]`: declares whose scores appear in the example
 	- `[X,Y,Z]`: scores, one slot per person in the `Perspectives` order - node scores appear after the node type character (e.g. `*[-4,0,-8]`), edge scores appear after the edge type (e.g. `causes[6,2,-]`)
 		- `-` in a slot: that person didn't score it
@@ -102,10 +104,10 @@
 	- `$some-id`: references an id
 		- references are prefixed with the referent's type character (e.g. `* $illegal-immig`, `? $best-ways`, `= $visa-overstay`)
 		- `= $some-id` on a concept's/edge's id: references the implied claim behind that thing's score, so it can be supported/critiqued/clarified
-  		- implied claims have standard phrasing:
-    		- concept's change-importance scores: `$node is important to increase`
-    		- edge scores: `$source-node [edge type] $target-node` (edges are verbs that claim a relation between the source and target)
-    		- claims's truth score: `[node's text]` (claims are worded as evaluable statements already)
+			- implied claims have standard phrasing:
+				- concept's change-importance scores: `$node is important to increase`
+				- edge scores: `$source-node [edge type] $target-node` (edges are verbs that claim a relation between the source and target)
+				- claim's truth score: `[node's text]` (claims are worded as evaluable statements already)
 			- explicit claims can have any text - ideally causal ones get promoted into the causal map and calculated instead (see [Calculated arguments](#calculated-arguments))
 	- `#tag`: explicitly specifies a subtype (e.g. `#action`) - subtypes like category/component/criterion are implied by their edges so aren't tagged
 	- `~`: a note relevant to its parent line - it would show visually if this were rendered
@@ -183,10 +185,10 @@ Perspectives: [alice, bob, casey]
   > clarifies[6,-,3]
     = $wall-reduces
   < answers[7,-,6]
-    =[3,-3,8] Most enter by crossing the border on foot between ports of entry &enter-on-foot
+    =[3,1,8] Most enter by crossing the border on foot between ports of entry &enter-on-foot
       / claim option
   < answers[7,8,-]
-    =[7,8,-2] Most enter legally and overstay visas &visa-overstay
+    =[7,8,1] Most enter legally and overstay visas &visa-overstay
       / claim option
 
 / --- Criteria: for evaluating the options (3 criteria x 3 options = a minimal tradeoffs table) ---
@@ -228,8 +230,9 @@ Perspectives: [alice, bob, casey]
   / implicit claim behind the "wall reduces illegal immigration" edge score
   < supports[7,-,8]
     =[8,-,8] A wall physically stops crossings without needing continuous surveillance &physical-barrier
+      %opposite: A wall physically _aids_ crossings without needing continuous surveillance
   < supports[-6,-8,-]
-    =[6,8,-2] People will find a way over the barrier &climb-over
+    =[6,8,1] People will find a way over the barrier &climb-over
       < supports[5,7,-]
         =[8,8,-] It's easy to climb a fence &easy-climb
       < supports[-4,-,-8]
@@ -241,7 +244,7 @@ Perspectives: [alice, bob, casey]
 =[-4,0,-8] $illegal-immig is important to increase
   / implicit claim behind the topic's concept score, with standardized node-score wording; its score is the node's score, so alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
   < supports[5,8,-]
-    =[7,8,-2] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
+    =[7,8,2] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
   < supports[-4,-,-8] &murder-supports-worse-score
     =[3,-,8] An illegal immigrant murdered a baby in cold blood last year &baby-murder #anecdote
 

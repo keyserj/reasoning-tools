@@ -609,10 +609,32 @@ There are a few different kinds of scores, as specified below. The reasons for t
 ##### Notes
 
 - need to define "opposite" claim in order to expand scoring range from 0..8 to -8..8
-  - implicit claims will intentionally either have this defined or not defined, based on what makes sense (e.g. "A causes B" has opposite "A reduces B", but "A guides B" doesn't have opposite because it doesnt' seem like something like "creates chaos for" makes sense)
+  - implicit claims will intentionally either have this defined or not defined, based on what makes sense (e.g. "A causes B" has opposite "A reduces B", but "A guides B" doesn't have opposite because it doesn't seem like something like "creates chaos for" makes sense)
 
 ##### Questions - Unanswered
 
+- is it possible for child claims to distinctly advocate for "absence of truth" separately from "opposite of truth"?
+	- seems like it might be possible for a claim with a "supports" score of 4 to suggest that the parent claim should be a 4?
+		- this would also allow a claim to advocate for a precise positive score rather than the general "this supports the score being higher"
+			- would this be harder to think through?
+  	- i.e. a claim that supports that the parent has "absence of truth" would have "supports" score of 0, and a claim that supports that the parent has "opposite of truth" could have "supports" score of -8
+    	- wait... "supports" score of 0 should mean that the child claim is not relevant / doesn't impact belief in the parent claim...
+      	- I guess this might mean that we _can't_ separate "absence" vs "opposite" arguments via scoring...?
+        	- feels like there should be a way to adjust the word "supports" such that 0 means "supports that parent has a truth score of 0"
+          	- then again, this seems like it would mean that we _can't_ suggest that a claim is irrelevant / has no effect on the parent's truth score
+  	- notes for if we _could_ have "supports" score mean that parent truth score should be that value (seems like we can't do this right now, because of no way for score to mean "child has no relevance to parent")
+    	- however: then we'd have to calculate critique-ness based on "critiques" score _relative to_ the parent's current score
+      	- e.g. if parent's score is 7 and child "supports" score is 5, then it's really critique pointing towards -2 change of score
+      	- this does seem _doable_ at least
+    	- also however: how would the precise scoring possibly fit into the implied claim wording / scoring segments...
+      	- currently "supports" implied claim is "A supports B" or maybe "A supports truth of B" with segments of -8 = "strongly believe opposite", 0 = "don't believe", 8 = "strongly believe"
+        	- huh maybe this verbiage actually _does_ work with the precise scoring?
+          	- well, it's unclear if multiple supports should be averaged or somehow added... e.g. does 10 "supports[3]" mean the parent should be 3 or does it mean that parent should be 8? seems like there might be no way to tell.
+	- annoyingly, if we can't distinctly advocate absence vs opposite, then our children claims slightly misalign from the parent score semantics, since the parent score _can_ convey opposite. not the end of the world I guess.
+- would an unscored "supports" edge mean that it doesn't support?
+	- probably default unscored score to like a 4 or something "somewhat supports"
+- do the semantics allow/benefit-from distinguishing the _kind_ of claim, e.g. relevance support vs importance support vs truth support?
+  - relevance to parent / impact on parent seems all tied in via the "supports" edge - could argue about this by pointing claims at the edge
 - are there alternative semantics for a claim's score?
 - are there better names than "truth"?
 	- "credence" - maybe slightly academic, but more-explicitly implies "our _belief_ that something is true" as opposed to "absolutely true"
@@ -775,23 +797,6 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- desirability, current presence, ideal presence, scores could be clarifiers if the change score differs...?
 #### Questions - Unanswered
 
-- how do the semantics work with claims?
-	- e.g. pro = scored higher / con = scored lower
-	- seems like it might be possible for a pro with a "supports" score of 4 to suggest that the parent claim should be a 4?
-		- this would allow a pro to advocate for a precise positive score rather than the general "this supports the score being higher"
-			- would this be harder to think through?
-			- would an unscored "supports" edge mean that it doesn't support?
-				- probably default unscored score to like a 4 or something "somewhat supports"
-			- it does seem more fitting for a claim to not be a pro or a con except through its edge, and a 0-scored "supports" _doesn't_ support
-  	- this would enable a critique to distinguish between advocating parent claim is "not true" vs "opposite of true"
-    	- however: then we'd have to calculate critique-ness based on "critiques" score _relative to_ the parent's current score
-      	- e.g. if parent's score is 7 and child "supports" score is 5, then it's really critique pointing towards -2 change of score
-      	- this does seem _doable_ at least
-    	- also however: how would the precise scoring possibly fit into the implied claim wording / scoring segments...
-      	- currently "supports" implied claim is "A supports B" or maybe "A supports truth of B" with segments of -8 = "believe opposite", 0 = "don't believe", 8 = "strongly believe"
-        	- huh maybe this verbiage actually _does_ work with the precise scoring?
-          	- well, it's unclear if multiple supports should be averaged or somehow added... e.g. does 10 "supports[3]" mean the parent should be 3 or does it mean that parent should be 8? seems like there might be no way to tell.
-- do the semantics allow/benefit-from distinguishing the _kind_ of claim, e.g. relevance support vs importance support vs truth support?
 - "how important is it to increase/decrease this?" is _within the context of the topic_ - e.g. "death" might be less avoidable in a topic like "old people surviving surgeries" vs "children getting hit by cars"
 	- so node scores assume value relative to the topic, yet that relation isn't specified via edges to the topic
 	- potentially each node could have an extra edge to the topic to be scored instead of scoring the node, but that seems like a lot of extra edges (same concern as Topic's "how to relate all relevant nodes to the Topic?" question)

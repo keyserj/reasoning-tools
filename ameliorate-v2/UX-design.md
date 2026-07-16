@@ -86,15 +86,15 @@
     - this seems possible in the agenda pane
 - how to normalize scores?
   - normalize to 0..1
-  - generally scores that are -9 to 9: divide by 9 + absolute value
-  - generally scores that are 1 to 9: subtract 1 + divide by 8
+		- 0..8: divide by 8
+		- -8..8: add 8, divide by 16
   - for aggregates (multiple perspectives scored + showing):
     - calculate normalized averages _and_ normalized _standard deviations_ - high deviation should normalize close to 1
 
 #### Questions - answered
 
 - how should "Open questions" rank unscored questions (like `how-tall`) against scored ones?
-  - unscored questions can probably just use a default score of 5 (scale 1-9)
+  - unscored questions can probably just use a default score of 4 (scale 0..8)
 
 ## UX flow example (desktop) [OUT OF DATE - IGNORE UNTIL "High-level UX flow" IS MORE SOLID!]
 

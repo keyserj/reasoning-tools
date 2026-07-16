@@ -66,17 +66,19 @@
 	- Source
 		- All - Source mentions Claim
 - Individual: Scores
+	- note: all scores use one of two ranges - bipolar -8..8 (the scored thing has a meaningful opposite) or unipolar 0..8 (it doesn't); see [Score ranges](#Score-ranges) for more details
 	- [Concept scoring semantics: desirability? importance? more-less vs good-bad?](#Concept%20scoring%20semantics%20desirability?%20importance?%20more-less%20vs%20good-bad?)
-	- Claim truth score: 1 = completely false, 5 = might be true or false, 9 = completely true
+	- Claim truth score: -8 = completely opposite of true, 0 = completely absent of truth, 8 = completely true
+		- claims use only 0..8 scoring if "opposite" isn't defined
 	- Edge weight score
 		- note: scores don't make sense for these?: categorizes, has, criterion for
-		- causes (opposite: reduces/impedes): how much the source moves the target: -9 = strongly reduces it, 0 = doesn't move it at all, 9 = strongly increases it
-		- fulfils: -9 = actively works against it, 0 = doesn't fulfil it at all, 9 = fully fulfils it
-		- guides: how much exploring the question would advance the target topic/question: 1 = tangential to it, 9 = central to it (most progress on the target runs through this question)
-		- clarifies: how contingent the target node is on the answer: 1 = answer wouldn't change anything about it, 9 = answer could completely reshape how we see/score it
-		- answers: 1 = doesn't answer, 5 = kind of answers, 9 = fully answers
-		- mentions: 1 = doesn't mention, 5 = kind of implies, 9 = definitely mentions
-		- supports (opposite: critiques): -9 = strongly critiques, 0 = doesn't relate / hard to say, 9 = strongly supports
+		- causes (opposite: reduces/impedes): how much the source moves the target: -8 = strongly reduces it, 0 = doesn't move it at all, 8 = strongly increases it
+		- fulfils: -8 = actively works against it, 0 = doesn't fulfil it at all, 8 = fully fulfils it
+		- guides: how much exploring the question would advance the target topic/question: 0 = no bearing on it, 8 = central to it (most progress on the target runs through this question)
+		- clarifies: how contingent the target node is on the answer: 0 = answer wouldn't change anything about it, 8 = answer could completely reshape how we see/score it
+		- answers: 0 = doesn't answer, 4 = kind of answers, 8 = fully answers
+		- mentions: 0 = doesn't mention, 4 = kind of implies, 8 = definitely mentions
+		- supports (opposite: critiques): -8 = strongly critiques, 0 = neither supports nor critiques, 8 = strongly supports
 
 ### Example
 
@@ -93,7 +95,7 @@
 	- `<`: edge whose source is the child (nested) line and target is the parent line
 	- `>`: edge whose source is the parent line and target is the child (nested) line
 	- `Perspectives: [person1, person2, person3]`: declares whose scores appear in the example
-	- `[X,Y,Z]`: scores, one slot per person in the `Perspectives` order - node scores appear after the node type character (e.g. `*[-4,0,-9]`), edge scores appear after the edge type (e.g. `causes[6,2,-]`)
+	- `[X,Y,Z]`: scores, one slot per person in the `Perspectives` order - node scores appear after the node type character (e.g. `*[-4,0,-8]`), edge scores appear after the edge type (e.g. `causes[6,2,-]`)
 		- `-` in a slot: that person didn't score it
 		- a scoreable node/edge with no brackets at all: nobody scored it
 	- `&some-id`: sets an id on the node/edge it follows
@@ -117,13 +119,13 @@ Perspectives: [alice, bob, casey]
 
 / --- Concepts: the causal core ---
 
-*[-4,0,-9] Illegal immigration into the US &illegal-immig #topic
+*[-4,0,-8] Illegal immigration into the US &illegal-immig #topic
   < causes[6,2,-] &wait-causes-illegal-immig
     *[-6,-3,-7] Long legal processing times &long-wait
       < causes[7,-,8]
         *[-5,-,-6] Administrative burden of enforcing immigration requirements &admin-burden
 
-*[7,9,2] Legal immigration into the US &legal-immig
+*[7,8,2] Legal immigration into the US &legal-immig
   > reduces[3,7,1]
     * $illegal-immig
   < impedes[6,8,-]
@@ -140,8 +142,8 @@ Perspectives: [alice, bob, casey]
       > causes[2,-,6]
         * $illegal-immig
   > categorizes
-    *[-8,-9,-6] Danger in home countries &danger
-      > causes[7,9,3]
+    *[-8,-8,-6] Danger in home countries &danger
+      > causes[7,8,3]
         * $illegal-immig
 
 / --- Actions ---
@@ -170,26 +172,26 @@ Perspectives: [alice, bob, casey]
 
 ? What are the most effective ways to reduce illegal immigration? &best-ways
   / guiding question (agenda-setting)
-  > guides[8,6,9]
+  > guides[7,5,8]
     * $illegal-immig
-  < guides[7,9,2]
+  < guides[6,8,1]
     ? Why do people immigrate illegally? &why-immigrate
       / guiding question guiding another guiding question
 
 ? How do most people illegally enter the US? &how-enter
   / clarifying question (fact-requesting); it clarifies an edge by targeting the edge's implied claim - note the `=` on the reference
-  > clarifies[7,-,4]
+  > clarifies[6,-,3]
     = $wall-reduces
-  < answers[8,-,7]
+  < answers[7,-,6]
     =[3,-3,8] Most enter by crossing the border on foot between ports of entry &enter-on-foot
       / claim option
-  < answers[8,9,-]
+  < answers[7,8,-]
     =[7,8,-2] Most enter legally and overstay visas &visa-overstay
       / claim option
 
 / --- Criteria: for evaluating the options (3 criteria x 3 options = a minimal tradeoffs table) ---
 
-*[7,9,2] Inexpensive &inexpensive
+*[7,8,2] Inexpensive &inexpensive
   / criterion: worded so that more of it is good
   > criterion for
     / criterion for doesn't take a score
@@ -200,8 +202,8 @@ Perspectives: [alice, bob, casey]
     * $fewer-requirements
   < fulfils[-7,-8,-2]
     *[-2,-4,-] Billions of dollars of construction and maintenance spending &wall-cost
-      < causes[9,9,9]
-        / the wall's fulfilment of "inexpensive" comes via this causal-fulfils chain (causes[9,9,9] x fulfils[-7,-8,-2]); everyone agrees the wall costs money
+      < causes[8,8,8]
+        / the wall's fulfilment of "inexpensive" comes via this causal-fulfils chain (causes[8,8,8] x fulfils[-7,-8,-2]); everyone agrees the wall costs money
         * $wall
 
 *[5,3,8] Quick to implement &quick
@@ -209,7 +211,7 @@ Perspectives: [alice, bob, casey]
   > criterion for
     ? $best-ways
 
-*[8,9,3] Humane treatment of immigrants &humane
+*[8,8,3] Humane treatment of immigrants &humane
   / fulfils edges omitted for brevity - only "inexpensive" shows them
   > criterion for
     ? $best-ways
@@ -224,24 +226,24 @@ Perspectives: [alice, bob, casey]
 
 =[3,1,8] $wall-reduces
   / implicit claim behind the "wall reduces illegal immigration" edge score
-  < supports[7,-,9]
-    =[8,-,9] A wall physically stops crossings without needing continuous surveillance &physical-barrier
+  < supports[7,-,8]
+    =[8,-,8] A wall physically stops crossings without needing continuous surveillance &physical-barrier
   < supports[-6,-8,-]
     =[6,8,-2] People will find a way over the barrier &climb-over
       < supports[5,7,-]
-        =[8,9,-] It's easy to climb a fence &easy-climb
+        =[8,8,-] It's easy to climb a fence &easy-climb
       < supports[-4,-,-8]
-        =[5,-,9] The wall design is tall, without handholds, and topped with barbed wire &unclimbable
+        =[5,-,8] The wall design is tall, without handholds, and topped with barbed wire &unclimbable
   < supports[-5,-8,-]
     / reuse: the same claim answers a question above and critiques this edge
     = $visa-overstay
 
-=[-4,0,-9] $illegal-immig is important to increase
+=[-4,0,-8] $illegal-immig is important to increase
   / implicit claim behind the topic's concept score, with standardized node-score wording; its score is the node's score, so alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
   < supports[5,8,-]
-    =[7,9,-2] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
+    =[7,8,-2] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
   < supports[-4,-,-8] &murder-supports-worse-score
-    =[3,-,9] An illegal immigrant murdered a baby in cold blood last year &baby-murder #anecdote
+    =[3,-,8] An illegal immigrant murdered a baby in cold blood last year &baby-murder #anecdote
 
 =[-4,-,-8] $murder-supports-worse-score
   / implied claim behind the anecdote's support edge score
@@ -252,7 +254,7 @@ Perspectives: [alice, bob, casey]
 / --- Sources ---
 
 @ House Judiciary hearing document, Jan 2025 (docs.house.gov) &house-doc
-  > mentions[9,-,-]
+  > mentions[8,-,-]
     = $texas-stat
 ```
 
@@ -279,10 +281,10 @@ Perspectives: [alice, bob, casey]
 		- All: `house-doc` mentions `texas-stat`
 	- Scores
 		- Perspectives: score brackets hold one slot per person, in the `Perspectives: [alice, bob, casey]` order
-			- scored by everyone: the main nodes, e.g. `*[-4,0,-9]` on the topic, `*[2,-7,8]` on `wall`
-			- scored by some (`-` = that person didn't score): e.g. `*[-2,-,-5]` on `save-money`, `mentions[9,-,-]`
+			- scored by everyone: the main nodes, e.g. `*[-4,0,-8]` on the topic, `*[2,-7,8]` on `wall`
+			- scored by some (`-` = that person didn't score): e.g. `*[-2,-,-5]` on `save-money`, `mentions[8,-,-]`
 			- scored by nobody (brackets omitted): `barbed-wire`, the `clarifies` edge from `how-tall`
-		- Concept score: e.g. `*[-8,-9,-6]` on `danger`
+		- Concept score: e.g. `*[-8,-8,-6]` on `danger`
 		- Claim truth score: e.g. `=[8,-,4]` on `texas-stat`
 		- Edge weight score: one on each scoreable edge type - causes, reduces, impedes, fulfils, guides, clarifies, answers, mentions, supports
 		- Unscored edges (never take scores): categorizes, has, criterion for
@@ -431,7 +433,7 @@ Perspectives: [alice, bob, casey]
 
 ###### Purpose
 
-- Enable a tradeoffs table: options along one axis, criteria along the other; each option's value = sum over criteria of (how much the option fulfils the criterion) x (how important the criterion is, -9 to 9)
+- Enable a tradeoffs table: options along one axis, criteria along the other; each option's value = sum over criteria of (how much the option fulfils the criterion) x (how important the criterion is, -8 to 8)
 	- In theory, this table could be created just by looking all the things caused/reduced by a solution, but generally it's much easier to think about through a smaller set of common criteria
 - Provide a way for "causing too much of a thing" to create negative value (e.g. a solution that creates excess would poorly fulfil "avoids excess")
 
@@ -550,7 +552,7 @@ Perspectives: [alice, bob, casey]
 			- potentially sources could create effects via components
 				- e.g. "Source: {News Show}" has "Component: {Segment}" or "Component: {Person with sarcastic personality}" causes "Concept: Misinformation"
 		- but the core intention behind Source is to discuss Claims that it "mentions"
-	- no: "desirability" score is probably more like a "credibility" score? still (-9 to 9) probably though
+	- no: "desirability" score is probably more like a "credibility" score? still (-8 to 8) probably though
 		- egh if sources are discussed based on the effects they create, then desirability might make sense to score
 	- no: Concept is supposed to be "higher" than Claim in this ontology, but Source's primary relation is to Claim
 		- but maybe it's ok for Concept not to be "higher" than Claim?
@@ -568,6 +570,29 @@ There are a few different kinds of scores, as specified below. The reasons for t
 2. allow individual opinions to be specified separately from reasoning, so that the shared map structure can capture all reasons without perspective-based conflict
 3. allow views to be generated automatically based on specific individuals' perspectives
 
+#### Notes
+
+- default scores in UX probably display something like `-`, but for calculations these would generally be 4 (positive midpoint) or 0, depending on the meaning of the score
+  - e.g. concept implicit claim defaults to 0 ("not important to change")
+  - e.g. "causes" implicit claim defaults to 4 ("somewhat causes")
+
+#### Score ranges
+
+- all scores use one of two ranges: -8..8 ("bipolar" - the scored thing has a meaningful opposite) or 0..8 ("unipolar" - it doesn't)
+- why -8..8 / 0..8 (previously -9..9 / 1..9):
+	- absence lives at 0 everywhere ("doesn't cause at all", "doesn't mention", "completely absent of truth", "no need to change")
+	- 0..8 has an odd number of options (9), so 4 is a midpoint that can be used for defaults if appropriate; a 0..9 range would put the midpoint at 4.5
+
+##### Questions - Unanswered
+
+- is there better terminology than "unipolar vs bipolar" for the score ranges?
+  - these terms are good because they're established in surveying literature
+  - but bipolar seems more-colloquially related to the medical condition. would be ideal to avoid this connection
+  - "magnitude vs directional" - directional seems decent in that it somewhat implies "opposite", but poor in that there can be many directions
+  - "non-negative vs signed" - "signed" is a bit non-colloquial. "non-negative" is a bit mathematical/non-semantic
+  - "bidirectional vs unidirectional" - mouthful, also bidirectional doesn't necessarily imply "opposite"
+  - "magnitude vs oppositional" - "oppositional" seems a little off for some reason
+
 #### Concept scoring semantics: desirability/importance?
 
 ##### Questions - Unanswered
@@ -580,6 +605,11 @@ There are a few different kinds of scores, as specified below. The reasons for t
 		- this _could_ be useful asynchronously? though maybe a "driving question"
 
 #### Claim truth score
+
+##### Notes
+
+- need to define "opposite" claim in order to expand scoring range from 0..8 to -8..8
+  - implicit claims will intentionally either have this defined or not defined, based on what makes sense (e.g. "A causes B" has opposite "A reduces B", but "A guides B" doesn't have opposite because it doesnt' seem like something like "creates chaos for" makes sense)
 
 ##### Questions - Unanswered
 
@@ -596,7 +626,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 - enables calculating "how much does node A cause node B?"
 	- by multiplying causal weight scores
-		- probably normalized to -1..1 (score / 9), so that chained causation attenuates rather than compounds
+		- probably normalized to -1..1 (score / 8), so that chained causation attenuates rather than compounds
 	- and this, combined with [Concept scoring semantics: ?](#Concept%20scoring%20semantics%20?): "how much does node B _matter to_ node A?"
 		- by multiplying causal score by concept score e.g. goodness
 - avoid duplicate edges when a chain already conveys the relation (e.g. A causes B and B causes C, plus a direct A causes C edge) - the duplicate would double-count in calculations
@@ -637,7 +667,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 - many of the arguments in an argument map about a node's score can be _calculated_ based on causation to/from the node, rather than manually maintained as claims:
 	- arguments supporting a higher score: nodes with positive score that this node causes, nodes with negative score that this node reduces
 	- arguments supporting a lower score: nodes with negative score that this node causes, nodes with positive score that this node reduces, nodes that impede this node ? (see questions - not sure if impediments should be included - should "change importance" include attainability?)
-- e.g. in the [Example](#Example), "the wall costs billions" doesn't need to be a manual claim critiquing the wall's score - `wall causes[9,9,9] wall-cost`, combined with `wall-cost`'s negative scores, _is_ that con, calculably
+- e.g. in the [Example](#Example), "the wall costs billions" doesn't need to be a manual claim critiquing the wall's score - `wall causes[8,8,8] wall-cost`, combined with `wall-cost`'s negative scores, _is_ that con, calculably
 - this reuses the "multiply edge weights by concept scores" machinery from "how good is a solution" (see Causes notes under [Edge weight score](#Edge%20weight%20score)) - the argument map is that calculation decomposed per-neighbor, displayed as pros/cons
 
 #### Purpose
@@ -646,7 +676,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- e.g. `long-wait` feeds calculated arguments in multiple places (its `causes` edge argues about the topic's score; `more-admin reduces long-wait` argues for `more-admin`) - one update to `long-wait`'s score or edges flows to all of them
 2. keep the shared structure more side-free in wording
   - "X causes Y" just models reality, and calculated arguments can use standardized wording - manual claim wording usually reads as taking a side (e.g. "people will find a way over the barrier")
-	- the side of the calculated argument is also based on the viewer's own scores rather than baked into the shared structure; though non-causal supports edges using a -9 to 9 score also allows claim pro/con status to be calculated
+	- the side of the calculated argument is also based on the viewer's own scores rather than baked into the shared structure; though non-causal supports edges using a -8 to 8 score also allows claim pro/con status to be calculated
 
 #### Notes
 
@@ -673,31 +703,9 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 - these should be root-level so we can do something like e.g. "option 1" "option 2"
 
-### How should implied claim's score relate to the score on the parent that implies it?
+### Is it ok that the three distinct concept score meanings can only have two distinct forms of justification?
 
-- concern: right now these lines imply a critical inconsistency:
-  - from structure definition: `Claim truth score: 1 = completely false, 5 = might be true or false, 9 = completely true`
-  - from the example: `*[-4,0,-9] Illegal immigration into the US &illegal-immig #topic`
-  - from the example: `=[-4,0,-9] $illegal-immig is important to increase`
-  - so claim truth scores are supposed to be 1 (false) to 9 (true), but implied claims can be about any node or edge, and node and edge scores can be -9 to 9 OR 1 to 9, depending on the type of node / edge.
-  - we also specify that the parent node/edge score should always match the implied claim score, being one in the same. due to the above, this is impossible.
-- thoughts
-  - we want concept scores to be -9 to 9; this is critical for allowing the map to switch between displaying opposites ("causes" vs "reduces") based on perspective
-  - truth scores don't make sense to be negative, because "false" doesn't mean "opposite of truth" any more than "absence of truth".
-    - hmm... technically this may be based on the context of the parent claim. if the parent is about "causes", then it may be appropriate for the claim to have an "opposite of true" (reduces) score value available separately from "absence of truth" (doesn't cause or reduce)
-      - it feels janky and overly/unnecessarily-complex though to allow claims to have different score meanings based on what the claim is about. does not seem appropriate.
-  - the core issue seems to be that the parent score (e.g. -9 important to decrease, 0 not important to change) includes different meaning than the implied score (e.g. X is important to increase):
-- ideas
-  - can we just convert the parent's score into a 1-9 claim range score?
-    - I don't think so. main issues with this:
-      - it seems like the score mismatch would be confusing... if I scored a -6 for the parent, why does the implied claim have e.g. a 3? I didn't score that!
-  - can we just have the implied claim score _in addition_ to the parent score?
-    - this is very suboptimal because:
-      - children supports/critiques make sense to be used for both scores
-      - the parent score will likely be confusing if the implied claim, with its children supports/critiques, does not directly tie to it
-
-#### Related concern: Is it ok that the three distinct concept score meanings can only have two distinct forms of justification?
-
+- current leaning: yes, seems ok that these are not distinct - keeping the question open in case better ideas for distinguishing come up
 - what:
   - a further-positive score means "important to increase", a further-negative score means "important to decrease", a lower absolute-value score means "not important to change"
   - but the claim that's justified behind this score is technically "X is important to increase" - meaning critiques are ambiguous between meaning "important to decrease" vs "not important to change"
@@ -707,6 +715,37 @@ There are a few different kinds of scores, as specified below. The reasons for t
     - no way - there would be a ton of overlap e.g. a support for "important to increase" would almost always be a critique for "important to decrease" and "not important to change"
   - instead of one claim having "supports" / "critiques", can we have three edge types?
     - same issue as above - even "supports increase" vs "supports decrease" vs "supports no change" seem to have some overlapping justification... e.g. a claim at the same time may "supports decrease" _and_ "supports no change" if the claim conveys that "critiques increase"
+  - supports edge score might be able to indicate _which score_ the child claim supports in the parent - see the [Concept scoring semantics](#Concept%20scoring%20semantics%20desirability?%20importance?%20more-less%20vs%20good-bad?) unanswered question about a pro suggesting a precise score for its parent
+
+### Should claim truth scores be the _only_ possible scores?
+
+- (rather than having other score types and having to match claim scores to them)
+- option 1: everything has its own score type (causes, guides, supports, change-importance)
+- option 2: only claim truth scores
+	- idea: all scores could be about a claim, with scores being negative if an opposite is defined
+		- e.g. rather having a concept change-importance score where -8 = important to decrease, 0 = not important to change, 8 = important to increase; with an associated claim truth score -8..8 for "X is important to increase", where negative means opposite i.e. "important to decrease"; we could potentially _only_ have the claim truth score which shows on the concept node directly
+	- good
+  	- consistency! we could show the same UX for all scores, maybe something like:
+    	- show claim e.g. bipolar "A causes B" / "it's important to increase A" / "A fulfills B", unipolar "Q guides Topic" / "Avg walking speed is 4 mph"
+    	- show score slider with each segment labeled
+			- bipolar: show opposite claim ("A reduces B" / "it's important to decrease A" / "A reduces fulfillment of (??) B")
+	- questions
+  	- what should segments be labeled?
+    	- this seems like it could work for all claims?: -8 = strongly believe _opposite_, -4 = somewhat believe _opposite_, 0 = don't believe, 4 = somewhat believe, 8 = strongly believe
+  	- what is opposite of "fulfills"?
+    	- e.g. `[solution] fulfills 'inexpensive'/'reduces vehicle speeds'`
+      	- agh not sure how this would work - it seems like some criteria have a clear opposite ('_increases_ vehicle speeds') and some don't (I suppose 'expensive' is the opposite of 'inexpensive'? but semantically speaking, this seems the same as "absence of inexpensive")
+        	- maybe the "fulfills" score should be 0 to 8 unless the criterion itself has an "opposite" defined?
+- questions
+  - hmm would we still want to show different colors based on the type of score?
+    - would it be enough to show colors based on unipolar vs bipolar scores?
+      - no
+    - hmm it does seem like it could be nice to color differently based on the specific score's meaning e.g. causal vs supports vs guides vs importance... but not sure if that'd be too cluttery/confusing to figure out
+      - the currently-planned coloring was to have good/bad coloring, which works for "important to increase/decrease", "increases an important-to-increase concept"
+      - maybe for claim nodes, purple = true, grey = untrue, yellow = opposite of true? seems like it should be different from good/bad color because true is not necessarily "good". Hmm what about claim edges though? they probably don't make sense to be the same color because a negative score is a critique which just means "not true", rather than "opposite"... hmm...
+		- which scores should be which colors should be a separate open question
+		- notably, regardless of the modeling choice, we should be able to color scores differently based on what they're about, not based on their scale
+			- and we can achieve this coloring no matter the answer to this question - if we go all truth scores, then we potentially could have a "claim semantic type" property to specify that this is a "causes" claim vs "change importance claim" etc.
 
 ### Concept scoring semantics: desirability? importance? more-less vs good-bad?
 
@@ -722,7 +761,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- having both scores seems like a lot to think through
 		- could it be easier if you specify a "how much we have this" score vs "how much we should have this" score?
 			- visually it could be as easy as clicking twice - first click is "how much does this currently exist?" "how much should this ideally exist?"
-			- "desirability" is akin to "how much should this ideally exist" - 1 "should exist" = -9 desirability, 9 "should exist" = 9 desirability, 5 "should exist" = 0 desirability...? not sure how 0 desirability is represented actually
+			- "desirability" is akin to "how much should this ideally exist" - 0 "should exist" = -8 desirability, 8 "should exist" = 8 desirability, 4 "should exist" = 0 desirability...? not sure how 0 desirability is represented actually
 			- "change score" is akin to "how much should we have this" minus "how much we have this"
 				- issue: change score should reflect _how important it is that this changes_, we don't really care as much about _how much (quantity) does this need to change_, which is what the subtraction conveys
 					- e.g. if "pedestrians die in car accidents" is a 2 and should be a 1, how do we know that the 2->1 is a critical change?
@@ -732,7 +771,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	3. how much does a thing currently exist?
 	4. is a thing good or bad? (calculable 2 minus 3 ? not true actually, a thing can be bad and not need to change because it's kept in check already)
 - idea 1
-	- change importance score: -9 really important to decrease, 0 no need to change, 9 really important to increase
+	- change importance score: -8 really important to decrease, 0 no need to change, 8 really important to increase
 	- desirability, current presence, ideal presence, scores could be clarifiers if the change score differs...?
 #### Questions - Unanswered
 
@@ -742,8 +781,16 @@ There are a few different kinds of scores, as specified below. The reasons for t
 		- this would allow a pro to advocate for a precise positive score rather than the general "this supports the score being higher"
 			- would this be harder to think through?
 			- would an unscored "supports" edge mean that it doesn't support?
-				- probably default unscored score to like a 5 or something "somewhat supports"
+				- probably default unscored score to like a 4 or something "somewhat supports"
 			- it does seem more fitting for a claim to not be a pro or a con except through its edge, and a 0-scored "supports" _doesn't_ support
+  	- this would enable a critique to distinguish between advocating parent claim is "not true" vs "opposite of true"
+    	- however: then we'd have to calculate critique-ness based on "critiques" score _relative to_ the parent's current score
+      	- e.g. if parent's score is 7 and child "supports" score is 5, then it's really critique pointing towards -2 change of score
+      	- this does seem _doable_ at least
+    	- also however: how would the precise scoring possibly fit into the implied claim wording / scoring segments...
+      	- currently "supports" implied claim is "A supports B" or maybe "A supports truth of B" with segments of -8 = "believe opposite", 0 = "don't believe", 8 = "strongly believe"
+        	- huh maybe this verbiage actually _does_ work with the precise scoring?
+          	- well, it's unclear if multiple supports should be averaged or somehow added... e.g. does 10 "supports[3]" mean the parent should be 3 or does it mean that parent should be 8? seems like there might be no way to tell.
 - do the semantics allow/benefit-from distinguishing the _kind_ of claim, e.g. relevance support vs importance support vs truth support?
 - "how important is it to increase/decrease this?" is _within the context of the topic_ - e.g. "death" might be less avoidable in a topic like "old people surviving surgeries" vs "children getting hit by cars"
 	- so node scores assume value relative to the topic, yet that relation isn't specified via edges to the topic
@@ -754,20 +801,20 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 - what is it
 	- score answers the question "how much do we like this?"
-	- -9 really don't like, 0 indifferent, 9 really like
+	- -8 really don't like, 0 indifferent, 8 really like
 - good
 - bad
 	- calculations for "how good is a solution" aren't able to convey how much of things are created that we actually want created
-		- e.g. I like chocolate so I score it a 9, but assuming I already eat as much chocolate as I need, this would result in solutions that bring me more chocolate being highly scored, even though I don't need more chocolate
+		- e.g. I like chocolate so I score it an 8, but assuming I already eat as much chocolate as I need, this would result in solutions that bring me more chocolate being highly scored, even though I don't need more chocolate
 
 #### Option 2: desirability "do we want more or less of this?"
 
 - what is it
 	- score answers the question "do we want more or less of this?"
-	- -9 want way less, 0 we have the right amount, 9 want way more
+	- -8 want way less, 0 we have the right amount, 8 want way more
 - good
 	- calculations for "how good is a solution" would be able to convey how much of things are created that we actually want created
-		- e.g. I eat chocolate an amount I like, so I score it a 0, as opposed to a 9 (I really like chocolate), which would result in solutions that bring me more chocolate being lower scored, which is accurate because I don't need more chocolate
+		- e.g. I eat chocolate an amount I like, so I score it a 0, as opposed to an 8 (I really like chocolate), which would result in solutions that bring me more chocolate being lower scored, which is accurate because I don't need more chocolate
 - bad
 	- scores probably have to significantly change much more often e.g. after implementing a solution
 
@@ -775,7 +822,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 - what is it
 	- score answers the question "do we want this, and how important is it?"
-	- -9 don't want and really important, 0 indifferent and not important, 9 want and really important
+	- -8 don't want and really important, 0 indifferent and not important, 8 want and really important
 - good
 	- doesn't have the "solution scored highly for creating good things that we don't need more of" issue because the "importance" side of the score would scale the "goodness" down
 - bad
@@ -785,7 +832,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 - what is it
 	- score answers the question "how important is it to change this?"
-	- -9 really important to decrease, 0 no need for change, 9 really important to increase
+	- -8 really important to decrease, 0 no need for change, 8 really important to increase
 - good
 	- doesn't have the "solution scored highly for creating good things that we don't need more of" issue because we're scoring how much they should change rather than how good they are
 - bad
@@ -798,9 +845,9 @@ There are a few different kinds of scores, as specified below. The reasons for t
 		- overshoot probably won't happen too often, so handling it via explicit modeling (criteria) rather than automatically in calculations seems reasonable
 - questions
 	- how would "how good is a solution" be calculated with causation and this score?
-		- if something has a change importance of 3, and a solution `causes[9]` it, is that... good? this doesn't take into account how much it's being changed...
+		- if something has a change importance of 3, and a solution `causes[8]` it, is that... good? this doesn't take into account how much it's being changed...
 			- I suppose a slightly-naive-but-maybe-ok strategy would be to give that solution 3 "good" points for positively changing that
-				- but taking into account how much something should change seems important... e.g. if solution B `causes[6]` it, is that sufficient? potentially the `causes[9]` could be interpreted as "causes the ideal amount"...?
+				- but taking into account how much something should change seems important... e.g. if solution B `causes[6]` it, is that sufficient? potentially the `causes[8]` could be interpreted as "causes the ideal amount"...?
 					- or a change importance of `[3]` could mean that "ideally we have `causes[3]` for this"
 			- hmm this issue would be solved if the concepts were worded with quantities in them... but that seems pretty terrible
 		- I think it's fine to just treat the "change importance of 3" as "goodness points" for a solution, so just multiple the change importance by how much the solution causes the concept to change
@@ -820,13 +867,13 @@ There are a few different kinds of scores, as specified below. The reasons for t
 		- e.g. a topic about pizza toppings should care that I like pepperoni better, but the score difference between pepperoni and sausage is going to be _completely_ negligible when compared to a concept like "genocide"
 		- but: scoring UX could show everything as relative (e.g. no numbers shown, just ordering of nodes) while storing absolute
 			- well, there's no need to store absolute in that case if absolute isn't shown, is there?
-			- maybe even there could be a visual scale that shows ~6 or so scored nodes from -9 to 9, along with the one node you're trying to score
+			- maybe even there could be a visual scale that shows ~6 or so scored nodes from -8 to 8, along with the one node you're trying to score
 - bad
 	- when a new max or min node is added, all the other nodes need to have their scores updated?
 
 #### Option 2: absolutely
 
-- i.e. score -9 to 9 with examples at each score e.g. -9 = genocide, 9 = preventing nuclear war
+- i.e. score -8 to 8 with examples at each score e.g. -8 = genocide, 8 = preventing nuclear war
 - good
 - bad
 	- decisions about something only somewhat important would have negligible differences between their options
@@ -876,14 +923,14 @@ There are a few different kinds of scores, as specified below. The reasons for t
 - current leaning: no
   - concepts with large positive/negative scores act as implicit goals, and Guiding Questions imply goals a little more explicitly
   - seems like the explicit modeling is mostly duplicate
-- context: the example previously had a goal node `*[8,2,9] Reduced illegal immigration` with `achieves` edges from each option
+- context: the example previously had a goal node `*[8,2,8] Reduced illegal immigration` with `achieves` edges from each option
 	- it duplicated the topic node ("Reduced illegal immigration" is just "Illegal immigration into the US" plus the desire to reduce it), with scores roughly the topic's inverted
 	- it ended up with no edge to the topic node at all - the options only connected to the causal web via their side effects (e.g. `more-admin` reduces `long-wait`) - suggesting `achieves` edges float alongside the causal structure rather than being part of it
 
 #### Option 1: implicit goals - no Goal nodes or achieves edges
 
 - what is it
-	- a "goal" is any concept whose score conveys a strong desire for change (e.g. the topic's `*[-4,0,-9]` implies the goal "reduce illegal immigration"); options connect to the causal web via ordinary causes/reduces/impedes edges
+	- a "goal" is any concept whose score conveys a strong desire for change (e.g. the topic's `*[-4,0,-8]` implies the goal "reduce illegal immigration"); options connect to the causal web via ordinary causes/reduces/impedes edges
 - good
 	- fewer node/edge types to learn
 	- no duplicate "Reduced X" nodes splitting scores and discussion between them and "X"
@@ -910,3 +957,40 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- `achieves` invites ungrounded assertion ("the wall achieves the goal") where a causal edge would demand a mechanism
 
 # Archive
+
+## Big open questions
+
+### How should implied claim's score relate to the score on the parent that implies it?
+
+- concern: right now these lines imply a critical inconsistency:
+  - from structure definition: `Claim truth score: 1 = completely false, 5 = might be true or false, 9 = completely true`
+  - from the example: `*[-4,0,-9] Illegal immigration into the US &illegal-immig #topic`
+  - from the example: `=[-4,0,-9] $illegal-immig is important to increase`
+  - so claim truth scores are supposed to be 1 (false) to 9 (true), but implied claims can be about any node or edge, and node and edge scores can be -9 to 9 OR 1 to 9, depending on the type of node / edge.
+  - we also specify that the parent node/edge score should always match the implied claim score, being one in the same. due to the above, this is impossible.
+- answer: all scores become truth scores, and truth scores support "opposite" (-8..0) scoring so the full possible range of meanings is covered
+  - see [Should claim truth scores be the _only_ possible scores?](#should-claim-truth-scores-be-the-only-possible-scores)
+	- AI summary of these thoughts:
+		1. claim truth scores became -8 = completely opposite of true, 0 = completely absent of truth, 8 = completely true (see [Claim truth score](#Claim%20truth%20score))
+		2. all scales shifted from -9..9 / 1..9 to -8..8 / 0..8, so their tops align and absence sits at 0 everywhere (see [Score ranges](#Score-ranges))
+		- with those, the parent-score-to-claim-score mapping is the identity for every parent scale:
+			- concept change-importance: `$X is important to increase` scored -8 = the opposite is true ("important to decrease"), 0 = absent of truth ("not important to change"), 8 = completely true
+			- bipolar edges (causes/fulfils/supports): `$A causes $B` scored -8 = the opposite relation holds (reduces), 0 = no relation, 8 = fully holds
+			- unipolar edges (guides/clarifies/answers/mentions): the implied claim just never uses the negative half
+		- explicit claims default to 0..8 unless "opposite"/"absent" phrasings are defined for them, so the negative half only exists where it's meaningful (see [Claim truth score](#Claim%20truth%20score))
+- thoughts
+  - we want concept scores to be -9 to 9; this is critical for allowing the map to switch between displaying opposites ("causes" vs "reduces") based on perspective
+  - truth scores don't make sense to be negative, because "false" doesn't mean "opposite of truth" any more than "absence of truth".
+    - hmm... technically this may be based on the context of the parent claim. if the parent is about "causes", then it may be appropriate for the claim to have an "opposite of true" (reduces) score value available separately from "absence of truth" (doesn't cause or reduce)
+      - it feels janky and overly/unnecessarily-complex though to allow claims to have different score meanings based on what the claim is about. does not seem appropriate.
+        - this intuition ended up being the answer anyway: distinguishing "opposite of true" from "absent of truth" is exactly what lets one claim scale absorb every parent scale - the de-janking move was making the -8..8 range universal, with the negative half unlocked by opposite/absent phrasings rather than varying score _meanings_ per claim
+  - the core issue seems to be that the parent score (e.g. -9 important to decrease, 0 not important to change) includes different meaning than the implied score (e.g. X is important to increase):
+- rejected ideas
+  - can we just convert the parent's score into a 1-9 claim range score?
+    - I don't think so. main issues with this:
+      - it seems like the score mismatch would be confusing... if I scored a -6 for the parent, why does the implied claim have e.g. a 3? I didn't score that!
+      - also lossy: the conversion collapses "not important to change" and "important to decrease" into the same low-truth region
+  - can we just have the implied claim score _in addition_ to the parent score?
+    - this is very suboptimal because:
+      - children supports/critiques make sense to be used for both scores
+      - the parent score will likely be confusing if the implied claim, with its children supports/critiques, does not directly tie to it

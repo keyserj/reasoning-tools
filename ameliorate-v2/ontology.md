@@ -151,7 +151,7 @@ Perspectives: [alice, bob, casey]
 / --- Actions ---
 
 *[2,-7,8] Border wall along the southern US border &wall #action
-  > reduces[3,1,8] &wall-reduces
+  > reduces[3,-5,8] &wall-reduces
     * $illegal-immig
   > has
     / has doesn't take a score
@@ -226,11 +226,15 @@ Perspectives: [alice, bob, casey]
     =[6,-,8] Even with instant processing, people would still immigrate illegally to save money or "disappear" &still-immigrate
       / explicit claim, but causal: it's essentially pointing at the save-money/disappear causes edges, so it could be promoted and become a calculated argument
 
-=[3,1,8] $wall-reduces
+=[3,-5,8] $wall-reduces
   / implicit claim behind the "wall reduces illegal immigration" edge score
   < supports[7,-,8]
     =[8,-,8] A wall physically stops crossings without needing continuous surveillance &physical-barrier
       %opposite: A wall physically _aids_ crossings without needing continuous surveillance
+  < supports[-,-7,-3]
+    =[2,7,1] Hardened borders trap circular migrants who used to return home &caging-effect
+      < supports[-,7,4]
+        =[3,8,2] Re-crossing a hardened border is costly and dangerous, so seasonal migrants stay and bring their families over &costly-recrossing
   < supports[-6,-8,-]
     =[6,8,1] People will find a way over the barrier &climb-over
       < supports[5,7,-]
@@ -292,6 +296,7 @@ Perspectives: [alice, bob, casey]
 		- Edge weight score: one on each scoreable edge type - causes, reduces, impedes, fulfils, guides, clarifies, answers, mentions, supports
 		- Unscored edges (never take scores): categorizes, has, criterion for
 		- Implied claims behind scores: `= $wait-causes-illegal-immig` (a causes edge's score), `= $illegal-immig` (a concept's score), `= $murder-supports-worse-score` (a supports edge's score)
+		- Oppositional scores: `wall reduces[3,-5,8] illegal-immig` - casey (`8`) believes it reduces, bob (`-5`) believes it increases
 	- note: argument-map "reuse" (same claim in multiple arguments) falls out naturally from the graph: `visa-overstay` both answers `how-enter` and critiques `wall-reduces`
 
 #### Questions - Unanswered

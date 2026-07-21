@@ -657,6 +657,12 @@ There are a few different kinds of scores, as specified below. The reasons for t
 		- by multiplying causal score by concept score e.g. goodness
 - avoid duplicate edges when a chain already conveys the relation (e.g. A causes B and B causes C, plus a direct A causes C edge) - the duplicate would double-count in calculations
 
+###### Questions - kind of answered
+
+- does it make more sense for opposite of "A causes B" to be "B causes A", rather than "A reduces B"?
+  - seems like edge direction ("B causes A") is more significantly distinct, that claims wouldn't necessarily be equal and opposite, that this claim would make more sense to actually have independent / unlinked
+    - for example, "B guides A" doesn't seem to make any sense at all
+
 ##### Positively correlates with
 
 ###### Purpose

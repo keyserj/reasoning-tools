@@ -791,6 +791,22 @@ There are a few different kinds of scores, as specified below. The reasons for t
     - same issue as above - even "supports increase" vs "supports decrease" vs "supports no change" seem to have some overlapping justification... e.g. a claim at the same time may "supports decrease" _and_ "supports no change" if the claim conveys that "critiques increase"
   - supports edge score might be able to indicate _which score_ the child claim supports in the parent - see the [Concept scoring semantics](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad) unanswered question about a pro suggesting a precise score for its parent
 
+### How to model contexts? E.g. location, time, broader vs more specific
+
+- some notes in https://github.com/amelioro/ameliorate/issues/13 that should probably be moved here eventually
+
+#### Purpose
+
+- When problems exist in multiple contexts, it seems useful to model these problems separately, yet keep them linked to each other. For example, with World Hunger, one mapping might list general causes ("cannot afford importing food", "poor food production", "region internally uncooperative", …), but each specific region that struggles with hunger will be impacted by these causes in different amounts and ways, and therefore any solutions would have differing value.
+
+#### Thoughts
+
+- seems useful to be able to easily see commonalities and differences between situations that differ in context
+- maybe a node could have an edge "generalizes" or "specializes" another node
+	- then the nodes would be linked such that A's related nodes show up in a list for B, so a user could go through the list and check off if they make sense for B
+  	- should this only go in one direction? the more specific node seeing the general node's relations, but not vice versa? like inheritance
+- could be useful to compare a problem across each ("sibling"?) context using a matrix or table view. This could aid in identifying similarities and differences across contexts - e.g. "in Africa it seems a big cause of hunger is weak governmental infrastructure, but in Asia the bigger cause seems to be overpopulation".
+
 ### How to model variable quantities that relate to multiple nodes / edges?
 
 - some notes in https://github.com/amelioro/ameliorate/issues/715

@@ -715,7 +715,24 @@ There are a few different kinds of scores, as specified below. The reasons for t
 ## Core features
 
 - features enabled by the structure
-- other candidates that could migrate here from notes elsewhere: the tradeoffs table (see [Criterion](#Criterion)), question prioritization via guides/clarifies chaining (see [Edge weight score](#edge-weight-score)), "how good is a solution" calculation
+- other candidates that could migrate here from notes elsewhere: question prioritization via guides/clarifies chaining (see [Edge weight score](#edge-weight-score)), "how good is a solution" calculation
+
+### Causal map
+
+- a structural view that shows concept nodes and their causal edges (causes / reduces / impedes) - the "core" structure
+- everything non-causal is hidden here by default and typically surfaced via other views (or a node's details pane):
+
+#### Purpose
+
+- provide visual clarity / anchoring so that the topic is easier to understand and details are easier to align on
+
+### Tradeoffs table
+
+- options (actions) along one axis, criteria along the other; each cell is a "fulfills" score of how much the option fulfils the criterion, weighted by the criterion's importance (see [Criterion](#criterion))
+
+#### Purpose
+
+- provide a concise way of organizing all the factors involved with a decision, so that everything can be fairly considered
 
 ### Calculated arguments
 

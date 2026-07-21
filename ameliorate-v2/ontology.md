@@ -551,7 +551,19 @@ Perspectives: [alice, bob, casey]
 - See [More advanced claim modeling](#more-advanced-claim-modeling)
 - Non-causal arguments - e.g. evidence about truth (statistics, anecdotes, source mentions), definitional disputes, pure value assertions - make sense to exist via explicit claims. But causal arguments are ideally converted into causal form (concepts + causal edges) so that they're _calculated_ into the argument map instead of manually maintained (see [Calculated arguments](#calculated-arguments)).
 
-##### Questions - Unanswered
+##### Questions - Kind of answered
+
+- how to model implied claims?
+	- (option 2 seems best)
+  - option 1: don't model them directly - score points at node / edge, and score's implied claim is _calculated_ based on the parent. explicit child claims point directly at the score's parent node / edge...?
+    - good: don't have to store anything! claim text is unmodifiable and can never be wrong
+		- bad: very awkward to point explicit child claims at score's parent node / edge, rather than an actual claim
+	- option 2: actually create an "implied claim" for each node / edge, and put the score on _that_
+		- note: probably mark this as implied somehow, so we don't ever put text into it? text should be calculated based on parent
+		- good: putting the score on the implied claim seems most accurate / unambiguous about the score's meaning
+		- bad: _double_ the total number of nodes / edges (because each needs an implied claim)
+  		- but: could try to automatically maintain implied claims... deleting them if no score or child claim exists
+    		- probably not worth doing this. the implied claim could be a very trivial record that's literally just an id
 
 ##### Questions - Kind of answered
 

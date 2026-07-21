@@ -791,6 +791,16 @@ There are a few different kinds of scores, as specified below. The reasons for t
     - same issue as above - even "supports increase" vs "supports decrease" vs "supports no change" seem to have some overlapping justification... e.g. a claim at the same time may "supports decrease" _and_ "supports no change" if the claim conveys that "critiques increase"
   - supports edge score might be able to indicate _which score_ the child claim supports in the parent - see the [Concept scoring semantics](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad) unanswered question about a pro suggesting a precise score for its parent
 
+### How to model variable quantities that relate to multiple nodes / edges?
+
+- some notes in https://github.com/amelioro/ameliorate/issues/715
+- e.g. See [multiple variations for one solution](https://ameliorate.app/docs/diagramming-choices#multiple-variations-for-one-solution) - how would a "hire guards" solution look at hiring 20 guards vs 40 guards?
+  - another example: food legislation, e.g. what are costs of providing X meals for students statewide vs 2X meals, and what are differences in benefits
+- Seems like generally you could start by creating various variables e.g. guard quantity, solution cost, then you add some function between them so that when you increase guards from 20 to 40, the cost goes up by $X/guard. Maybe even "expected might vs potential enemies" to be "guard quantity" divided by "potential enemy size" (e.g. 30 enemies)
+  - Nicely it seems like this could be independent from user scoring, basically as things to consider when scoring
+  - I suppose a variable might be able to associate / fulfill some criteria directly, so then when evaluating a criterion, we'd want to show the related variables
+- probably should allow variables to have a discrete or continuous range defined
+
 ### Should claim truth scores be the _only_ possible scores?
 
 - (rather than having other score types and having to match claim scores to them)

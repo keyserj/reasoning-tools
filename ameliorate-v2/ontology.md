@@ -457,6 +457,10 @@ Perspectives: [alice, bob, casey]
 
 - sometimes criteria seem to make sense being directly caused by other concepts, and sometimes they seem like they can only be "fulfilled" - might be based on how the criterion is worded? awkward
 	- hypothesis: criteria that are _properties of the option itself_ (e.g. "inexpensive", "durable") can only be fulfilled, while criteria that are _outcomes in the world_ (e.g. "reduced admin burden") can be caused?
+- what should the criterion edge be to the thing that the criterion is helping weigh?
+  - "criterion for [Question]"
+    - is... accurate?
+	- perhaps "weighs"? "helps weigh"?
 
 ###### Questions - Kind of answered
 
@@ -469,7 +473,7 @@ Perspectives: [alice, bob, casey]
 
 ##### Notes
 
-- the subtypes differ on the answer side: clarifying questions are generally answered by claims (via `answers` edges), while guiding questions generally don't have a concrete answer - they make sense to be "answered" by a view, probably generated based on relevant causal nodes (e.g. a tradeoffs-table view for "what are the most effective ways to reduce illegal immigration?")
+- answers look differently based on question subtype: clarifying questions are generally answered by claims (via `answers` edges), while guiding questions generally don't have a concrete answer - they make sense to be "answered" by a view, probably generated based on relevant causal nodes (e.g. a tradeoffs-table view for "what are the most effective ways to reduce illegal immigration?")
   - this can double as a sanity check: a "guiding" question that accumulates `answers` claims was probably clarifying all along
 
 ##### Questions - Unanswered
@@ -733,6 +737,17 @@ There are a few different kinds of scores, as specified below. The reasons for t
 #### Purpose
 
 - provide a concise way of organizing all the factors involved with a decision, so that everything can be fairly considered
+
+#### Questions - unanswered
+
+- how does the table determine what criteria are to be shown for a question?
+  - all criteria with a "is criterion for" ([name TBD](#criterion)) edge that points to this question
+- how does the table determine what options are to be shown for a question?
+  - canned question "what best to do about [negative Concept]?": find all Option concepts causally related (causes OR reduces, in case people disagree on what the impact is) to the [negative Concept]
+  - maybe: options could also have an "option for" edge to question
+    - hmm then the causes/reduces relation to the [negative Concept] doesn't participate in the tradeoffs table?
+      - I guess these would have to be tied to a criterion somehow?
+      - might have to play with these for a bit to see
 
 ### Calculated arguments
 

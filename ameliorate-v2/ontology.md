@@ -521,7 +521,47 @@ Perspectives: [alice, bob, casey]
 
 ###### Notes
 
-- guiding questions will want the ability to select from a list (e.g. "what causes this node?", "what addresses this node?", these generally can have automatic views created for them) OR be custom - clarifying questions should generally be custom (e.g. "are there any studies about this?")
+- guiding questions can be selected from a list of common canned questions (e.g. "what's the best solution to this problem?") OR be custom - clarifying questions should generally be custom (e.g. "are there any studies about this?")
+
+###### Canned Questions
+
+- canned questions are pre-defined guiding questions that come up commonly when trying to understand or solve a problem
+- because the shape of a useful answer is known ahead of time, each one can auto-generate a view from the structure + the viewer's scores
+- notes regarding specific questions mentioned below:
+	- "good"/"bad" are perspective-specific per [Concept scoring semantics](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad) (change importance): a positive-scored concept is "good" (important to increase), a negative-scored one is "bad" (important to decrease)
+	- "upstream"/"downstream" mean the whole transitive causal reach, not just immediate neighbors - followed via the same multiply-and-attenuate causal chaining as [Calculated arguments](#calculated-arguments), which is what sorts each reached node into pro vs con and weights it
+- specific question ideas:
+	- "what is [concept]?"
+		- what the view shows: its components
+		- structure used to determine what to show: downstream `has` edges
+	- "what causes [concept]? / what does [concept] affect?"
+		- what the view shows: what causes/impedes it vs what it causes/impedes
+		- structure used to determine what to show: upstream vs downstream `causes` / `reduces` / `impedes` edges
+		- q: should these be separate questions or combined? maybe separate and allow multiple questions to be selected at once...?
+	- "why might we want [concept]?"
+		- what the view shows: good things it causes + bad things it reduces (its "pros")
+		- structure used to determine what to show: downstream `causes` to positive-scored concepts + `reduces` to negative-scored concepts
+	- "what is concerning about [concept]?"
+		- what the view shows: bad things it causes + good things it reduces (its "cons")
+		- structure used to determine what to show: downstream `causes` to negative-scored concepts + `reduces` to positive-scored concepts
+	- "what tradeoffs are involved with [concept]?"
+		- what the view shows: its pros vs its cons, side by side
+		- structure used to determine what to show: the "why might we want" set vs the "what is concerning" set
+		- q: should all concepts have this canned question, or just Options?
+		- q: should impeding things be shown here? (I think this  may be discussed elsewhere in the doc)
+	- "how do we best address [negative-scored concept]?"
+		- what the view shows: a [tradeoffs table](#tradeoffs-table): options along one axis, criteria along the other
+		- structure used to determine what to show: see [tradeoffs table](#tradeoffs-table)'s questions about how to determine criteria / options
+	- "is it true that [claim]?"
+		- what the view shows: supporting claims vs critiquing claims (pros vs cons)
+		- structure used to determine what to show: sign of the `supports` score, and [calculated arguments](#calculated-arguments)
+
+- Visual notes
+	- the bracketed placeholder in each question (e.g. `[concept]`) should actually render the node inline (or a brief version of it)
+- Implementation notes
+  - when creating a question about a node/edge, the canned questions should be selectable. For canned questions that aren't selected, we shouldn't create a question
+- Questions - Unanswered
+	- should the canned set include something like "what do we know about this?" for questions / claims / sources?
 
 ###### Questions - Unanswered
 

@@ -794,14 +794,20 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 ### Is it ok that the three distinct concept score meanings can only have two distinct forms of justification?
 
-- current leaning: yes, seems ok that these are not distinct - keeping the question open in case better ideas for distinguishing come up
+- current leaning: seems problematic, see thoughts
 - what:
   - a further-positive score means "important to increase", a further-negative score means "important to decrease", a lower absolute-value score means "not important to change"
   - but the claim that's justified behind this score is technically "X is important to increase" - meaning critiques are ambiguous between meaning "important to decrease" vs "not important to change"
 - thoughts
+  - may be more problematic than I thought, since we want to be able to flip the claim and see pros/cons flip sides too. if there are three distinct score meanings, then what is the "flip" meaning?
+    - if flip meaning is opposite: then we want to move the cons that "support opposite" to be pro, and cons that "support absence" to remain con
+		- it seems like in reality there _are_ three tied-together claims here: "truth", "absence of truth", "opposite of truth"
+  		- seems like there should be a way to pick which of the three claims to display, then to calculate where each claim lays (in terms of pro/con)
 - ideas
   - instead of one claim, should we have three claims - one for each meaning?
     - no way - there would be a ton of overlap e.g. a support for "important to increase" would almost always be a critique for "important to decrease" and "not important to change"
+      - ... would it _always_ be a critique for these? would a support for any of them _always_ be a critique for the other two?
+        - it seems like a support for "important to decrease" could also be a support for "important not to change", but I'd have to find an example of this to be more confident about it
   - instead of one claim having "supports" / "critiques", can we have three edge types?
     - same issue as above - even "supports increase" vs "supports decrease" vs "supports no change" seem to have some overlapping justification... e.g. a claim at the same time may "supports decrease" _and_ "supports no change" if the claim conveys that "critiques increase"
   - supports edge score might be able to indicate _which score_ the child claim supports in the parent - see the [Concept scoring semantics](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad) unanswered question about a pro suggesting a precise score for its parent

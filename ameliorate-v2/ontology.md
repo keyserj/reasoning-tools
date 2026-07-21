@@ -49,6 +49,7 @@
 	- Concept
 		- Topic?
 		- All - Concept causes/reduces/impedes Concept
+		- Correlation - Concept positively correlates with Concept
 		- Category - {Concept} categorizes Concept
 		- Component - Concept has {Concept}
 		- Action - {Concept} tagged `#action`
@@ -73,6 +74,7 @@
 	- Edge weight score
 		- note: scores don't make sense for these?: categorizes, has, criterion for
 		- causes (opposite: reduces/impedes): how much the source moves the target: -8 = strongly reduces it, 0 = doesn't move it at all, 8 = strongly increases it
+		- positively correlates with (opposite: negatively correlates with): how much source and target move together: -8 = strong negative correlation, 0 = uncorrelated, 8 = strong positive correlation
 		- fulfils: -8 = actively works against it, 0 = doesn't fulfil it at all, 8 = fully fulfils it
 		- guides: how much exploring the question would advance the target topic/question: 0 = no bearing on it, 8 = central to it (most progress on the target runs through this question)
 		- clarifies: how contingent the target node is on the answer: 0 = answer wouldn't change anything about it, 8 = answer could completely reshape how we see/score it
@@ -650,6 +652,13 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 #### Edge weight score
 
+##### Notes
+
+- every scorable edge is scored through its implied claim, worded `[source node text] [edge verb] [target node text]` (e.g. `A causes B`); the edge's weight score _is_ that implied claim's truth score (see [Claim truth score](#claim-truth-score))
+- so all edge scores share one scale: `8 = strongly believe`, `0 = don't believe`, `-8 = strongly believe the opposite`
+	- only bipolar edges (those with a defined opposite, e.g. causes / reduces) use the negative half; unipolar edges (e.g. guides, mentions) stay 0..8
+- e.g. `A causes[8] B` reads "A causes B", strongly believed; `A causes[-8] B` reads its opposite, "A reduces B"
+
 ##### Causes (opposite: reduces/impedes)
 
 ###### Notes
@@ -660,6 +669,24 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- and this, combined with [Concept scoring semantics](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad): "how much does node B _matter to_ node A?"
 		- by multiplying causal score by concept score e.g. goodness
 - avoid duplicate edges when a chain already conveys the relation (e.g. A causes B and B causes C, plus a direct A causes C edge) - the duplicate would double-count in calculations
+
+##### Positively correlates with
+
+###### Purpose
+
+- represents an observed association where we don't (yet) know the direction or the mechanism
+- example: `eating ice cream _positively correlates with_ drowning`
+- can add a question to signify uncertainty, e.g. `why does ice cream correlate with drowning?`
+- can add a statistic to support/critique the edge
+- intention is that this association eventually gets replaced by `A causes B`, `B causes A`, and/or a shared upstream cause of both A and B
+  - shared upstream cause example: `eating ice cream _correlates with_ drowning` -> `hot day _causes_ eating ice cream`, `hot day _causes_ swimming _causes_ likelihood of drowning`
+
+###### Questions - Unanswered
+
+- is there a better, shorter name for this edge?
+	- "positively correlates with" is verbose next to `causes` / `guides`
+	- but "correlates with" doesn't indicate positive vs negative, so the implied claim would be ambiguous
+  	- potentially could use "correlates with" as the visible edge, and have the implied claim actually be "positively correlates with". but that seems confusing
 
 ##### Guides
 

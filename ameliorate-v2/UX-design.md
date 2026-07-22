@@ -124,10 +124,10 @@
 	- section: `Basics` (`[topic description]`)
 	- section: `Guiding Questions`: top 5 guiding questions (top one is selected, and default is "what's important to consider in this topic?")
 		- if structure editing + < 5 items: "add guiding question"
-	- section: `Hottest Details`: top 5 of all nodes/edges excluding topic node (normalized scores, see question in subsection for how)
-	- "Most important to change": top 5 (absolute value) concepts
-	- "Disagreement": top 5 std-deviation causal concepts/edges
-	- "Unknowns": top 5 unanswered clarifying questions
+	- section: `Hottest Details`: top 5 of all nodes/edges excluding topic node (normalized scores, see question in subsection for how), with pills to filter
+		- "Important to change": top 5 (absolute value) concepts
+		- "Controversial": top 5 std-deviation causal concepts/edges
+		- "Unknowns": top 5 unanswered clarifying questions
 - Structure pane
   - (top 1/4, switch between, collapsible) generated current-view summary, sunburst
   - show view based on selected guiding question (default: top 10 important nodes to the Topic)

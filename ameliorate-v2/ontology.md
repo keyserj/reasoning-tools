@@ -123,8 +123,7 @@ Perspectives: [alice, bob, casey]
 
 / --- Concepts: the causal core ---
 
-*[-4,0,-8] Illegal immigration into the US &illegal-immig #topic
-  %description: Illegal immigration into the US is politically contested; we're mapping its causes and weighing the most effective, humane ways to reduce it.
+*[-4,0,-8] Illegal immigration into the US &illegal-immig
   < causes[6,2,-] &wait-causes-illegal-immig
     *[-6,-3,-7] Long legal processing times &long-wait
       < causes[7,-,8]
@@ -153,7 +152,8 @@ Perspectives: [alice, bob, casey]
 
 / --- Actions ---
 
-*[2,-7,8] Border wall along the southern US border &wall #action
+*[2,-7,8] Border wall along the southern US border &wall #topic #action
+  %description: Should the US build a wall along its southern border to reduce illegal immigration? We're weighing what the wall would cost against how much it would reduce illegal immigration.
   > reduces[3,-5,8] &wall-reduces
     * $illegal-immig
   > has
@@ -175,8 +175,13 @@ Perspectives: [alice, bob, casey]
 
 / --- Questions ---
 
+? Why might we want the wall? &why-wall
+  / guiding question (agenda-setting); the canned "why might we want [concept]?" pointed at the topic - its view shows the wall's pros
+  > guides[8,6,8]
+    * $wall
+
 ? What are the most effective ways to reduce illegal immigration? &best-ways
-  / guiding question (agenda-setting)
+  / guiding question (agenda-setting); guides `illegal-immig` (not the topic) - guides chains through the wall-reduces edge to relate it to the wall topic
   > guides[7,5,8]
     * $illegal-immig
   < guides[6,8,1]
@@ -249,7 +254,7 @@ Perspectives: [alice, bob, casey]
     = $visa-overstay
 
 =[-4,0,-8] $illegal-immig is important to increase
-  / implicit claim behind the topic's concept score, with standardized node-score wording; its score is the node's score, so alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
+  / implicit claim behind `illegal-immig`'s concept score, with standardized node-score wording; its score is the node's score, so alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
   < supports[5,8,-]
     =[7,8,2] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
   < supports[-4,-,-8] &murder-supports-worse-score
@@ -272,14 +277,14 @@ Perspectives: [alice, bob, casey]
 
 - Structure coverage (one of each piece from [Structure](#Structure)):
 	- Concept
-		- Topic: `illegal-immig` (`#topic`)
+		- Topic: `wall` (`#topic`; also tagged `#action` - a concept can be both)
 		- All: causes (`long-wait` causes `illegal-immig`), reduces (`legal-immig` reduces `illegal-immig`), impedes (`long-wait` impedes `legal-immig`)
 		- Category: `motivations` categorizes `save-money` / `disappear` / `danger`
 		- Component: `wall` has `barbed-wire`
-		- Action: `wall` / `more-admin` / `fewer-requirements` (tagged `#action`; each reduces the topic problem or one of its causes)
+		- Action: `wall` / `more-admin` / `fewer-requirements` (tagged `#action`; each reduces `illegal-immig` or one of its causes)
 		- Criterion: `inexpensive` / `quick` / `humane` (criterion for the `best-ways` question); `more-admin` / `fewer-requirements` fulfil `inexpensive` directly, while `wall` fulfils it via a causal-fulfils chain (`wall` causes `wall-cost`, which fulfils[-7,-8,-2] `inexpensive`)
 	- Question
-		- Guiding Question: `best-ways` guides the topic; `why-immigrate` guides `best-ways`
+		- Guiding Question: `why-wall` guides the topic (`wall`); `best-ways` guides `illegal-immig` (a concept the wall reduces); `why-immigrate` guides `best-ways`
 		- Clarifying Question: `how-tall` clarifies the `wall` node; `how-enter` clarifies the `wall-reduces` edge, via the edge's implied claim
 	- Claim
 		- All: `easy-climb` supports `climb-over`; `unclimbable` supports[-4,-,-8] (i.e. critiques) `climb-over`
@@ -291,7 +296,7 @@ Perspectives: [alice, bob, casey]
 		- All: `house-doc` mentions `texas-stat`
 	- Scores
 		- Perspectives: score brackets hold one slot per person, in the `Perspectives: [alice, bob, casey]` order
-			- scored by everyone: the main nodes, e.g. `*[-4,0,-8]` on the topic, `*[2,-7,8]` on `wall`
+			- scored by everyone: the main nodes, e.g. `*[2,-7,8]` on the topic (`wall`), `*[-4,0,-8]` on `illegal-immig`
 			- scored by some (`-` = that person didn't score): e.g. `*[-2,-,-5]` on `save-money`, `mentions[8,-,-]`
 			- scored by nobody (brackets omitted): `barbed-wire`, the `clarifies` edge from `how-tall`
 		- Concept score: e.g. `*[-8,-8,-6]` on `danger`
@@ -808,7 +813,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 #### Purpose
 
 1. make the contested information easier to maintain: causes are often reused across many arguments, so updating a few cause-effect relations (or concept scores) automatically updates every calculated argument they participate in - in a manual argument map, each affected argument would have to be found and edited by hand
-	- e.g. `long-wait` feeds calculated arguments in multiple places (its `causes` edge argues about the topic's score; `more-admin reduces long-wait` argues for `more-admin`) - one update to `long-wait`'s score or edges flows to all of them
+	- e.g. `long-wait` feeds calculated arguments in multiple places (its `causes` edge argues about `illegal-immig`'s score; `more-admin reduces long-wait` argues for `more-admin`) - one update to `long-wait`'s score or edges flows to all of them
 2. keep the shared structure more side-free in wording
   - "X causes Y" just models reality, and calculated arguments can use standardized wording - manual claim wording usually reads as taking a side (e.g. "people will find a way over the barrier")
 	- the side of the calculated argument is also based on the viewer's own scores rather than baked into the shared structure; though non-causal supports edges using a -8 to 8 score also allows claim pro/con status to be calculated
@@ -827,7 +832,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 - do _incoming_ edges argue about a node's score?
 	- "Y impedes X": an impediment seems to speak to how attainable X is, not how important it is to change X - e.g. `long-wait impedes legal-immig` doesn't seem to argue that `legal-immig` should be scored lower (alice and bob score it high while fully agreeing it's impeded)
   	- but attainability _does_ seem to relate to "is this is a good option?" because if it's easier to attain then that's a plus. perhaps the impedance should show up in the tradeoffs table but not in the arguments about "is X important to increase?"
-	- "Y causes X": `danger causes illegal-immig` feels like it carries the `fleeing-danger` argument ("they're fleeing danger" supports a less-negative topic score), but strictly the argument's causal content is an _outgoing_ edge that doesn't exist yet (illegal immigration reduces the harm those people face) - should promotion prefer creating that outgoing edge, or should sympathetic/incriminating incoming causes count as arguments somehow?
+	- "Y causes X": `danger causes illegal-immig` feels like it carries the `fleeing-danger` argument ("they're fleeing danger" supports a less-negative score for `illegal-immig`), but strictly the argument's causal content is an _outgoing_ edge that doesn't exist yet (illegal immigration reduces the harm those people face) - should promotion prefer creating that outgoing edge, or should sympathetic/incriminating incoming causes count as arguments somehow?
 - which arguments are irreducibly non-causal, beyond the candidates in the notes above?
 - how should scores migrate when a claim is promoted to causal form?
   - do old truth score + supports weight map 1:1 onto the new concept score + causal edge weight?
@@ -1095,13 +1100,13 @@ There are a few different kinds of scores, as specified below. The reasons for t
   - concepts with large positive/negative scores act as implicit goals, and Guiding Questions imply goals a little more explicitly
   - seems like the explicit modeling is mostly duplicate
 - context: the example previously had a goal node `*[8,2,8] Reduced illegal immigration` with `achieves` edges from each option
-	- it duplicated the topic node ("Reduced illegal immigration" is just "Illegal immigration into the US" plus the desire to reduce it), with scores roughly the topic's inverted
-	- it ended up with no edge to the topic node at all - the options only connected to the causal web via their side effects (e.g. `more-admin` reduces `long-wait`) - suggesting `achieves` edges float alongside the causal structure rather than being part of it
+	- it duplicated `illegal-immig` ("Reduced illegal immigration" is just "Illegal immigration into the US" plus the desire to reduce it), with scores roughly `illegal-immig`'s inverted
+	- it ended up with no edge to `illegal-immig` at all - the options only connected to the causal web via their side effects (e.g. `more-admin` reduces `long-wait`) - suggesting `achieves` edges float alongside the causal structure rather than being part of it
 
 #### Option 1: implicit goals - no Goal nodes or achieves edges
 
 - what is it
-	- a "goal" is any concept whose score conveys a strong desire for change (e.g. the topic's `*[-4,0,-8]` implies the goal "reduce illegal immigration"); options connect to the causal web via ordinary causes/reduces/impedes edges
+	- a "goal" is any concept whose score conveys a strong desire for change (e.g. `illegal-immig`'s `*[-4,0,-8]` implies the goal "reduce illegal immigration"); options connect to the causal web via ordinary causes/reduces/impedes edges
 - good
 	- fewer node/edge types to learn
 	- no duplicate "Reduced X" nodes splitting scores and discussion between them and "X"

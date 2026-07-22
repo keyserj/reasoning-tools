@@ -48,8 +48,7 @@
 			- others need to be specified (e.g. Action, Anecdote/Statistic?)
 	- Concept
 		- Topic?
-		- All - Concept causes/reduces/impedes Concept
-		- Correlation - Concept positively correlates with Concept
+		- All - Concept causes/reduces/impedes Concept, Concept positively correlates with Concept
 		- Category - {Concept} categorizes Concept
 		- Component - Concept has {Concept}
 		- Action - {Concept} tagged `#action`

@@ -96,6 +96,7 @@
 	- `<`: edge whose source is the child (nested) line and target is the parent line
 	- `>`: edge whose source is the parent line and target is the child (nested) line
 	- `%[key]: [value]`: key-value property definition for the parent line
+  	- `Topic` property `description`: a high-level description of the topic - why are we discussing it?
   	- `Claim` property `opposite`: indicates phrasing for the opposite meaning of the claim. Enables -8..8 scale for explicit claim's truth score, rather than 0..8.
 	- `Perspectives: [person1, person2, person3]`: declares whose scores appear in the example
 	- `[X,Y,Z]`: scores, one slot per person in the `Perspectives` order - node scores appear after the node type character (e.g. `*[-4,0,-8]`), edge scores appear after the edge type (e.g. `causes[6,2,-]`)
@@ -123,6 +124,7 @@ Perspectives: [alice, bob, casey]
 / --- Concepts: the causal core ---
 
 *[-4,0,-8] Illegal immigration into the US &illegal-immig #topic
+  %description: Illegal immigration into the US is politically contested; we're mapping its causes and weighing the most effective, humane ways to reduce it.
   < causes[6,2,-] &wait-causes-illegal-immig
     *[-6,-3,-7] Long legal processing times &long-wait
       < causes[7,-,8]
@@ -345,6 +347,10 @@ Perspectives: [alice, bob, casey]
 ###### Meaning
 
 ###### Purpose
+
+###### Properties
+
+- `description`: a high-level description of the topic - why are we discussing it? Gives anyone arriving at the topic quick context before diving into the structure.
 
 ###### Notes
 

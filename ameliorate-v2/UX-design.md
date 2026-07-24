@@ -146,6 +146,8 @@
 
 #### Questions - kind of answered
 
+- should guiding questions be displayed with a color that indicates their "guides" score?
+  - could be a neutral color like purple, maybe. low score would probably be grayer
 - should the topic brief convey the scores via more than just sorting the items top-to-bottom?
   - would be nice to show the scores colored with a pie-distribution background
     - might even be good to use the backgrounds or borders to gradient-color it

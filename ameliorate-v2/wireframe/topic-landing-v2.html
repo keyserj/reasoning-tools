@@ -1,0 +1,1152 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Topic landing v2 — build-a-wall</title>
+<!--
+  Clickable wireframe for the "topic selected" state (nothing else selected). v2.
+  Generated from ameliorate-v2/UX-design.md + ontology.md ("Build a wall" example),
+  viewed as danny (no own scores; sees alice/bob/casey aggregated).
+  Self-contained: no external dependencies. Clickable, not functional.
+
+  Context + the version switcher live in the prototype bar at the very top
+  (the "i" button, and "version N" next to it) - that bar is scaffolding, not design.
+
+  v2 changes: smooth angled score gradients; bottom-to-top layered diagram of
+  concept-only nodes; equal-width panes; click-away unhighlight; collapse hides
+  the whole summary section.
+-->
+<style>
+  :root {
+    --bg: #f5f6f8;
+    --panel: #ffffff;
+    --line: #e2e4e8;
+    --line-strong: #cfd2d8;
+    --text: #23262b;
+    --muted: #6b7079;
+    --accent: #3b5bdb;
+    --purple: #6a3d9a;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    color: var(--text);
+    background: var(--bg);
+    font-size: 14px;
+    line-height: 1.4;
+  }
+
+  .app {
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
+    min-width: 900px;
+  }
+
+  /* ---- Top bar ---- */
+  .topbar {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 10px 16px;
+    background: var(--panel);
+    border-bottom: 1px solid var(--line);
+    flex: 0 0 auto;
+  }
+  .topbar .hamburger {
+    font-size: 20px; line-height: 1; cursor: pointer; color: var(--muted);
+    background: none; border: none; padding: 4px 6px; border-radius: 6px;
+  }
+  .topbar .hamburger:hover { background: var(--bg); }
+  .topbar .crumb { font-weight: 600; }
+  .topbar .crumb .owner { color: var(--muted); font-weight: 500; }
+  .topbar .spacer { flex: 1; }
+  .persp-chip {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--line-strong); border-radius: 999px;
+    padding: 4px 10px; color: var(--muted); cursor: pointer; background: var(--bg);
+    font-size: 12.5px;
+  }
+  .persp-chip:hover { border-color: var(--accent); color: var(--text); }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%;
+    background: #dfe3ea; color: #444; display: flex; align-items: center; justify-content: center;
+    font-weight: 600; cursor: pointer;
+  }
+
+  /* ---- Prototype scaffolding: version switcher + info popover ----
+     Chrome for reviewing the wireframe, deliberately styled apart from the app
+     below it so it never reads as part of the design being evaluated. */
+  .proto-bar {
+    position: relative; z-index: 70; flex: 0 0 auto;
+    display: flex; align-items: center; gap: 5px;
+    padding: 4px 12px;
+    background: #e9ebef; border-bottom: 1px solid var(--line-strong);
+    color: var(--muted); font-size: 11.5px;
+  }
+  .proto-bar .proto-spacer { flex: 1; }
+  .proto-bar .proto-sep { opacity: .5; }
+  .proto-ver {
+    border: 1px solid transparent; background: none; cursor: pointer;
+    color: var(--muted); font: inherit; padding: 2px 7px; border-radius: 6px;
+  }
+  .proto-ver:hover, .proto-ver.active {
+    border-color: var(--line-strong); background: var(--panel); color: var(--text);
+  }
+  .proto-ver .caret { font-size: 9px; margin-left: 3px; }
+
+  .ver-pop {
+    position: absolute; top: calc(100% + 5px); left: 10px; width: 330px; z-index: 80;
+    background: var(--panel); border: 1px solid var(--line-strong); border-radius: 10px;
+    box-shadow: 0 12px 34px rgba(0,0,0,.18); padding: 5px; display: none;
+    max-height: 62vh; overflow-y: auto;
+  }
+  .ver-pop.show { display: block; }
+  .proto-ver:disabled { cursor: default; opacity: .7; }
+  .ver-link { display: block; padding: 7px 9px; border-radius: 7px; text-decoration: none; color: var(--text); }
+  .ver-link:hover { background: var(--bg); }
+  .ver-link.current { background: #eef1fc; }
+  .ver-link b { font-size: 12.5px; font-weight: 600; }
+  .ver-link span { display: block; color: var(--muted); font-size: 11.5px; }
+
+  .info-btn {
+    width: 21px; height: 21px; border-radius: 50%; flex: 0 0 auto;
+    border: 1px solid var(--line-strong); background: var(--panel);
+    color: var(--muted); cursor: pointer;
+    font-family: Georgia, "Times New Roman", serif; font-style: italic; font-weight: 700; font-size: 12px;
+    display: inline-flex; align-items: center; justify-content: center;
+  }
+  .info-btn:hover { border-color: var(--accent); color: var(--accent); }
+  .info-btn.active { background: #23262b; color: #fff; border-color: #23262b; }
+  .info-pop {
+    position: absolute; top: calc(100% + 5px); right: 10px; width: 430px; z-index: 80;
+    background: var(--panel); border: 1px solid var(--line-strong); border-radius: 12px;
+    box-shadow: 0 12px 34px rgba(0,0,0,.18); display: none;
+    color: var(--text); line-height: 1.45;
+  }
+  .info-pop.show { display: block; }
+  .info-tabs { display: flex; gap: 2px; padding: 6px 6px 0; border-bottom: 1px solid var(--line); }
+  .info-tab {
+    border: none; background: none; cursor: pointer; font: inherit; font-size: 12.5px;
+    color: var(--muted); padding: 7px 10px; border-radius: 7px 7px 0 0;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  .info-tab:hover { color: var(--text); background: var(--bg); }
+  .info-tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+  .info-body { padding: 12px 16px 14px; max-height: 64vh; overflow-y: auto; }
+  .info-body[hidden] { display: none; }
+  .info-body p { margin: 0 0 9px; font-size: 12.5px; color: #3d4149; }
+  .info-body ol, .info-body ul { margin: 0 0 9px; padding-left: 18px; }
+  .info-body li { margin: 0 0 8px; font-size: 12.5px; color: #3d4149; }
+  .info-body > :last-child { margin-bottom: 0; }
+  .info-body li:last-child { margin-bottom: 0; }
+  .info-body b { color: var(--text); }
+  .info-body a { color: var(--accent); }
+  .info-body .ver { color: var(--muted); font-size: 11.5px; margin-bottom: 10px; }
+
+  /* ---- Panes (equal width) ---- */
+  .panes { flex: 1 1 auto; display: flex; min-height: 0; }
+  .agenda {
+    flex: 1 1 0; min-width: 0; background: var(--panel); border-right: 1px solid var(--line);
+    overflow-y: auto; padding: 18px 18px 40px;
+  }
+  .structure {
+    flex: 1 1 0; min-width: 0; display: flex; flex-direction: column; background: var(--bg);
+  }
+
+  /* ---- Agenda sections ---- */
+  .section { padding: 6px 0 14px; border-bottom: 1px solid var(--line); }
+  .section:last-child { border-bottom: none; }
+  .section h2 {
+    font-size: 15px; margin: 6px 0 10px; letter-spacing: .2px;
+  }
+  .topic-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  .btn {
+    border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px;
+    padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--text);
+  }
+  .btn:hover { border-color: var(--accent); }
+  .desc { color: #3d4149; margin: 4px 0 2px; }
+
+  /* Pills (nodes / edges / references) */
+  .pill {
+    display: inline-flex; align-items: center; text-align: left;
+    border-radius: 10px; padding: 3px 9px; cursor: pointer;
+    font-size: 12.5px; line-height: 1.25; vertical-align: middle;
+    border: 2px solid transparent; background: #fff;
+    max-width: 100%;
+  }
+  .pill.inline { font-size: inherit; padding: 1px 7px; border-radius: 8px; margin: 0 1px; }
+  .pill:hover { filter: brightness(0.97); box-shadow: 0 0 0 2px rgba(59,91,219,.15); }
+  .pill .tag { font-size: 9.5px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin-left: 6px; }
+
+  .q-list { display: flex; flex-direction: column; gap: 10px; margin-top: 2px; }
+  .q-item {
+    cursor: pointer; padding: 7px 9px; border-radius: 8px; border: 1px solid transparent;
+  }
+  .q-item:hover { background: var(--bg); }
+  .q-item.selected { background: #eef1fc; border-color: #c7d0f5; }
+  .q-item .q-text { display: inline; }
+
+  /* Hottest details */
+  .filter-row { display: flex; gap: 8px; margin: 4px 0 12px; flex-wrap: wrap; }
+  .filter-pill {
+    display: inline-flex; align-items: center; gap: 6px;
+    border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px 11px;
+    cursor: pointer; font-size: 12.5px; background: var(--panel); color: var(--muted);
+    user-select: none;
+  }
+  .filter-pill:hover { border-color: var(--accent); }
+  .filter-pill.active { background: #23262b; color: #fff; border-color: #23262b; }
+  .filter-pill .ic { font-size: 12px; }
+
+  .hot-list { display: flex; flex-direction: column; gap: 8px; }
+  .hot-row { display: flex; align-items: flex-start; gap: 8px; }
+  .hot-row .cats { flex: 0 0 auto; display: inline-flex; gap: 2px; padding-top: 3px; min-width: 30px; }
+  .hot-row .cats span { font-size: 12px; }
+  .hot-body { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; }
+  .rel-word { color: var(--muted); font-size: 12px; }
+
+  .show-more {
+    margin-top: 10px; background: none; border: none; color: var(--accent);
+    cursor: pointer; font-size: 12.5px; padding: 2px 0;
+  }
+  .show-more:hover { text-decoration: underline; }
+
+  /* ---- Structure pane ---- */
+  .struct-head {
+    display: flex; align-items: center; gap: 10px; padding: 12px 16px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .struct-head h2 { font-size: 15px; margin: 0; }
+  .struct-head .spacer { flex: 1; }
+  .view-toggle { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
+  .view-toggle button {
+    border: none; background: var(--panel); padding: 5px 10px; cursor: pointer; color: var(--muted); font-size: 13px;
+  }
+  .view-toggle button.active { background: #23262b; color: #fff; }
+  .icon-btn {
+    border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px;
+    width: 30px; height: 30px; cursor: pointer; color: var(--muted); font-size: 14px;
+  }
+  .icon-btn:hover { border-color: var(--accent); }
+
+  /* Summary strip — collapsing hides the whole section */
+  .summary {
+    border-bottom: 1px solid var(--line); background: var(--panel);
+    padding: 10px 16px 14px;
+  }
+  .summary.collapsed { display: none; }
+  .summary-title { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
+  .summary-body p { margin: 0; color: #3d4149; }
+  .summary-body .ref { border-radius: 6px; padding: 0 5px; cursor: pointer; border: 1.5px solid transparent; white-space: nowrap; }
+  .summary-body .ref:hover { box-shadow: 0 0 0 2px rgba(59,91,219,.15); }
+  .sunburst-wrap { display: flex; align-items: center; gap: 16px; }
+  .sunburst-wrap figcaption { color: var(--muted); font-size: 12px; }
+
+  /* Diagram — responsive canvas locked to the 1000x640 coordinate aspect */
+  .struct-body { flex: 1 1 auto; overflow: auto; padding: 16px; }
+  .diagram {
+    position: relative; width: 100%; min-width: 1240px; aspect-ratio: 1000 / 640; margin: 0 auto;
+  }
+  .diagram svg.edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
+  .diagram .edges path { stroke: #9aa0aa; stroke-width: 1.6; fill: none; }
+  .diagram .edges path.hl { stroke: var(--accent); stroke-width: 2.6; }
+  .diag-node {
+    position: absolute; transform: translate(-50%, -50%);
+    width: 160px; text-align: center; font-size: 11.5px; line-height: 1.2;
+    border-radius: 12px; padding: 6px 9px; border: 3px solid transparent; background: #fff;
+    cursor: pointer; z-index: 2; box-shadow: 0 1px 2px rgba(0,0,0,.05);
+  }
+  .diag-node:hover { box-shadow: 0 0 0 3px rgba(59,91,219,.18); }
+  .diag-node.hl { box-shadow: 0 0 0 4px rgba(59,91,219,.45); }
+  .diag-node .ntag { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin-top: 3px; }
+  .edge-label {
+    position: absolute; transform: translate(-50%, -50%);
+    font-size: 10.5px; padding: 1px 7px; border-radius: 8px; background: #fff;
+    border: 2px solid transparent; z-index: 3; white-space: nowrap; cursor: pointer;
+    box-shadow: 0 1px 1px rgba(0,0,0,.05);
+  }
+  .edge-label:hover { box-shadow: 0 0 0 2px rgba(59,91,219,.15); }
+
+  /* Question view panels (replace diagram when a guiding question is selected) */
+  .qview { max-width: 860px; margin: 0 auto; }
+  .qview h3 { font-size: 15px; margin: 0 0 4px; }
+  .qview .sub { color: var(--muted); margin: 0 0 16px; font-size: 12.5px; }
+  .pros { display: flex; flex-direction: column; gap: 12px; }
+  .pro-card {
+    display: flex; align-items: center; gap: 12px; background: var(--panel);
+    border: 1px solid var(--line); border-radius: 10px; padding: 12px 14px; flex-wrap: wrap;
+  }
+  .pro-card .badge { font-size: 11px; font-weight: 600; padding: 3px 8px; border-radius: 6px; white-space: nowrap; }
+  .pro-card .badge.pro { background: #e7f0ff; color: #1b4fa8; }
+  table.tradeoffs { border-collapse: collapse; width: 100%; background: var(--panel); }
+  table.tradeoffs th, table.tradeoffs td { border: 1px solid var(--line); padding: 8px 10px; text-align: center; vertical-align: middle; }
+  table.tradeoffs th { background: var(--bg); font-weight: 600; font-size: 12.5px; }
+  table.tradeoffs th.crit { text-align: left; }
+  table.tradeoffs .cell-score { display: inline-block; min-width: 34px; border-radius: 6px; padding: 3px 6px; font-size: 12px; }
+  table.tradeoffs td.na { color: var(--muted); }
+  .crit-weight { display: block; font-size: 10.5px; color: var(--muted); font-weight: 400; }
+
+  /* Toast */
+  .toast {
+    position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%) translateY(20px);
+    background: #23262b; color: #fff; padding: 10px 16px; border-radius: 8px; font-size: 13px;
+    opacity: 0; pointer-events: none; transition: opacity .18s, transform .18s; z-index: 50; max-width: 80vw;
+  }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  .hint { color: var(--muted); font-size: 11.5px; margin-top: 8px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <!-- Prototype scaffolding: version switcher + info popover. Not part of the
+       design being evaluated - see the "What is this?" tab. -->
+  <div class="proto-bar">
+    <span>ameliorate-v2 prototype</span>
+    <span class="proto-sep">/</span>
+    <button class="proto-ver" id="verBtn" title="Switch version">version 2 <span class="caret">&#9662;</span></button>
+    <span class="proto-spacer"></span>
+    <button class="info-btn" id="infoBtn" title="About this prototype">i</button>
+
+    <div class="ver-pop" id="verPop"><!-- built from versions.js --></div>
+
+    <div class="info-pop" id="infoPop">
+      <div class="info-tabs">
+        <button class="info-tab active" data-tab="what">What is this?</button>
+        <button class="info-tab" data-tab="new">What&rsquo;s new in this version</button>
+      </div>
+      <div class="info-body" data-tab="what">
+        <p>This is a prototype of an app for integrating disputed knowledge about uncertain problems.</p>
+        <p>It&rsquo;s entirely based on this <a href="https://github.com/keyserj/reasoning-tools/blob/main/ameliorate-v2/ontology.md" target="_blank">ontology.md</a>, using that as the data structure and visualizing some features that are enabled by the structure. This <a href="https://github.com/keyserj/reasoning-tools/blob/main/ameliorate-v2/UX-design.md" target="_blank">UX-design.md</a> describes some of the prototype&rsquo;s design in text.</p>
+        <p>Nothing here is functional. It&rsquo;s hard-coded to the ontology&rsquo;s &ldquo;Build a wall&rdquo; example, viewed as <b>danny</b> &mdash; new to the topic, hasn&rsquo;t scored anything yet; the scores shown are alice&rsquo;s, bob&rsquo;s and casey&rsquo;s.</p>
+      </div>
+      <div class="info-body" data-tab="new" hidden>
+        <div class="ver">v2 &mdash; changes since v1</div>
+        <ol>
+          <li>Score borders switched from hard bands to a <b>smooth angled gradient</b>.</li>
+          <li>The diagram became a <b>bottom-to-top layered layout</b> computed from the causal edges, with <b>concept-only</b> nodes (questions excluded).</li>
+          <li><b>Equal-width panes</b>, and the diagram canvas scales to the pane instead of scrolling at a fixed width.</li>
+          <li><b>Click-away unhighlight:</b> clicking blank space clears the current highlight.</li>
+          <li>Collapsing the summary hides the <b>whole</b> summary section, not just its body.</li>
+        </ol>
+      </div>
+    </div>
+  </div>
+
+  <!-- Top bar -->
+  <header class="topbar">
+    <button class="hamburger" title="Menu (stub)" data-stub="Menu isn't wired up in this wireframe.">&#9776;</button>
+    <div class="crumb"><span class="owner">keyserj / </span>build-a-wall</div>
+    <div class="spacer"></div>
+    <div class="persp-chip" data-stub="Perspective switching isn't wired up in this wireframe.">
+      <span>&#128101;</span> alice, bob, casey
+    </div>
+    <div class="avatar" title="danny (viewer)" data-stub="You're viewing as danny.">D</div>
+  </header>
+
+  <div class="panes">
+    <!-- ================= AGENDA PANE ================= -->
+    <aside class="agenda">
+      <div class="section">
+        <div class="topic-head">
+          <h2 style="margin:0">Topic</h2>
+          <span class="spacer" style="flex:1"></span>
+          <button class="btn" id="tourBtn">Tour this topic</button>
+        </div>
+        <div style="margin:10px 0 8px" id="topicPillSlot"></div>
+        <p class="desc" id="topicDesc"></p>
+      </div>
+
+      <div class="section">
+        <h2>Guiding questions</h2>
+        <div class="q-list" id="qList"></div>
+      </div>
+
+      <div class="section">
+        <h2>Hottest details</h2>
+        <div class="filter-row" id="filterRow"></div>
+        <div class="hot-list" id="hotList"></div>
+        <button class="show-more" id="hotMore"></button>
+      </div>
+    </aside>
+
+    <!-- ================= STRUCTURE PANE ================= -->
+    <main class="structure">
+      <div class="struct-head">
+        <h2>Structure</h2>
+        <div class="spacer"></div>
+        <div class="view-toggle" id="summaryToggle">
+          <button data-mode="text" class="active" title="Text summary">T</button>
+          <button data-mode="sunburst" title="Sunburst">&#9673;</button>
+        </div>
+        <button class="icon-btn" id="summaryCollapseBtn" title="Collapse / expand summary">&#9650;</button>
+      </div>
+
+      <div class="summary" id="summary">
+        <div class="summary-title">
+          <span id="summaryLabel">Current-view summary</span>
+        </div>
+        <div class="summary-body" id="summaryBody"></div>
+      </div>
+
+      <div class="struct-body" id="structBody">
+        <div class="diagram" id="diagram">
+          <svg class="edges" id="edges" viewBox="0 0 1000 640">
+            <defs>
+              <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#9aa0aa"></path>
+              </marker>
+              <marker id="arrowHl" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+                <path d="M0,0 L10,5 L0,10 z" fill="#3b5bdb"></path>
+              </marker>
+            </defs>
+          </svg>
+          <!-- node + edge-label divs injected here -->
+        </div>
+        <div class="qview" id="qview" style="display:none"></div>
+      </div>
+    </main>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="versions.js"></script>
+<script>
+/* ============================================================
+   DATA — derived by hand from ontology.md "Build a wall" example.
+   Scores are [alice, bob, casey]; null = that person didn't score it.
+   ============================================================ */
+const SCORERS = ["alice", "bob", "casey"];
+
+const NODES = {
+  "illegal-immig":      { label: "Illegal immigration into the US", kind: "concept", scores: [-4, 0, -8] },
+  "long-wait":          { label: "Long legal processing times", kind: "concept", scores: [-6, -3, -7] },
+  "admin-burden":       { label: "Administrative burden of enforcing immigration requirements", kind: "concept", scores: [-5, null, -6] },
+  "legal-immig":        { label: "Legal immigration into the US", kind: "concept", scores: [7, 8, 2] },
+  "save-money":         { label: "Saving money by skipping the legal process", kind: "concept", scores: [-2, null, -5] },
+  "disappear":          { label: "Wanting to “disappear” (avoid government records)", kind: "concept", scores: [-3, null, null] },
+  "danger":             { label: "Danger in home countries", kind: "concept", scores: [-8, -8, -6] },
+  "wall":               { label: "Border wall along the southern US border", kind: "concept", tag: "topic · action", scores: [2, -7, 8] },
+  "wall-cost":          { label: "Billions of dollars of construction and maintenance spending", kind: "concept", scores: [-2, -4, null] },
+  "more-admin":         { label: "Increased administrative resources for processing immigration", kind: "concept", tag: "action", scores: [5, 8, 2] },
+  "fewer-requirements": { label: "Reduced immigration requirements", kind: "concept", tag: "action", scores: [3, 7, -4] },
+  "inexpensive":        { label: "Inexpensive", kind: "concept", tag: "criterion", scores: [7, 8, 2] },
+  "quick":              { label: "Quick to implement", kind: "concept", tag: "criterion", scores: [5, 3, 8] },
+  "humane":             { label: "Humane treatment of immigrants", kind: "concept", tag: "criterion", scores: [8, 8, 3] },
+  // questions
+  "why-wall":           { label: "Why might we want the wall?", kind: "guiding", scores: [8, 6, 8] },
+  "how-tall":           { label: "How tall is the proposed wall design?", kind: "clarifying", scores: null },
+};
+
+const TOPIC_DESC = "Should the US build a wall along its southern border to reduce illegal immigration? We're weighing what the wall would cost against how much it would reduce illegal immigration.";
+
+/* Guiding questions, ordered by (pre-computed) guides-to-topic score.
+   why-immigrate guides best-ways (not the topic), so chaining attenuates its score and it sorts last. */
+const QUESTIONS = [
+  { id: "why-wall",       guides: 0.917, view: "pros",
+    parts: [{ t: "Why might we want " }, { node: "wall" }, { t: "?" }] },
+  { id: "best-ways",      guides: 0.833, view: "tradeoffs",
+    parts: [{ t: "What are the most effective ways to reduce " }, { node: "illegal-immig" }, { t: "?" }] },
+  { id: "why-immigrate",  guides: 0.520, view: "causes",
+    parts: [{ t: "Why do people immigrate illegally?" }] },
+];
+
+/* Hottest details — combined list using the pre-computed distance-scaled numbers.
+   cats: important (change-importance), controversial (std-dev), unknown (open clarifying q).
+   Criteria excluded from "important" unless causal, so `inexpensive` is absent. Sorted by `hot` (normalized to 0..1). */
+const HOTTEST = [
+  { kind: "edge", from: "wall",        rel: "reduces", to: "illegal-immig", scores: [3, -5, 8], cats: ["controversial"], hot: 0.669 },
+  { kind: "question", id: "how-tall",  cats: ["unknown"], hot: 0.500 },
+  { kind: "node", id: "danger",        cats: ["important"], hot: 0.459 },
+  { kind: "node", id: "wall-cost",     cats: ["important"], hot: 0.375 },
+  { kind: "node", id: "illegal-immig", cats: ["important", "controversial"], hot: 0.334 },
+  { kind: "node", id: "long-wait",     cats: ["important"], hot: 0.223 },
+  { kind: "node", id: "legal-immig",   cats: ["important"], hot: 0.216 },
+  { kind: "edge", from: "legal-immig", rel: "reduces", to: "illegal-immig", scores: [3, 7, 1], cats: ["controversial"], hot: 0.208 },
+  { kind: "edge", from: "danger",      rel: "causes",  to: "illegal-immig", scores: [7, 8, 3], cats: ["controversial"], hot: 0.180 },
+  { kind: "edge", from: "disappear",   rel: "causes",  to: "illegal-immig", scores: [2, null, 6], cats: ["controversial"], hot: 0.166 },
+  { kind: "edge", from: "long-wait",   rel: "causes",  to: "illegal-immig", scores: [6, 2, null], cats: ["controversial"], hot: 0.166 },
+];
+
+const CATS = {
+  important:    { icon: "△", label: "Important to change" },
+  controversial:{ icon: "🔥", label: "Controversial" },
+  unknown:      { icon: "?", label: "Unknowns" },
+};
+
+/* Diagram: concept-only nodes (questions excluded). Positions are computed as a
+   bottom-to-top layered layout from the causal edges below. NODE_ORDER only sets
+   left-to-right order within a layer (to reduce crossings). */
+const DIAGRAM_NODE_IDS = [
+  "illegal-immig", "legal-immig", "long-wait", "wall-cost",
+  "danger", "save-money", "disappear", "admin-burden", "more-admin", "wall",
+];
+const NODE_ORDER = {
+  "more-admin": 0, "admin-burden": 1, "danger": 2, "save-money": 3, "disappear": 4, "wall": 5, // bottom layer
+  "long-wait": 0, "wall-cost": 1,  // layer 1
+  "legal-immig": 0,                // layer 2
+  "illegal-immig": 0,              // top layer
+};
+/* Edges point from the acting/causing node (lower) to the affected node (higher). */
+const DIAGRAM_EDGES = [
+  { from: "wall",         to: "illegal-immig", rel: "reduces", scores: [3, -5, 8] },
+  { from: "legal-immig",  to: "illegal-immig", rel: "reduces", scores: [3, 7, 1] },
+  { from: "more-admin",   to: "long-wait",     rel: "reduces", scores: [7, 8, null] },
+  { from: "admin-burden", to: "long-wait",     rel: "causes",  scores: [7, null, 8] },
+  { from: "long-wait",    to: "illegal-immig", rel: "causes",  scores: [6, 2, null] },
+  { from: "danger",       to: "illegal-immig", rel: "causes",  scores: [7, 8, 3] },
+  { from: "save-money",   to: "illegal-immig", rel: "causes",  scores: [4, null, 7] },
+  { from: "disappear",    to: "illegal-immig", rel: "causes",  scores: [2, null, 6] },
+  { from: "wall",         to: "wall-cost",     rel: "causes",  scores: [8, 8, 8] },
+  { from: "long-wait",    to: "legal-immig",   rel: "impedes", scores: [6, 8, null] },
+];
+
+/* ============================================================
+   COLOR HELPERS — colorblind-safe RdBu diverging + purple for guides.
+   ============================================================ */
+const RB = { neg: "#b2182b", mid: "#e9e9e9", pos: "#2166ac" }; // red .. gray .. blue
+const PURPLE = { lo: "#e6dcf0", hi: "#6a3d9a" };
+
+function hex2rgb(h){ h = h.replace("#",""); return [parseInt(h.slice(0,2),16), parseInt(h.slice(2,4),16), parseInt(h.slice(4,6),16)]; }
+function rgb2hex(a){ return "#" + a.map(v => Math.round(Math.max(0,Math.min(255,v))).toString(16).padStart(2,"0")).join(""); }
+function mix(c1, c2, t){ const a = hex2rgb(c1), b = hex2rgb(c2); return rgb2hex(a.map((v,i) => v + (b[i]-v)*t)); }
+
+// change-importance / edge weight: -8..8 -> red..gray..blue
+function colorRB(s){ if (s < 0) return mix(RB.neg, RB.mid, (s+8)/8); return mix(RB.mid, RB.pos, s/8); }
+// guides weight: 0..8 -> light..deep purple
+function colorPurple(s){ return mix(PURPLE.lo, PURPLE.hi, Math.max(0,s)/8); }
+function colorFor(s, palette){ return palette === "purple" ? colorPurple(s) : colorRB(s); }
+function tint(c){ return mix(c, "#ffffff", 0.82); }
+
+/* Build inline style for a pill/node/edge-label from its scores.
+   Border = smooth angled gradient across each scorer's color (one per scorer, sorted by
+   score, placed at its band center); fill = light tint of the average. Consensus reads
+   near-solid, disagreement as a diagonal sweep. The padding-box/border-box background
+   trick keeps the gradient border while respecting border-radius. */
+function pillStyle(scores, palette, borderPx){
+  borderPx = borderPx || 2;
+  if (!scores || scores.every(s => s === null)) {
+    return `background:#fff; border:${borderPx}px solid #c4c4c4;`;
+  }
+  const present = scores.filter(s => s !== null).sort((a,b) => a - b);
+  const n = present.length;
+  const stops = present.map((s,i) => `${colorFor(s, palette)} ${((i + 0.5) / n * 100).toFixed(1)}%`).join(", ");
+  const grad = `linear-gradient(125deg, ${stops})`;
+  const avg = present.reduce((a,s) => a+s, 0) / n;
+  const fill = tint(colorFor(avg, palette));
+  return `background:linear-gradient(${fill},${fill}) padding-box, ${grad} border-box;`
+       + `border:${borderPx}px solid transparent;`;
+}
+
+function paletteForNode(id){ return NODES[id].kind === "guiding" ? "purple" : "rb"; }
+
+/* ============================================================
+   PILL / NODE FACTORIES
+   ============================================================ */
+function makeNodePill(id, opts){
+  opts = opts || {};
+  const node = NODES[id];
+  const el = document.createElement(opts.inline ? "span" : "button");
+  el.className = "pill" + (opts.inline ? " inline" : "");
+  el.setAttribute("style", pillStyle(node.scores, paletteForNode(id), 2));
+  el.dataset.node = id;
+  el.textContent = node.label;
+  if (opts.tag && node.tag) {
+    const t = document.createElement("span"); t.className = "tag"; t.textContent = node.tag; el.appendChild(t);
+  }
+  if (opts.static) {
+    // used for pills embedded in a guiding-question row: let clicks bubble up to select the row
+    el.style.cursor = "inherit";
+  } else {
+    el.addEventListener("click", (e) => { e.stopPropagation(); onNodeActivate(id); });
+  }
+  return el;
+}
+
+/* ============================================================
+   RENDER: AGENDA
+   ============================================================ */
+function renderTopic(){
+  document.getElementById("topicPillSlot").appendChild(makeNodePill("wall", { tag: true }));
+  document.getElementById("topicDesc").textContent = TOPIC_DESC;
+}
+
+function renderQuestions(){
+  const list = document.getElementById("qList");
+  QUESTIONS.forEach(q => {
+    const item = document.createElement("div");
+    item.className = "q-item";
+    item.dataset.q = q.id;
+    const text = document.createElement("span");
+    text.className = "q-text";
+    q.parts.forEach(p => {
+      if (p.t) text.appendChild(document.createTextNode(p.t));
+      if (p.node) text.appendChild(makeNodePill(p.node, { inline: true, static: true }));
+    });
+    item.appendChild(text);
+    item.addEventListener("click", () => toggleQuestion(q.id));
+    list.appendChild(item);
+  });
+}
+
+let hotExpanded = false;
+const activeFilters = new Set();
+
+function renderFilters(){
+  const row = document.getElementById("filterRow");
+  row.innerHTML = "";
+  Object.entries(CATS).forEach(([key, c]) => {
+    const p = document.createElement("div");
+    p.className = "filter-pill" + (activeFilters.has(key) ? " active" : "");
+    p.innerHTML = `<span class="ic">${c.icon}</span>${c.label}`;
+    p.addEventListener("click", () => {
+      if (activeFilters.has(key)) activeFilters.delete(key); else activeFilters.add(key);
+      renderFilters(); renderHottest();
+    });
+    row.appendChild(p);
+  });
+}
+
+function edgePhrase(item){
+  const wrap = document.createElement("span");
+  wrap.className = "hot-body";
+  wrap.appendChild(makeNodePill(item.from, { inline: true }));
+  const rel = document.createElement("span"); rel.className = "rel-word"; rel.textContent = " " + item.rel + " "; wrap.appendChild(rel);
+  wrap.appendChild(makeNodePill(item.to, { inline: true }));
+  rel.style.cursor = "pointer";
+  rel.addEventListener("click", (e) => { e.stopPropagation(); onEdgeActivate(item.from, item.to); });
+  return wrap;
+}
+
+function questionRow(item){
+  const q = NODES[item.id];
+  const wrap = document.createElement("span");
+  wrap.className = "hot-body";
+  const el = document.createElement("span");
+  el.className = "pill inline";
+  el.setAttribute("style", pillStyle(q.scores, "rb", 2));
+  el.textContent = q.label;
+  el.style.cursor = "default";
+  wrap.appendChild(el);
+  return wrap;
+}
+
+function renderHottest(){
+  const list = document.getElementById("hotList");
+  list.innerHTML = "";
+  let items = HOTTEST.filter(it => activeFilters.size === 0 || it.cats.some(c => activeFilters.has(c)));
+  const limit = hotExpanded ? items.length : 5;
+  items.slice(0, limit).forEach(item => {
+    const row = document.createElement("div");
+    row.className = "hot-row";
+    const cats = document.createElement("span");
+    cats.className = "cats";
+    item.cats.forEach(c => { const s = document.createElement("span"); s.textContent = CATS[c].icon; cats.appendChild(s); });
+    row.appendChild(cats);
+    if (item.kind === "edge") row.appendChild(edgePhrase(item));
+    else if (item.kind === "question") row.appendChild(questionRow(item));
+    else { const b = document.createElement("span"); b.className = "hot-body"; b.appendChild(makeNodePill(item.id, {})); row.appendChild(b); }
+    list.appendChild(row);
+  });
+  const more = document.getElementById("hotMore");
+  if (items.length > 5) {
+    more.style.display = "";
+    more.textContent = hotExpanded ? "Show less" : `Show ${items.length - 5} more`;
+  } else {
+    more.style.display = "none";
+  }
+}
+
+/* ============================================================
+   RENDER: STRUCTURE DIAGRAM (bottom-to-top layered)
+   ============================================================ */
+const CANVAS_W = 1000, CANVAS_H = 640;
+let POS = {}; // id -> {x%, y%}
+
+// Longest-path layering: each edge forces target at least one layer above source.
+function computeLayout(){
+  const layer = {}; DIAGRAM_NODE_IDS.forEach(id => layer[id] = 0);
+  let changed = true, guard = 0;
+  while (changed && guard++ < 50) {
+    changed = false;
+    DIAGRAM_EDGES.forEach(e => {
+      if (layer[e.to] < layer[e.from] + 1) { layer[e.to] = layer[e.from] + 1; changed = true; }
+    });
+  }
+  const maxLayer = Math.max(...DIAGRAM_NODE_IDS.map(id => layer[id]));
+  const byLayer = {};
+  DIAGRAM_NODE_IDS.forEach(id => { (byLayer[layer[id]] = byLayer[layer[id]] || []).push(id); });
+  const topY = 12, botY = 88, margin = 8;
+  const pos = {};
+  Object.keys(byLayer).forEach(L => {
+    const grp = byLayer[L].sort((a,b) => (NODE_ORDER[a] || 0) - (NODE_ORDER[b] || 0));
+    const k = grp.length;
+    const y = maxLayer === 0 ? (topY + botY) / 2 : botY - (L / maxLayer) * (botY - topY);
+    grp.forEach((id, i) => { pos[id] = { x: margin + (i + 0.5) * ((100 - 2 * margin) / k), y }; });
+  });
+  return pos;
+}
+
+function renderDiagram(){
+  POS = computeLayout();
+  const diagram = document.getElementById("diagram");
+  diagram.querySelectorAll(".diag-node, .edge-label").forEach(el => el.remove());
+
+  DIAGRAM_NODE_IDS.forEach(id => {
+    const node = NODES[id];
+    const el = document.createElement("div");
+    el.className = "diag-node";
+    el.dataset.node = id;
+    el.setAttribute("style", `left:${POS[id].x}%; top:${POS[id].y}%;` + pillStyle(node.scores, paletteForNode(id), 3));
+    el.innerHTML = node.label + (node.tag ? `<span class="ntag">${node.tag}</span>` : "");
+    el.addEventListener("click", (e) => { e.stopPropagation(); onNodeActivate(id); });
+    diagram.appendChild(el);
+  });
+
+  layoutEdges();
+}
+
+// Boundary point of the target node's rect in the direction of (cx,cy)
+function trimToRect(cx, cy, tx, ty, hw, hh){
+  const dx = cx - tx, dy = cy - ty;
+  if (dx === 0 && dy === 0) return { x: tx, y: ty };
+  const sx = dx !== 0 ? hw / Math.abs(dx) : Infinity;
+  const sy = dy !== 0 ? hh / Math.abs(dy) : Infinity;
+  const s = Math.min(sx, sy);
+  return { x: tx + dx * s, y: ty + dy * s };
+}
+
+function nodeCenter(id){ return { x: POS[id].x / 100 * CANVAS_W, y: POS[id].y / 100 * CANVAS_H }; }
+
+function layoutEdges(){
+  const diagram = document.getElementById("diagram");
+  const svg = document.getElementById("edges");
+  svg.querySelectorAll("path.edge").forEach(p => p.remove());
+  const rect = diagram.getBoundingClientRect();
+  const scaleX = CANVAS_W / rect.width, scaleY = CANVAS_H / rect.height;
+
+  DIAGRAM_EDGES.forEach(edge => {
+    const a = nodeCenter(edge.from), b = nodeCenter(edge.to);
+    const nodeA = diagram.querySelector(`.diag-node[data-node="${edge.from}"]`);
+    const nodeB = diagram.querySelector(`.diag-node[data-node="${edge.to}"]`);
+    const ar = nodeA.getBoundingClientRect(), br = nodeB.getBoundingClientRect();
+    const ahw = (ar.width * scaleX) / 2 + 3, ahh = (ar.height * scaleY) / 2 + 3;
+    const bhw = (br.width * scaleX) / 2 + 5, bhh = (br.height * scaleY) / 2 + 5;
+    const start = trimToRect(b.x, b.y, a.x, a.y, ahw, ahh);
+    const end = trimToRect(a.x, a.y, b.x, b.y, bhw, bhh);
+
+    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+    path.setAttribute("class", "edge");
+    path.setAttribute("d", `M ${start.x} ${start.y} L ${end.x} ${end.y}`);
+    path.setAttribute("marker-end", "url(#arrow)");
+    path.dataset.from = edge.from; path.dataset.to = edge.to;
+    svg.appendChild(path);
+
+    const label = document.createElement("div");
+    label.className = "edge-label";
+    label.setAttribute("style", pillStyle(edge.scores, "rb", 2));
+    // place labels ~40% from the source (not the midpoint) to keep them off the target/middle nodes
+    const f = 0.4;
+    label.style.left = ((start.x + (end.x - start.x) * f) / CANVAS_W * 100) + "%";
+    label.style.top = ((start.y + (end.y - start.y) * f) / CANVAS_H * 100) + "%";
+    label.textContent = edge.rel;
+    label.addEventListener("click", (e) => { e.stopPropagation(); onEdgeActivate(edge.from, edge.to); });
+    diagram.appendChild(label);
+  });
+}
+
+/* ============================================================
+   RENDER: SUMMARY STRIP
+   ============================================================ */
+let summaryMode = "text";
+
+const SUMMARY_TEXT = [
+  { t: "This topic weighs building a " }, { ref: "wall" }, { t: " against illegal immigration. The group broadly agrees " },
+  { ref: "danger" }, { t: " and " }, { ref: "long-wait" }, { t: " drive " }, { ref: "illegal-immig" },
+  { t: ", and that " }, { ref: "legal-immig" }, { t: " is worth increasing. The sharpest disagreement is whether the " },
+  { edge: ["wall", "illegal-immig"], t2: "wall reduces illegal immigration" },
+  { t: " — casey scores it strongly positive while bob believes it backfires." },
+];
+
+function renderSummary(){
+  const label = document.getElementById("summaryLabel");
+  const body = document.getElementById("summaryBody");
+  body.innerHTML = "";
+  document.querySelectorAll("#summaryToggle button").forEach(b => b.classList.toggle("active", b.dataset.mode === summaryMode));
+
+  if (summaryMode === "text") {
+    label.textContent = "Current-view summary";
+    const p = document.createElement("p");
+    SUMMARY_TEXT.forEach(seg => {
+      if (seg.t) p.appendChild(document.createTextNode(seg.t));
+      if (seg.ref) {
+        const s = document.createElement("span");
+        s.className = "ref"; s.textContent = NODES[seg.ref].label;
+        s.setAttribute("style", pillStyle(NODES[seg.ref].scores, paletteForNode(seg.ref), 1.5));
+        s.addEventListener("click", () => highlightNode(seg.ref));
+        p.appendChild(s);
+      }
+      if (seg.edge) {
+        const s = document.createElement("span");
+        s.className = "ref"; s.textContent = seg.t2;
+        s.setAttribute("style", pillStyle([3,-5,8], "rb", 1.5));
+        s.addEventListener("click", () => onEdgeActivate(seg.edge[0], seg.edge[1]));
+        p.appendChild(s);
+      }
+    });
+    body.appendChild(p);
+  } else {
+    label.textContent = "Sunburst";
+    body.appendChild(buildSunburst());
+  }
+}
+
+// Rough static sunburst placeholder: center = topic, one ring of related concepts colored by score.
+function buildSunburst(){
+  const wrap = document.createElement("figure");
+  wrap.className = "sunburst-wrap";
+  wrap.style.margin = "0";
+  const ring = ["illegal-immig", "danger", "long-wait", "legal-immig", "wall-cost", "more-admin", "save-money", "disappear"];
+  const size = 180, cx = size/2, cy = size/2, r0 = 34, r1 = 84;
+  const svgns = "http://www.w3.org/2000/svg";
+  const svg = document.createElementNS(svgns, "svg");
+  svg.setAttribute("width", size); svg.setAttribute("height", size); svg.setAttribute("viewBox", `0 0 ${size} ${size}`);
+  const per = (Math.PI * 2) / ring.length;
+  ring.forEach((id, i) => {
+    const a0 = i * per - Math.PI/2, a1 = a0 + per - 0.04;
+    const p = document.createElementNS(svgns, "path");
+    const x0 = cx + r0*Math.cos(a0), y0 = cy + r0*Math.sin(a0);
+    const x1 = cx + r1*Math.cos(a0), y1 = cy + r1*Math.sin(a0);
+    const x2 = cx + r1*Math.cos(a1), y2 = cy + r1*Math.sin(a1);
+    const x3 = cx + r0*Math.cos(a1), y3 = cy + r0*Math.sin(a1);
+    p.setAttribute("d", `M ${x0} ${y0} L ${x1} ${y1} A ${r1} ${r1} 0 0 1 ${x2} ${y2} L ${x3} ${y3} A ${r0} ${r0} 0 0 0 ${x0} ${y0} Z`);
+    const sc = NODES[id].scores.filter(s => s !== null);
+    const avg = sc.reduce((a,s)=>a+s,0)/sc.length;
+    p.setAttribute("fill", colorRB(avg));
+    p.setAttribute("stroke", "#fff"); p.setAttribute("stroke-width", "1.5");
+    p.setAttribute("class", "sb-seg");
+    p.style.cursor = "pointer";
+    p.addEventListener("click", () => highlightNode(id));
+    svg.appendChild(p);
+  });
+  const center = document.createElementNS(svgns, "circle");
+  center.setAttribute("cx", cx); center.setAttribute("cy", cy); center.setAttribute("r", r0);
+  center.setAttribute("fill", tint(colorRB(1))); center.setAttribute("stroke", "#888"); center.setAttribute("stroke-width", "1.5");
+  center.setAttribute("class", "sb-seg");
+  center.style.cursor = "pointer";
+  center.addEventListener("click", () => highlightNode("wall"));
+  svg.appendChild(center);
+  const cap = document.createElement("figcaption");
+  cap.innerHTML = "Sunburst (placeholder) — center is the topic; ring segments are related concepts colored by score. Click a segment to highlight it.";
+  wrap.appendChild(svg); wrap.appendChild(cap);
+  return wrap;
+}
+
+/* ============================================================
+   QUESTION VIEWS (swap the structure body when a question is selected)
+   ============================================================ */
+let selectedQuestion = null;
+
+function showDefaultView(){
+  selectedQuestion = null;
+  document.querySelectorAll(".q-item").forEach(el => el.classList.remove("selected"));
+  document.getElementById("diagram").style.display = "";
+  document.getElementById("qview").style.display = "none";
+  layoutEdges();
+}
+
+function toggleQuestion(id){
+  selectedQuestion = (selectedQuestion === id) ? null : id;
+  if (!selectedQuestion) {
+    showDefaultView();
+    summaryMode = "text"; renderSummary();
+    return;
+  }
+  document.querySelectorAll(".q-item").forEach(el => el.classList.toggle("selected", el.dataset.q === selectedQuestion));
+  document.getElementById("diagram").style.display = "none";
+  document.getElementById("qview").style.display = "";
+  const q = QUESTIONS.find(x => x.id === id);
+  renderQuestionView(q);
+  renderSummaryForQuestion(q);
+}
+
+function renderSummaryForQuestion(q){
+  const body = document.getElementById("summaryBody");
+  document.getElementById("summaryLabel").textContent = "Current-view summary";
+  document.querySelectorAll("#summaryToggle button").forEach(b => b.classList.toggle("active", b.dataset.mode === "text"));
+  const texts = {
+    "why-wall": "Showing the wall's pros: good things it causes and bad things it reduces. Its main pro is reducing illegal immigration — though how much is the topic's biggest disagreement.",
+    "best-ways": "Comparing actions against criteria. Only “inexpensive” has scored fulfilment in the example; “quick” and “humane” are shown but unscored here.",
+    "why-immigrate": "Showing what the group believes drives illegal immigration — the causal parents feeding into it.",
+  };
+  body.innerHTML = `<p>${texts[q.id]}</p>`;
+}
+
+function renderQuestionView(q){
+  const qview = document.getElementById("qview");
+  qview.innerHTML = "";
+  const titleParts = document.createElement("h3");
+  q.parts.forEach(p => {
+    if (p.t) titleParts.appendChild(document.createTextNode(p.t));
+    if (p.node) titleParts.appendChild(makeNodePill(p.node, { inline: true }));
+  });
+  qview.appendChild(titleParts);
+
+  if (q.view === "pros") {
+    const sub = document.createElement("p"); sub.className = "sub"; sub.textContent = "Pros = good things it causes + bad things it reduces.";
+    qview.appendChild(sub);
+    const pros = document.createElement("div"); pros.className = "pros";
+    const card = document.createElement("div"); card.className = "pro-card";
+    const badge = document.createElement("span"); badge.className = "badge pro"; badge.textContent = "PRO · reduces a bad thing";
+    card.appendChild(badge);
+    card.appendChild(makeNodePill("wall", { inline: true }));
+    const rel = document.createElement("span"); rel.className = "rel-word"; rel.textContent = " reduces "; card.appendChild(rel);
+    card.appendChild(makeNodePill("illegal-immig", { inline: true }));
+    pros.appendChild(card);
+    qview.appendChild(pros);
+    const hint = document.createElement("p"); hint.className = "hint";
+    hint.textContent = "Cons (e.g. the wall's cost) are hidden in this pros-only view.";
+    qview.appendChild(hint);
+
+  } else if (q.view === "tradeoffs") {
+    const sub = document.createElement("p"); sub.className = "sub"; sub.textContent = "Tradeoffs table: options (actions) × criteria. Cells are fulfilment scores, colored by value.";
+    qview.appendChild(sub);
+    qview.appendChild(buildTradeoffs());
+
+  } else if (q.view === "causes") {
+    const sub = document.createElement("p"); sub.className = "sub"; sub.textContent = "Causes feeding into illegal immigration.";
+    qview.appendChild(sub);
+    const pros = document.createElement("div"); pros.className = "pros";
+    ["danger", "save-money", "disappear", "long-wait"].forEach(id => {
+      const card = document.createElement("div"); card.className = "pro-card";
+      card.appendChild(makeNodePill(id, { inline: true }));
+      const rel = document.createElement("span"); rel.className = "rel-word"; rel.textContent = " causes "; card.appendChild(rel);
+      card.appendChild(makeNodePill("illegal-immig", { inline: true }));
+      pros.appendChild(card);
+    });
+    qview.appendChild(pros);
+  }
+}
+
+function buildTradeoffs(){
+  const actions = ["wall", "more-admin", "fewer-requirements"];
+  // fulfils scores per criterion x action; null = not scored in the example
+  const cells = {
+    inexpensive: { wall: [-7,-8,-2], "more-admin": [-3,-4,null], "fewer-requirements": [7,null,6] },
+    quick:       { wall: null, "more-admin": null, "fewer-requirements": null },
+    humane:      { wall: null, "more-admin": null, "fewer-requirements": null },
+  };
+  const table = document.createElement("table"); table.className = "tradeoffs";
+  const thead = document.createElement("thead");
+  const hr = document.createElement("tr");
+  hr.appendChild(cellTh("Criterion \\ Option", "crit"));
+  actions.forEach(a => hr.appendChild(cellTh(NODES[a].label)));
+  thead.appendChild(hr); table.appendChild(thead);
+  const tbody = document.createElement("tbody");
+  Object.keys(cells).forEach(crit => {
+    const tr = document.createElement("tr");
+    const th = cellTh("", "crit");
+    th.textContent = NODES[crit].label;
+    const w = document.createElement("span"); w.className = "crit-weight";
+    const cs = NODES[crit].scores.filter(s => s !== null); const avg = cs.reduce((a,s)=>a+s,0)/cs.length;
+    w.textContent = `importance ${avg.toFixed(1)}`;
+    th.appendChild(w);
+    tr.appendChild(th);
+    actions.forEach(a => {
+      const td = document.createElement("td");
+      const sc = cells[crit][a];
+      if (!sc) { td.className = "na"; td.textContent = "—"; }
+      else {
+        const present = sc.filter(s => s !== null); const avg2 = present.reduce((x,s)=>x+s,0)/present.length;
+        const span = document.createElement("span"); span.className = "cell-score";
+        span.style.background = tint(colorRB(avg2)); span.style.border = "1px solid " + colorRB(avg2);
+        span.textContent = avg2.toFixed(1);
+        td.appendChild(span);
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  table.appendChild(tbody);
+  return table;
+}
+function cellTh(txt, cls){ const th = document.createElement("th"); if (cls) th.className = cls; th.textContent = txt; return th; }
+
+/* ============================================================
+   INTERACTIONS
+   ============================================================ */
+let lastHighlighted = null;
+
+function onNodeActivate(id){
+  if (lastHighlighted === id) { toast(`Details view for “${NODES[id].label}” isn't designed yet.`); return; }
+  highlightNode(id);
+}
+
+function clearHighlight(){
+  document.querySelectorAll(".diag-node.hl").forEach(el => el.classList.remove("hl"));
+  document.querySelectorAll("#edges path.edge").forEach(p => { p.classList.remove("hl"); p.setAttribute("marker-end", "url(#arrow)"); });
+  lastHighlighted = null;
+}
+
+function highlightNode(id){
+  if (selectedQuestion) toggleQuestion(selectedQuestion); // return to default diagram
+  const inDiagram = DIAGRAM_NODE_IDS.includes(id);
+  document.querySelectorAll(".diag-node").forEach(el => el.classList.toggle("hl", el.dataset.node === id));
+  document.querySelectorAll("#edges path.edge").forEach(p => { p.classList.remove("hl"); p.setAttribute("marker-end", "url(#arrow)"); });
+  lastHighlighted = id;
+  if (inDiagram) {
+    document.querySelector(`.diag-node[data-node="${id}"]`).scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
+  } else {
+    toast(`“${NODES[id].label}” isn't among the concepts shown here.`);
+  }
+}
+
+function onEdgeActivate(from, to){
+  if (selectedQuestion) toggleQuestion(selectedQuestion);
+  document.querySelectorAll(".diag-node").forEach(el => el.classList.toggle("hl", el.dataset.node === from || el.dataset.node === to));
+  document.querySelectorAll("#edges path.edge").forEach(p => {
+    const on = p.dataset.from === from && p.dataset.to === to;
+    p.classList.toggle("hl", on);
+    p.setAttribute("marker-end", on ? "url(#arrowHl)" : "url(#arrow)");
+  });
+  lastHighlighted = null;
+  const el = document.querySelector(`.diag-node[data-node="${from}"]`);
+  if (el) el.scrollIntoView({ block: "center", inline: "center", behavior: "smooth" });
+}
+
+let toastTimer = null;
+function toast(msg){
+  const t = document.getElementById("toast");
+  t.textContent = msg; t.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove("show"), 2600);
+}
+
+/* ============================================================
+   WIRING
+   ============================================================ */
+function init(){
+  renderTopic();
+  renderQuestions();
+  renderFilters();
+  renderHottest();
+  renderDiagram();
+  renderSummary();
+
+  document.getElementById("hotMore").addEventListener("click", () => { hotExpanded = !hotExpanded; renderHottest(); });
+  document.getElementById("tourBtn").addEventListener("click", () => toast("“Tour this topic” would step through the hottest nodes one at a time (not built)."));
+
+  document.querySelectorAll("#summaryToggle button").forEach(b => {
+    b.addEventListener("click", () => {
+      summaryMode = b.dataset.mode;
+      const s = document.getElementById("summary");
+      s.classList.remove("collapsed"); // choosing a mode reveals the summary
+      document.getElementById("summaryCollapseBtn").innerHTML = "▲";
+      if (selectedQuestion) showDefaultView();
+      renderSummary();
+    });
+  });
+  document.getElementById("summaryCollapseBtn").addEventListener("click", () => {
+    const s = document.getElementById("summary");
+    s.classList.toggle("collapsed");
+    document.getElementById("summaryCollapseBtn").innerHTML = s.classList.contains("collapsed") ? "▼" : "▲";
+    if (!selectedQuestion) layoutEdges();
+  });
+
+  document.querySelectorAll("[data-stub]").forEach(el => el.addEventListener("click", () => toast(el.dataset.stub)));
+
+  // Click away (anywhere not a highlight source) clears the highlight.
+  document.addEventListener("click", (e) => {
+    if (e.target.closest(".diag-node, .edge-label, .pill, .ref, .sb-seg")) return;
+    clearHighlight();
+  });
+
+  window.addEventListener("resize", () => { if (!selectedQuestion) layoutEdges(); });
+  requestAnimationFrame(() => requestAnimationFrame(layoutEdges));
+}
+
+document.addEventListener("DOMContentLoaded", init);
+/* ============================================================
+   PROTOTYPE SCAFFOLDING: version switcher + info popover
+   Not part of the design - chrome for reviewing the wireframes.
+   The version list is built from the shared versions.js so that adding a
+   version means editing one file instead of all of them. If versions.js isn't
+   alongside this file the switcher hides itself; nothing else changes.
+   ============================================================ */
+(function initProtoBar(){
+  const CURRENT_VERSION = "2";
+  const INTRO_SEEN_KEY = "ameliorate-v2-wireframe-intro-seen";
+
+  const verBtn = document.getElementById("verBtn");
+  const verPop = document.getElementById("verPop");
+  const infoBtn = document.getElementById("infoBtn");
+  const infoPop = document.getElementById("infoPop");
+
+  const setVer = (show) => {
+    verPop.classList.toggle("show", show);
+    verBtn.classList.toggle("active", show);
+    if (show) verPop.querySelector(".ver-link.current")?.scrollIntoView({ block: "nearest" });
+  };
+  const setInfo = (show) => {
+    infoPop.classList.toggle("show", show);
+    infoBtn.classList.toggle("active", show);
+  };
+
+  const versions = window.WIREFRAME_VERSIONS;
+  if (Array.isArray(versions)) {
+    verPop.innerHTML = versions.map(({ v, desc }) =>
+      `<a class="ver-link${v === CURRENT_VERSION ? " current" : ""}" href="topic-landing-v${v}.html">` +
+      `<b>version ${v}</b><span>${desc}</span></a>`
+    ).join("");
+    verBtn.addEventListener("click", (e) => {
+      e.stopPropagation();
+      const show = !verPop.classList.contains("show");
+      setInfo(false); setVer(show);
+    });
+  } else {
+    verBtn.disabled = true;
+    verBtn.title = "The version list needs versions.js alongside this file";
+    verBtn.querySelector(".caret").remove();
+  }
+
+  infoBtn.addEventListener("click", (e) => {
+    e.stopPropagation();
+    const show = !infoPop.classList.contains("show");
+    setVer(false); setInfo(show);
+  });
+
+  document.querySelectorAll(".info-tab").forEach(tab => {
+    tab.addEventListener("click", (e) => {
+      e.stopPropagation();
+      document.querySelectorAll(".info-tab").forEach(t => t.classList.toggle("active", t === tab));
+      document.querySelectorAll(".info-body").forEach(b => { b.hidden = b.dataset.tab !== tab.dataset.tab; });
+    });
+  });
+
+  // Close on outside click. Capture phase so it still fires for targets (nodes,
+  // pills, edges) whose own handlers call stopPropagation().
+  document.addEventListener("click", (e) => {
+    if (!e.target.closest(".proto-bar")) { setVer(false); setInfo(false); }
+  }, true);
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") { setVer(false); setInfo(false); }
+  });
+
+  // First visit: open the intro instead of hoping the small "i" gets noticed.
+  // The flag is shared across versions (one file:// origin), so this shows once
+  // overall, not once per wireframe. If storage is blocked, just show it.
+  let seen = false;
+  try { seen = localStorage.getItem(INTRO_SEEN_KEY) === "1"; } catch (e) { /* blocked */ }
+  if (!seen) {
+    setInfo(true);
+    try { localStorage.setItem(INTRO_SEEN_KEY, "1"); } catch (e) { /* blocked */ }
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-import type { LayoutDirection, NodeType, StyleConfig } from "../ontology/types.ts";
+import type { LayoutDirection, NodeTypeDef, StyleConfig } from "../ontology/types.ts";
 
 const DIRECTIONS: { value: LayoutDirection; label: string }[] = [
   { value: "BT", label: "Bottom → Top" },
@@ -10,7 +10,7 @@ const DIRECTIONS: { value: LayoutDirection; label: string }[] = [
 interface Props {
   open: boolean;
   config: StyleConfig;
-  typeLabels: Record<NodeType, string>;
+  nodeTypes: NodeTypeDef[];
   onChange: (config: StyleConfig) => void;
   onReset: () => void;
   onClose: () => void;
@@ -19,17 +19,18 @@ interface Props {
 export default function ConfigPanel({
   open,
   config,
-  typeLabels,
+  nodeTypes,
   onChange,
   onReset,
   onClose,
 }: Props) {
   if (!open) return null;
 
-  const setColor = (type: NodeType, key: "fill" | "stroke" | "color", value: string) => {
+  const setColor = (type: NodeTypeDef, key: "fill" | "stroke" | "color", value: string) => {
+    const base = config.types[type.id] ?? type.defaultStyle;
     onChange({
       ...config,
-      types: { ...config.types, [type]: { ...config.types[type], [key]: value } },
+      types: { ...config.types, [type.id]: { ...base, [key]: value } },
     });
   };
 
@@ -83,38 +84,43 @@ export default function ConfigPanel({
               </tr>
             </thead>
             <tbody>
-              {(Object.keys(config.types) as NodeType[]).map((type) => (
-                <tr key={type}>
-                  <td>{typeLabels[type]}</td>
-                  <td>
-                    <input
-                      type="color"
-                      className="h-7 w-10 cursor-pointer"
-                      value={config.types[type].fill}
-                      onChange={(e) => setColor(type, "fill", e.target.value)}
-                      aria-label={`${typeLabels[type]} fill`}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="color"
-                      className="h-7 w-10 cursor-pointer"
-                      value={config.types[type].stroke}
-                      onChange={(e) => setColor(type, "stroke", e.target.value)}
-                      aria-label={`${typeLabels[type]} border`}
-                    />
-                  </td>
-                  <td>
-                    <input
-                      type="color"
-                      className="h-7 w-10 cursor-pointer"
-                      value={config.types[type].color}
-                      onChange={(e) => setColor(type, "color", e.target.value)}
-                      aria-label={`${typeLabels[type]} text`}
-                    />
-                  </td>
-                </tr>
-              ))}
+              {nodeTypes.map((type) => {
+                const style = config.types[type.id] ?? type.defaultStyle;
+                return (
+                  <tr key={type.id}>
+                    <td className="whitespace-nowrap">
+                      {type.icon} {type.label}
+                    </td>
+                    <td>
+                      <input
+                        type="color"
+                        className="h-7 w-10 cursor-pointer"
+                        value={style.fill}
+                        onChange={(e) => setColor(type, "fill", e.target.value)}
+                        aria-label={`${type.label} fill`}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="color"
+                        className="h-7 w-10 cursor-pointer"
+                        value={style.stroke}
+                        onChange={(e) => setColor(type, "stroke", e.target.value)}
+                        aria-label={`${type.label} border`}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        type="color"
+                        className="h-7 w-10 cursor-pointer"
+                        value={style.color}
+                        onChange={(e) => setColor(type, "color", e.target.value)}
+                        aria-label={`${type.label} text`}
+                      />
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
-import type { StyleConfig } from "./ontology/types.ts";
 import { defaultOntologyId, getOntology, ontologyList } from "./ontology/registry.ts";
-import { decodeState, encodeState } from "./share/url.ts";
+import { type DocState, decodeState, encodeState } from "./share/url.ts";
 import Toolbar from "./components/Toolbar.tsx";
 import EditorPane, { type EditorTab } from "./components/EditorPane.tsx";
 import DiagramPane from "./components/DiagramPane.tsx";
@@ -19,32 +18,11 @@ function readInitialTheme(): Theme {
   return window.matchMedia?.("(prefers-color-scheme: dark)").matches ? "dark" : "light";
 }
 
-interface InitialState {
-  ontologyId: string;
-  source: string;
-  config: StyleConfig;
-}
-
-/** Merge a possibly-partial shared config over the ontology defaults so old/partial links stay valid. */
-function mergeConfig(base: StyleConfig, partial?: StyleConfig): StyleConfig {
-  if (!partial) return structuredClone(base);
-  return {
-    ...base,
-    ...partial,
-    types: { ...base.types, ...(partial.types ?? {}) },
-  };
-}
-
-function readInitialState(): InitialState {
+/** A shared link supplies the whole document; otherwise start on the default ontology's sample. */
+function readInitialDoc(): DocState {
   const decoded = decodeState(window.location.hash);
-  const ontology = getOntology(decoded?.ontologyId ?? defaultOntologyId);
-  if (decoded) {
-    return {
-      ontologyId: ontology.id,
-      source: decoded.source,
-      config: mergeConfig(ontology.defaultConfig, decoded.config),
-    };
-  }
+  if (decoded) return decoded;
+  const ontology = getOntology(defaultOntologyId);
   return {
     ontologyId: ontology.id,
     source: ontology.sample,
@@ -53,11 +31,8 @@ function readInitialState(): InitialState {
 }
 
 export default function App() {
-  const initial = useMemo(readInitialState, []);
-  const [ontologyId, setOntologyId] = useState(initial.ontologyId);
-  const [source, setSource] = useState(initial.source);
-  const [config, setConfig] = useState<StyleConfig>(initial.config);
-  const [activeTab, setActiveTab] = useState<EditorTab>("ibis");
+  const [doc, setDoc] = useState<DocState>(readInitialDoc);
+  const [activeTab, setActiveTab] = useState<EditorTab>("source");
   const [legendOpen, setLegendOpen] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(readInitialTheme);
@@ -68,37 +43,36 @@ export default function App() {
     localStorage.setItem(THEME_KEY, theme);
   }, [theme]);
 
-  const ontology = getOntology(ontologyId);
-  const parseResult = useMemo(() => ontology.parse(source), [ontology, source]);
+  const ontology = getOntology(doc.ontologyId);
+  const parseResult = useMemo(() => ontology.parse(doc.source), [ontology, doc.source]);
   const mermaidText = useMemo(
-    () => ontology.toMermaid(parseResult.graph, config),
-    [ontology, parseResult, config],
+    () => ontology.toMermaid(parseResult.graph, doc.config),
+    [ontology, parseResult, doc.config],
   );
   const mermaidTheme: MermaidTheme = theme === "dark" ? "dark" : "default";
 
   // Persist the whole document into the URL hash (debounced) so links are shareable.
   useEffect(() => {
     const handle = setTimeout(() => {
-      const encoded = encodeState({ ontologyId, source, config });
-      window.history.replaceState(null, "", `#${encoded}`);
+      window.history.replaceState(null, "", `#${encodeState(doc)}`);
     }, 300);
     return () => clearTimeout(handle);
-  }, [ontologyId, source, config]);
+  }, [doc]);
 
   const switchOntology = (id: string) => {
     const next = getOntology(id);
-    setOntologyId(next.id);
-    setSource(next.sample);
-    setConfig(structuredClone(next.defaultConfig));
+    setDoc({
+      ontologyId: next.id,
+      source: next.sample,
+      config: structuredClone(next.defaultConfig),
+    });
   };
 
   return (
     <div className="flex flex-col h-full">
       <Toolbar
         ontologyList={ontologyList}
-        ontologyId={ontologyId}
-        source={source}
-        config={config}
+        doc={doc}
         theme={theme}
         onOntologyChange={switchOntology}
         onToggleTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
@@ -109,12 +83,13 @@ export default function App() {
       <div className="flex flex-1 min-h-0">
         <div className="w-2/5 min-w-70 max-w-160">
           <EditorPane
-            source={source}
-            onSourceChange={setSource}
+            source={doc.source}
+            onSourceChange={(source) => setDoc((d) => ({ ...d, source }))}
             mermaidText={mermaidText}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             ontologyLabel={ontology.label}
+            placeholder={ontology.placeholder}
             errors={parseResult.errors}
           />
         </div>
@@ -129,10 +104,10 @@ export default function App() {
       />
       <ConfigPanel
         open={configOpen}
-        config={config}
-        typeLabels={ontology.typeLabels}
-        onChange={setConfig}
-        onReset={() => setConfig(structuredClone(ontology.defaultConfig))}
+        config={doc.config}
+        nodeTypes={ontology.nodeTypes}
+        onChange={(config) => setDoc((d) => ({ ...d, config }))}
+        onReset={() => setDoc((d) => ({ ...d, config: structuredClone(ontology.defaultConfig) }))}
         onClose={() => setConfigOpen(false)}
       />
     </div>

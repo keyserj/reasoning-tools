@@ -1,22 +1,20 @@
 import type { LegendEntry } from "../types.ts";
-import { ICONS } from "./icons.ts";
+import { nodeTypes } from "./nodeTypes.ts";
+import { MARKER_TO_TYPE } from "./markers.ts";
 
-export const legend: LegendEntry[] = [
-  {
-    marker: "?",
-    label: "Question / Issue",
-    meaning: "A question or issue to resolve.",
-    icon: ICONS.question,
-  },
-  {
-    marker: "=",
-    label: "Idea / Position",
-    meaning: "A possible answer to its parent question.",
-    icon: ICONS.idea,
-  },
-  { marker: "+", label: "Pro", meaning: "An argument supporting its parent.", icon: ICONS.pro },
-  { marker: "-", label: "Con", meaning: "An argument objecting to its parent.", icon: ICONS.con },
-  { marker: "~", label: "Note", meaning: "A note shown attached to its parent.", icon: ICONS.note },
+const markerByType: Record<string, string> = Object.fromEntries(
+  Object.entries(MARKER_TO_TYPE).map(([marker, type]) => [type, marker]),
+);
+
+// Node-type rows come from the one table; the rest are syntax that produces no node.
+const typeEntries: LegendEntry[] = nodeTypes.map((t) => ({
+  marker: markerByType[t.id] ?? "",
+  label: t.label,
+  meaning: t.description,
+  icon: t.icon,
+}));
+
+const syntaxEntries: LegendEntry[] = [
   { marker: "/", label: "Meta-comment", meaning: "A comment hidden from the diagram.", icon: "🚫" },
   {
     marker: "&id",
@@ -37,3 +35,5 @@ export const legend: LegendEntry[] = [
     icon: "↳",
   },
 ];
+
+export const legend: LegendEntry[] = [...typeEntries, ...syntaxEntries];

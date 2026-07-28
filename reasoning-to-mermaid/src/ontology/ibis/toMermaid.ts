@@ -1,14 +1,8 @@
-import type { Graph, NodeType, StyleConfig } from "../types.ts";
-import { ICONS } from "./icons.ts";
+import type { Graph, StyleConfig } from "../types.ts";
+import { nodeTypesById } from "./nodeTypes.ts";
+import { DEFAULT_CONNECTOR, edgeTypesById } from "./edgeTypes.ts";
 
-/** Wrapping delimiters per node type: [open, close]. Text goes between them, quoted. */
-const SHAPES: Record<NodeType, [string, string]> = {
-  question: ['{{"', '"}}'],
-  idea: ['["', '"]'],
-  pro: ['["', '"]'],
-  con: ['["', '"]'],
-  note: ['[/"', '"/]'],
-};
+const FALLBACK_SHAPE: [string, string] = ['["', '"]'];
 
 /** Escape text for use inside a mermaid quoted label. */
 function escapeLabel(text: string): string {
@@ -41,8 +35,9 @@ export function toMermaid(graph: Graph, config: StyleConfig): string {
   const lines: string[] = [`flowchart ${config.direction}`];
 
   for (const node of graph.nodes) {
-    const [open, close] = SHAPES[node.type];
-    const icon = config.showIcons ? `${ICONS[node.type]} ` : "";
+    const def = nodeTypesById[node.type];
+    const [open, close] = def?.shape ?? FALLBACK_SHAPE;
+    const icon = config.showIcons && def ? `${def.icon} ` : "";
     const label = escapeLabel(`${icon}${node.text}`);
     lines.push(`  ${idMap.get(node.id)}${open}${label}${close}:::${node.type}`);
   }
@@ -51,14 +46,13 @@ export function toMermaid(graph: Graph, config: StyleConfig): string {
     const from = idMap.get(edge.from);
     const to = idMap.get(edge.to);
     if (!from || !to) continue;
-    const connector = edge.type === "note" ? "-.->" : "-->";
+    const connector = edgeTypesById[edge.type]?.connector ?? DEFAULT_CONNECTOR;
     lines.push(`  ${from} ${connector} ${to}`);
   }
 
-  for (const type of Object.keys(config.types) as NodeType[]) {
-    const s = config.types[type];
+  for (const [type, style] of Object.entries(config.types)) {
     lines.push(
-      `  classDef ${type} fill:${s.fill},stroke:${s.stroke},color:${s.color},stroke-width:1.5px`,
+      `  classDef ${type} fill:${style.fill},stroke:${style.stroke},color:${style.color},stroke-width:1.5px`,
     );
   }
 

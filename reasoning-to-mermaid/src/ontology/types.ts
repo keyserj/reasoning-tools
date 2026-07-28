@@ -1,12 +1,14 @@
 // Shared, ontology-agnostic data model and the contract every ontology implements.
 // The UI shell only ever talks to these types + the registry, never to a concrete
 // ontology (IBIS today, "Contested Causal Diagrams" later).
-
-export type NodeType = "question" | "idea" | "pro" | "con" | "note";
+//
+// Node and edge types are strings rather than a fixed union: each ontology declares its
+// own vocabulary (IBIS's question/idea/pro/con/note, a causal map's concept/action/
+// criterion + causes/reduces/guides edges) via the tables below.
 
 export interface GraphNode {
   id: string;
-  type: NodeType;
+  type: string;
   text: string;
 }
 
@@ -15,8 +17,8 @@ export interface GraphEdge {
   from: string;
   /** parent / target (the thing being argued about) */
   to: string;
-  /** typed by the child's marker; "note" edges render dotted */
-  type: NodeType;
+  /** id of one of the ontology's edge types */
+  type: string;
 }
 
 export interface Graph {
@@ -35,7 +37,9 @@ export interface ParseResult {
   errors: ParseError[];
 }
 
-export type LayoutDirection = "TB" | "BT" | "LR" | "RL";
+export const LAYOUT_DIRECTIONS = ["TB", "BT", "LR", "RL"] as const;
+
+export type LayoutDirection = (typeof LAYOUT_DIRECTIONS)[number];
 
 export interface NodeTypeStyle {
   fill: string;
@@ -44,10 +48,30 @@ export interface NodeTypeStyle {
   color: string;
 }
 
+/** Everything an ontology declares about one of its node types, in one place. */
+export interface NodeTypeDef {
+  id: string;
+  /** shown in the style panel and the legend */
+  label: string;
+  icon: string;
+  /** legend prose */
+  description: string;
+  /** mermaid wrapping delimiters: [open, close]. Text goes between them, quoted. */
+  shape: [string, string];
+  defaultStyle: NodeTypeStyle;
+}
+
+export interface EdgeTypeDef {
+  id: string;
+  /** mermaid connector, e.g. "-->" or "-.->" */
+  connector: string;
+}
+
 export interface StyleConfig {
   direction: LayoutDirection;
   showIcons: boolean;
-  types: Record<NodeType, NodeTypeStyle>;
+  /** keyed by node type id */
+  types: Record<string, NodeTypeStyle>;
 }
 
 export interface LegendEntry {
@@ -65,8 +89,10 @@ export interface Ontology {
   legend: LegendEntry[];
   /** Optional prose shown beneath the legend table. */
   legendNote?: string;
-  /** Human-readable label per node type, used by the style panel. */
-  typeLabels: Record<NodeType, string>;
+  nodeTypes: NodeTypeDef[];
+  edgeTypes: EdgeTypeDef[];
   sample: string;
+  /** Placeholder shown in an empty editor, in this ontology's syntax. */
+  placeholder: string;
   defaultConfig: StyleConfig;
 }

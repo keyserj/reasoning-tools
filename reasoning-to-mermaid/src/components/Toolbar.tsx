@@ -1,12 +1,10 @@
 import { useState } from "react";
-import type { Ontology, StyleConfig } from "../ontology/types.ts";
-import { buildShareUrl } from "../share/url.ts";
+import type { Ontology } from "../ontology/types.ts";
+import { type DocState, buildShareUrl } from "../share/url.ts";
 
 interface Props {
   ontologyList: Ontology[];
-  ontologyId: string;
-  source: string;
-  config: StyleConfig;
+  doc: DocState;
   theme: "light" | "dark";
   onOntologyChange: (id: string) => void;
   onToggleTheme: () => void;
@@ -16,9 +14,7 @@ interface Props {
 
 export default function Toolbar({
   ontologyList,
-  ontologyId,
-  source,
-  config,
+  doc,
   theme,
   onOntologyChange,
   onToggleTheme,
@@ -28,7 +24,7 @@ export default function Toolbar({
   const [copied, setCopied] = useState(false);
 
   const copyLink = async () => {
-    const url = buildShareUrl({ ontologyId, source, config });
+    const url = buildShareUrl(doc);
     window.history.replaceState(null, "", url);
     try {
       await navigator.clipboard.writeText(url);
@@ -46,7 +42,7 @@ export default function Toolbar({
         <span className="font-semibold hidden sm:inline">reasoning → mermaid</span>
         <select
           className="select select-sm select-bordered ml-1"
-          value={ontologyId}
+          value={doc.ontologyId}
           onChange={(e) => onOntologyChange(e.target.value)}
           aria-label="Ontology"
         >

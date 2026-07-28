@@ -1,6 +1,6 @@
 import type { ParseError } from "../ontology/types.ts";
 
-export type EditorTab = "ibis" | "mermaid";
+export type EditorTab = "source" | "mermaid";
 
 interface Props {
   source: string;
@@ -9,6 +9,7 @@ interface Props {
   activeTab: EditorTab;
   onTabChange: (tab: EditorTab) => void;
   ontologyLabel: string;
+  placeholder: string;
   errors: ParseError[];
 }
 
@@ -19,21 +20,24 @@ export default function EditorPane({
   activeTab,
   onTabChange,
   ontologyLabel,
+  placeholder,
   errors,
 }: Props) {
+  const editing = activeTab === "source";
+
   return (
     <div className="flex flex-col h-full min-w-0 border-r border-base-300 bg-base-100">
       <div role="tablist" className="tabs tabs-bordered px-2 pt-2 shrink-0">
         <button
           role="tab"
-          className={`tab ${activeTab === "ibis" ? "tab-active" : ""}`}
-          onClick={() => onTabChange("ibis")}
+          className={`tab ${editing ? "tab-active" : ""}`}
+          onClick={() => onTabChange("source")}
         >
           {ontologyLabel}
         </button>
         <button
           role="tab"
-          className={`tab ${activeTab === "mermaid" ? "tab-active" : ""}`}
+          className={`tab ${!editing ? "tab-active" : ""}`}
           onClick={() => onTabChange("mermaid")}
         >
           Mermaid
@@ -41,22 +45,15 @@ export default function EditorPane({
       </div>
 
       <div className="flex-1 min-h-0 p-2">
-        {activeTab === "ibis" ? (
-          <textarea
-            className="textarea textarea-bordered w-full h-full font-mono text-sm leading-relaxed resize-none"
-            spellCheck={false}
-            value={source}
-            onChange={(e) => onSourceChange(e.target.value)}
-            placeholder="? Your question here &q1&#10;  = An idea &i1&#10;    + A pro&#10;    - A con"
-          />
-        ) : (
-          <textarea
-            className="textarea textarea-bordered w-full h-full font-mono text-sm leading-relaxed resize-none"
-            readOnly
-            value={mermaidText}
-            aria-label="Generated mermaid source"
-          />
-        )}
+        <textarea
+          className="textarea textarea-bordered w-full h-full font-mono text-sm leading-relaxed resize-none"
+          spellCheck={false}
+          value={editing ? source : mermaidText}
+          onChange={(e) => onSourceChange(e.target.value)}
+          readOnly={!editing}
+          placeholder={editing ? placeholder : undefined}
+          aria-label={editing ? `${ontologyLabel} source` : "Generated mermaid source"}
+        />
       </div>
 
       {errors.length > 0 && (

@@ -1,5 +1,5 @@
 import type { Graph, GraphEdge, GraphNode, ParseError, ParseResult } from "../types.ts";
-import { MARKER_TO_TYPE, META_MARKER } from "./icons.ts";
+import { MARKER_TO_TYPE, META_MARKER } from "./markers.ts";
 
 const TAB_SIZE = 4;
 

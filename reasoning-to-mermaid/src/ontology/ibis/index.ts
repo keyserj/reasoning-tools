@@ -1,20 +1,16 @@
-import type { NodeType, Ontology } from "../types.ts";
+import type { Ontology } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toMermaid } from "./toMermaid.ts";
 import { legend } from "./legend.ts";
+import { nodeTypes } from "./nodeTypes.ts";
+import { edgeTypes } from "./edgeTypes.ts";
 import { sample } from "./sample.ts";
 import { defaultConfig } from "./defaultConfig.ts";
 
-const typeLabels: Record<NodeType, string> = {
-  question: "Question",
-  idea: "Idea",
-  pro: "Pro",
-  con: "Con",
-  note: "Note",
-};
-
 const legendNote =
   "Indent a line to nest it under the line above. Edges point from a child up to the parent it supports, objects to, or answers.";
+
+const placeholder = "? Your question here &q1\n  = An idea &i1\n    + A pro\n    - A con";
 
 export const ibis: Ontology = {
   id: "ibis",
@@ -23,7 +19,9 @@ export const ibis: Ontology = {
   toMermaid,
   legend,
   legendNote,
-  typeLabels,
+  nodeTypes,
+  edgeTypes,
   sample,
+  placeholder,
   defaultConfig,
 };

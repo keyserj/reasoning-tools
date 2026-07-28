@@ -70,7 +70,8 @@ export default function DiagramPane({ mermaidText, theme }: Props) {
 
   return (
     <div className="relative flex-1 min-w-0 bg-base-100">
-      <div ref={containerRef} className="absolute inset-0 overflow-hidden" />
+      {/* touch-none hands drag/pinch to svg-pan-zoom instead of the browser panning the page. */}
+      <div ref={containerRef} className="absolute inset-0 overflow-hidden touch-none" />
 
       {error && (
         <div className="absolute inset-0 flex items-center justify-center p-6 pointer-events-none">

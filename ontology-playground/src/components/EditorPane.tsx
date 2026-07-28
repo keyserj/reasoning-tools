@@ -45,8 +45,9 @@ export default function EditorPane({
       </div>
 
       <div className="flex-1 min-h-0 p-2">
+        {/* 16px text on small screens keeps iOS Safari from zooming in when the textarea is focused. */}
         <textarea
-          className="textarea textarea-bordered w-full h-full font-mono text-sm leading-relaxed resize-none"
+          className="textarea textarea-bordered w-full h-full font-mono text-base md:text-sm leading-relaxed resize-none"
           spellCheck={false}
           value={editing ? source : mermaidText}
           onChange={(e) => onSourceChange(e.target.value)}

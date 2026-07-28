@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { defaultOntologyId, getOntology, ontologyList } from "./ontology/registry.ts";
 import { type DocState, decodeState, encodeState } from "./share/url.ts";
-import Toolbar from "./components/Toolbar.tsx";
+import Toolbar, { type PaneView } from "./components/Toolbar.tsx";
 import EditorPane, { type EditorTab } from "./components/EditorPane.tsx";
 import DiagramPane from "./components/DiagramPane.tsx";
 import Legend from "./components/Legend.tsx";
@@ -33,6 +33,7 @@ function readInitialDoc(): DocState {
 export default function App() {
   const [doc, setDoc] = useState<DocState>(readInitialDoc);
   const [activeTab, setActiveTab] = useState<EditorTab>("source");
+  const [pane, setPane] = useState<PaneView>("edit");
   const [legendOpen, setLegendOpen] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
   const [theme, setTheme] = useState<Theme>(readInitialTheme);
@@ -74,14 +75,22 @@ export default function App() {
         ontologyList={ontologyList}
         doc={doc}
         theme={theme}
+        pane={pane}
         onOntologyChange={switchOntology}
+        onPaneChange={setPane}
         onToggleTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
         onToggleLegend={() => setLegendOpen((v) => !v)}
         onToggleConfig={() => setConfigOpen((v) => !v)}
       />
 
-      <div className="flex flex-1 min-h-0">
-        <div className="w-2/5 min-w-70 max-w-160">
+      {/* Both panes stay mounted: on a phone the editor sits on top of a full-width diagram,
+          so switching back to the diagram keeps the size and pan/zoom it already had. */}
+      <div className="relative flex flex-1 min-h-0">
+        <div
+          className={`absolute inset-0 z-10 md:static md:w-2/5 md:min-w-70 md:max-w-160 ${
+            pane === "view" ? "hidden md:block" : ""
+          }`}
+        >
           <EditorPane
             source={doc.source}
             onSourceChange={(source) => setDoc((d) => ({ ...d, source }))}

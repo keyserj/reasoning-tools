@@ -43,7 +43,7 @@ export default function Toolbar({
     <div className="navbar bg-base-200 border-b border-base-300 min-h-12 py-0 px-3 gap-2">
       <div className="flex-1 flex items-center gap-2">
         <span className="text-lg">🗺️</span>
-        <span className="font-semibold hidden sm:inline">markdownish → mermaid</span>
+        <span className="font-semibold hidden sm:inline">reasoning → mermaid</span>
         <select
           className="select select-sm select-bordered ml-1"
           value={ontologyId}

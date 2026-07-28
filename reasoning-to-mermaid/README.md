@@ -1,4 +1,4 @@
-# markdownish-to-mermaid
+# reasoning-to-mermaid
 
 A static, backend-free web app (in the spirit of [mermaid.live](https://mermaid.live), but
 minimal). Write a markdown-like syntax on the left; a rendered [mermaid](https://mermaid.js.org)

@@ -27,7 +27,7 @@
 	- [Structure Details](#structure-details) has more information (e.g. meaning, purpose, open questions) about each piece of the structure
 	- [Core features](#core-features) goes deeper into what the structure + scores enable (e.g. calculated arguments)
 	- [Big open questions](#big-open-questions) has details about open questions that have more significant impact on the ontology than the "open questions" in the structure details section
-- UX design for an app implementing this ontology lives in the sibling doc [UX-design](./UX-design.md) - its mockups are built from this doc's [Example](#Example)
+- UX design for an app implementing this ontology lives in the sibling doc [UX-design](./UX-design.md)
 
 #### Questions - Unanswered
 
@@ -44,7 +44,7 @@
 	- notes:
 		- a node can be only one of the types (Concept, Question, Claim, Source)
 			- but can be one or more of the subtypes e.g. a concept can be a topic and an action
-		- some subtypes can be determined based on the node's relations (e.g. Component)
+		- some subtypes can be determined based on the node's relations (e.g. Component via "has")
 			- others need to be specified (e.g. Action, Anecdote/Statistic?)
 	- Concept
 		- Topic?
@@ -54,7 +54,7 @@
 		- Action - {Concept} tagged `#action`
 		- Criterion - Concept fulfils {Concept}; {Concept} criterion for Question ?
 	- Question
-		- Guiding Question - Guiding Question guides Topic/Guiding-Question ?
+		- Guiding Question - Guiding Question guides Topic/Guiding-Question
 		- Clarifying Question - Clarifying Question clarifies Node
 	- Claim
 		- note: all scores have an implied claim, where supporting claims support a higher score, critiquing claims support a lower score

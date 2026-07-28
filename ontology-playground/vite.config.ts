@@ -2,9 +2,9 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
-// Project page lives at https://keyserj.github.io/reasoning-tools/
+// Project page lives at https://keyserj.github.io/reasoning-tools/ontology-playground/
 export default defineConfig({
-  base: "/reasoning-tools/",
+  base: "/reasoning-tools/ontology-playground/",
   plugins: [react(), tailwindcss()],
   server: {
     // Allow sharing local server through ngrok tunnels

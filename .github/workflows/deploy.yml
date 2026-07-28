@@ -4,7 +4,8 @@ on:
   push:
     branches: [main]
     paths:
-      - "reasoning-to-mermaid/**"
+      - "ontology-playground/**"
+      - "site/**"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
 
@@ -19,7 +20,7 @@ concurrency:
 
 defaults:
   run:
-    working-directory: reasoning-to-mermaid
+    working-directory: ontology-playground
 
 jobs:
   build:
@@ -28,16 +29,24 @@ jobs:
       - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
       - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
         with:
-          node-version: 22
+          node-version: 24
           cache: npm
-          cache-dependency-path: reasoning-to-mermaid/package-lock.json
+          cache-dependency-path: ontology-playground/package-lock.json
       - run: npm ci
       - run: npm run test
       - run: npm run build
+      # Pages serves one site per repo, so each app gets a subdirectory of it and
+      # site/ holds whatever sits at the root.
+      - name: Assemble site
+        working-directory: ${{ github.workspace }}
+        run: |
+          mkdir -p _site
+          cp site/index.html _site/
+          cp -r ontology-playground/dist _site/ontology-playground
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:
-          path: reasoning-to-mermaid/dist
+          path: _site
 
   deploy:
     needs: build

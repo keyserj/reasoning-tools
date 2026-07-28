@@ -1,16 +1,12 @@
 # reasoning-tools
+
 Tooling for / notes about collaborative reasoning.
 
-## reasoning-to-mermaid Tools
+Reasoning about complex, controversial problems is very hard, especially when multiple people are trying to reason together. This repo is for tooling that attempts to make it easier to incorporate, understand, and consider all details and perspectives that are relevant to a situation.
 
-Collaborative reasoning can be aided by having some good visuals, but good visuals can be annoying to maintain when the information in them changes often. Reasoning-to-mermaid tools allow you to use a markdown-like syntax to create visuals in mermaidjs. Try them out at https://keyserj.github.io/reasoning-tools/.
+## Reasoning Ontology Playground
 
-Right now, there are reasoning-to-mermaid tools for:
-
-- [IBIS diagrams](https://keyserj.github.io/reasoning-tools/) (an ontology described on Wikipedia as [Issue-based information system](https://en.wikipedia.org/wiki/Issue-based_information_system))
-- "Contested Causal Diagrams" (an ontology being developed by @keyserj, described here [TODO: make a link for it])
-
-Claude is pretty great at whipping together these reasoning-to-mermaid conversions. Feel free to make an issue or pull request to suggest another syntax or improvements to existing syntax.
+A playground for developing and comparing reasoning ontologies. Can also be used to visualize reasoning via any of the implemented ontologies. Try it out at https://keyserj.github.io/reasoning-tools/ontology-playground/. See [ontology-playground/README.md](ontology-playground/README.md) for details.
 
 ## Community
 

@@ -1,0 +1,24 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes:
+    light --default,
+    dark --prefersdark;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+}
+
+/* Mobile browser chrome shrinks the viewport as it hides/shows; dvh tracks that so the
+   app stays exactly one screen tall instead of overflowing. */
+html {
+  height: 100dvh;
+}
+
+/* Dragging the diagram near the top of the screen shouldn't pull-to-refresh the page. */
+body {
+  overscroll-behavior: none;
+}

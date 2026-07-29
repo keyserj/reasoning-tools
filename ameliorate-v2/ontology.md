@@ -86,7 +86,7 @@
 #### Context
 
 - Based on arguments about "The US should 'build a wall' to reduce illegal immigration"; tries to show off one of each piece from [Structure](#Structure)
-- Scores convey three users' perspectives via the `Perspectives` line - the main nodes are scored by everyone, some things by only some people, and some by nobody
+- Scores convey three users' perspectives via the `%perspectives` line - the main nodes are scored by everyone, some things by only some people, and some by nobody
 - Syntax legend:
 	- `*`: Concept node type
 	- `?`: Question node type
@@ -95,16 +95,17 @@
 	- `@`: Source node type
 	- `<`: edge whose source is the child (nested) line and target is the parent line
 	- `>`: edge whose source is the parent line and target is the child (nested) line
-	- `%[key]: [value]`: key-value property definition for the parent line
+	- `%[key]: [value]`: key-value property definition - for the parent line when indented, otherwise for the document as a whole
+		- document-level `%perspectives: [person1, person2, person3]`: declares whose scores appear in the example
   	- `Topic` property `description`: a high-level description of the topic - why are we discussing it?
   	- `Claim` property `opposite`: indicates phrasing for the opposite meaning of the claim. Enables -8..8 scale for explicit claim's truth score, rather than 0..8.
-	- `Perspectives: [person1, person2, person3]`: declares whose scores appear in the example
-	- `[X,Y,Z]`: scores, one slot per person in the `Perspectives` order - node scores appear after the node type character (e.g. `*[-4,0,-8]`), edge scores appear after the edge type (e.g. `causes[6,2,-]`)
+	- `[X,Y,Z]`: scores, one slot per person in the `%perspectives` order - node scores appear after the node type character (e.g. `*[-4,0,-8]`), edge scores appear after the edge type (e.g. `causes[6,2,-]`)
 		- `-` in a slot: that person didn't score it
 		- a scoreable node/edge with no brackets at all: nobody scored it
-	- `&some-id`: sets an id on the node/edge it follows
+	- `&some-id`: sets an id on the node/edge whose line the id appears on
 	- `$some-id`: references an id
 		- references are prefixed with the referent's type character (e.g. `* $illegal-immig`, `? $best-ways`, `= $visa-overstay`)
+		- to reduce duplication, a reference line never carries scores. Where that hurts readability, the example echoes the referent's score in a `/` comment
 		- `= $some-id` on a concept's/edge's id: references the implied claim behind that thing's score, so it can be supported/critiqued/clarified
 			- implied claims have standard phrasing:
 				- concept's change-importance scores: `$node is important to increase`
@@ -118,7 +119,7 @@
 #### "Build a wall"
 
 ```
-Perspectives: [alice, bob, casey]
+%perspectives: [alice, bob, casey]
   / rough personas so the scores tell a story: alice is moderate, bob doubts illegal immigration is a big problem and opposes the wall, casey wants illegal immigration reduced hard and favors the wall
 
 / --- Concepts: the causal core ---
@@ -228,13 +229,15 @@ Perspectives: [alice, bob, casey]
 
 / --- Claims: arguing about scores ---
 
-=[6,2,-] $wait-causes-illegal-immig
-  / implied claim behind the "long waits cause illegal immigration" edge score; slots match the edge's slots, so person3 has "-" here too
+= $wait-causes-illegal-immig
+  / scored above as [6,2,-]
+  / implied claim behind the "long waits cause illegal immigration" edge score
   < supports[-4,-,-6]
     =[6,-,8] Even with instant processing, people would still immigrate illegally to save money or "disappear" &still-immigrate
       / explicit claim, but causal: it's essentially pointing at the save-money/disappear causes edges, so it could be promoted and become a calculated argument
 
-=[3,-5,8] $wall-reduces
+= $wall-reduces
+  / scored above as [3,-5,8]
   / implicit claim behind the "wall reduces illegal immigration" edge score
   < supports[7,-,8]
     =[8,-,8] A wall physically stops crossings without needing continuous surveillance &physical-barrier
@@ -253,14 +256,16 @@ Perspectives: [alice, bob, casey]
     / reuse: the same claim answers a question above and critiques this edge
     = $visa-overstay
 
-=[-4,0,-8] $illegal-immig is important to increase
-  / implicit claim behind `illegal-immig`'s concept score, with standardized node-score wording; its score is the node's score, so alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
+= $illegal-immig is important to increase
+	/ scored above as [-4,0,-8]
+  / implicit claim behind `illegal-immig`'s concept score, with standardized node-score wording; alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
   < supports[5,8,-]
     =[7,8,2] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
   < supports[-4,-,-8] &murder-supports-worse-score
     =[3,-,8] An illegal immigrant murdered a baby in cold blood last year &baby-murder #anecdote
 
-=[-4,-,-8] $murder-supports-worse-score
+= $murder-supports-worse-score
+  / scored above as [-4,-,-8]
   / implied claim behind the anecdote's support edge score
   < supports[-7,-,-3]
     =[8,-,4] In Texas 2012-2018, illegal immigrants were arrested for violent crimes at half the rate of native-born citizens &texas-stat #statistic
@@ -295,7 +300,7 @@ Perspectives: [alice, bob, casey]
 	- Source
 		- All: `house-doc` mentions `texas-stat`
 	- Scores
-		- Perspectives: score brackets hold one slot per person, in the `Perspectives: [alice, bob, casey]` order
+		- Perspectives: score brackets hold one slot per person, in the `%perspectives: [alice, bob, casey]` order
 			- scored by everyone: the main nodes, e.g. `*[2,-7,8]` on the topic (`wall`), `*[-4,0,-8]` on `illegal-immig`
 			- scored by some (`-` = that person didn't score): e.g. `*[-2,-,-5]` on `save-money`, `mentions[8,-,-]`
 			- scored by nobody (brackets omitted): `barbed-wire`, the `clarifies` edge from `how-tall`
@@ -311,14 +316,11 @@ Perspectives: [alice, bob, casey]
 
 - questions and sources are left unscored here because [Structure](#Structure) doesn't define scores for them - should they have importance / credibility scores respectively?
 
-#### Questions - Kind of answered
-
-- should an implied claim's score just _be_ the score of the node/edge it wraps, or is it a separate truth score?
-  - it should just _be_ the same score (shown matching here, e.g. `causes[6,2,-]` and `=[6,2,-] $wait-causes-illegal-immig`)
-  - still open: is there a good way to show the score in only one of the two spots? it seems relevant in both
-
 #### Questions - Answered
 
+- should an implied claim's score just _be_ the score of the node/edge it wraps, or is it a separate truth score?
+	- it should just _be_ the same score, and it's written in exactly one place: the declaration. Reference lines carry no scores, so `causes[6,2,-]` has it and `= $wait-causes-illegal-immig` doesn't
+	- that costs readability - you can't see which score an implied-claim block is arguing about without finding the declaration - so the example echoes it in a `/` comment.
 - should `answers` edges be scoreable, or do the answering claims' truth scores cover it?
 	- scoreable - truth doesn't cover it because a claim can be true and yet not relevant to the question
 

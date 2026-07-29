@@ -1,0 +1,49 @@
+%description: Discussing how worthwhile it is to build a wall along the US's southern border.
+%perspectives: [alice, bob, casey]
+  / personas: alice is moderate; bob doubts illegal immigration is a real problem and opposes the wall; casey wants illegal immigration reduced hard and favors the wall
+
+/ --- Thesis ---
+
+=[4,1,8] The US should build a wall along its southern border &wall
+  < supports[8,2,8] &reduction-supports-wall
+    =[5,2,8] A border wall would substantially reduce illegal immigration &wall-reduces
+      < supports[8,3,8] &barrier-supports-reduction
+        =[8,7,8] A wall physically stops crossings without needing continuous surveillance &physical-barrier
+      < critiques[7,8,6]
+        =[6,8,2] People will find a way over the barrier &climb-over
+          < supports[8,8,2] &climb-easy-supports
+            =[8,8,8] It's easy to climb a chain-link fence &easy-climb
+      < critiques[7,7,8]
+        =[7,8,1] Most illegal immigrants enter legally and overstay visas, so they never cross the border &visa-overstay
+  < critiques[7,8,4] &cost-critiques-wall
+    =[7,8,6] The wall would cost tens of billions to build and maintain &wall-cost
+      < supports
+        = Concrete and steel prices rose sharply over the last decade &material-prices
+          / nobody scored this claim or the edge above it, so no brackets at all on either
+
+/ --- Arguing about relevance: each block below is an edge's implied claim ---
+
+= $reduction-supports-wall
+  / scored [8,2,8]
+  / "wall-reduces supports wall". bob's 2 is what this block argues: he grants the wall might reduce illegal immigration and denies that this bears on whether to build it
+  < critiques[6,8,2]
+    =[3,8,0] Illegal immigration causes little net harm &little-harm
+      < supports[5,7,1]
+        =[6,7,5] Illegal immigrants are arrested for violent crimes at lower rates than native-born citizens &crime-stat
+          ~ rates vary by year and state; this is a national average
+
+= $climb-easy-supports
+  / scored [8,8,2]
+  / "easy-climb supports climb-over". casey's 2: true about fences, irrelevant to the proposed design
+  < critiques[7,6,8]
+    =[6,-,8] The proposed design is 30 feet tall, without handholds, and topped with barbed wire &unclimbable
+      / bob left this one unscored - he has no view on the design spec - so his slot is `-`
+
+/ --- An alternative, pointing back up at the thesis with `>` ---
+
+=[6,7,3] Hiring more immigration judges would cut illegal immigration more cheaply than a wall &more-judges
+  > critiques[6,7,2]
+    = $wall
+  < supports[6,7,4]
+    / reuse: wall-cost critiques the thesis directly, and supports the cheaper-alternative claim here
+    = $wall-cost

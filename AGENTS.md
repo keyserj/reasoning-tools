@@ -11,7 +11,7 @@ Instructions for every agent working in this repo. See [README.md](./README.md) 
 
 ## Don't start web servers yourself
 
-When you need a server for testing, first check whether one is already running; if it isn't, ask the user to run it and give them the command for the directory in question. If the port is dead, say so rather than starting your own server. (This matters mostly for wireframes because `file://` URLs are blocked by playwright, but also it's annoying for the user to have to figure out if you started a server)
+When you need a server for testing, first check whether one is already running via playwright; if it isn't, ask the user to run it and give them the command for the directory in question. If the port is dead, say so rather than starting your own server. (This matters mostly for wireframes because `file://` URLs are blocked by playwright, but also it's annoying for the user to have to figure out if you started a server)
 
 - playground: `cd ontology-playground && npm run dev` → `http://localhost:5173/`
 - wireframes — serve the wireframe directory itself, not the repo root: `cd ameliorate-v2/wireframe && python3 -m http.server 8777`, then browse `http://localhost:8777/<page>.html`

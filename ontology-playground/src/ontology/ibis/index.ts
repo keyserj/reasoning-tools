@@ -4,7 +4,7 @@ import { toMermaid } from "./toMermaid.ts";
 import { legend } from "./legend.ts";
 import { nodeTypes } from "./nodeTypes.ts";
 import { edgeTypes } from "./edgeTypes.ts";
-import { sample } from "./sample.ts";
+import sample from "./example.txt?raw";
 import { defaultConfig } from "./defaultConfig.ts";
 
 const legendNote =

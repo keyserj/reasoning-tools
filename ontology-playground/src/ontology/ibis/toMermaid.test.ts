@@ -3,7 +3,7 @@ import type { Graph } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toMermaid } from "./toMermaid.ts";
 import { defaultConfig } from "./defaultConfig.ts";
-import { sample } from "./sample.ts";
+import sample from "./example.txt?raw";
 
 describe("toMermaid", () => {
   it("emits a flowchart with shapes, classes and child -> parent edges", () => {

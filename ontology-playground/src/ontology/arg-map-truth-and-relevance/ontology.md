@@ -28,7 +28,7 @@ Scores convey three people's perspectives via the `%perspectives` line.
   - `<`: edge whose source is the child (nested) line and target is the parent line
     - edge types: supports, critiques
   - `>`: edge whose source is the parent line and target is the child (nested) line
-  - `%[key]: [value]`: key-value property definition - for the parent line when indented, for the document as a whole when at column 0
+  - `%[key]: [value]`: key-value property definition for the document as a whole (must be at column 0)
     - `%description`: a high-level description of the topic - why are we discussing it?
     - `%perspectives: [person1, person2, person3]`: declares whose scores appear in the example, and in what order
   - `[X,Y,Z]`: scores, 0-8, one slot per person in the `%perspectives` order

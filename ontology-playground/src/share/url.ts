@@ -40,7 +40,7 @@ const configSchema = (ontology: Ontology) =>
     types: z
       .object(
         Object.fromEntries(
-          ontology.nodeTypes.map((t) => [t.id, styleSchema.catch(t.defaultStyle)]),
+          ontology.renderedNodeTypes.map((t) => [t.id, styleSchema.catch(t.defaultStyle)]),
         ),
       )
       .catch(ontology.defaultConfig.types),
@@ -70,7 +70,7 @@ export function encodeState(state: DocState): string {
 /**
  * Decode a hash into a valid document, or null if there is nothing decodable there.
  * A link naming an unknown ontology falls back to the default ontology's own sample:
- * reinterpreting a foreign syntax as IBIS would only produce a wall of parse errors.
+ * reinterpreting one ontology's syntax as another's would only produce a wall of parse errors.
  */
 export function decodeState(encoded: string): DocState | null {
   let raw: unknown;

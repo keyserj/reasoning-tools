@@ -26,8 +26,8 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the bundled samp
   q3 --> n5
   c1 --> n5
   classDef question fill:#ede9fe,stroke:#7c3aed,color:#2e1065,stroke-width:1.5px
-  classDef idea fill:#dbeafe,stroke:#2563eb,color:#0c1e3e,stroke-width:1.5px
-  classDef pro fill:#dcfce7,stroke:#16a34a,color:#052e16,stroke-width:1.5px
-  classDef con fill:#fee2e2,stroke:#dc2626,color:#450a0a,stroke-width:1.5px
-  classDef note fill:#fef9c3,stroke:#ca8a04,color:#422006,stroke-width:1.5px"
+  classDef idea fill:#fef9c3,stroke:#ca8a04,color:#422006,stroke-width:1.5px
+  classDef pro fill:#e7f0ff,stroke:#2166ac,color:#1b4fa8,stroke-width:1.5px
+  classDef con fill:#fdecea,stroke:#b2182b,color:#7f1d1d,stroke-width:1.5px
+  classDef note fill:#f1f5f9,stroke:#64748b,color:#0f172a,stroke-width:1.5px"
 `;

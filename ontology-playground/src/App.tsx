@@ -114,7 +114,7 @@ export default function App() {
       <ConfigPanel
         open={configOpen}
         config={doc.config}
-        nodeTypes={ontology.nodeTypes}
+        renderedNodeTypes={ontology.renderedNodeTypes}
         onChange={(config) => setDoc((d) => ({ ...d, config }))}
         onReset={() => setDoc((d) => ({ ...d, config: structuredClone(ontology.defaultConfig) }))}
         onClose={() => setConfigOpen(false)}

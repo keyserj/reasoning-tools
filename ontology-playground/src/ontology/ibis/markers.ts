@@ -1,5 +1,5 @@
 // IBIS syntax: which leading marker produces which node type. This is the parser's
-// business, kept separate from ./nodeTypes.ts (semantics) because another ontology may
+// business, kept separate from ./renderedNodeTypes.ts (semantics) because another ontology may
 // not use single-character markers at all.
 
 /** Markers that create a node, mapped to the node type id they produce. */

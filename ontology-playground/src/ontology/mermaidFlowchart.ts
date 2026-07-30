@@ -15,9 +15,35 @@ export interface FlowchartTables {
   defaultConnector: string;
 }
 
-/** Escape text for use inside a mermaid quoted label. */
+/**
+ * Escape text for use inside a mermaid quoted label.
+ *
+ * Labels render as HTML (`flowchart.htmlLabels`), so unescaped markup in a node's text
+ * renders as markup. Two reasons that matters, and the second is the load-bearing one:
+ *
+ * 1. Fidelity: someone writing `R&D` or `&lt;b&gt;` in a node should see what they typed.
+ * 2. Documents arrive from other people, as a whole `DocState` in the URL hash (see
+ *    ../share/url.ts), so node text is untrusted. Before this escaping, a link you were
+ *    sent could put `<img src=https://attacker.example/pixel.png>` in a node and your
+ *    browser would fetch it on load — an IP/user-agent beacon firing with no interaction,
+ *    from a diagram that looks ordinary. Styled `<div>`s could likewise overlay the
+ *    diagram with content that isn't in the document.
+ *
+ * This is not the XSS defense: mermaid's `securityLevel: "strict"` (see ../../mermaidClient.ts)
+ * DOMPurifies away scripts, event handlers, `javascript:` hrefs and iframes, and it still
+ * would if this function were deleted. But DOMPurify deliberately allows `<img>`, so the
+ * beacon above survived it — escaping here is what stops that, not defense in depth.
+ *
+ * Order matters: `&` first so the entities below aren't double-escaped, and the newline
+ * `<br/>` last so it survives as the one tag this function does emit.
+ */
 function escapeLabel(text: string): string {
-  return text.replace(/"/g, "&quot;").replace(/\r?\n/g, "<br/>");
+  return text
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/\r?\n/g, "<br/>");
 }
 
 /** Map arbitrary node ids to safe mermaid identifiers, preserving uniqueness. */

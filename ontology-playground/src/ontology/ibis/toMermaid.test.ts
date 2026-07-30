@@ -39,6 +39,16 @@ describe("toMermaid", () => {
     expect(out).toContain("weird_id[");
   });
 
+  it("escapes markup so labels render as typed, keeping newlines as breaks", () => {
+    const graph: Graph = {
+      nodes: [{ id: "n1", type: "idea", text: "5 < 6 & <img src=x>\nsecond line" }],
+      edges: [],
+    };
+    const out = toMermaid(graph, defaultConfig);
+    expect(out).toContain("5 &lt; 6 &amp; &lt;img src=x&gt;");
+    expect(out).toContain("<br/>second line");
+  });
+
   it("returns a placeholder for an empty graph", () => {
     const out = toMermaid({ nodes: [], edges: [] }, defaultConfig);
     expect(out).toContain("_empty");

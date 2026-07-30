@@ -37,7 +37,7 @@ describe("toMermaid", () => {
   it("renders the topic header as a subroutine box carrying the perspectives key", () => {
     const { graph } = parse("%description: Why we care\n%perspectives: [alice, bob]\n= A &a");
     expect(toMermaid(graph, defaultConfig)).toContain(
-      '_topic[["📋 Why we care<br/>Scores: alice · bob"]]:::topic',
+      '_topic[["📋 Why we care<br/>Scores: [alice, bob]"]]:::topic',
     );
   });
 

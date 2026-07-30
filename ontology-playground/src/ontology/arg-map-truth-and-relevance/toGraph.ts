@@ -30,19 +30,21 @@ function firstRootClaimId(doc: ArgDoc): string | null {
   return doc.claims.find((claim) => !sources.has(claim.id))?.id ?? null;
 }
 
-const SCORE_SEPARATOR = " · ";
-
 /** Scores go on their own line; ../mermaidFlowchart.ts turns the newline into a `<br/>`. */
 function withScores(text: string, scores: Scores | null): string {
   return scores === null ? text : `${text}\n${formatScores(scores)}`;
 }
 
-/** The header's text: why we're discussing this, and how to read a score row. */
+/**
+ * The header's text: why we're discussing this, and how to read a score row. Perspectives keep
+ * the bracketed, comma-separated shape of a score row (and of the `%perspectives` line they come
+ * from), so `[5,2,8]` can be read off the header slot by slot instead of by inference.
+ */
 function topicText(doc: ArgDoc): string {
   const parts: string[] = [];
   if (doc.description) parts.push(doc.description);
   if (doc.perspectives.length > 0) {
-    parts.push(`Scores: ${doc.perspectives.join(SCORE_SEPARATOR)}`);
+    parts.push(`Scores: [${doc.perspectives.join(", ")}]`);
   }
   return parts.join("\n");
 }

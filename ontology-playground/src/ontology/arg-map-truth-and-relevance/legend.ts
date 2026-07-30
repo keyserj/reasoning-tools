@@ -36,13 +36,13 @@ const syntaxEntries: LegendEntry[] = [
     marker: "[4,1,8]",
     label: "Scores",
     meaning:
-      "Belief in a claim (its truth) or in a link (its relevance), 0-8, one slot per perspective. Use - for unscored.",
+      "How strongly each perspective believes this line, 0-8 — a claim's truth, a link's relevance. Use - for unscored.",
     icon: "🔢",
   },
   {
     marker: "%perspectives",
     label: "Perspectives",
-    meaning: "Whose scores appear, and the order the score slots are read in.",
+    meaning: "Who the score slots belong to, in the order they're written.",
     icon: "👥",
   },
   {
@@ -54,8 +54,7 @@ const syntaxEntries: LegendEntry[] = [
   {
     marker: "$id",
     label: "Reference",
-    meaning:
-      "Point at an existing claim, or at a link — which is how you argue about a link's relevance.",
+    meaning: "Reuse an existing claim, or point at a link to argue about the link itself.",
     icon: "🔗",
   },
   { marker: "/", label: "Meta-comment", meaning: "A comment hidden from the diagram.", icon: "🚫" },

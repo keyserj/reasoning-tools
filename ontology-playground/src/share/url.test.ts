@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ibis } from "../ontology/ibis/index.ts";
+import { argMapTruthAndRelevance } from "../ontology/arg-map-truth-and-relevance/index.ts";
 import { type DocState, decodeState, encodeState } from "./url.ts";
 
 const doc: DocState = {
@@ -11,6 +12,23 @@ const doc: DocState = {
 describe("share/url", () => {
   it("round-trips a document", () => {
     expect(decodeState(encodeState(doc))).toEqual(doc);
+  });
+
+  it("round-trips a document in a non-default ontology, keeping its own node types", () => {
+    const other: DocState = {
+      ontologyId: argMapTruthAndRelevance.id,
+      source: argMapTruthAndRelevance.sample,
+      config: structuredClone(argMapTruthAndRelevance.defaultConfig),
+    };
+    expect(decodeState(encodeState(other))).toEqual(other);
+  });
+
+  it("falls back to the default ontology's own sample for an unknown ontology id", () => {
+    const decoded = decodeState(encodeState({ ...doc, ontologyId: "no-such-ontology" }));
+    // Reinterpreting a foreign syntax would just be a wall of parse errors, so the source
+    // is replaced rather than carried over.
+    expect(decoded?.ontologyId).toBe(ibis.id);
+    expect(decoded?.source).toBe(ibis.sample);
   });
 
   it("returns null for a hash it cannot decode", () => {

@@ -1,10 +1,15 @@
 // Shared, ontology-agnostic data model and the contract every ontology implements.
 // The UI shell only ever talks to these types + the registry, never to a concrete
-// ontology (IBIS today, "Contested Causal Diagrams" later).
+// ontology (IBIS and the truth-and-relevance argument map today, "Contested Causal
+// Diagrams" later).
 //
 // Node and edge types are strings rather than a fixed union: each ontology declares its
 // own vocabulary (IBIS's question/idea/pro/con/note, a causal map's concept/action/
 // criterion + causes/reduces/guides edges) via the tables below.
+//
+// An ontology whose semantics don't fit a plain node-and-edge graph is expected to flatten
+// them itself on the way out of `parse` — see arg-map-truth-and-relevance/toGraph.ts, which
+// turns links into nodes because a link there can be argued about like any other claim.
 
 export interface GraphNode {
   id: string;
@@ -89,8 +94,8 @@ export interface Ontology {
   legend: LegendEntry[];
   /** Optional prose shown beneath the legend table. */
   legendNote?: string;
-  nodeTypes: NodeTypeDef[];
-  edgeTypes: EdgeTypeDef[];
+  renderedNodeTypes: NodeTypeDef[];
+  renderedEdgeTypes: EdgeTypeDef[];
   sample: string;
   /** Placeholder shown in an empty editor, in this ontology's syntax. */
   placeholder: string;

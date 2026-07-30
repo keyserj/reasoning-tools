@@ -1,0 +1,293 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parse > matches the parsed-graph snapshot for the bundled sample 1`] = `
+{
+  "edges": [
+    {
+      "from": "wall-reduces",
+      "to": "reduction-supports-wall",
+      "type": "link",
+    },
+    {
+      "from": "reduction-supports-wall",
+      "to": "wall",
+      "type": "link",
+    },
+    {
+      "from": "physical-barrier",
+      "to": "barrier-supports-reduction",
+      "type": "link",
+    },
+    {
+      "from": "barrier-supports-reduction",
+      "to": "wall-reduces",
+      "type": "link",
+    },
+    {
+      "from": "climb-over",
+      "to": "l1",
+      "type": "link",
+    },
+    {
+      "from": "l1",
+      "to": "wall-reduces",
+      "type": "link",
+    },
+    {
+      "from": "easy-climb",
+      "to": "climb-easy-supports",
+      "type": "link",
+    },
+    {
+      "from": "climb-easy-supports",
+      "to": "climb-over",
+      "type": "link",
+    },
+    {
+      "from": "visa-overstay",
+      "to": "l2",
+      "type": "link",
+    },
+    {
+      "from": "l2",
+      "to": "wall-reduces",
+      "type": "link",
+    },
+    {
+      "from": "wall-cost",
+      "to": "cost-critiques-wall",
+      "type": "link",
+    },
+    {
+      "from": "cost-critiques-wall",
+      "to": "wall",
+      "type": "link",
+    },
+    {
+      "from": "material-prices",
+      "to": "l3",
+      "type": "link",
+    },
+    {
+      "from": "l3",
+      "to": "wall-cost",
+      "type": "link",
+    },
+    {
+      "from": "little-harm",
+      "to": "l4",
+      "type": "link",
+    },
+    {
+      "from": "l4",
+      "to": "reduction-supports-wall",
+      "type": "link",
+    },
+    {
+      "from": "crime-stat",
+      "to": "l5",
+      "type": "link",
+    },
+    {
+      "from": "l5",
+      "to": "little-harm",
+      "type": "link",
+    },
+    {
+      "from": "unclimbable",
+      "to": "l6",
+      "type": "link",
+    },
+    {
+      "from": "l6",
+      "to": "climb-easy-supports",
+      "type": "link",
+    },
+    {
+      "from": "more-judges",
+      "to": "l7",
+      "type": "link",
+    },
+    {
+      "from": "l7",
+      "to": "wall",
+      "type": "link",
+    },
+    {
+      "from": "wall-cost",
+      "to": "l8",
+      "type": "link",
+    },
+    {
+      "from": "l8",
+      "to": "more-judges",
+      "type": "link",
+    },
+    {
+      "from": "t1",
+      "to": "crime-stat",
+      "type": "note",
+    },
+    {
+      "from": "wall",
+      "to": "_topic",
+      "type": "anchor",
+    },
+  ],
+  "nodes": [
+    {
+      "id": "_topic",
+      "text": "Discussing how worthwhile it is to build a wall along the US's southern border.
+Scores: alice · bob · casey",
+      "type": "topic",
+    },
+    {
+      "id": "wall",
+      "text": "The US should build a wall along its southern border
+[4,1,8]",
+      "type": "claim",
+    },
+    {
+      "id": "wall-reduces",
+      "text": "A border wall would substantially reduce illegal immigration
+[5,2,8]",
+      "type": "claim",
+    },
+    {
+      "id": "physical-barrier",
+      "text": "A wall physically stops crossings without needing continuous surveillance
+[8,7,8]",
+      "type": "claim",
+    },
+    {
+      "id": "climb-over",
+      "text": "People will find a way over the barrier
+[6,8,2]",
+      "type": "claim",
+    },
+    {
+      "id": "easy-climb",
+      "text": "It's easy to climb a chain-link fence
+[8,8,8]",
+      "type": "claim",
+    },
+    {
+      "id": "visa-overstay",
+      "text": "Most illegal immigrants enter legally and overstay visas, so they never cross the border
+[7,8,1]",
+      "type": "claim",
+    },
+    {
+      "id": "wall-cost",
+      "text": "The wall would cost tens of billions to build and maintain
+[7,8,6]",
+      "type": "claim",
+    },
+    {
+      "id": "material-prices",
+      "text": "Concrete and steel prices rose sharply over the last decade",
+      "type": "claim",
+    },
+    {
+      "id": "little-harm",
+      "text": "Illegal immigration causes little net harm
+[3,8,0]",
+      "type": "claim",
+    },
+    {
+      "id": "crime-stat",
+      "text": "Illegal immigrants are arrested for violent crimes at lower rates than native-born citizens
+[6,7,5]",
+      "type": "claim",
+    },
+    {
+      "id": "unclimbable",
+      "text": "The proposed design is 30 feet tall, without handholds, and topped with barbed wire
+[6,-,8]",
+      "type": "claim",
+    },
+    {
+      "id": "more-judges",
+      "text": "Hiring more immigration judges would cut illegal immigration more cheaply than a wall
+[6,7,3]",
+      "type": "claim",
+    },
+    {
+      "id": "reduction-supports-wall",
+      "text": "supports
+[8,2,8]",
+      "type": "supports",
+    },
+    {
+      "id": "barrier-supports-reduction",
+      "text": "supports
+[8,3,8]",
+      "type": "supports",
+    },
+    {
+      "id": "l1",
+      "text": "critiques
+[7,8,6]",
+      "type": "critiques",
+    },
+    {
+      "id": "climb-easy-supports",
+      "text": "supports
+[8,8,2]",
+      "type": "supports",
+    },
+    {
+      "id": "l2",
+      "text": "critiques
+[7,7,8]",
+      "type": "critiques",
+    },
+    {
+      "id": "cost-critiques-wall",
+      "text": "critiques
+[7,8,4]",
+      "type": "critiques",
+    },
+    {
+      "id": "l3",
+      "text": "supports",
+      "type": "supports",
+    },
+    {
+      "id": "l4",
+      "text": "critiques
+[6,8,2]",
+      "type": "critiques",
+    },
+    {
+      "id": "l5",
+      "text": "supports
+[5,7,1]",
+      "type": "supports",
+    },
+    {
+      "id": "l6",
+      "text": "critiques
+[7,6,8]",
+      "type": "critiques",
+    },
+    {
+      "id": "l7",
+      "text": "critiques
+[6,7,2]",
+      "type": "critiques",
+    },
+    {
+      "id": "l8",
+      "text": "supports
+[6,7,4]",
+      "type": "supports",
+    },
+    {
+      "id": "t1",
+      "text": "rates vary by year and state; this is a national average",
+      "type": "note",
+    },
+  ],
+}
+`;

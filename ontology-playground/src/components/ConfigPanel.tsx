@@ -10,7 +10,7 @@ const DIRECTIONS: { value: LayoutDirection; label: string }[] = [
 interface Props {
   open: boolean;
   config: StyleConfig;
-  nodeTypes: NodeTypeDef[];
+  renderedNodeTypes: NodeTypeDef[];
   onChange: (config: StyleConfig) => void;
   onReset: () => void;
   onClose: () => void;
@@ -19,7 +19,7 @@ interface Props {
 export default function ConfigPanel({
   open,
   config,
-  nodeTypes,
+  renderedNodeTypes,
   onChange,
   onReset,
   onClose,
@@ -84,7 +84,7 @@ export default function ConfigPanel({
               </tr>
             </thead>
             <tbody>
-              {nodeTypes.map((type) => {
+              {renderedNodeTypes.map((type) => {
                 const style = config.types[type.id] ?? type.defaultStyle;
                 return (
                   <tr key={type.id}>

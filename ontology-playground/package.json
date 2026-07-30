@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Write a markdown-like syntax, get a rendered mermaid diagram. IBIS argument maps for now.",
+  "description": "Write a markdown-like syntax, get a rendered mermaid diagram, in the reasoning ontology of your choice.",
   "engines": {
     "node": ">=24.18.0"
   },

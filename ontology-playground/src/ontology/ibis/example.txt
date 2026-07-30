@@ -1,4 +1,4 @@
-export const sample = `? How should we handle session storage? &q1
+? How should we handle session storage? &q1
   = Use Redis &i1
     + Fast, battle-tested
     - Another service to operate &c1
@@ -12,4 +12,3 @@ export const sample = `? How should we handle session storage? &q1
     ~ worker queues hit the same operational cost
     - $c1
     ? Which broker? &q3
-`;

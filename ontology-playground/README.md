@@ -12,28 +12,14 @@ Ontology designers:
 
 LLMs are pretty great at plugging into this playground, so trying out your ideas is cheap! Feel free to make an issue or pull request to suggest another ontology or improvements to an existing one.
 
-The first ontology is **IBIS** argument maps ([Issue-based information system](https://en.wikipedia.org/wiki/Issue-based_information_system) on Wikipedia).
+## Ontologies
 
-[TODO] More ontologies — the "see how it looks in yours" bullet above isn't possible until there's a second one.
+Each lives in `src/ontology/<id>/` and documents itself: `ontology.md` for what it is, `rendering.md` for how the playground draws it, `ideal-ux-design.md` for what an ideal app might look like (not all ontologies have this one). The full syntax key is also in the app under **Key**.
 
-[TODO] A shared set of examples, so the same reasoning can be viewed through each ontology.
+- **[IBIS](./src/ontology/ibis/ontology.md)** ([rendering](./src/ontology/ibis/rendering.md)) — the classic question / idea / pro / con argument map.
+- **[Argument map: truth and relevance](./src/ontology/arg-map-truth-and-relevance/ontology.md)** ([rendering](./src/ontology/arg-map-truth-and-relevance/rendering.md)) — claims linked by supports/critiques, where each link is itself a claim that can be scored and argued about.
 
-## IBIS syntax
-
-One node per line; indentation nests a line under the line above it.
-
-| Marker | Meaning |
-| ------ | ------- |
-| `?` | Question / issue |
-| `=` | Idea / position (answers its parent question) |
-| `+` | Pro (supports its parent) |
-| `-` | Con (objects to its parent) |
-| `~` | Note (shown, attached to its parent) |
-| `/` | Meta-comment (dropped from the diagram) |
-| `&id` | Label a node so it can be referenced |
-| `$id` | Reference an existing node instead of creating a new one |
-
-Edges point from a child up to the parent it supports, objects to, or answers (argument-map direction). Full key is in the app under **Key**.
+[TODO] A shared set of examples, so the same reasoning can be viewed through each ontology. The arg-map example is an adaptation of `ameliorate-v2`'s "Build a wall", so those two can already be compared.
 
 ## Develop
 

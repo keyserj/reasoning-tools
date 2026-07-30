@@ -6,7 +6,14 @@ import type { NodeTypeDef } from "../types.ts";
 //
 // Syntax (which marker produces which type) intentionally lives in ./parse.ts instead:
 // markers are this ontology's syntax, not its semantics.
-export const nodeTypes: NodeTypeDef[] = [
+//
+// Colors avoid a red-green pro/con pair, which is the one distinction a reader most needs and
+// the hardest for the ~6% of men with deuteranomaly to make. They follow the same red/blue axis
+// as ameliorate-v2's wireframes (`RB = { neg: "#b2182b", ..., pos: "#2166ac" }`) and the
+// arg-map ontology, so the two ontologies are comparable on the same topic. `idea` takes the
+// yellow that `note` used to hold: it suits the 💡 icon, and blue-vs-yellow is the second
+// colorblind-safe axis, so ideas stay distinct from both pros and cons.
+export const renderedNodeTypes: NodeTypeDef[] = [
   {
     id: "question",
     label: "Question / Issue",
@@ -21,7 +28,7 @@ export const nodeTypes: NodeTypeDef[] = [
     icon: "💡",
     description: "A possible answer to its parent question.",
     shape: ['["', '"]'],
-    defaultStyle: { fill: "#dbeafe", stroke: "#2563eb", color: "#0c1e3e" },
+    defaultStyle: { fill: "#fef9c3", stroke: "#ca8a04", color: "#422006" },
   },
   {
     id: "pro",
@@ -29,7 +36,7 @@ export const nodeTypes: NodeTypeDef[] = [
     icon: "✅",
     description: "An argument supporting its parent.",
     shape: ['["', '"]'],
-    defaultStyle: { fill: "#dcfce7", stroke: "#16a34a", color: "#052e16" },
+    defaultStyle: { fill: "#e7f0ff", stroke: "#2166ac", color: "#1b4fa8" },
   },
   {
     id: "con",
@@ -37,7 +44,7 @@ export const nodeTypes: NodeTypeDef[] = [
     icon: "⛔",
     description: "An argument objecting to its parent.",
     shape: ['["', '"]'],
-    defaultStyle: { fill: "#fee2e2", stroke: "#dc2626", color: "#450a0a" },
+    defaultStyle: { fill: "#fdecea", stroke: "#b2182b", color: "#7f1d1d" },
   },
   {
     id: "note",
@@ -45,10 +52,10 @@ export const nodeTypes: NodeTypeDef[] = [
     icon: "📝",
     description: "A note shown attached to its parent.",
     shape: ['[/"', '"/]'],
-    defaultStyle: { fill: "#fef9c3", stroke: "#ca8a04", color: "#422006" },
+    defaultStyle: { fill: "#f1f5f9", stroke: "#64748b", color: "#0f172a" },
   },
 ];
 
-export const nodeTypesById: Record<string, NodeTypeDef> = Object.fromEntries(
-  nodeTypes.map((t) => [t.id, t]),
+export const renderedNodeTypesById: Record<string, NodeTypeDef> = Object.fromEntries(
+  renderedNodeTypes.map((t) => [t.id, t]),
 );

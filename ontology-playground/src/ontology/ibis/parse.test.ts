@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { parse } from "./parse.ts";
-import { sample } from "./sample.ts";
+import sample from "./example.txt?raw";
 
 describe("parse", () => {
   it("builds child -> parent edges with the child's marker type", () => {

@@ -1,5 +1,5 @@
 import type { LegendEntry } from "../types.ts";
-import { nodeTypes } from "./nodeTypes.ts";
+import { renderedNodeTypes } from "./renderedNodeTypes.ts";
 import { MARKER_TO_TYPE } from "./markers.ts";
 
 const markerByType: Record<string, string> = Object.fromEntries(
@@ -7,7 +7,7 @@ const markerByType: Record<string, string> = Object.fromEntries(
 );
 
 // Node-type rows come from the one table; the rest are syntax that produces no node.
-const typeEntries: LegendEntry[] = nodeTypes.map((t) => ({
+const typeEntries: LegendEntry[] = renderedNodeTypes.map((t) => ({
   marker: markerByType[t.id] ?? "",
   label: t.label,
   meaning: t.description,

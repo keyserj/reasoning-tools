@@ -8,13 +8,14 @@ import sample from "./example.txt?raw";
 import { defaultConfig } from "./defaultConfig.ts";
 
 const legendNote =
-  "Indent a line to nest it under the line above. Edges point from a child up to the parent it supports, objects to, or answers.";
+  "Claims are the only node type; supports/critiques links are drawn as boxes because a link is argued about like anything else — nest a `< critiques` under a `= $link-id` block to attack a link's relevance rather than its claim. Every score is belief in some claim, 0-8.";
 
-const placeholder = "? Your question here &q1\n  = An idea &i1\n    + A pro\n    - A con";
+const placeholder =
+  "%perspectives: [you]\n= Your thesis here &thesis\n  < supports[8]\n    = A reason to believe it";
 
-export const ibis: Ontology = {
-  id: "ibis",
-  label: "IBIS",
+export const argMapTruthAndRelevance: Ontology = {
+  id: "arg-map-truth-and-relevance",
+  label: "Arg map: truth & relevance",
   parse,
   toMermaid,
   legend,

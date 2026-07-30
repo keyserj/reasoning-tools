@@ -1,6 +1,10 @@
+import type { KeyboardEvent } from "react";
 import type { ParseError } from "../ontology/types.ts";
 
 export type EditorTab = "source" | "mermaid";
+
+/** What one indent level is worth. Two spaces, GitHub-style — the syntaxes nest by indentation. */
+const INDENT = "  ";
 
 interface Props {
   source: string;
@@ -24,6 +28,61 @@ export default function EditorPane({
   errors,
 }: Props) {
   const editing = activeTab === "source";
+
+  // Indent edits go through execCommand("insertText") rather than onSourceChange: the browser
+  // applies them as real user edits, so the caret lands correctly, ctrl+z still undoes them, and
+  // the resulting input event feeds React's onChange like any keystroke.
+  const insertText = (el: HTMLTextAreaElement, text: string, from: number, to: number) => {
+    el.setSelectionRange(from, to);
+    document.execCommand("insertText", false, text);
+  };
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
+    // Tab is trapped for indenting, so Escape is the keyboard way back out of the textarea.
+    if (e.key === "Escape") {
+      e.currentTarget.blur();
+      return;
+    }
+    if (e.key !== "Tab" || !editing) return;
+    e.preventDefault();
+
+    const el = e.currentTarget;
+    const { value, selectionStart, selectionEnd } = el;
+
+    // Plain Tab with the selection inside one line: insert an indent like any other typed text.
+    if (!e.shiftKey && !value.slice(selectionStart, selectionEnd).includes("\n")) {
+      insertText(el, INDENT, selectionStart, selectionEnd);
+      return;
+    }
+
+    // Otherwise indent/outdent every line the selection touches, as one replacement.
+    const blockStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
+    const lineEnd = value.indexOf("\n", selectionEnd);
+    const blockEnd = lineEnd === -1 ? value.length : lineEnd;
+    const block = value.slice(blockStart, blockEnd);
+
+    let firstDelta = 0;
+    const next = block
+      .split("\n")
+      .map((line, i) => {
+        const outdent = line.startsWith(INDENT) ? INDENT.length : line.startsWith(" ") ? 1 : 0;
+        if (i === 0) firstDelta = e.shiftKey ? -outdent : INDENT.length;
+        return e.shiftKey ? line.slice(outdent) : INDENT + line;
+      })
+      .join("\n");
+    if (next === block) return;
+
+    insertText(el, next, blockStart, blockEnd);
+
+    // insertText leaves the caret at the end of what it wrote. Reselect the block so repeated
+    // presses keep acting on the same lines; a bare caret stays a caret, shifted by its line.
+    if (selectionStart === selectionEnd) {
+      const caret = Math.max(blockStart, selectionStart + firstDelta);
+      el.setSelectionRange(caret, caret);
+    } else {
+      el.setSelectionRange(blockStart, blockStart + next.length);
+    }
+  };
 
   return (
     <div className="flex flex-col h-full min-w-0 border-r border-base-300 bg-base-100">
@@ -51,9 +110,12 @@ export default function EditorPane({
           spellCheck={false}
           value={editing ? source : mermaidText}
           onChange={(e) => onSourceChange(e.target.value)}
+          onKeyDown={handleKeyDown}
           readOnly={!editing}
           placeholder={editing ? placeholder : undefined}
           aria-label={editing ? `${ontologyLabel} source` : "Generated mermaid source"}
+          aria-keyshortcuts={editing ? "Tab Shift+Tab Escape" : undefined}
+          title={editing ? "Tab/Shift+Tab indent/outdent. Escape exits the editor." : undefined}
         />
       </div>
 

@@ -3,7 +3,7 @@ import type { Graph } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toMermaid } from "./toMermaid.ts";
 import { defaultConfig } from "./defaultConfig.ts";
-import { sample } from "./sample.ts";
+import sample from "./example.txt?raw";
 
 describe("toMermaid", () => {
   it("emits a flowchart with shapes, classes and child -> parent edges", () => {
@@ -37,6 +37,16 @@ describe("toMermaid", () => {
     const out = toMermaid(graph, defaultConfig);
     expect(out).toContain("&quot;hi&quot;");
     expect(out).toContain("weird_id[");
+  });
+
+  it("escapes markup so labels render as typed, keeping newlines as breaks", () => {
+    const graph: Graph = {
+      nodes: [{ id: "n1", type: "idea", text: "5 < 6 & <img src=x>\nsecond line" }],
+      edges: [],
+    };
+    const out = toMermaid(graph, defaultConfig);
+    expect(out).toContain("5 &lt; 6 &amp; &lt;img src=x&gt;");
+    expect(out).toContain("<br/>second line");
   });
 
   it("returns a placeholder for an empty graph", () => {

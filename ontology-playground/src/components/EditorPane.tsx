@@ -114,6 +114,8 @@ export default function EditorPane({
           readOnly={!editing}
           placeholder={editing ? placeholder : undefined}
           aria-label={editing ? `${ontologyLabel} source` : "Generated mermaid source"}
+          aria-keyshortcuts={editing ? "Tab Shift+Tab Escape" : undefined}
+          title={editing ? "Tab/Shift+Tab indent/outdent. Escape exits the editor." : undefined}
         />
       </div>
 

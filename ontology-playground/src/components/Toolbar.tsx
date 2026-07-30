@@ -5,7 +5,7 @@ import { type DocState, buildShareUrl } from "../share/url.ts";
 /** Which pane a phone-sized screen shows; wider screens show both side by side. */
 export type PaneView = "edit" | "view";
 
-const GITHUB_URL = "https://github.com/keyserj/reasoning-tools";
+const GITHUB_URL = "https://github.com/keyserj/reasoning-tools/tree/main/ontology-playground";
 
 interface Props {
   ontologyList: Ontology[];

@@ -2,7 +2,7 @@
 
 exports[`toMermaid > matches the generated-mermaid snapshot for the bundled sample 1`] = `
 "flowchart BT
-  _topic[["📋 Discussing how worthwhile it is to build a wall along the US's southern border.<br/>Scores: alice · bob · casey"]]:::topic
+  _topic[["📋 Discussing how worthwhile it is to build a wall along the US's southern border.<br/>Scores: [alice, bob, casey]"]]:::topic
   wall["💬 The US should build a wall along its southern border<br/>[4,1,8]"]:::claim
   wall_reduces["💬 A border wall would substantially reduce illegal immigration<br/>[5,2,8]"]:::claim
   physical_barrier["💬 A wall physically stops crossings without needing continuous surveillance<br/>[8,7,8]"]:::claim

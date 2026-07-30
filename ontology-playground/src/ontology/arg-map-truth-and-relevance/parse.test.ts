@@ -92,7 +92,7 @@ describe("parse", () => {
     expect(graph.nodes[0]).toEqual({
       id: "_topic",
       type: "topic",
-      text: "Why we care\nScores: alice · bob",
+      text: "Why we care\nScores: [alice, bob]",
     });
   });
 

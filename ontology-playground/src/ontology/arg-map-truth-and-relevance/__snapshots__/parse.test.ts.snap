@@ -138,7 +138,7 @@ exports[`parse > matches the parsed-graph snapshot for the bundled sample 1`] = 
     {
       "id": "_topic",
       "text": "Discussing how worthwhile it is to build a wall along the US's southern border.
-Scores: alice · bob · casey",
+Scores: [alice, bob, casey]",
       "type": "topic",
     },
     {

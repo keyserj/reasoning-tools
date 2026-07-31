@@ -1,6 +1,77 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`toMermaid > matches the generated-mermaid snapshot for the bundled sample 1`] = `
+exports[`toMermaid > matches the generated-mermaid snapshots for the bundled examples 1`] = `
+"flowchart BT
+  _topic[["📋 Where should we keep web session state?<br/>Scores: [alice, bob]"]]:::topic
+  redis["💬 We should use Redis for session storage<br/>[7,3]"]:::claim
+  fast["💬 Redis is fast for hot reads<br/>[8,8]"]:::claim
+  ops_cost["💬 It's another service to operate<br/>[6,6]"]:::claim
+  postgres["💬 We should use Postgres rows for session storage<br/>[4,6]"]:::claim
+  slow_reads["💬 Postgres is slower for hot reads<br/>[7,3]"]:::claim
+  not_hot["💬 Our session reads aren't hot enough for speed to matter<br/>[5,2]"]:::claim
+  fast_supports_redis["💬 ① &quot;Redis is fast for hot reads&quot; supports &quot;We should use Redis for session storage&quot;<br/>[8,4]"]:::claim
+  t1[/"📝 measured on last year's hardware"/]:::note
+  fast -->|"✅ ① supports [8,4]"| redis
+  ops_cost -->|"⛔ critiques [5,7]"| redis
+  ops_cost -->|"✅ supports [7,7]"| postgres
+  slow_reads -->|"⛔ critiques [6,-]"| postgres
+  not_hot -->|"⛔ critiques [7,2]"| fast_supports_redis
+  fast_supports_redis ~~~ redis
+  t1 -.-> slow_reads
+  redis ~~~ _topic
+  classDef claim fill:#fff4e6,stroke:#c2410c,color:#431407,stroke-width:1.5px
+  classDef supports fill:#e7f0ff,stroke:#2166ac,color:#1b4fa8,stroke-width:1.5px
+  classDef critiques fill:#fdecea,stroke:#b2182b,color:#7f1d1d,stroke-width:1.5px
+  classDef note fill:#f1f5f9,stroke:#64748b,color:#0f172a,stroke-width:1.5px
+  classDef topic fill:#f3e8ff,stroke:#7c3aed,color:#2e1065,stroke-width:1.5px
+  linkStyle 0,2 stroke:#2166ac,stroke-width:1.5px
+  linkStyle 1,3,4 stroke:#b2182b,stroke-width:1.5px"
+`;
+
+exports[`toMermaid > matches the generated-mermaid snapshots for the bundled examples 2`] = `
+"flowchart BT
+  _topic[["📋 Discussing how worthwhile it is to build a wall along the US's southern border.<br/>Scores: [alice, bob, casey]"]]:::topic
+  wall["💬 The US should build a wall along its southern border<br/>[4,1,8]"]:::claim
+  wall_reduces["💬 A border wall would substantially reduce illegal immigration<br/>[5,2,8]"]:::claim
+  physical_barrier["💬 A wall physically stops crossings without needing continuous surveillance<br/>[8,7,8]"]:::claim
+  climb_over["💬 People will find a way over the barrier<br/>[6,8,2]"]:::claim
+  easy_climb["💬 It's easy to climb a chain-link fence<br/>[8,8,8]"]:::claim
+  visa_overstay["💬 Most illegal immigrants enter legally and overstay visas, so they never cross the border<br/>[7,8,1]"]:::claim
+  wall_cost["💬 The wall would cost tens of billions to build and maintain<br/>[7,8,6]"]:::claim
+  material_prices["💬 Concrete and steel prices rose sharply over the last decade"]:::claim
+  little_harm["💬 Illegal immigration causes little net harm<br/>[3,8,0]"]:::claim
+  crime_stat["💬 Illegal immigrants are arrested for violent crimes at lower rates than native-born citizens<br/>[6,7,5]"]:::claim
+  unclimbable["💬 The proposed design is 30 feet tall, without handholds, and topped with barbed wire<br/>[6,-,8]"]:::claim
+  more_judges["💬 Hiring more immigration judges would cut illegal immigration more cheaply than a wall<br/>[6,7,3]"]:::claim
+  reduction_supports_wall["💬 ① &quot;A border wall would substantially reduc…&quot; supports &quot;The US should build a wall along its so…&quot;<br/>[8,2,8]"]:::claim
+  climb_easy_supports["💬 ② &quot;It's easy to climb a chain-link fence&quot; supports &quot;People will find a way over the barrier&quot;<br/>[8,8,2]"]:::claim
+  t1[/"📝 rates vary by year and state; this is a national average"/]:::note
+  wall_reduces -->|"✅ ① supports [8,2,8]"| wall
+  physical_barrier -->|"✅ supports [8,3,8]"| wall_reduces
+  climb_over -->|"⛔ critiques [7,8,6]"| wall_reduces
+  easy_climb -->|"✅ ② supports [8,8,2]"| climb_over
+  visa_overstay -->|"⛔ critiques [7,7,8]"| wall_reduces
+  wall_cost -->|"⛔ critiques [7,8,4]"| wall
+  material_prices -->|"✅ supports"| wall_cost
+  little_harm -->|"⛔ critiques [6,8,2]"| reduction_supports_wall
+  crime_stat -->|"✅ supports [5,7,1]"| little_harm
+  unclimbable -->|"⛔ critiques [7,6,8]"| climb_easy_supports
+  more_judges -->|"⛔ critiques [6,7,2]"| wall
+  wall_cost -->|"✅ supports [6,7,4]"| more_judges
+  reduction_supports_wall ~~~ wall
+  climb_easy_supports ~~~ climb_over
+  t1 -.-> crime_stat
+  wall ~~~ _topic
+  classDef claim fill:#fff4e6,stroke:#c2410c,color:#431407,stroke-width:1.5px
+  classDef supports fill:#e7f0ff,stroke:#2166ac,color:#1b4fa8,stroke-width:1.5px
+  classDef critiques fill:#fdecea,stroke:#b2182b,color:#7f1d1d,stroke-width:1.5px
+  classDef note fill:#f1f5f9,stroke:#64748b,color:#0f172a,stroke-width:1.5px
+  classDef topic fill:#f3e8ff,stroke:#7c3aed,color:#2e1065,stroke-width:1.5px
+  linkStyle 0,1,3,6,8,11 stroke:#2166ac,stroke-width:1.5px
+  linkStyle 2,4,5,7,9,10 stroke:#b2182b,stroke-width:1.5px"
+`;
+
+exports[`toMermaid > matches the generated-mermaid snapshots for the bundled examples 3`] = `
 "flowchart BT
   _topic[["📋 Discussing how worthwhile it is to build a wall along the US's southern border.<br/>Scores: [alice, bob, casey]"]]:::topic
   wall["💬 The US should build a wall along its southern border<br/>[4,1,8]"]:::claim
@@ -28,29 +99,29 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the bundled samp
   l7(["⛔ critiques<br/>[6,7,2]"]):::critiques
   l8(["✅ supports<br/>[6,7,4]"]):::supports
   t1[/"📝 rates vary by year and state; this is a national average"/]:::note
-  wall_reduces --> reduction_supports_wall
+  wall_reduces --- reduction_supports_wall
   reduction_supports_wall --> wall
-  physical_barrier --> barrier_supports_reduction
+  physical_barrier --- barrier_supports_reduction
   barrier_supports_reduction --> wall_reduces
-  climb_over --> l1
+  climb_over --- l1
   l1 --> wall_reduces
-  easy_climb --> climb_easy_supports
+  easy_climb --- climb_easy_supports
   climb_easy_supports --> climb_over
-  visa_overstay --> l2
+  visa_overstay --- l2
   l2 --> wall_reduces
-  wall_cost --> cost_critiques_wall
+  wall_cost --- cost_critiques_wall
   cost_critiques_wall --> wall
-  material_prices --> l3
+  material_prices --- l3
   l3 --> wall_cost
-  little_harm --> l4
-  l4 --> reduction_supports_wall
-  crime_stat --> l5
+  little_harm --- l4
+  l4 ==> reduction_supports_wall
+  crime_stat --- l5
   l5 --> little_harm
-  unclimbable --> l6
-  l6 --> climb_easy_supports
-  more_judges --> l7
+  unclimbable --- l6
+  l6 ==> climb_easy_supports
+  more_judges --- l7
   l7 --> wall
-  wall_cost --> l8
+  wall_cost --- l8
   l8 --> more_judges
   t1 -.-> crime_stat
   wall ~~~ _topic

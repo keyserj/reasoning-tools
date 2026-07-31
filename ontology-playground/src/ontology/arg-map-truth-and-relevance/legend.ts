@@ -23,20 +23,20 @@ const syntaxEntries: LegendEntry[] = [
   {
     marker: "<",
     label: "Link from child",
-    meaning: "The nested claim is the link's source; the line above is its target.",
+    meaning: "The nested claim is the edge's source; the line above is its target.",
     icon: "⬆️",
   },
   {
     marker: ">",
     label: "Link to child",
-    meaning: "The line above is the link's source; the nested claim is its target.",
+    meaning: "The line above is the edge's source; the nested claim is its target.",
     icon: "⬇️",
   },
   {
     marker: "[4,1,8]",
     label: "Scores",
     meaning:
-      "How strongly each perspective believes this line, 0-8 — a claim's truth, a link's relevance. Use - for unscored.",
+      "How strongly each perspective believes this line, 0-8 — a claim's truth, an edge's relevance. Use - for unscored.",
     icon: "🔢",
   },
   {
@@ -48,13 +48,13 @@ const syntaxEntries: LegendEntry[] = [
   {
     marker: "&id",
     label: "Label",
-    meaning: "Give a claim or link an id so you can reference it.",
+    meaning: "Give a claim or edge an id so you can reference it.",
     icon: "🏷️",
   },
   {
     marker: "$id",
     label: "Reference",
-    meaning: "Reuse an existing claim, or point at a link to argue about the link itself.",
+    meaning: "Reuse an existing claim, or point at an edge to argue about the edge itself.",
     icon: "🔗",
   },
   { marker: "/", label: "Meta-comment", meaning: "A comment hidden from the diagram.", icon: "🚫" },

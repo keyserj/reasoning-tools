@@ -24,3 +24,6 @@ yarn-error.log*
 
 # LLM often takes screenshots which go here
 .playwright-mcp/
+
+# local AI stuff
+.claude/*.local.*

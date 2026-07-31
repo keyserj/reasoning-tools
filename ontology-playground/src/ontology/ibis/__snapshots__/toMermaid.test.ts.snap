@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`toMermaid > matches the generated-mermaid snapshot for the bundled sample 1`] = `
+exports[`toMermaid > matches the generated-mermaid snapshot for the session-storage example 1`] = `
 "flowchart BT
   q1{{"❓ How should we handle session storage?"}}:::question
   i1["💡 Use Redis"]:::idea

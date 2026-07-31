@@ -1,32 +1,29 @@
-import type { Graph, GraphEdge, GraphNode } from "../types.ts";
-import type { ArgDoc } from "./model.ts";
+import type { FeatureState, Graph, GraphEdge, GraphNode } from "../types.ts";
+import { featureOption, featureParam } from "../features.ts";
+import type { ArgDoc, Claim, Edge } from "./model.ts";
+import {
+  EDGE_CLAIMS,
+  EDGE_DISPLAY,
+  EDGE_DISPLAY_DISTINGUISH,
+  EXPLICIT_SEPARATE,
+  IMPLICIT_ON_EDGE,
+} from "./features.ts";
 import { type Scores, formatScores } from "./scores.ts";
 
 // How this ontology gets drawn — the one file to rewrite if the rendering should change.
-//
-// Every supports/critiques link is REIFIED into its own node sitting between its endpoints
-// (`source ──▶ [supports 8,2,8] ──▶ target`). Mermaid can't point an arrow at another arrow,
-// and in this ontology a link is an argued thing in its own right: a `= $some-link-id` block
-// attaches arguments to a link's implied claim. Reifying makes that structurally identical to
-// arguing about a claim, so every `$ref` resolves to a plain node and no case is special.
-// It also puts every score in a box, which is the point of rendering this at all.
-//
-// The alternative, if the box count starts to feel heavy: draw links as labeled mermaid edges
-// (`-- "supports [8,2,8]" -->`) and give each argued-about link its own *unattached* mini
-// argument map, rooted at a claim spelling out the implied claim ("wall-reduces supports
-// wall"). That mirrors how the source text already reads, at the cost of one concept having
-// two visual forms and of `GraphEdge` needing a label.
+// Every supports/critiques edge makes a claim that can itself be argued about, and mermaid
+// can't point an arrow at another arrow; the `Edge claims` feature switches between the two
+// answers to that, which ./rendering.md lays out and compares.
 
 /** Id of the header node. Leading `_` is already a safe mermaid identifier. */
 const TOPIC_ID = "_topic";
 
-/**
- * A claim nothing argues *for* — the thesis, in a document with one. Left unconnected, the
- * topic header is a component of its own and dagre drops it among the claims, so it gets
- * anchored to the first root by an invisible edge purely to fix where it lands.
- */
+/** How much of an endpoint's text a spelled-out claim quotes before it stops being readable. */
+const SIDE_MAX = 40;
+
+/** A claim nothing argues *for* — the thesis, in a document with one. */
 function firstRootClaimId(doc: ArgDoc): string | null {
-  const sources = new Set(doc.links.map((link) => link.sourceId));
+  const sources = new Set(doc.edges.map((edge) => edge.sourceId));
   return doc.claims.find((claim) => !sources.has(claim.id))?.id ?? null;
 }
 
@@ -49,10 +46,9 @@ function topicText(doc: ArgDoc): string {
   return parts.join("\n");
 }
 
-/** Flatten an {@link ArgDoc} into the shared {@link Graph}, reifying links into nodes. */
-export function toGraph(doc: ArgDoc): Graph {
+/** Topic header + one node per claim: the part both renderings share. */
+function claimNodes(doc: ArgDoc): { nodes: GraphNode[]; known: Set<string> } {
   const nodes: GraphNode[] = [];
-  const edges: GraphEdge[] = [];
   const known = new Set<string>();
 
   const header = topicText(doc);
@@ -60,31 +56,30 @@ export function toGraph(doc: ArgDoc): Graph {
     nodes.push({ id: TOPIC_ID, type: "topic", text: header });
     known.add(TOPIC_ID);
   }
-
   for (const claim of doc.claims) {
     nodes.push({ id: claim.id, type: "claim", text: withScores(claim.text, claim.scores) });
     known.add(claim.id);
   }
-  // A link node is labelled with its type — its text *is* "supports" / "critiques", which is
-  // what its implied claim asserts about the two claims it sits between.
-  for (const link of doc.links) {
-    nodes.push({ id: link.id, type: link.type, text: withScores(link.type, link.scores) });
-    known.add(link.id);
-  }
-  for (const note of doc.notes) {
-    nodes.push({ id: note.id, type: "note", text: note.text });
-    known.add(note.id);
-  }
+  return { nodes, known };
+}
 
-  // Endpoints can dangle when a `$ref` names something that was never declared; the parser
-  // already reported that, so here the half-edge is simply dropped.
-  for (const link of doc.links) {
-    if (known.has(link.sourceId)) edges.push({ from: link.sourceId, to: link.id, type: "link" });
-    if (known.has(link.targetId)) edges.push({ from: link.id, to: link.targetId, type: "link" });
-  }
-  for (const note of doc.notes) {
-    if (known.has(note.attachedTo)) {
-      edges.push({ from: note.id, to: note.attachedTo, type: "note" });
+/**
+ * Notes and the topic anchor, which attach the same way in both renderings. An owner with no
+ * node of its own carries its notes nowhere: that's an un-argued edge under `explicit-separate`,
+ * where the note is what would have earned it a node in the first place.
+ */
+function addNotesAndAnchor(
+  doc: ArgDoc,
+  nodes: GraphNode[],
+  edges: GraphEdge[],
+  known: Set<string>,
+) {
+  const owners: (Claim | Edge)[] = [...doc.claims, ...doc.edges];
+  for (const owner of owners) {
+    if (!known.has(owner.id)) continue;
+    for (const note of owner.notes) {
+      nodes.push({ id: note.id, type: "note", text: note.text });
+      edges.push({ from: note.id, to: owner.id, type: "note" });
     }
   }
 
@@ -94,6 +89,137 @@ export function toGraph(doc: ArgDoc): Graph {
     const rootId = firstRootClaimId(doc);
     if (rootId !== null) edges.push({ from: rootId, to: TOPIC_ID, type: "anchor" });
   }
+}
 
-  return { nodes, edges };
+/** Flatten an {@link ArgDoc} into the shared {@link Graph}, reifying every edge into a node. */
+function implicitOnEdge(doc: ArgDoc, distinguish: boolean): Graph {
+  const { nodes, known } = claimNodes(doc);
+  const graphEdges: GraphEdge[] = [];
+  const edgeIds = new Set(doc.edges.map((edge) => edge.id));
+
+  // A reified node is labelled with its type — its text *is* "supports" / "critiques", which
+  // is what its implied claim asserts about the two claims it sits between.
+  for (const edge of doc.edges) {
+    nodes.push({ id: edge.id, type: edge.type, text: withScores(edge.type, edge.scores) });
+    known.add(edge.id);
+  }
+
+  // One ontology edge becomes two connectors; `distinguish` draws them as the halves they are.
+  // Endpoints can dangle when a `$ref` names something that was never declared; the parser
+  // already reported that, so here the half-edge is simply dropped.
+  for (const edge of doc.edges) {
+    if (known.has(edge.sourceId)) {
+      graphEdges.push({
+        from: edge.sourceId,
+        to: edge.id,
+        type: distinguish ? "edge-half" : "link",
+      });
+    }
+    if (known.has(edge.targetId)) {
+      graphEdges.push({
+        from: edge.id,
+        to: edge.targetId,
+        type: distinguish && edgeIds.has(edge.targetId) ? "edge-to-edge" : "link",
+      });
+    }
+  }
+
+  addNotesAndAnchor(doc, nodes, graphEdges, known);
+  return { nodes, edges: graphEdges };
+}
+
+/** `A really quite long claim…` — one side of a spelled-out claim. */
+function truncate(text: string): string {
+  return text.length <= SIDE_MAX ? text : `${text.slice(0, SIDE_MAX - 1).trimEnd()}…`;
+}
+
+/**
+ * The claim an edge makes, spelled out: `"Redis is fast for hot reads" supports "We should…"`.
+ *
+ * A side falls back to the endpoint's id in the two cases where there is no claim text to
+ * quote, both reachable: the endpoint is itself an edge (a nested implied claim — spelling
+ * that one out in full is unreadable), or it is an unresolved `$ref`, which is the normal
+ * state while typing `= $foo` before `&foo` exists.
+ */
+function impliedClaimText(edge: Edge, claimTextById: Map<string, string>): string {
+  const side = (id: string) => truncate(claimTextById.get(id) ?? id);
+  return `"${side(edge.sourceId)}" ${edge.type} "${side(edge.targetId)}"`;
+}
+
+/** What a labeled edge says: its type and, when someone scored it, its score row. */
+function edgeLabel(edge: Edge): string {
+  return edge.scores === null ? edge.type : `${edge.type} ${formatScores(edge.scores)}`;
+}
+
+/** Circled digits run out at ⑳, where the parenthesized form takes over. */
+function marker(n: number): string {
+  return n <= 20 ? String.fromCodePoint(0x245f + n) : `(${n})`;
+}
+
+/**
+ * Flatten an {@link ArgDoc} into the shared {@link Graph}, drawing edges as labeled connectors
+ * and giving only the argued-about ones a detached node that spells their claim out.
+ */
+function explicitSeparate(doc: ArgDoc): Graph {
+  const { nodes, known } = claimNodes(doc);
+  const graphEdges: GraphEdge[] = [];
+  const claimTextById = new Map(doc.claims.map((claim) => [claim.id, claim.text]));
+
+  // An edge needs a node of its own exactly when something has to attach to it: another edge
+  // argues about it (that's what a `= $edge-id` block writes), or a note hangs off it.
+  const edgeIds = new Set(doc.edges.map((edge) => edge.id));
+  const argued = new Set<string>();
+  for (const edge of doc.edges) {
+    if (edgeIds.has(edge.sourceId)) argued.add(edge.sourceId);
+    if (edgeIds.has(edge.targetId)) argued.add(edge.targetId);
+    if (edge.notes.length > 0) argued.add(edge.id);
+  }
+
+  const markers = new Map<string, string>();
+  for (const edge of doc.edges) {
+    if (!argued.has(edge.id)) continue;
+    const mark = marker(markers.size + 1);
+    markers.set(edge.id, mark);
+    nodes.push({
+      id: edge.id,
+      type: "claim",
+      text: withScores(`${mark} ${impliedClaimText(edge, claimTextById)}`, edge.scores),
+    });
+    known.add(edge.id);
+  }
+
+  // A dangling endpoint drops the connector, as in the other rendering. An endpoint that is
+  // itself an edge resolves to that edge's detached node, which exists by construction: being
+  // an endpoint is what got it one.
+  for (const edge of doc.edges) {
+    if (!known.has(edge.sourceId) || !known.has(edge.targetId)) continue;
+    const mark = markers.get(edge.id);
+    graphEdges.push({
+      from: edge.sourceId,
+      to: edge.targetId,
+      type: edge.type,
+      label: mark === undefined ? edgeLabel(edge) : `${mark} ${edgeLabel(edge)}`,
+    });
+  }
+
+  // The marker says *which* connector a detached node is about; this anchor says roughly
+  // *where*. The BT trap from addNotesAndAnchor applies: the node has to be the source for it
+  // to land beneath the connector's upper end. Target end only — see ./rendering.md for why
+  // pinning both is worse.
+  for (const edge of doc.edges) {
+    if (markers.has(edge.id) && known.has(edge.targetId)) {
+      graphEdges.push({ from: edge.id, to: edge.targetId, type: "anchor" });
+    }
+  }
+
+  addNotesAndAnchor(doc, nodes, graphEdges, known);
+  return { nodes, edges: graphEdges };
+}
+
+/** Flatten an {@link ArgDoc} into the shared {@link Graph}, per the `Edge claims` feature. */
+export function toGraph(doc: ArgDoc, features: FeatureState): Graph {
+  const option = featureOption(features, EDGE_CLAIMS, EXPLICIT_SEPARATE);
+  if (option !== IMPLICIT_ON_EDGE) return explicitSeparate(doc);
+  const display = featureParam(features, EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_DISTINGUISH);
+  return implicitOnEdge(doc, display === EDGE_DISPLAY_DISTINGUISH);
 }

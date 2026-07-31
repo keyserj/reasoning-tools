@@ -12,6 +12,15 @@ body,
   margin: 0;
 }
 
+/* The app is exactly one screen; only the panes inside it scroll. Without this, anything
+   that briefly overflows (a re-rendering diagram, an expanding feature panel) flashes the
+   document scrollbar, and because the editor pane is a *percentage* of the width, that 15px
+   moves the split by 6px and back — a visible sideways jump on every feature change. */
+html,
+body {
+  overflow: hidden;
+}
+
 /* Mobile browser chrome shrinks the viewport as it hides/shows; dvh tracks that so the
    app stays exactly one screen tall instead of overflowing. */
 html {

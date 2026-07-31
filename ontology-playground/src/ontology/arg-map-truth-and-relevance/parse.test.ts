@@ -1,34 +1,30 @@
 import { describe, expect, it } from "vitest";
-import { parse, parseDoc } from "./parse.ts";
-import sample from "./example.txt?raw";
+import { parse } from "./parse.ts";
+import sessionStorage from "./examples/session-storage.txt?raw";
+import buildAWall from "./examples/build-a-wall.txt?raw";
+
+// Parsing produces the ontology's own model and stops there — how a document is drawn is
+// ./toGraph.test.ts's business.
 
 /** Just the messages, for the error cases. */
 const messages = (text: string): string[] => parse(text).errors.map((e) => e.message);
 
 describe("parse", () => {
-  it("reifies a `<` link into a node between its child source and parent target", () => {
-    const { graph } = parse("= Thesis &t\n  < supports[8] &sup\n    = Reason &r");
-    expect(graph.nodes).toEqual([
-      { id: "t", type: "claim", text: "Thesis" },
-      { id: "r", type: "claim", text: "Reason" },
-      { id: "sup", type: "supports", text: "supports\n[8]" },
-    ]);
-    expect(graph.edges).toEqual([
-      { from: "r", to: "sup", type: "link" },
-      { from: "sup", to: "t", type: "link" },
+  it("reads a `<` edge as running from its nested child to the line above", () => {
+    const { doc } = parse("= Thesis &t\n  < supports[8] &sup\n    = Reason &r");
+    expect(doc.claims.map((c) => c.id)).toEqual(["t", "r"]);
+    expect(doc.edges).toEqual([
+      { id: "sup", type: "supports", sourceId: "r", targetId: "t", scores: [8], notes: [] },
     ]);
   });
 
-  it("points a `>` link the other way: parent is the source, child the target", () => {
-    const { graph } = parse("= Thesis &t\n= Alternative &a\n  > critiques[6] &crit\n    = $t");
-    expect(graph.edges).toEqual([
-      { from: "a", to: "crit", type: "link" },
-      { from: "crit", to: "t", type: "link" },
-    ]);
+  it("points a `>` edge the other way: parent is the source, child the target", () => {
+    const { doc } = parse("= Thesis &t\n= Alternative &a\n  > critiques[6] &crit\n    = $t");
+    expect(doc.edges[0]).toMatchObject({ id: "crit", sourceId: "a", targetId: "t" });
   });
 
-  it("attaches an argument to a link's implied claim via a `= $link-id` block", () => {
-    const { graph } = parse(
+  it("attaches an argument to an edge's implied claim via a `= $edge-id` block", () => {
+    const { doc } = parse(
       [
         "= Thesis &t",
         "  < supports[8] &sup",
@@ -38,18 +34,13 @@ describe("parse", () => {
         "    = Beside the point &btp",
       ].join("\n"),
     );
-    // The critique targets the *link*, not either claim it connects.
-    expect(graph.edges).toEqual([
-      { from: "r", to: "sup", type: "link" },
-      { from: "sup", to: "t", type: "link" },
-      { from: "btp", to: "crit", type: "link" },
-      { from: "crit", to: "sup", type: "link" },
-    ]);
-    expect(graph.nodes.filter((n) => n.id === "sup")).toHaveLength(1);
+    // The critique targets the *edge*, not either claim it connects.
+    expect(doc.edges[1]).toMatchObject({ id: "crit", sourceId: "btp", targetId: "sup" });
+    expect(doc.claims.map((c) => c.id)).not.toContain("sup");
   });
 
-  it("reuses a claim referenced from two places without duplicating the node", () => {
-    const { graph } = parse(
+  it("reuses a claim referenced from two places without duplicating it", () => {
+    const { doc } = parse(
       [
         "= A &a",
         "  < supports &l1",
@@ -59,56 +50,55 @@ describe("parse", () => {
         "    = $s",
       ].join("\n"),
     );
-    expect(graph.nodes.filter((n) => n.id === "s")).toHaveLength(1);
-    expect(graph.edges).toContainEqual({ from: "s", to: "l1", type: "link" });
-    expect(graph.edges).toContainEqual({ from: "s", to: "l2", type: "link" });
+    expect(doc.claims.filter((c) => c.id === "s")).toHaveLength(1);
+    expect(doc.edges.map((l) => l.sourceId)).toEqual(["s", "s"]);
   });
 
   it("distinguishes an unscored slot from nobody having scored at all", () => {
-    const { doc } = parseDoc("=[6,-,8] Scored &a\n  < supports\n    = Unscored &b");
+    const { doc } = parse("=[6,-,8] Scored &a\n  < supports\n    = Unscored &b");
     expect(doc.claims[0].scores).toEqual([6, null, 8]);
     expect(doc.claims[1].scores).toBeNull();
-    expect(doc.links[0].scores).toBeNull();
+    expect(doc.edges[0].scores).toBeNull();
   });
 
   it("accepts kebab-case ids", () => {
-    const { graph } = parse("= A &wall-reduces\n  < supports &barrier-supports-reduction\n    = B");
-    expect(graph.nodes.map((n) => n.id)).toContain("wall-reduces");
-    expect(graph.nodes.map((n) => n.id)).toContain("barrier-supports-reduction");
+    const { doc } = parse("= A &wall-reduces\n  < supports &barrier-supports-reduction\n    = B");
+    expect(doc.claims.map((c) => c.id)).toContain("wall-reduces");
+    expect(doc.edges.map((l) => l.id)).toContain("barrier-supports-reduction");
   });
 
   it("keeps notes, drops meta-comments, and lets a sibling claim still be the endpoint", () => {
-    const { graph } = parse(
+    const { doc } = parse(
       "= A &a\n  < supports &l\n    / dropped entirely\n    ~ a note &nt\n    = B &b",
     );
-    expect(graph.nodes).toContainEqual({ id: "nt", type: "note", text: "a note" });
-    expect(graph.nodes.map((n) => n.text)).not.toContain("dropped entirely");
-    expect(graph.edges).toContainEqual({ from: "nt", to: "l", type: "note" });
-    expect(graph.edges).toContainEqual({ from: "b", to: "l", type: "link" });
+    // The note hangs off the edge line it was nested under, not off either claim.
+    expect(doc.edges[0].notes).toEqual([{ id: "nt", text: "a note" }]);
+    expect(doc.claims.map((c) => c.text)).not.toContain("dropped entirely");
+    expect(doc.edges[0]).toMatchObject({ sourceId: "b", targetId: "a" });
   });
 
-  it("builds a topic header from %description and %perspectives", () => {
-    const { graph } = parse("%description: Why we care\n%perspectives: [alice, bob]\n= A &a");
-    expect(graph.nodes[0]).toEqual({
-      id: "_topic",
-      type: "topic",
-      text: "Why we care\nScores: [alice, bob]",
-    });
+  it("drops a note whose owner never resolved, rather than leaving it ownerless", () => {
+    const { doc, errors } = parse("= A &a\n  < supports\n    = $nope\n      ~ orphan");
+    expect(errors.map((e) => e.message)).toContain('Unknown reference "$nope"');
+    expect(doc.claims.flatMap((c) => c.notes)).toEqual([]);
+    expect(doc.edges.flatMap((e) => e.notes)).toEqual([]);
   });
 
-  it("omits the topic header when the document declares neither property", () => {
-    const { graph } = parse("= A &a");
-    expect(graph.nodes.map((n) => n.type)).not.toContain("topic");
+  it("reads %description and %perspectives as document properties", () => {
+    const { doc } = parse("%description: Why we care\n%perspectives: [alice, bob]\n= A &a");
+    expect(doc.description).toBe("Why we care");
+    expect(doc.perspectives).toEqual(["alice", "bob"]);
   });
 
-  it("auto-ids claims and links that have no `&id`", () => {
-    const { graph } = parse("= A\n  < supports\n    = B");
-    expect(graph.nodes.map((n) => n.id)).toEqual(["c1", "c2", "l1"]);
+  it("auto-ids claims and edges that have no `&id`", () => {
+    const { doc } = parse("= A\n  < supports\n    = B");
+    expect(doc.claims.map((c) => c.id)).toEqual(["c1", "c2"]);
+    expect(doc.edges.map((l) => l.id)).toEqual(["l1"]);
   });
 
-  it("reports an unknown link type", () => {
+  it("reports an unknown edge type", () => {
     expect(messages("= A &a\n  < undermines\n    = B")).toContain(
-      'Unknown link type "undermines" (expected supports or critiques)',
+      'Unknown edge type "undermines" (expected supports or critiques)',
     );
   });
 
@@ -125,20 +115,22 @@ describe("parse", () => {
     );
   });
 
-  it("rejects a link line with no claim, or with two claims, nested under it", () => {
+  it("rejects an edge line with no claim, or with two claims, nested under it", () => {
     expect(messages("= A &a\n  < supports")).toContain('A "<" line needs a claim nested under it');
     expect(messages("= A &a\n  < supports\n    = B\n    = C")).toContain(
       'This "<" line already has a claim nested under it',
     );
   });
 
-  it("rejects a link line with nothing above it to link to", () => {
-    expect(messages("< supports\n  = B")).toContain('A "<" line needs a claim above it to link');
+  it("rejects an edge line with nothing above it to attach to", () => {
+    expect(messages("< supports\n  = B")).toContain(
+      'A "<" line needs a claim above it to attach to',
+    );
   });
 
-  it("rejects a link line nested under another link line", () => {
+  it("rejects an edge line nested under another edge line", () => {
     expect(messages("= A &a\n  < supports\n    < critiques\n      = B")).toContain(
-      'A "<" line can\'t nest under another link line — argue about a link with a "= $link-id" block',
+      'A "<" line can\'t nest under another edge line — argue about an edge with a "= $edge-id" block',
     );
   });
 
@@ -168,14 +160,15 @@ describe("parse", () => {
   it("handles mixed tabs and spaces the same way", () => {
     const withTabs = parse("= A &a\n\t< supports &l\n\t\t= B &b");
     expect(withTabs.errors).toEqual([]);
-    expect(withTabs.graph.edges).toContainEqual({ from: "b", to: "l", type: "link" });
+    expect(withTabs.doc.edges[0]).toMatchObject({ sourceId: "b", targetId: "a" });
   });
 
-  it("parses the bundled sample without errors", () => {
-    expect(parse(sample).errors).toEqual([]);
+  it("parses the bundled examples without errors", () => {
+    expect(parse(sessionStorage).errors).toEqual([]);
+    expect(parse(buildAWall).errors).toEqual([]);
   });
 
-  it("matches the parsed-graph snapshot for the bundled sample", () => {
-    expect(parse(sample).graph).toMatchSnapshot();
+  it("matches the parsed-model snapshot for the build-a-wall example", () => {
+    expect(parse(buildAWall).doc).toMatchSnapshot();
   });
 });

@@ -17,9 +17,15 @@ LLMs are pretty great at plugging into this playground, so trying out your ideas
 Each lives in `src/ontology/<id>/` and documents itself: `ontology.md` for what it is, `rendering.md` for how the playground draws it, `ideal-ux-design.md` for what an ideal app might look like (not all ontologies have this one). The full syntax key is also in the app under **Key**.
 
 - **[IBIS](./src/ontology/ibis/ontology.md)** ([rendering](./src/ontology/ibis/rendering.md)) — the classic question / idea / pro / con argument map.
-- **[Argument map: truth and relevance](./src/ontology/arg-map-truth-and-relevance/ontology.md)** ([rendering](./src/ontology/arg-map-truth-and-relevance/rendering.md)) — claims linked by supports/critiques, where each link is itself a claim that can be scored and argued about.
+- **[Argument map: truth and relevance](./src/ontology/arg-map-truth-and-relevance/ontology.md)** ([rendering](./src/ontology/arg-map-truth-and-relevance/rendering.md)) — claims joined by supports/critiques edges, where each edge is itself a claim that can be scored and argued about.
 
-[TODO] A shared set of examples, so the same reasoning can be viewed through each ontology. The arg-map example is an adaptation of `ameliorate-v2`'s "Build a wall", so those two can already be compared.
+## Examples
+
+Each ontology has a set of examples that show off its syntax and features. The playground can switch between ontologies while keeping the same example, so you can see how the same reasoning looks through different lenses.
+
+## Features
+
+Each ontology can declare features that change how the playground renders its model. These just help you play around with different ways of displaying the same underlying model.
 
 ## Develop
 

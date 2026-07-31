@@ -1,4 +1,4 @@
-import type { Graph, GraphEdge, GraphNode, ParseError, ParseResult } from "../types.ts";
+import type { Graph, GraphEdge, GraphNode, ParseError } from "../types.ts";
 import { MARKER_TO_TYPE, META_MARKER } from "./markers.ts";
 
 const TAB_SIZE = 4;
@@ -37,8 +37,11 @@ interface PendingRef {
  * `=` idea, `+` pro, `-` con, `~` note, `/` meta-comment (dropped). `&id` labels a
  * node; `$id` (as the whole body) references an existing node instead of making one.
  * Edges point child -> parent (argument-map direction).
+ *
+ * IBIS's own model *is* the shared `Graph`, so the `doc` an ontology hands to its
+ * `toMermaid` is that graph, with nothing left to flatten.
  */
-export function parse(text: string): ParseResult {
+export function parse(text: string): { doc: Graph; errors: ParseError[] } {
   const nodes: GraphNode[] = [];
   const edges: GraphEdge[] = [];
   const errors: ParseError[] = [];
@@ -134,5 +137,5 @@ export function parse(text: string): ParseResult {
   }
 
   const graph: Graph = { nodes, edges };
-  return { graph, errors };
+  return { doc: graph, errors };
 }

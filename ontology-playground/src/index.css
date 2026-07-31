@@ -5,6 +5,16 @@
     dark --prefersdark;
 }
 
+/* daisyUI's stock dark ramp packs base-100/200/300 into ~4 points of oklch lightness. That's
+   the same perceptual step as its light ramp, but near black it lands on far fewer sRGB code
+   values and gets washed out by ambient screen glare, so chrome and canvas read as one
+   surface. Widened here, weighted toward base-300, which draws the dividers. App.tsx always
+   writes an explicit data-theme, so this one selector covers both ways dark mode is reached. */
+[data-theme="dark"] {
+  --color-base-200: oklch(20.5% 0.014 253.1);
+  --color-base-300: oklch(16% 0.012 254.09);
+}
+
 html,
 body,
 #root {

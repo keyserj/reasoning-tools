@@ -1,6 +1,6 @@
 # Argument map: truth and relevance
 
-Ontology id: `arg-map-truth-and-relevance`. Implemented in the playground; this doc and [example.txt](./example.txt) are where the syntax gets settled, and the rest of this directory implements it. How the playground draws it is a separate question, kept in [rendering.md](./rendering.md).
+Ontology id: `arg-map-truth-and-relevance`. Implemented in the playground; this doc and [examples/build-a-wall.txt](./examples/build-a-wall.txt) are where the syntax gets settled, and the rest of this directory implements it. How the playground draws it is a separate question, kept in [rendering.md](./rendering.md).
 
 This ontology is essentially a narrowing of [ameliorate-v2's contested causal map](../../../../ameliorate-v2/ontology.md) down to claims and supports/critiques edges.
 
@@ -18,9 +18,11 @@ This ontology is essentially a narrowing of [ameliorate-v2's contested causal ma
 
 ### Context
 
-[example.txt](./example.txt) - "Build a wall", adapted from ameliorate-v2's example of the same name so the two ontologies can be compared on the same subject matter. Like any adaptation it's lossy, and what it loses says something about both ontologies: a weighted `causes` edge between concepts can only appear here as a claim whose score is belief in it, and the criteria, questions and sources have no home in this ontology at all.
+[examples/build-a-wall.txt](./examples/build-a-wall.txt) - "Build a wall", adapted from ameliorate-v2's example of the same name so the two ontologies can be compared on the same subject matter. Like any adaptation it's lossy, and what it loses says something about both ontologies: a weighted `causes` edge between concepts can only appear here as a claim whose score is belief in it, and the criteria, questions and sources have no home in this ontology at all.
 
 Scores convey three people's perspectives via the `%perspectives` line.
+
+The other examples live in [examples/](./examples/), each a writing of one of the playground's shared examples.
 
 - Syntax legend:
   - indentation nests a line under the line above
@@ -46,8 +48,8 @@ Scores convey three people's perspectives via the `%perspectives` line.
 
 ### What the example shows
 
-- **A claim's score and its link's score pulling apart, in both directions.** `visa-overstay` is casey at claim 1 / link 8: he fully grants that _if_ most immigrants overstay visas the wall is beside the point, and denies the premise. `crime-stat` is casey at claim 5 / link 1: he grants the statistic and denies it bears on harm. This is what the "if true" framing buys — without it, casey has one number per argument and no way to say which half he objects to.
-- **A link as the thing being argued.** Bob's whole position is the `= $reduction-supports-wall` block: not that the wall wouldn't work, but that whether it works barely bears on whether to build it.
+- **A claim's score and its edge's score pulling apart, in both directions.** `visa-overstay` is casey at claim 1 / edge 8: he fully grants that _if_ most immigrants overstay visas the wall is beside the point, and denies the premise. `crime-stat` is casey at claim 5 / edge 1: he grants the statistic and denies it bears on harm. This is what the "if true" framing buys — without it, casey has one number per argument and no way to say which half he objects to.
+- **An edge as the thing being argued.** Bob's whole position is the `= $reduction-supports-wall` block: not that the wall wouldn't work, but that whether it works barely bears on whether to build it.
 - **Undercut vs rebut.** `unclimbable` doesn't say `climb-over` is false — it attacks whether fence-climbing evidence transfers to this design, so it hangs off `= $climb-easy-supports`. `climb-over` itself is a plain rebut of `wall-reduces`.
 - **Reuse.** `wall-cost` critiques the thesis and supports `more-judges`.
 
@@ -67,6 +69,7 @@ Scores convey three people's perspectives via the `%perspectives` line.
 ##### Notes
 
 - claims are worded as evaluable statements, since their score is belief in them. A claim and its opposite are separate claims (see [Individual: Scores](#individual-scores))
+- there is no node type for a _question_, which is visible when a document is adapted from [IBIS](../ibis/ontology.md): a question becomes two competing root claims ("we should use Redis…" / "we should use Postgres rows…"). That's faithful to the argument but loses the fact that the two are answers to the same thing — and leaves the topic header anchored above only the first of them (see [rendering.md](./rendering.md))
 
 #### Supports / Critiques
 

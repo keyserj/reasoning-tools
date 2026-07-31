@@ -1,83 +1,118 @@
 import { describe, expect, it } from "vitest";
-import type { Graph } from "../types.ts";
+import type { FeatureState } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toMermaid } from "./toMermaid.ts";
 import { defaultConfig } from "./defaultConfig.ts";
-import sample from "./example.txt?raw";
+import { EDGE_CLAIMS, IMPLICIT_ON_EDGE } from "./features.ts";
+import sessionStorage from "./examples/session-storage.txt?raw";
+import buildAWall from "./examples/build-a-wall.txt?raw";
+
+/** `{}` resolves to every feature's default, which is what a fresh document has. */
+const defaults: FeatureState = {};
+const implicit: FeatureState = { [EDGE_CLAIMS]: { option: IMPLICIT_ON_EDGE } };
+
+const render = (text: string, features = defaults, config = defaultConfig) =>
+  toMermaid(parse(text).doc, config, features);
 
 describe("toMermaid", () => {
-  it("draws claims as rectangles and reified links as stadiums between them", () => {
-    const { graph } = parse("= Thesis &t\n  < supports[8] &sup\n    = Reason &r");
-    const out = toMermaid(graph, defaultConfig);
+  it("draws claims as rectangles joined by a labeled, colored edge", () => {
+    const out = render("= Thesis &t\n  < supports[8] &sup\n    = Reason &r");
     expect(out.startsWith("flowchart BT")).toBe(true);
     expect(out).toContain('t["💬 Thesis"]:::claim');
+    expect(out).toContain('r -->|"✅ supports [8]"| t');
+    // Without color the two edge types would differ only by the word in the label.
+    expect(out).toContain("linkStyle 0 stroke:#2166ac");
+  });
+
+  it("styles a critiques edge distinctly from a supports edge", () => {
+    const out = render("= A &a\n  < critiques[2] &crit\n    = B &b");
+    expect(out).toContain('b -->|"⛔ critiques [2]"| a');
+    expect(out).toContain("linkStyle 0 stroke:#b2182b");
+  });
+
+  it("draws an argued-about edge as a detached claim spelling its claim out", () => {
+    const out = render(
+      "= Thesis &t\n  < supports[8] &sup\n    = Reason &r\n= $sup\n  < critiques[2] &c\n    = No &n",
+    );
+    expect(out).toContain(
+      'sup["💬 ① &quot;Reason&quot; supports &quot;Thesis&quot;<br/>[8]"]:::claim',
+    );
+    // The same marker on the edge is what says which edge that node is about, and the
+    // invisible anchor is what stops dagre from parking it across the diagram.
+    expect(out).toContain('r -->|"✅ ① supports [8]"| t');
+    expect(out).toContain("sup ~~~ t");
+  });
+
+  it("reifies every edge into a stadium in the implicit rendering", () => {
+    const out = render("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", implicit);
     expect(out).toContain('sup(["✅ supports<br/>[8]"]):::supports');
-    expect(out).toContain("r --> sup");
+    expect(out).toContain("r --- sup");
     expect(out).toContain("sup --> t");
-    expect(out).toContain("classDef supports");
+    expect(out).not.toContain("linkStyle");
+  });
+
+  it("thickens the connector that lands on another edge box", () => {
+    const out = render(
+      "= Thesis &t\n  < supports &sup\n    = Reason &r\n= $sup\n  < critiques &c\n    = No &n",
+      implicit,
+    );
+    expect(out).toContain("c ==> sup");
   });
 
   it("puts scores on a second line", () => {
-    const { graph } = parse("=[6,-,8] A claim &a");
-    expect(toMermaid(graph, defaultConfig)).toContain('a["💬 A claim<br/>[6,-,8]"]:::claim');
-  });
-
-  it("styles a critiques link distinctly from a supports link", () => {
-    const { graph } = parse("= A &a\n  < critiques[2] &crit\n    = B &b");
-    expect(toMermaid(graph, defaultConfig)).toContain('crit(["⛔ critiques<br/>[2]"]):::critiques');
+    expect(render("=[6,-,8] A claim &a")).toContain('a["💬 A claim<br/>[6,-,8]"]:::claim');
   });
 
   it("uses a dotted edge and parallelogram shape for notes", () => {
-    const { graph } = parse("= A &a\n  ~ a note &nt");
-    const out = toMermaid(graph, defaultConfig);
+    const out = render("= A &a\n  ~ a note &nt");
     expect(out).toContain('nt[/"📝 a note"/]:::note');
     expect(out).toContain("nt -.-> a");
   });
 
   it("renders the topic header as a subroutine box carrying the perspectives key", () => {
-    const { graph } = parse("%description: Why we care\n%perspectives: [alice, bob]\n= A &a");
-    expect(toMermaid(graph, defaultConfig)).toContain(
-      '_topic[["📋 Why we care<br/>Scores: [alice, bob]"]]:::topic',
-    );
+    const out = render("%description: Why we care\n%perspectives: [alice, bob]\n= A &a");
+    expect(out).toContain('_topic[["📋 Why we care<br/>Scores: [alice, bob]"]]:::topic');
   });
 
   it("anchors the topic header to the first root claim with an invisible edge", () => {
-    const { graph } = parse(
+    // `r` argues for something, `t` doesn't — so `t` is the root the header hangs off. The
+    // root is the *source* so that BT ranks the header above it.
+    const out = render(
       "%perspectives: [alice]\n= Thesis &t\n  < supports[8] &sup\n    = Reason &r",
     );
-    // `r` argues for something, `t` doesn't — so `t` is the root the header hangs off. The root
-    // is the *source* so that BT ranks the header above it.
-    expect(graph.edges).toContainEqual({ from: "t", to: "_topic", type: "anchor" });
-    expect(toMermaid(graph, defaultConfig)).toContain("t ~~~ _topic");
+    expect(out).toContain("t ~~~ _topic");
   });
 
-  it("skips the anchor when there is no topic header", () => {
-    const { graph } = parse("= Thesis &t");
-    expect(graph.edges).toEqual([]);
+  it("counts linkStyle indices by emitted line, not by position in the edge list", () => {
+    // The first edge's `$nope` never resolves, so it is dropped and the *second* edge
+    // is mermaid's edge 0. Using the array index here would paint the wrong edge.
+    const out = render("= A &a\n  < supports &l\n    = $nope\n  < critiques[2] &c\n    = B &b");
+    expect(out).toContain('b -->|"⛔ critiques [2]"| a');
+    expect(out).toContain("linkStyle 0 stroke:#b2182b");
   });
 
-  it("omits icons when showIcons is false", () => {
-    const { graph } = parse("= A &a\n  < supports[8] &sup\n    = B &b");
-    const out = toMermaid(graph, { ...defaultConfig, showIcons: false });
+  it("omits icons on nodes and edge labels when showIcons is false", () => {
+    const out = render("= A &a\n  < supports[8] &sup\n    = B &b", defaults, {
+      ...defaultConfig,
+      showIcons: false,
+    });
     expect(out).toContain('a["A"]:::claim');
-    expect(out).toContain('sup(["supports<br/>[8]"]):::supports');
+    expect(out).toContain('b -->|"supports [8]"| a');
   });
 
   it("escapes embedded quotes and sanitizes unsafe ids", () => {
-    const graph: Graph = {
-      nodes: [{ id: "wall-reduces", type: "claim", text: 'say "hi"' }],
-      edges: [],
-    };
-    const out = toMermaid(graph, defaultConfig);
+    const out = render('= say "hi" &wall-reduces');
     expect(out).toContain("&quot;hi&quot;");
     expect(out).toContain("wall_reduces[");
   });
 
-  it("returns a placeholder for an empty graph", () => {
-    expect(toMermaid({ nodes: [], edges: [] }, defaultConfig)).toContain("_empty");
+  it("returns a placeholder for an empty document", () => {
+    expect(render("")).toContain("_empty");
   });
 
-  it("matches the generated-mermaid snapshot for the bundled sample", () => {
-    expect(toMermaid(parse(sample).graph, defaultConfig)).toMatchSnapshot();
+  it("matches the generated-mermaid snapshots for the bundled examples", () => {
+    expect(toMermaid(parse(sessionStorage).doc, defaultConfig, defaults)).toMatchSnapshot();
+    expect(toMermaid(parse(buildAWall).doc, defaultConfig, defaults)).toMatchSnapshot();
+    expect(toMermaid(parse(buildAWall).doc, defaultConfig, implicit)).toMatchSnapshot();
   });
 });

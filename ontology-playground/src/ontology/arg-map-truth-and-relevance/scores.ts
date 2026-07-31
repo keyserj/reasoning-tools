@@ -1,5 +1,5 @@
 // Every score in this ontology is belief in some claim on the same 0..8 scale — a claim's
-// reads as "truth", a link's as "relevance", purely because of what the link's implied
+// reads as "truth", an edge's as "relevance", purely because of what the edge's implied
 // claim says. Nothing here distinguishes the two.
 
 export const MIN_SCORE = 0;

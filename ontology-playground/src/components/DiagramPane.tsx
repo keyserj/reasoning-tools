@@ -69,7 +69,9 @@ export default function DiagramPane({ mermaidText, theme }: Props) {
   );
 
   return (
-    <div className="relative flex-1 min-w-0 bg-base-100">
+    // `min-h-0` so the pane can shrink when the feature strip above it expands, instead of
+    // pushing itself out of the column.
+    <div className="relative flex-1 min-w-0 min-h-0 bg-base-100">
       {/* touch-none hands drag/pinch to svg-pan-zoom instead of the browser panning the page. */}
       <div ref={containerRef} className="absolute inset-0 overflow-hidden touch-none" />
 

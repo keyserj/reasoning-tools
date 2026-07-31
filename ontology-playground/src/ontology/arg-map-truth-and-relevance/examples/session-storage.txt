@@ -1,0 +1,21 @@
+%description: Where should we keep web session state?
+%perspectives: [alice, bob]
+
+=[7,3] We should use Redis for session storage &redis
+  < supports[8,4] &fast-supports-redis
+    =[8,8] Redis is fast for hot reads &fast
+  < critiques[5,7]
+    =[6,6] It's another service to operate &ops-cost
+
+=[4,6] We should use Postgres rows for session storage &postgres
+  < supports[7,7]
+    = $ops-cost
+      / reuse: the same claim argues for Postgres and against Redis
+  < critiques[6,-]
+    =[7,3] Postgres is slower for hot reads &slow-reads
+      ~ measured on last year's hardware
+
+/ arguing about an edge's relevance rather than about the claim it points at
+= $fast-supports-redis
+  < critiques[7,2]
+    =[5,2] Our session reads aren't hot enough for speed to matter &not-hot

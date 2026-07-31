@@ -17,7 +17,7 @@ This is a well-established ontology rather than one being designed here, so this
 
 ## Example
 
-[example.txt](./example.txt) — two questions about session storage and background jobs, chosen to show off the syntax rather than to actually make an argument.
+[examples/session-storage.txt](./examples/session-storage.txt) — two questions about session storage and background jobs, chosen to show off the syntax rather than to actually make an argument.
 
 - Syntax legend:
   - indentation nests a line under the line above

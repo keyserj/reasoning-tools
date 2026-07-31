@@ -1,16 +1,15 @@
-import type { ParseError, ParseResult } from "../types.ts";
-import type { ArgDoc, Claim, Link, Note } from "./model.ts";
+import type { ParseError } from "../types.ts";
+import type { ArgDoc, Claim, Edge, Note } from "./model.ts";
 import {
   DESCRIPTION_KEY,
   EXPECTED_MARKERS,
-  LINK_TYPES,
-  type LinkType,
+  EDGE_TYPES,
+  type EdgeType,
   MARKER_TO_KIND,
   PERSPECTIVES_KEY,
-  isLinkType,
+  isEdgeType,
 } from "./markers.ts";
 import { type Scores, takeScores } from "./scores.ts";
-import { toGraph } from "./toGraph.ts";
 
 const TAB_SIZE = 4;
 
@@ -29,32 +28,32 @@ const LEADING_WS = /^[ \t]*/;
 const ID_SUFFIX = /\s*&([A-Za-z0-9_-]+)\s*$/;
 const REF_BODY = /^\$([A-Za-z0-9_-]+)$/;
 const PROPERTY = /^%([A-Za-z0-9_-]+)\s*:\s*(.*)$/;
-const LINK_TYPE_HEAD = /^([A-Za-z]+)/;
+const EDGE_TYPE_HEAD = /^([A-Za-z]+)/;
 const BRACKETED_LIST = /^\[(.*)\]$/;
 
 interface ClaimFrame {
   kind: "claim";
   indent: number;
-  /** the claim (or, for a `= $ref` block, the referenced claim or link) children attach to */
+  /** the claim (or, for a `= $ref` block, the referenced claim or edge) children attach to */
   id: string;
 }
 
-interface LinkFrame {
-  kind: "link";
+interface EdgeFrame {
+  kind: "edge";
   indent: number;
-  pending: PendingLink;
+  pending: PendingEdge;
 }
 
-type Frame = ClaimFrame | LinkFrame;
+type Frame = ClaimFrame | EdgeFrame;
 
 /**
  * A `<` or `>` line, held open until the claim nested under it supplies the other endpoint.
- * `valid` is false once the line has an error that makes the link unusable — the frame is
+ * `valid` is false once the line has an error that makes the edge unusable — the frame is
  * still pushed so its child gets absorbed instead of cascading more errors.
  */
-interface PendingLink {
+interface PendingEdge {
   id: string;
-  type: LinkType;
+  type: EdgeType;
   scores: Scores | null;
   parentId: string;
   /** `<` = the nested child is the source; `>` = the child is the target */
@@ -67,19 +66,28 @@ interface PendingLink {
 /**
  * Parse this ontology's syntax into its own {@link ArgDoc} model.
  *
- * Lines: `=` claim, `<`/`>` a supports/critiques link, `~` note, `%key: value` document
+ * Lines: `=` claim, `<`/`>` a supports/critiques edge, `~` note, `%key: value` document
  * property, `/` meta-comment (dropped). Scores follow their marker directly (`=[4,1,8]`,
- * `supports[8,2,8]`). `&id` names the claim or link on the line; `= $id` references one
- * instead of declaring it, which is how an argument attaches to a *link's* implied claim.
+ * `supports[8,2,8]`). `&id` names the claim or edge on the line; `= $id` references one
+ * instead of declaring it, which is how an argument attaches to an *edge's* implied claim.
+ *
+ * This is the whole of parsing: turning the model into something mermaid can draw is a
+ * rendering decision, and lives in ./toGraph.ts behind the `Edge claims` feature.
  */
-export function parseDoc(text: string): { doc: ArgDoc; errors: ParseError[] } {
+export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
   const claims: Claim[] = [];
-  const links: Link[] = [];
-  const notes: Note[] = [];
+  const edges: Edge[] = [];
   const errors: ParseError[] = [];
   const usedIds = new Set<string>();
   const refUses: { refId: string; line: number }[] = [];
-  const pendingLinks: PendingLink[] = [];
+  // A note names its owner by id, and the owner may not exist yet: an edge only materializes
+  // once the claim nested under it is read, and a `= $ref` block can point further down the
+  // file. So notes are filed at the end, when every id is known.
+  const pendingNotes: { note: Note; ownerId: string }[] = [];
+  // `%perspectives` may appear anywhere, so slot counts can't be checked until the end. This
+  // is the only reason a line number outlives the loop; nothing in the model carries one.
+  const scored: { scores: Scores; line: number }[] = [];
+  const pendingEdges: PendingEdge[] = [];
   const stack: Frame[] = [];
   const autoCounters: Record<string, number> = {};
   let description: string | undefined;
@@ -203,10 +211,11 @@ export function parseDoc(text: string): { doc: ArgDoc; errors: ParseError[] } {
         }
         nodeId = takeId(explicitId, "c", lineNo);
         usedIds.add(nodeId);
-        claims.push({ id: nodeId, text: body, scores, line: lineNo });
+        claims.push({ id: nodeId, text: body, scores, notes: [] });
+        if (scores !== null) scored.push({ scores, line: lineNo });
       }
 
-      if (parent?.kind === "link") {
+      if (parent?.kind === "edge") {
         const pending = parent.pending;
         if (pending.endpointFound) {
           errors.push({
@@ -216,14 +225,17 @@ export function parseDoc(text: string): { doc: ArgDoc; errors: ParseError[] } {
         } else {
           pending.endpointFound = true;
           if (pending.valid) {
-            links.push({
+            edges.push({
               id: pending.id,
               type: pending.type,
               sourceId: pending.childIsSource ? nodeId : pending.parentId,
               targetId: pending.childIsSource ? pending.parentId : nodeId,
               scores: pending.scores,
-              line: pending.line,
+              notes: [],
             });
+            if (pending.scores !== null) {
+              scored.push({ scores: pending.scores, line: pending.line });
+            }
           }
         }
       } else if (parent?.kind === "claim") {
@@ -250,30 +262,28 @@ export function parseDoc(text: string): { doc: ArgDoc; errors: ParseError[] } {
       }
       const id = takeId(explicitId, "t", lineNo);
       usedIds.add(id);
-      notes.push({
-        id,
-        text: body,
-        attachedTo: parent.kind === "claim" ? parent.id : parent.pending.id,
-        line: lineNo,
+      pendingNotes.push({
+        note: { id, text: body },
+        ownerId: parent.kind === "claim" ? parent.id : parent.pending.id,
       });
       // A note is a leaf, so it never becomes a frame: a sibling claim at the same indent
-      // still counts as the enclosing link line's endpoint.
+      // still counts as the enclosing edge line's endpoint.
       continue;
     }
 
-    // `<` or `>`: a link line.
-    const childIsSource = kind === "link-from-child";
+    // `<` or `>`: an edge line.
+    const childIsSource = kind === "edge-from-child";
     let body = content.slice(1).trim();
     const idMatch = ID_SUFFIX.exec(body);
     const explicitId = idMatch?.[1];
     if (idMatch) body = body.slice(0, idMatch.index).trim();
 
-    const word = LINK_TYPE_HEAD.exec(body)?.[1] ?? "";
-    const linkType: LinkType | null = isLinkType(word) ? word : null;
-    if (linkType === null) {
+    const word = EDGE_TYPE_HEAD.exec(body)?.[1] ?? "";
+    const edgeType: EdgeType | null = isEdgeType(word) ? word : null;
+    if (edgeType === null) {
       errors.push({
         line: lineNo,
-        message: `Unknown link type "${word}" (expected ${LINK_TYPES.join(" or ")})`,
+        message: `Unknown edge type "${word}" (expected ${EDGE_TYPES.join(" or ")})`,
       });
     }
 
@@ -285,11 +295,14 @@ export function parseDoc(text: string): { doc: ArgDoc; errors: ParseError[] } {
 
     let parentId: string | null = null;
     if (!parent) {
-      errors.push({ line: lineNo, message: `A "${marker}" line needs a claim above it to link` });
-    } else if (parent.kind === "link") {
       errors.push({
         line: lineNo,
-        message: `A "${marker}" line can't nest under another link line — argue about a link with a "= $link-id" block`,
+        message: `A "${marker}" line needs a claim above it to attach to`,
+      });
+    } else if (parent.kind === "edge") {
+      errors.push({
+        line: lineNo,
+        message: `A "${marker}" line can't nest under another edge line — argue about an edge with a "= $edge-id" block`,
       });
     } else {
       parentId = parent.id;
@@ -297,21 +310,21 @@ export function parseDoc(text: string): { doc: ArgDoc; errors: ParseError[] } {
 
     const id = takeId(explicitId, "l", lineNo);
     usedIds.add(id);
-    const pending: PendingLink = {
+    const pending: PendingEdge = {
       id,
-      type: linkType ?? "supports",
+      type: edgeType ?? "supports",
       scores,
       parentId: parentId ?? "",
       childIsSource,
       line: lineNo,
       endpointFound: false,
-      valid: linkType !== null && parentId !== null,
+      valid: edgeType !== null && parentId !== null,
     };
-    pendingLinks.push(pending);
-    stack.push({ kind: "link", indent, pending });
+    pendingEdges.push(pending);
+    stack.push({ kind: "edge", indent, pending });
   }
 
-  for (const pending of pendingLinks) {
+  for (const pending of pendingEdges) {
     if (pending.valid && !pending.endpointFound) {
       errors.push({
         line: pending.line,
@@ -327,27 +340,26 @@ export function parseDoc(text: string): { doc: ArgDoc; errors: ParseError[] } {
     }
   }
 
-  // Slot counts are checked here rather than inline so `%perspectives` can appear anywhere.
+  // A note whose owner never resolved (`~` under a `= $nope`) is dropped rather than left
+  // ownerless: the unknown reference is already reported above, and keeping it would put a
+  // note box in the diagram attached to nothing.
+  const owners = new Map<string, Claim | Edge>();
+  for (const claim of claims) owners.set(claim.id, claim);
+  for (const edge of edges) owners.set(edge.id, edge);
+  for (const { note, ownerId } of pendingNotes) owners.get(ownerId)?.notes.push(note);
+
   if (perspectives.length > 0) {
-    const checkSlots = (scores: Scores | null, line: number) => {
-      if (scores !== null && scores.length !== perspectives.length) {
+    for (const { scores, line } of scored) {
+      if (scores.length !== perspectives.length) {
         errors.push({
           line,
           message: `Expected ${perspectives.length} scores to match %${PERSPECTIVES_KEY}, got ${scores.length}`,
         });
       }
-    };
-    for (const claim of claims) checkSlots(claim.scores, claim.line);
-    for (const link of links) checkSlots(link.scores, link.line);
+    }
   }
 
   errors.sort((a, b) => a.line - b.line);
 
-  return { doc: { description, perspectives, claims, links, notes }, errors };
-}
-
-/** The {@link Ontology} entry point: parse, then flatten into a drawable {@link Graph}. */
-export function parse(text: string): ParseResult {
-  const { doc, errors } = parseDoc(text);
-  return { graph: toGraph(doc), errors };
+  return { doc: { description, perspectives, claims, edges }, errors };
 }

@@ -4,8 +4,8 @@
 /** What a line declares, keyed by the character it starts with. */
 export const MARKER_TO_KIND: Record<string, LineKind | undefined> = {
   "=": "claim",
-  "<": "link-from-child",
-  ">": "link-to-child",
+  "<": "edge-from-child",
+  ">": "edge-to-child",
   "~": "note",
   "%": "property",
   "/": "meta",
@@ -13,10 +13,10 @@ export const MARKER_TO_KIND: Record<string, LineKind | undefined> = {
 
 export type LineKind =
   | "claim"
-  /** `<` — the nested child is the link's source, the parent line its target */
-  | "link-from-child"
-  /** `>` — the parent line is the link's source, the nested child its target */
-  | "link-to-child"
+  /** `<` — the nested child is the edge's source, the parent line its target */
+  | "edge-from-child"
+  /** `>` — the parent line is the edge's source, the nested child its target */
+  | "edge-to-child"
   | "note"
   | "property"
   /** `/` — a comment about the document, dropped from the diagram entirely */
@@ -24,12 +24,12 @@ export type LineKind =
 
 export const EXPECTED_MARKERS = "= < > ~ % /";
 
-export const LINK_TYPES = ["supports", "critiques"] as const;
+export const EDGE_TYPES = ["supports", "critiques"] as const;
 
-export type LinkType = (typeof LINK_TYPES)[number];
+export type EdgeType = (typeof EDGE_TYPES)[number];
 
-export function isLinkType(word: string): word is LinkType {
-  return (LINK_TYPES as readonly string[]).includes(word);
+export function isEdgeType(word: string): word is EdgeType {
+  return (EDGE_TYPES as readonly string[]).includes(word);
 }
 
 /** Document-level `%key: value` properties recognized today. */

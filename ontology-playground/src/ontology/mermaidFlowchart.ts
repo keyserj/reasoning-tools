@@ -80,18 +80,41 @@ export function flowchart(graph: Graph, config: StyleConfig, tables: FlowchartTa
     lines.push(`  ${idMap.get(node.id)}${open}${label}${close}:::${node.type}`);
   }
 
+  // mermaid can't name an edge: `linkStyle` targets edges by the position they were
+  // *declared* in, so the indices are collected as the lines are emitted. An edge whose
+  // endpoint is missing (a dropped half-edge from an unresolved `$ref` — the normal state
+  // mid-typing) emits nothing, which is why this can't just be the index in `graph.edges`:
+  // that would paint the wrong edges, and shift the colors around as you type.
+  const strokeIndices = new Map<string, number[]>();
+  let emitted = 0;
   for (const edge of graph.edges) {
     const from = idMap.get(edge.from);
     const to = idMap.get(edge.to);
     if (!from || !to) continue;
-    const connector = renderedEdgeTypesById[edge.type]?.connector ?? defaultConnector;
-    lines.push(`  ${from} ${connector} ${to}`);
+    const def = renderedEdgeTypesById[edge.type];
+    const connector = def?.connector ?? defaultConnector;
+    // The pipe form composes with any connector (including `-.->`) without having to take
+    // the connector string apart, which the `-- "text" -->` form would need. An edge icon
+    // rides on `showIcons` exactly as a node's does.
+    const icon = config.showIcons && def?.icon ? `${def.icon} ` : "";
+    const label = edge.label ? `|"${escapeLabel(`${icon}${edge.label}`)}"|` : "";
+    lines.push(`  ${from} ${connector}${label} ${to}`);
+    if (def?.stroke) {
+      const forStroke = strokeIndices.get(def.stroke) ?? [];
+      forStroke.push(emitted);
+      strokeIndices.set(def.stroke, forStroke);
+    }
+    emitted++;
   }
 
   for (const [type, style] of Object.entries(config.types)) {
     lines.push(
       `  classDef ${type} fill:${style.fill},stroke:${style.stroke},color:${style.color},stroke-width:1.5px`,
     );
+  }
+
+  for (const [stroke, indices] of strokeIndices) {
+    lines.push(`  linkStyle ${indices.join(",")} stroke:${stroke},stroke-width:1.5px`);
   }
 
   return lines.join("\n");

@@ -1,7 +1,14 @@
 import { deflateSync, inflateSync, strFromU8, strToU8 } from "fflate";
 import { z } from "zod";
-import { LAYOUT_DIRECTIONS, type Ontology, type StyleConfig } from "../ontology/types.ts";
+import {
+  type FeatureState,
+  LAYOUT_DIRECTIONS,
+  type Ontology,
+  type StyleConfig,
+} from "../ontology/types.ts";
 import { defaultOntologyId, ontologies } from "../ontology/registry.ts";
+import { EXAMPLE_LABELS, defaultExample } from "../ontology/examples.ts";
+import { defaultFeatureState, resolveFeatures } from "../ontology/features.ts";
 
 // The whole document lives in the URL hash so sharing needs no backend. We DEFLATE
 // the JSON (fflate) then base64url-encode it, mirroring how mermaid.live keeps links short.
@@ -14,19 +21,30 @@ import { defaultOntologyId, ontologies } from "../ontology/registry.ts";
 /** The shared document: the app's state and the thing encoded into the hash are the same. */
 export interface DocState {
   ontologyId: string;
+  /** which shared example the source came from; `null` once it's someone's own document */
+  exampleId: string | null;
   source: string;
   config: StyleConfig;
+  features: FeatureState;
 }
 
 const hexColor = z.string().regex(/^#[0-9a-fA-F]{3,8}$/);
 
 const styleSchema = z.object({ fill: hexColor, stroke: hexColor, color: hexColor });
 
-/** Ontology-independent outer shape; `config` is checked once its ontology is known. */
+/**
+ * Ontology-independent outer shape; `config` and `features` are checked once the ontology is
+ * known. `exampleId` and `features` are absent from links written before they existed, which
+ * is why they carry defaults rather than being required.
+ */
 const envelopeSchema = z.object({
   ontologyId: z.string(),
+  exampleId: z.string().nullish().catch(null),
   source: z.string(),
-  config: z.unknown(),
+  // `.optional()` because zod treats an `unknown` key as required-but-any: without it, a
+  // hash missing the key is rejected outright rather than falling back.
+  config: z.unknown().optional(),
+  features: z.unknown().optional(),
 });
 
 /**
@@ -45,6 +63,43 @@ const configSchema = (ontology: Ontology) =>
       )
       .catch(ontology.defaultConfig.types),
   });
+
+/**
+ * Same idea as {@link configSchema}, one level deeper: the valid feature ids, option ids and
+ * param ids all come from the ontology's own table, so a link naming a feature that has since
+ * been renamed or removed degrades to the current defaults instead of reaching a renderer.
+ */
+const featuresSchema = (ontology: Ontology) =>
+  z
+    .object(
+      Object.fromEntries(
+        ontology.features.map((feature) => {
+          const optionIds = feature.options.map((o) => o.id) as [string, ...string[]];
+          const params = feature.params ?? [];
+          return [
+            feature.id,
+            z
+              .object({
+                option: z.enum(optionIds).catch(feature.defaultOption),
+                params: z
+                  .object(
+                    Object.fromEntries(
+                      params.map((param) => [
+                        param.id,
+                        z
+                          .enum(param.options.map((o) => o.id) as [string, ...string[]])
+                          .catch(param.defaultOption),
+                      ]),
+                    ),
+                  )
+                  .optional(),
+              })
+              .catch({ option: feature.defaultOption }),
+          ];
+        }),
+      ),
+    )
+    .catch({});
 
 function bytesToBase64Url(bytes: Uint8Array): string {
   let binary = "";
@@ -69,7 +124,7 @@ export function encodeState(state: DocState): string {
 
 /**
  * Decode a hash into a valid document, or null if there is nothing decodable there.
- * A link naming an unknown ontology falls back to the default ontology's own sample:
+ * A link naming an unknown ontology falls back to the default ontology's own first example:
  * reinterpreting one ontology's syntax as another's would only produce a wall of parse errors.
  */
 export function decodeState(encoded: string): DocState | null {
@@ -87,14 +142,26 @@ export function decodeState(encoded: string): DocState | null {
 
   const known = ontologies[envelope.data.ontologyId];
   const ontology = known ?? ontologies[defaultOntologyId];
-  const source = known ? envelope.data.source : ontology.sample;
+  const fallback = defaultExample(ontology);
+  const source = known ? envelope.data.source : fallback.source;
 
   const config = configSchema(ontology).safeParse(envelope.data.config);
+  const features = featuresSchema(ontology).safeParse(envelope.data.features);
+
+  // An id that isn't in the shared table (a renamed example, or a link written before the
+  // examples were shared) reads as "Custom": the source still opens, it just isn't claimed
+  // to be a known example.
+  const claimed = envelope.data.exampleId;
+  const inTable = typeof claimed === "string" && claimed in EXAMPLE_LABELS;
 
   return {
     ontologyId: ontology.id,
+    exampleId: known ? (inTable ? claimed : null) : fallback.id,
     source,
     config: config.success ? config.data : structuredClone(ontology.defaultConfig),
+    features: features.success
+      ? resolveFeatures(ontology, features.data as FeatureState)
+      : defaultFeatureState(ontology),
   };
 }
 

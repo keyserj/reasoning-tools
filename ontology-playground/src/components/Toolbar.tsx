@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
-import type { Ontology } from "../ontology/types.ts";
+import type { Ontology, OntologyExample } from "../ontology/types.ts";
+import { exampleLabel } from "../ontology/examples.ts";
 import { type DocState, buildShareUrl } from "../share/url.ts";
 
 /** Which pane a phone-sized screen shows; wider screens show both side by side. */
@@ -7,12 +8,21 @@ export type PaneView = "edit" | "view";
 
 const GITHUB_URL = "https://github.com/keyserj/reasoning-tools/tree/main/ontology-playground";
 
+/** `<option>` value standing in for "this text is nobody's example any more". */
+const CUSTOM = "__custom";
+
 interface Props {
   ontologyList: Ontology[];
+  /** the current ontology's writings of the shared examples */
+  examples: OntologyExample[];
   doc: DocState;
+  /** the source differs from the example it came from */
+  dirty: boolean;
   theme: "light" | "dark";
   pane: PaneView;
   onOntologyChange: (id: string) => void;
+  onExampleChange: (id: string) => void;
+  onResetExample: () => void;
   onPaneChange: (pane: PaneView) => void;
   onToggleTheme: () => void;
   onToggleLegend: () => void;
@@ -21,10 +31,14 @@ interface Props {
 
 export default function Toolbar({
   ontologyList,
+  examples,
   doc,
+  dirty,
   theme,
   pane,
   onOntologyChange,
+  onExampleChange,
+  onResetExample,
   onPaneChange,
   onToggleTheme,
   onToggleLegend,
@@ -70,12 +84,14 @@ export default function Toolbar({
   const themeLabel = theme === "dark" ? "Light mode" : "Dark mode";
 
   return (
-    <div className="navbar bg-base-200 border-b border-base-300 min-h-12 py-0 px-3 gap-2">
-      <div className="flex-1 flex items-center gap-2 min-w-0">
+    // Two selects plus the pane toggle don't fit one phone-width row, so the row wraps and
+    // the pickers get a line of their own; above `md` it stays the single row it was.
+    <div className="navbar bg-base-200 border-b border-base-300 min-h-12 py-0 px-3 gap-2 flex-wrap md:flex-nowrap">
+      <div className="flex-1 basis-full md:basis-auto flex items-center gap-2 min-w-0">
         <span className="text-lg">🗺️</span>
-        <span className="font-semibold hidden md:inline">Reasoning Ontology Playground</span>
+        <span className="font-semibold hidden lg:inline">Reasoning Ontology Playground</span>
         <select
-          className="select select-sm select-bordered ml-1 text-base md:text-sm"
+          className="select select-sm select-bordered ml-1 min-w-0 flex-1 md:flex-initial md:w-auto text-base md:text-sm"
           value={doc.ontologyId}
           onChange={(e) => onOntologyChange(e.target.value)}
           aria-label="Ontology"
@@ -86,9 +102,36 @@ export default function Toolbar({
             </option>
           ))}
         </select>
+        {/* Example ids are shared across ontologies, so switching ontology keeps the example
+            and this dropdown reads the same everywhere. */}
+        <select
+          className="select select-sm select-bordered min-w-0 flex-1 md:flex-initial md:w-auto text-base md:text-sm"
+          value={doc.exampleId ?? CUSTOM}
+          onChange={(e) => onExampleChange(e.target.value)}
+          aria-label="Example"
+        >
+          {doc.exampleId === null && <option value={CUSTOM}>Custom</option>}
+          {examples.map((e) => (
+            <option key={e.id} value={e.id}>
+              {exampleLabel(e.id) ?? e.id}
+              {dirty && e.id === doc.exampleId ? " • edited" : ""}
+            </option>
+          ))}
+        </select>
+        {dirty && (
+          <button
+            className="btn btn-sm btn-ghost px-2"
+            onClick={onResetExample}
+            title="Reset to the original example"
+          >
+            <span className="md:hidden">↺</span>
+            <span className="hidden md:inline">Reset</span>
+          </button>
+        )}
       </div>
 
-      <div className="flex items-center gap-1">
+      {/* `ml-auto` keeps these right-aligned on the wrapped phone row too. */}
+      <div className="flex items-center gap-1 ml-auto">
         {/* Only one pane fits on a phone, so it gets a toggle between them. */}
         <div className="join mr-1 md:hidden" role="group" aria-label="Show editor or diagram">
           <button

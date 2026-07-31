@@ -3,11 +3,11 @@ import type { Graph } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toMermaid } from "./toMermaid.ts";
 import { defaultConfig } from "./defaultConfig.ts";
-import sample from "./example.txt?raw";
+import example from "./examples/session-storage.txt?raw";
 
 describe("toMermaid", () => {
   it("emits a flowchart with shapes, classes and child -> parent edges", () => {
-    const { graph } = parse("? Q &q1\n  = Idea &i1");
+    const { doc: graph } = parse("? Q &q1\n  = Idea &i1");
     const out = toMermaid(graph, defaultConfig);
     expect(out.startsWith("flowchart BT")).toBe(true);
     expect(out).toContain('q1{{"❓ Q"}}:::question');
@@ -17,14 +17,14 @@ describe("toMermaid", () => {
   });
 
   it("uses a dotted edge and parallelogram shape for notes", () => {
-    const { graph } = parse("= Idea &i1\n  ~ a note &nt1");
+    const { doc: graph } = parse("= Idea &i1\n  ~ a note &nt1");
     const out = toMermaid(graph, defaultConfig);
     expect(out).toContain('nt1[/"📝 a note"/]:::note');
     expect(out).toContain("nt1 -.-> i1");
   });
 
   it("omits icons when showIcons is false", () => {
-    const { graph } = parse("? Q &q1");
+    const { doc: graph } = parse("? Q &q1");
     const out = toMermaid(graph, { ...defaultConfig, showIcons: false });
     expect(out).toContain('q1{{"Q"}}:::question');
   });
@@ -54,7 +54,7 @@ describe("toMermaid", () => {
     expect(out).toContain("_empty");
   });
 
-  it("matches the generated-mermaid snapshot for the bundled sample", () => {
-    expect(toMermaid(parse(sample).graph, defaultConfig)).toMatchSnapshot();
+  it("matches the generated-mermaid snapshot for the session-storage example", () => {
+    expect(toMermaid(parse(example).doc, defaultConfig)).toMatchSnapshot();
   });
 });

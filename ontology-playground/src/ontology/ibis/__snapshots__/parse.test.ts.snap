@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`parse > matches the parsed-graph snapshot for the bundled sample 1`] = `
+exports[`parse > matches the parsed-graph snapshot for the session-storage example 1`] = `
 {
   "edges": [
     {

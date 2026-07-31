@@ -16,7 +16,7 @@ import type { NodeTypeDef } from "../types.ts";
 // wireframes' `RB = { neg: "#b2182b", mid: "#e9e9e9", pos: "#2166ac" }`. `supports` vs
 // `critiques` is the one pair that *needs* color to separate it (same shape, same role), and
 // blue vs red survives both protanopia and deuteranopia. Claims are warm and pale on purpose:
-// they're the majority of boxes, so a loud fill would bury the link boxes that matter most.
+// they're the majority of boxes, so a loud fill would bury the edge boxes that matter most.
 //
 // Icons carry the same distinction by silhouette: ✅ vs ⛔ reads as a check against a barred circle
 // at the ~12px they render at, which is what separates support from critique when color can't
@@ -36,7 +36,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     id: "supports",
     label: "Supports",
     icon: "✅",
-    description: "A link saying its source claim is a reason to believe its target.",
+    description: "An edge saying its source claim is a reason to believe its target.",
     shape: ['(["', '"])'],
     defaultStyle: { fill: "#e7f0ff", stroke: "#2166ac", color: "#1b4fa8" },
   },
@@ -44,7 +44,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     id: "critiques",
     label: "Critiques",
     icon: "⛔",
-    description: "A link saying its source claim is a reason to doubt its target.",
+    description: "An edge saying its source claim is a reason to doubt its target.",
     shape: ['(["', '"])'],
     defaultStyle: { fill: "#fdecea", stroke: "#b2182b", color: "#7f1d1d" },
   },

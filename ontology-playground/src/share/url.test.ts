@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ibis } from "../ontology/ibis/index.ts";
 import { argMapTruthAndRelevance } from "../ontology/arg-map-truth-and-relevance/index.ts";
-import { defaultExample } from "../ontology/examples.ts";
+import { defaultExample, findExample } from "../ontology/examples.ts";
 import { defaultFeatureState } from "../ontology/features.ts";
 import { type DocState, decodeState, encodeState } from "./url.ts";
 
@@ -87,6 +87,19 @@ describe("share/url", () => {
     expect(decodeState(encodeState(bad as unknown as DocState))?.features).toEqual(
       defaultFeatureState(argMapTruthAndRelevance),
     );
+  });
+
+  it("reads an example this ontology doesn't ship as Custom, keeping the source", () => {
+    // Shared ids outlive any one ontology's writing of them, so "in the shared table" isn't
+    // enough: claiming an example the ontology doesn't ship leaves the selector with no
+    // `<option>` to show and the document permanently un-dirty (no Reset, no draft stashed).
+    const unshipped = "build-a-wall";
+    expect(findExample(argMapTruthAndRelevance, unshipped)).toBeDefined();
+    expect(findExample(ibis, unshipped)).toBeUndefined();
+
+    const decoded = decodeState(encodeState({ ...doc, exampleId: unshipped }));
+    expect(decoded?.exampleId).toBeNull();
+    expect(decoded?.source).toBe(doc.source);
   });
 
   it("opens a link written before examples and features existed", () => {

@@ -7,7 +7,7 @@ import {
   type StyleConfig,
 } from "../ontology/types.ts";
 import { defaultOntologyId, ontologies } from "../ontology/registry.ts";
-import { EXAMPLE_LABELS, defaultExample } from "../ontology/examples.ts";
+import { defaultExample, findExample } from "../ontology/examples.ts";
 import { defaultFeatureState, resolveFeatures } from "../ontology/features.ts";
 
 // The whole document lives in the URL hash so sharing needs no backend. We DEFLATE
@@ -148,15 +148,18 @@ export function decodeState(encoded: string): DocState | null {
   const config = configSchema(ontology).safeParse(envelope.data.config);
   const features = featuresSchema(ontology).safeParse(envelope.data.features);
 
-  // An id that isn't in the shared table (a renamed example, or a link written before the
-  // examples were shared) reads as "Custom": the source still opens, it just isn't claimed
-  // to be a known example.
+  // An id this ontology doesn't ship (a renamed example, one dropped from this ontology but
+  // kept in the shared table, or a link written before the examples were shared) reads as
+  // "Custom": the source still opens, it just isn't claimed to be a known example. Checking
+  // the ontology's own examples rather than the shared table is what keeps the claim honest —
+  // an unshipped id has no `<option>` to select, and leaves the document permanently
+  // un-dirty, so edits to it would never be stashed as a draft.
   const claimed = envelope.data.exampleId;
-  const inTable = typeof claimed === "string" && claimed in EXAMPLE_LABELS;
+  const shipped = typeof claimed === "string" && findExample(ontology, claimed) !== undefined;
 
   return {
     ontologyId: ontology.id,
-    exampleId: known ? (inTable ? claimed : null) : fallback.id,
+    exampleId: known ? (shipped ? claimed : null) : fallback.id,
     source,
     config: config.success ? config.data : structuredClone(ontology.defaultConfig),
     features: features.success

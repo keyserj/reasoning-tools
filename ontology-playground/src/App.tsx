@@ -156,8 +156,6 @@ export default function App() {
         onResetExample={resetExample}
         onPaneChange={setPane}
         onToggleTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
-        onToggleLegend={() => setLegendOpen((v) => !v)}
-        onToggleConfig={() => setConfigOpen((v) => !v)}
       />
 
       {/* Both panes stay mounted: on a phone the editor sits on top of a full-width diagram,
@@ -177,6 +175,7 @@ export default function App() {
             ontologyLabel={ontology.label}
             placeholder={ontology.placeholder}
             errors={parseResult.errors}
+            onOpenLegend={() => setLegendOpen(true)}
           />
         </div>
         <div className="flex flex-col flex-1 min-w-0">
@@ -184,6 +183,7 @@ export default function App() {
             features={ontology.features}
             state={shared.features}
             onChange={(features) => setShared((d) => ({ ...d, features }))}
+            onOpenStyle={() => setConfigOpen(true)}
           />
           <DiagramPane mermaidText={mermaidText} theme={mermaidTheme} />
         </div>

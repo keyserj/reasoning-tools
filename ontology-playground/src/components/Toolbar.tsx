@@ -25,8 +25,6 @@ interface Props {
   onResetExample: () => void;
   onPaneChange: (pane: PaneView) => void;
   onToggleTheme: () => void;
-  onToggleLegend: () => void;
-  onToggleConfig: () => void;
 }
 
 export default function Toolbar({
@@ -41,8 +39,6 @@ export default function Toolbar({
   onResetExample,
   onPaneChange,
   onToggleTheme,
-  onToggleLegend,
-  onToggleConfig,
 }: Props) {
   const [copied, setCopied] = useState(false);
   const [menuOpen, setMenuOpen] = useState(false);
@@ -158,12 +154,6 @@ export default function Toolbar({
         >
           {themeIcon}
         </button>
-        <button className="btn btn-sm btn-ghost hidden md:inline-flex" onClick={onToggleLegend}>
-          Key
-        </button>
-        <button className="btn btn-sm btn-ghost hidden md:inline-flex" onClick={onToggleConfig}>
-          Style
-        </button>
         <button
           className="btn btn-sm btn-primary"
           onClick={copyLink}
@@ -202,12 +192,6 @@ export default function Toolbar({
                 <button onClick={fromMenu(onToggleTheme)}>
                   {themeIcon} {themeLabel}
                 </button>
-              </li>
-              <li>
-                <button onClick={fromMenu(onToggleLegend)}>Key</button>
-              </li>
-              <li>
-                <button onClick={fromMenu(onToggleConfig)}>Style</button>
               </li>
               <li>
                 <a href={GITHUB_URL} target="_blank" rel="noreferrer">

@@ -15,6 +15,7 @@ interface Props {
   ontologyLabel: string;
   placeholder: string;
   errors: ParseError[];
+  onOpenLegend: () => void;
 }
 
 export default function EditorPane({
@@ -26,6 +27,7 @@ export default function EditorPane({
   ontologyLabel,
   placeholder,
   errors,
+  onOpenLegend,
 }: Props) {
   const editing = activeTab === "source";
 
@@ -86,20 +88,37 @@ export default function EditorPane({
 
   return (
     <div className="flex flex-col h-full min-w-0 border-r border-base-300 bg-base-100">
-      <div role="tablist" className="tabs tabs-bordered px-2 pt-2 shrink-0">
+      <div className="flex items-center px-2 pt-2 shrink-0">
+        {/* "Code" rather than the ontology's name: the picker above already names the ontology,
+            and a fixed-width label keeps this row from being at the mercy of how long an
+            ontology chose to call itself — the pair plus the Key button has to fit 320px. */}
+        <div role="tablist" className="tabs tabs-bordered">
+          <button
+            role="tab"
+            className={`tab ${editing ? "tab-active" : ""}`}
+            onClick={() => onTabChange("source")}
+          >
+            Code
+          </button>
+          <button
+            role="tab"
+            className={`tab ${!editing ? "tab-active" : ""}`}
+            onClick={() => onTabChange("mermaid")}
+          >
+            Mermaid
+          </button>
+        </div>
+
+        {/* Sits with the syntax it documents rather than in the page header, but stays a button
+            outside the tablist: a third tab would replace the textarea and be a mode to click
+            back out of, where the key is glance-and-dismiss. Shown on the Mermaid tab too —
+            it describes the ontology either way, and hiding it would make the row jump. */}
         <button
-          role="tab"
-          className={`tab ${editing ? "tab-active" : ""}`}
-          onClick={() => onTabChange("source")}
+          className="btn btn-xs btn-ghost ml-auto"
+          onClick={onOpenLegend}
+          title={`How to read and write ${ontologyLabel}`}
         >
-          {ontologyLabel}
-        </button>
-        <button
-          role="tab"
-          className={`tab ${!editing ? "tab-active" : ""}`}
-          onClick={() => onTabChange("mermaid")}
-        >
-          Mermaid
+          Key
         </button>
       </div>
 

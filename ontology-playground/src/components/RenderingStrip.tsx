@@ -2,24 +2,30 @@ import { useState } from "react";
 import type { FeatureDef, FeatureState } from "../ontology/types.ts";
 import { paramApplies } from "../ontology/features.ts";
 
-// Renders an ontology's rendering lenses generically: one pill per feature reading
-// `feature: current option`, opening a panel where that feature's options get read and picked.
+// The rendering-scope bar above the diagram: the controls that change how the document is
+// drawn without changing the document itself. Two kinds share it — an ontology's own rendering
+// lenses, one pill per feature reading `feature: current option` and opening a panel where that
+// feature's options get read and picked, plus the shell's own Style button.
+//
 // Nothing here knows what a feature *means* — an ontology declares the table (see
 // arg-map-truth-and-relevance/features.ts) and only its `toMermaid` gives an option effect.
+// Style is handed in by the shell rather than declared as a `FeatureDef`, which is what keeps
+// that true: an ontology can't reach it, and the features path never learns a second meaning.
 //
 // One pill and one open panel per feature is what keeps the strip bounded.
 //
-// An ontology with no features renders no strip at all, which is IBIS today.
+// The strip renders even for an ontology declaring no features (IBIS today), because Style
+// lives here — the diagram column has the same chrome whichever ontology is loaded.
 
 interface Props {
   features: FeatureDef[];
   state: FeatureState;
   onChange: (state: FeatureState) => void;
+  onOpenStyle: () => void;
 }
 
-export default function RenderingStrip({ features, state, onChange }: Props) {
+export default function RenderingStrip({ features, state, onChange, onOpenStyle }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
-  if (features.length === 0) return null;
 
   const optionOf = (feature: FeatureDef) => state[feature.id]?.option ?? feature.defaultOption;
 
@@ -59,6 +65,18 @@ export default function RenderingStrip({ features, state, onChange }: Props) {
             </button>
           );
         })}
+
+        {/* Deliberately not caret-suffixed like the feature pills: the caret is what marks a
+            pill as expanding in place, and this one opens a dialog instead. Same row because
+            it's the same scope; different affordance because it behaves differently. */}
+        <button
+          className="btn btn-xs btn-ghost font-normal ml-auto"
+          onClick={onOpenStyle}
+          title="Colors, layout direction and icons for the diagram"
+        >
+          <span>🎨</span>
+          <span className="whitespace-nowrap">Style</span>
+        </button>
       </div>
 
       {/* Expands *inside* the strip, pushing the diagram down rather than covering it, so an

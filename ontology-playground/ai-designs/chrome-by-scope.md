@@ -54,7 +54,7 @@ Emoji are double-width, so column alignment below is approximate.
 │   ▐Session storage▌ ⌈Build a wall⌉│                  │  put sessions │              │
 ├──────────────────────────────────┤                   └───────┬───────┘              │
 │ ┌──────┬─────────┐          ⌈Key⌉│                           │                      │
-│ │ IBIS │ Mermaid │               │                   ┌───────┴───────┐              │
+│ │ Code │ Mermaid │               │                   ┌───────┴───────┐              │
 │ ├──────┴─────────┴───────────────┤                   │   = Redis     │              │
 │ │                                │                   └───────────────┘              │
 │ │ ? Where do we put sessions &q1 │                                                  │
@@ -82,7 +82,7 @@ With IBIS selected, the example row reads `▐Session storage▌ ⌈Build a wall
 │ ▸ Example: Session storage │         ├────────────────────────────┤
 ├────────────────────────────┤         │                            │
 │ ┌──────┬─────────┐    ⌈Key⌉│         │      ┌─────────────┐       │
-│ │ IBIS │ Mermaid │         │         │      │ ? Where do  │       │
+│ │ Code │ Mermaid │         │         │      │ ? Where do  │       │
 │ ├──────┴─────────┴─────────┤         │      └──────┬──────┘       │
 │ │ ? Where do we put        │         │             │              │
 │ │   sessions &q1           │         │      ┌──────┴──────┐       │
@@ -190,6 +190,8 @@ Read once at mount, not tracked across resizes — crossing the breakpoint mid-s
 ### 2. `src/components/EditorPane.tsx` — gains the `Key` button
 
 Tab row becomes a flex row: the `role="tablist"` container, then `Key` pushed right with `ml-auto`, **outside** the tablist (a non-tab child of a tablist is an a11y problem). It's a `btn btn-xs btn-ghost`, not a `tab`, so the row doesn't imply three modes — it opens the existing `Legend` modal, which keeps its `max-w-4xl` width. Visible on both tabs; hiding it on the Mermaid tab would make the row jump for no gain.
+
+**The first tab is relabelled from the ontology's name to `Code`** (mermaid.live's word for the same thing). The picker above already names the ontology, so the tab was repeating it — and a variable-length label here is a liability: at 320px, `Arg map: truth & relevance` + `Mermaid` + `Key` overflowed and daisyUI's `tabs` wrapped to two lines with `Key` floating between them. A fixed label makes the row immune to however long an ontology chooses to call itself, which matters more as ontologies are added. `ontologyLabel` stays a prop — it still names the ontology in the `Key` tooltip and, more importantly, in the textarea's `aria-label`, where a screen reader should hear "IBIS source" rather than "Code".
 
 New prop: `onToggleLegend: () => void`.
 

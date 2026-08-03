@@ -235,6 +235,24 @@ Pass `onOpenStyle` to `RenderingStrip`, import `EXAMPLES` from `./ontology/examp
 - Add a short line stating the site / document / rendering split and where each kind of control belongs, since that's now the rule a new control has to be placed by.
 - Note in the examples bullet that the picker shows examples an ontology hasn't written as disabled pills.
 
+## What changed during implementation
+
+Recorded because these were decided against evidence, and each is easy to "simplify" back into a bug.
+
+**The unavailable pill uses `aria-disabled`, not `disabled`.** `disabled` sets `pointer-events: none`, so the browser never delivers hover and the `title` explaining the gap could never appear — and it drops the pill out of the tab order, so keyboard and screen-reader users never learned the example existed at all. The explanation was unreachable by every route, which defeats the whole reason for showing the pill. With `aria-disabled` it stays focusable, announced and hoverable, and clicking it raises the existing notice instead of doing nothing — the only route a touch device has, having no hover. Note that Playwright treats `aria-disabled` as non-actionable, so a UI test needs a forced click.
+
+**Dark-mode separations are content-derived, not surface-derived.** Measured on the dark theme: daisyUI's ghost hover computed to RGB(16,20,26) on an RGB(19,24,30) surface — three sRGB code values, and *darker* than what it sat on. A `border-base-300` pill border was nine. Both are effectively invisible. The hover fix lives in `index.css` beside the existing ramp comment, because it's a theme-level defect and one override covers every ghost button; the borders moved to `border-base-content/20` in the component. See AGENTS.md for the rule and how to measure it.
+
+**The unavailable pill's text colour is set explicitly.** daisyUI's disabled colour is 20% alpha — about 1.9:1 on the dark theme. A disabled control is normally allowed to be that faint, but this one carries a message, and an unreadable message is no message.
+
+**The first editor tab is `Code`, not the ontology's name** — see the `EditorPane` section above.
+
+**Toolbar: the logo group is `shrink-0`.** Its `flex-1 min-w-0` existed so the two selects could shrink; with them gone it squeezed the group to 7px at 320px and the pane toggle drew over the logo. Refusing to shrink lets the row wrap instead, which is what `flex-wrap` was always the fallback for.
+
+### Still open
+
+Giving the summary row a resting affordance. Spanning the row (`flex-1 justify-start`) buys a large target and full-width hover, but does not make the row *look* clickable at rest — transparent full-width is pixel-identical to transparent text-width until hovered. A `bg-base-content/5` band was tried and backed out; a better design is wanted.
+
 ## Out of scope
 
 Making the `Style` panel expand inline instead of opening a modal. The backdrop dimming the diagram you're recoloring is a real wart, but a 6-type × 3-swatch table doesn't fit in the strip without a compact redesign. Left as a later call.

@@ -22,7 +22,7 @@ export interface FlowchartTables {
  * renders as markup. Two reasons that matters, and the second is the load-bearing one:
  *
  * 1. Fidelity: someone writing `R&D` or `&lt;b&gt;` in a node should see what they typed.
- * 2. Documents arrive from other people, as a whole `DocState` in the URL hash (see
+ * 2. Documents arrive from other people, as a whole `ShareState` in the URL hash (see
  *    ../share/url.ts), so node text is untrusted. Before this escaping, a link you were
  *    sent could put `<img src=https://attacker.example/pixel.png>` in a node and your
  *    browser would fetch it on load — an IP/user-agent beacon firing with no interaction,

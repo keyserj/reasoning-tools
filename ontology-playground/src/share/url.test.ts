@@ -3,12 +3,12 @@ import { ibis } from "../ontology/ibis/index.ts";
 import { argMapTruthAndRelevance } from "../ontology/arg-map-truth-and-relevance/index.ts";
 import { defaultExample, findExample } from "../ontology/examples.ts";
 import { defaultFeatureState } from "../ontology/features.ts";
-import { type DocState, decodeState, encodeState } from "./url.ts";
+import { type ShareState, decodeState, encodeState } from "./url.ts";
 
 const ibisExample = defaultExample(ibis);
 const argMapExample = defaultExample(argMapTruthAndRelevance);
 
-const doc: DocState = {
+const shared: ShareState = {
   ontologyId: ibis.id,
   exampleId: ibisExample.id,
   source: ibisExample.source,
@@ -18,11 +18,11 @@ const doc: DocState = {
 
 describe("share/url", () => {
   it("round-trips a document", () => {
-    expect(decodeState(encodeState(doc))).toEqual(doc);
+    expect(decodeState(encodeState(shared))).toEqual(shared);
   });
 
   it("round-trips a document in a non-default ontology, keeping its own node types", () => {
-    const other: DocState = {
+    const other: ShareState = {
       ontologyId: argMapTruthAndRelevance.id,
       exampleId: argMapExample.id,
       source: argMapExample.source,
@@ -33,7 +33,7 @@ describe("share/url", () => {
   });
 
   it("round-trips a non-default feature option and param", () => {
-    const other: DocState = {
+    const other: ShareState = {
       ontologyId: argMapTruthAndRelevance.id,
       exampleId: argMapExample.id,
       source: argMapExample.source,
@@ -46,7 +46,7 @@ describe("share/url", () => {
   });
 
   it("falls back to the default ontology's own first example for an unknown ontology id", () => {
-    const decoded = decodeState(encodeState({ ...doc, ontologyId: "no-such-ontology" }));
+    const decoded = decodeState(encodeState({ ...shared, ontologyId: "no-such-ontology" }));
     // Reinterpreting a foreign syntax would just be a wall of parse errors, so the source
     // is replaced rather than carried over.
     expect(decoded?.ontologyId).toBe(ibis.id);
@@ -61,21 +61,21 @@ describe("share/url", () => {
 
   it("falls back to defaults for an invalid direction or color", () => {
     const bad = {
-      ...doc,
+      ...shared,
       config: {
-        ...doc.config,
+        ...shared.config,
         direction: "sideways",
-        types: { ...doc.config.types, con: { fill: "red", stroke: "red", color: "red" } },
+        types: { ...shared.config.types, con: { fill: "red", stroke: "red", color: "red" } },
       },
     };
-    const decoded = decodeState(encodeState(bad as unknown as DocState));
+    const decoded = decodeState(encodeState(bad as unknown as ShareState));
     expect(decoded?.config.direction).toBe(ibis.defaultConfig.direction);
     expect(decoded?.config.types.con).toEqual(ibis.defaultConfig.types.con);
   });
 
   it("falls back to feature defaults for an unknown feature, option or param", () => {
     const bad = {
-      ...doc,
+      ...shared,
       ontologyId: argMapTruthAndRelevance.id,
       features: {
         // `edge-label` is a param the ontology used to declare and dropped, which is the
@@ -84,7 +84,7 @@ describe("share/url", () => {
         "no-such-feature": { option: "whatever" },
       },
     };
-    expect(decodeState(encodeState(bad as unknown as DocState))?.features).toEqual(
+    expect(decodeState(encodeState(bad as unknown as ShareState))?.features).toEqual(
       defaultFeatureState(argMapTruthAndRelevance),
     );
   });
@@ -97,15 +97,15 @@ describe("share/url", () => {
     expect(findExample(argMapTruthAndRelevance, unshipped)).toBeDefined();
     expect(findExample(ibis, unshipped)).toBeUndefined();
 
-    const decoded = decodeState(encodeState({ ...doc, exampleId: unshipped }));
+    const decoded = decodeState(encodeState({ ...shared, exampleId: unshipped }));
     expect(decoded?.exampleId).toBeNull();
-    expect(decoded?.source).toBe(doc.source);
+    expect(decoded?.source).toBe(shared.source);
   });
 
   it("opens a link written before examples and features existed", () => {
     // The whole point of the catch-everything schema: an old hash has neither field.
     const old = { ontologyId: ibis.id, source: "? Old &q", config: ibis.defaultConfig };
-    const decoded = decodeState(encodeState(old as unknown as DocState));
+    const decoded = decodeState(encodeState(old as unknown as ShareState));
     expect(decoded?.source).toBe("? Old &q");
     expect(decoded?.exampleId).toBeNull();
     expect(decoded?.features).toEqual(defaultFeatureState(ibis));

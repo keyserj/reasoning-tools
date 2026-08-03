@@ -19,7 +19,7 @@ import { defaultFeatureState, resolveFeatures } from "../ontology/features.ts";
 // default rather than rejecting the document.
 
 /** The shared document: the app's state and the thing encoded into the hash are the same. */
-export interface DocState {
+export interface ShareState {
   ontologyId: string;
   /** which shared example the source came from; `null` once it's someone's own document */
   exampleId: string | null;
@@ -116,7 +116,7 @@ function base64UrlToBytes(s: string): Uint8Array {
   return bytes;
 }
 
-export function encodeState(state: DocState): string {
+export function encodeState(state: ShareState): string {
   const json = JSON.stringify(state);
   const deflated = deflateSync(strToU8(json));
   return bytesToBase64Url(deflated);
@@ -127,7 +127,7 @@ export function encodeState(state: DocState): string {
  * A link naming an unknown ontology falls back to the default ontology's own first example:
  * reinterpreting one ontology's syntax as another's would only produce a wall of parse errors.
  */
-export function decodeState(encoded: string): DocState | null {
+export function decodeState(encoded: string): ShareState | null {
   let raw: unknown;
   try {
     const trimmed = encoded.replace(/^#/, "");
@@ -168,7 +168,7 @@ export function decodeState(encoded: string): DocState | null {
   };
 }
 
-export function buildShareUrl(state: DocState): string {
+export function buildShareUrl(state: ShareState): string {
   const { origin, pathname } = window.location;
   return `${origin}${pathname}#${encodeState(state)}`;
 }

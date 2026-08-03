@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import type { Ontology, OntologyExample } from "../ontology/types.ts";
 import { exampleLabel } from "../ontology/examples.ts";
-import { type DocState, buildShareUrl } from "../share/url.ts";
+import { type ShareState, buildShareUrl } from "../share/url.ts";
 
 /** Which pane a phone-sized screen shows; wider screens show both side by side. */
 export type PaneView = "edit" | "view";
@@ -15,7 +15,7 @@ interface Props {
   ontologyList: Ontology[];
   /** the current ontology's writings of the shared examples */
   examples: OntologyExample[];
-  doc: DocState;
+  shared: ShareState;
   /** the source differs from the example it came from */
   dirty: boolean;
   theme: "light" | "dark";
@@ -32,7 +32,7 @@ interface Props {
 export default function Toolbar({
   ontologyList,
   examples,
-  doc,
+  shared,
   dirty,
   theme,
   pane,
@@ -64,7 +64,7 @@ export default function Toolbar({
   }, [menuOpen]);
 
   const copyLink = async () => {
-    const url = buildShareUrl(doc);
+    const url = buildShareUrl(shared);
     window.history.replaceState(null, "", url);
     try {
       await navigator.clipboard.writeText(url);
@@ -92,7 +92,7 @@ export default function Toolbar({
         <span className="font-semibold hidden lg:inline">Reasoning Ontology Playground</span>
         <select
           className="select select-sm select-bordered ml-1 min-w-0 flex-1 md:flex-initial md:w-auto text-base md:text-sm"
-          value={doc.ontologyId}
+          value={shared.ontologyId}
           onChange={(e) => onOntologyChange(e.target.value)}
           aria-label="Ontology"
         >
@@ -106,15 +106,15 @@ export default function Toolbar({
             and this dropdown reads the same everywhere. */}
         <select
           className="select select-sm select-bordered min-w-0 flex-1 md:flex-initial md:w-auto text-base md:text-sm"
-          value={doc.exampleId ?? CUSTOM}
+          value={shared.exampleId ?? CUSTOM}
           onChange={(e) => onExampleChange(e.target.value)}
           aria-label="Example"
         >
-          {doc.exampleId === null && <option value={CUSTOM}>Custom</option>}
+          {shared.exampleId === null && <option value={CUSTOM}>Custom</option>}
           {examples.map((e) => (
             <option key={e.id} value={e.id}>
               {exampleLabel(e.id) ?? e.id}
-              {dirty && e.id === doc.exampleId ? " • edited" : ""}
+              {dirty && e.id === shared.exampleId ? " • edited" : ""}
             </option>
           ))}
         </select>

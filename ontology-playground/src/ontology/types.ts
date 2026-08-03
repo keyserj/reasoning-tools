@@ -105,7 +105,7 @@ export interface LegendEntry {
 // --- Features -------------------------------------------------------------------------
 //
 // A feature is a switchable rendering lens an ontology declares and the shell renders
-// generically (see components/FeatureStrip.tsx): the shell knows nothing beyond these
+// generically (see components/RenderingStrip.tsx): the shell knows nothing beyond these
 // shapes, and only `toMermaid` gives an option meaning. That's what lets an ontology pose
 // a rendering question as something you can answer by looking, rather than by rebuilding.
 //

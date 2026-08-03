@@ -17,7 +17,7 @@ interface Props {
   onChange: (state: FeatureState) => void;
 }
 
-export default function FeatureStrip({ features, state, onChange }: Props) {
+export default function RenderingStrip({ features, state, onChange }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
   if (features.length === 0) return null;
 

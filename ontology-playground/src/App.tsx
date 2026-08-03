@@ -1,12 +1,19 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { defaultOntologyId, getOntology, ontologyList } from "./ontology/registry.ts";
-import { defaultExample, exampleLabel, findExample } from "./ontology/examples.ts";
+import {
+  EXAMPLES,
+  defaultExample,
+  exampleLabel,
+  findExample,
+  missingExampleNote,
+} from "./ontology/examples.ts";
 import { defaultFeatureState } from "./ontology/features.ts";
 import type { Ontology, OntologyExample } from "./ontology/types.ts";
 import { type ShareState, decodeState, encodeState } from "./share/url.ts";
 import Toolbar, { type PaneView } from "./components/Toolbar.tsx";
 import EditorPane, { type EditorTab } from "./components/EditorPane.tsx";
 import DiagramPane from "./components/DiagramPane.tsx";
+import DocumentPicker from "./components/DocumentPicker.tsx";
 import RenderingStrip from "./components/RenderingStrip.tsx";
 import Legend from "./components/Legend.tsx";
 import ConfigPanel from "./components/ConfigPanel.tsx";
@@ -131,7 +138,14 @@ export default function App() {
   /** Within one ontology, only the document changes — style and features are left alone. */
   const switchExample = (id: string) => {
     const target = findExample(ontology, id);
-    if (!target || id === shared.exampleId) return;
+    // The picker shows examples this ontology hasn't written, greyed rather than hidden, so
+    // clicking one is expected and has to answer rather than do nothing. It's also the only
+    // route a touch device has to the reason, having no hover to raise the tooltip with.
+    if (!target) {
+      setNotice(missingExampleNote(ontology, id));
+      return;
+    }
+    if (id === shared.exampleId) return;
     stashDraft();
     setShared((d) => ({ ...d, exampleId: target.id, source: sourceFor(ontology, target) }));
   };
@@ -145,15 +159,9 @@ export default function App() {
   return (
     <div className="flex flex-col h-full">
       <Toolbar
-        ontologyList={ontologyList}
-        examples={ontology.examples}
         shared={shared}
-        dirty={dirty}
         theme={theme}
         pane={pane}
-        onOntologyChange={switchOntology}
-        onExampleChange={switchExample}
-        onResetExample={resetExample}
         onPaneChange={setPane}
         onToggleTheme={() => setTheme((t) => (t === "dark" ? "light" : "dark"))}
       />
@@ -161,11 +169,24 @@ export default function App() {
       {/* Both panes stay mounted: on a phone the editor sits on top of a full-width diagram,
           so switching back to the diagram keeps the size and pan/zoom it already had. */}
       <div className="relative flex flex-1 min-h-0">
+        {/* The document column: what the diagram is *of*, and the text it's read from.
+            `md:flex` rather than `md:block` in the hidden branch — `block` would override the
+            `flex` this column now needs for its two children. */}
         <div
-          className={`absolute inset-0 z-10 md:static md:w-2/5 md:min-w-70 md:max-w-160 ${
-            pane === "view" ? "hidden md:block" : ""
+          className={`absolute inset-0 z-10 flex flex-col border-r border-base-300 bg-base-100 md:static md:w-2/5 md:min-w-70 md:max-w-160 ${
+            pane === "view" ? "hidden md:flex" : ""
           }`}
         >
+          <DocumentPicker
+            ontologyList={ontologyList}
+            ontology={ontology}
+            examples={EXAMPLES}
+            exampleId={shared.exampleId}
+            dirty={dirty}
+            onOntologyChange={switchOntology}
+            onExampleChange={switchExample}
+            onResetExample={resetExample}
+          />
           <EditorPane
             source={shared.source}
             onSourceChange={(source) => setShared((d) => ({ ...d, source }))}

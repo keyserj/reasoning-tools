@@ -87,7 +87,10 @@ export default function EditorPane({
   };
 
   return (
-    <div className="flex flex-col h-full min-w-0 border-r border-base-300 bg-base-100">
+    // `min-h-0` so the textarea shrinks when the pickers above expand, rather than pushing
+    // itself out of the column. The border and background live on that column now, since the
+    // pickers share it.
+    <div className="flex flex-col flex-1 min-h-0 min-w-0">
       <div className="flex items-center px-2 pt-2 shrink-0">
         {/* "Code" rather than the ontology's name: the picker above already names the ontology,
             and a fixed-width label keeps this row from being at the mercy of how long an

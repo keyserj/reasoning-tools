@@ -15,6 +15,17 @@
   --color-base-300: oklch(16% 0.012 254.09);
 }
 
+/* The same problem one layer up, and the reason the ramp fix above wasn't enough: daisyUI's
+   ghost-button hover is a wash whose alpha is tuned for the light theme, where it lands ~14
+   sRGB code values from the surface and reads clearly. Against this dark theme it computes to
+   RGB(16,20,26) on an RGB(19,24,30) surface — three code values, and *darker* than what it
+   sits on, so hovering a ghost button looked like nothing happened at all. Lighten instead,
+   hard enough to survive the same screen glare the ramp comment describes. Applies to every
+   ghost button (toolbar, pickers, feature strip, Key/Style), so hover means one thing app-wide. */
+[data-theme="dark"] .btn-ghost:not(:disabled):not([aria-disabled="true"]):hover {
+  background-color: color-mix(in oklab, var(--color-base-content) 15%, transparent);
+}
+
 html,
 body,
 #root {

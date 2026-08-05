@@ -37,3 +37,14 @@ export function defaultExample(ontology: Ontology): OntologyExample {
 export function findExample(ontology: Ontology, id: string | null): OntologyExample | undefined {
   return id === null ? undefined : ontology.examples.find((e) => e.id === id);
 }
+
+/**
+ * Why an ontology can't show one of the shared examples. Lives here, next to the table it
+ * talks about, because two places say it: the picker's tooltip on the greyed pill, and the
+ * notice raised when someone clicks that pill — and the two drifting apart would be worse
+ * than either being slightly redundant.
+ */
+export function missingExampleNote(ontology: Ontology, id: string): string {
+  const label = exampleLabel(id);
+  return `${ontology.label} doesn't have the ${label === null ? "requested" : `"${label}"`} example added yet`;
+}

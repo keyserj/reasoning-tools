@@ -60,6 +60,23 @@ export default function DiagramPane({ mermaidText, theme }: Props) {
     };
   }, [mermaidText, theme]);
 
+  // svg-pan-zoom measures the SVG once at init and caches it, so without this every later
+  // `fit()`/`reset()` would scale to the pane's size at render time rather than its size now.
+  // Re-measuring leaves the current pan/zoom alone; it only refreshes what "fit" means.
+  useEffect(() => {
+    const container = containerRef.current;
+    if (!container) return;
+
+    const observer = new ResizeObserver(() => {
+      // A zero-size measurement (hidden pane) would leave a garbage scale cached.
+      if (container.clientWidth === 0 || container.clientHeight === 0) return;
+      panZoomRef.current?.resize();
+    });
+    observer.observe(container);
+
+    return () => observer.disconnect();
+  }, []);
+
   useEffect(
     () => () => {
       panZoomRef.current?.destroy();
@@ -100,20 +117,31 @@ export default function DiagramPane({ mermaidText, theme }: Props) {
         </button>
         <button
           className="btn btn-sm btn-circle"
+          aria-label="Fit to screen"
           title="Fit to screen"
           onClick={() => {
             panZoomRef.current?.fit();
             panZoomRef.current?.center();
           }}
         >
-          ⤢
-        </button>
-        <button
-          className="btn btn-sm btn-circle"
-          title="Reset zoom"
-          onClick={() => panZoomRef.current?.reset()}
-        >
-          ⟲
+          {/* Corner brackets rather than a glyph like ⤢ or ⛶: the neighbours can be one character
+              because + and − read at any size, while every "fit" glyph is either a hairline
+              diagonal or missing from the font. */}
+          <svg
+            className="w-4 h-4"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth={2.5}
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M4 9V6a2 2 0 0 1 2-2h3" />
+            <path d="M15 4h3a2 2 0 0 1 2 2v3" />
+            <path d="M20 15v3a2 2 0 0 1-2 2h-3" />
+            <path d="M9 20H6a2 2 0 0 1-2-2v-3" />
+          </svg>
         </button>
       </div>
     </div>

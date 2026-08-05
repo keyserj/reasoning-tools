@@ -197,6 +197,8 @@ export default function App() {
             placeholder={ontology.placeholder}
             errors={parseResult.errors}
             onOpenLegend={() => setLegendOpen(true)}
+            highlightLine={ontology.highlightLine}
+            config={shared.config}
           />
         </div>
         <div className="flex flex-col flex-1 min-w-0">

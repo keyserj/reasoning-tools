@@ -48,7 +48,7 @@
    7 code values from page to band is too tight for a band to carry structure, 13 is enough. Dark
    needs ~32 for the same read, since away from black code values aren't the scarce resource. */
 [data-theme="light"] {
-  --color-base-200: oklch(96% 0.010 259);
+  --color-base-200: oklch(96% 0.01 259);
   --color-base-300: oklch(92.5% 0.016 259);
 }
 
@@ -103,6 +103,95 @@
   }
 }
 
+/* --- Editor syntax highlighting ---------------------------------------------------------
+   How each `HighlightKind` (src/ontology/types.ts) is painted, in one place: an ontology's
+   tokenizer says *what* a stretch of text is and never what color it takes, so no ontology has
+   an opinion about the theme and no component has one about the syntax.
+
+   The organizing principle is that hue means type identity. A `type` token is drawn in the
+   stroke its rendered type carries in the *document's* StyleConfig, threaded in as `--tok-hue`
+   by EditorPane — so restyling a type in the Style dialog moves the editor, the legend and the
+   diagram together. Everything structural but typeless is weight, opacity or italic instead, and
+   body prose keeps base-content: color in the editor should mean the same thing it means in the
+   diagram, and prose means nothing there. */
+
+/* One rule for every hued kind, so a new one can't be added without a dark mode. Dark is derived
+   rather than hand-picked: 55% of a stroke mixed with white lands each one near its Tailwind-400
+   sibling, which is about where a 600-weight stroke has to sit to read on the near-black page.
+   The `currentColor` fallback is what an unknown type id degrades to — plain body color, still
+   semibold, i.e. the `keyword` treatment, which is what an unrecognized structural word is. */
+.tok-type,
+.tok-id-decl,
+.tok-id-ref {
+  color: var(--tok-hue, currentColor);
+}
+
+[data-theme="dark"] :is(.tok-type, .tok-id-decl, .tok-id-ref) {
+  color: color-mix(in oklab, var(--tok-hue, currentColor) 55%, white);
+}
+
+/* Ids are the one part of the syntax that isn't a type, so they take the one hue no node palette
+   uses (teal) and can never be mistaken for one. Declaring is quieter than using: `&id` names
+   something in passing, `$id` is a jump to it. */
+.tok-id-decl,
+.tok-id-ref {
+  --tok-hue: #0d9488;
+}
+
+.tok-id-decl {
+  opacity: 0.6;
+}
+
+.tok-id-ref {
+  text-decoration: underline;
+}
+
+/* A marker carries as much meaning as the sentence after it despite being one character, so it
+   takes weight as well as hue. `keyword` is the same shape for a structural word with no type. */
+.tok-type,
+.tok-keyword {
+  font-weight: 600;
+}
+
+.tok-comment {
+  font-style: italic;
+  opacity: 0.5;
+}
+
+/* A property's key is structure, its value is prose, so only the key is marked at all. */
+.tok-property {
+  font-weight: 600;
+  opacity: 0.7;
+}
+
+/* Scores are dense punctuation the eye should be able to skip; the brackets and commas recede
+   further than the numbers they hold, leaving the digits legible without the row shouting. */
+.tok-score-punct {
+  opacity: 0.4;
+}
+
+.tok-score-value {
+  opacity: 0.7;
+}
+
+.tok-tag {
+  opacity: 0.6;
+}
+
+/* The highlight layer, sitting behind a transparent textarea it has to lay text out identically
+   to: same font utilities and the same daisyUI `.textarea` box (see EditorPane), plus the
+   soft-wrap rules a textarea has by UA default and a `pre` doesn't.
+
+   It scrolls rather than clipping for one reason: a classic scrollbar takes its width out of the
+   text column, so a pre that never scrolled would wrap its lines ~15px later than the textarea
+   it's tracking, and every wrapped line would drift. Its scrollbar is painted away rather than
+   removed — `scrollbar-width: none` would take that width back and reintroduce the mismatch. */
+.syntax-overlay {
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+  scrollbar-color: transparent transparent;
+}
+
 /* Not fixable by any ramp, which is worth knowing before anyone tries: daisyUI's button hover is
    `color-mix(in oklab, <surface>, #000 7%)`, a hardcoded step toward *black*, so in dark mode a
    ghost button's hover is darker than whatever it sits on whichever way the ramp runs — on the
@@ -114,7 +203,8 @@
    Selected options are carved out: the picker pills are ghost buttons too, and this selector's
    five class-weights would otherwise outrank `option-selected` and repaint the chosen pill at the
    ordinary 15% hover — flattening the ladder that utility documents. */
-[data-theme="dark"] .btn-ghost:not(:disabled):not([aria-disabled="true"]):not(.option-selected):hover {
+[data-theme="dark"]
+  .btn-ghost:not(:disabled):not([aria-disabled="true"]):not(.option-selected):hover {
   background-color: color-mix(in oklab, var(--color-base-content) 15%, transparent);
 }
 

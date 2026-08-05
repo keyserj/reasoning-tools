@@ -1,5 +1,5 @@
 import type { Graph, GraphEdge, GraphNode, ParseError } from "../types.ts";
-import { MARKER_TO_TYPE, META_MARKER } from "./markers.ts";
+import { ID_SUFFIX, LEADING_WS, MARKER_TO_TYPE, META_MARKER, REF_BODY } from "./markers.ts";
 
 const TAB_SIZE = 4;
 
@@ -12,10 +12,6 @@ function indentWidth(ws: string): number {
   }
   return col;
 }
-
-const LEADING_WS = /^[ \t]*/;
-const ID_SUFFIX = /\s*&([A-Za-z0-9_]+)\s*$/;
-const REF_BODY = /^\$([A-Za-z0-9_]+)$/;
 
 interface StackFrame {
   indent: number;

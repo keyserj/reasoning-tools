@@ -36,14 +36,17 @@ export default function Toolbar({ shared, theme, pane, onPaneChange, onToggleThe
   const themeIcon = theme === "dark" ? "☀️" : "🌙";
 
   return (
-    // Everything fits one row at 375px now that the two selects have moved out, so there's no
-    // wrapped picker line and no overflow menu to hide controls in. `flex-wrap` stays as the
-    // fallback for narrower phones.
-    <div className="navbar bg-base-200 border-b border-base-300 min-h-12 py-0 px-3 gap-2 flex-wrap">
-      {/* `shrink-0`, not the `flex-1 min-w-0` this had while it held the selects: with nothing
-          left to shrink, that squeezed the group to 7px at 320px and the pane toggle drew over
-          the logo. Refusing to shrink lets the row wrap instead, which is what `flex-wrap` is
-          here for. */}
+    // Everything fits one row at 375px, so no control hides in an overflow menu; `flex-wrap` is
+    // the fallback for narrower phones.
+    //
+    // Page surface, not a fill of its own: the toolbar abuts a band on both columns (the
+    // `Ontologies` accordion header on the left, `RenderingStrip` on the right, and on a phone
+    // whichever pane is showing), so the value step separates it and a border would only add a
+    // seam. A fill here would make those bands read as more of the same chrome rather than as
+    // structure.
+    <div className="navbar bg-base-100 min-h-12 py-0 px-3 gap-2 flex-wrap">
+      {/* `shrink-0` so a 320px screen wraps the row rather than squeezing this group to a few
+          pixels and drawing the pane toggle over the logo. */}
       <div className="flex items-center gap-2 shrink-0">
         <span className="text-lg">🗺️</span>
         <span className="font-semibold hidden md:inline">Reasoning Ontology Playground</span>

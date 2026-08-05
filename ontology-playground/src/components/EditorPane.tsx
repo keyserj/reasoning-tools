@@ -91,21 +91,31 @@ export default function EditorPane({
     // itself out of the column. The border and background live on that column now, since the
     // pickers share it.
     <div className="flex flex-col flex-1 min-h-0 min-w-0">
-      <div className="flex items-center px-2 pt-2 shrink-0">
+      {/* The pane's third **band**: same surface, same `px-3`, same 40px as the two accordion
+          headers above it, so all three read as one kind of thing at a glance.
+
+          No `py-` here, unlike those rows: daisyUI's `tab` carries its own 40px height, and
+          padding on top of it would make this band 48px against their 40. */}
+      <div className="flex items-center bg-base-200 px-3 shrink-0">
         {/* "Code" rather than the ontology's name: the picker above already names the ontology,
             and a fixed-width label keeps this row from being at the mercy of how long an
             ontology chose to call itself — the pair plus the Key button has to fit 320px. */}
-        <div role="tablist" className="tabs tabs-bordered">
+        <div role="tablist" className="tabs tabs-border">
+          {/* daisyUI v5 spells the underline `tabs-border`; `tabs-bordered` is v4's name and is
+              inert, so switching to it would leave the active tab unmarked with no error.
+
+              Only the active tab heads the content below, so only it takes `section-header`; the
+              other is a route to a different view, and the dim says so alongside the underline. */}
           <button
             role="tab"
-            className={`tab ${editing ? "tab-active" : ""}`}
+            className={`tab ${editing ? "tab-active section-header" : "text-sm opacity-60"}`}
             onClick={() => onTabChange("source")}
           >
             Code
           </button>
           <button
             role="tab"
-            className={`tab ${!editing ? "tab-active" : ""}`}
+            className={`tab ${!editing ? "tab-active section-header" : "text-sm opacity-60"}`}
             onClick={() => onTabChange("mermaid")}
           >
             Mermaid

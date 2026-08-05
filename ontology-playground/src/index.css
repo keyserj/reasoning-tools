@@ -5,25 +5,94 @@
     dark --prefersdark;
 }
 
-/* daisyUI's stock dark ramp packs base-100/200/300 into ~4 points of oklch lightness. That's
-   the same perceptual step as its light ramp, but near black it lands on far fewer sRGB code
-   values and gets washed out by ambient screen glare, so chrome and canvas read as one
-   surface. Widened here, weighted toward base-300, which draws the dividers. App.tsx always
-   writes an explicit data-theme, so this one selector covers both ways dark mode is reached. */
+/* Surfaces carry three roles app-wide, and a region takes one by what it *is* rather than by
+   which component draws it: base-100 is the **page** (toolbar, pane content, diagram canvas),
+   base-200 is a **band** (the section headers), base-300 is an **edge** (dividers). Bands are
+   the only raised chrome; everything else is one surface.
+
+   Chrome elevates *toward gray* — which is lighter in dark and darker in light, leaving the
+   page at the extreme in both. daisyUI's light ramp (100/98/95%) already runs that way. Its
+   dark ramp runs the opposite way, toward black, so it's inverted here: without that, the
+   role→token mapping would have to flip per theme and no class could mean one thing.
+
+   The steps are also wider than daisyUI's ~4 points of oklch lightness. That's a perceptually
+   normal step, but near black it lands on far fewer sRGB code values and gets washed out by
+   ambient screen glare, so chrome and canvas read as one surface. Each token keeps the chroma
+   and hue it already had and only trades lightness, which desaturates slightly as it lightens
+   — toward gray in the literal sense too.
+
+   App.tsx always writes an explicit data-theme, so this one selector covers both ways dark mode
+   is reached. */
 [data-theme="dark"] {
-  --color-base-200: oklch(20.5% 0.014 253.1);
-  --color-base-300: oklch(16% 0.012 254.09);
+  --color-base-100: oklch(16% 0.012 254.09);
+  --color-base-200: oklch(21% 0.014 253.1);
+  --color-base-300: oklch(26% 0.016 252.42);
 }
 
-/* The same problem one layer up, and the reason the ramp fix above wasn't enough: daisyUI's
-   ghost-button hover is a wash whose alpha is tuned for the light theme, where it lands ~14
-   sRGB code values from the surface and reads clearly. Against this dark theme it computes to
-   RGB(16,20,26) on an RGB(19,24,30) surface — three code values, and *darker* than what it
-   sits on, so hovering a ghost button looked like nothing happened at all. Lighten instead,
-   hard enough to survive the same screen glare the ramp comment describes. Applies to every
-   ghost button (toolbar, pickers, feature strip, Key/Style), so hover means one thing app-wide. */
+/* Light runs the right direction already, but daisyUI's stock 100/98/95% is 7 sRGB code values
+   from page to band — too tight for a band to carry structure. Widened to the 13 the dark ramp
+   above uses, landing on an unremarkable light ramp (242 and 229 are Tailwind's gray-100 and
+   gray-200). Chroma stays 0 as daisyUI ships it; only lightness is reassigned, same as dark. */
+[data-theme="light"] {
+  --color-base-200: oklch(96% 0 0);
+  --color-base-300: oklch(92.5% 0 0);
+}
+
+/* A band's type, the counterpart to its surface above: every section header names itself in the
+   same 14px/600, so the eye finds the pane's sections without reading them. It goes on the
+   element holding the text — daisyUI's `.btn` and `.tab` set a font-size on the control itself,
+   which an inherited size from a parent can't outrank. Being a utility, it lands unlayered in
+   Tailwind's `utilities` layer and so wins over daisyUI's nested `daisyui.*` sublayers without
+   an `!`; don't put a competing `font-*` utility on the same element, since which one wins is
+   then down to Tailwind's emit order. */
+@utility section-header {
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* How a selection is marked, everywhere one exists: the picker pills, the strip's feature pills
+   and the option rows in its panel. Hue is spent on `Copy link` and on the diagram itself, so a
+   selection is drawn in value alone — a fill where an unselected control has none, over a border
+   twice the weight of theirs, which is what carries it at pill size.
+
+   Derived from base-content because it's the only neutral that flips with the theme: daisyUI's
+   `neutral` is rgb(9,9,11) in both, which against the dark page measures one code value. Same
+   reason `index.css` overrides the ghost hover and AGENTS.md asks for content-derived borders on
+   small controls. */
+@utility option-selected {
+  background-color: color-mix(in oklab, var(--color-base-content) 8%, transparent);
+  border-color: color-mix(in oklab, var(--color-base-content) 40%, transparent);
+}
+
+/* Worn by anything offering itself as a choice, selected or not, including the panel's option
+   rows, which are `label`s rather than buttons and so get neither the pointer nor the hover for
+   free. One step for both themes: daisyUI's own is 10% toward black, which the dark ramp has to
+   override anyway, and `option-selected`'s fill would outrank it regardless. */
+@utility option {
+  cursor: pointer;
+
+  &:hover {
+    background-color: color-mix(in oklab, var(--color-base-content) 15%, transparent);
+  }
+}
+
+/* Not fixable by any ramp, which is worth knowing before anyone tries: daisyUI's button hover is
+   `color-mix(in oklab, <surface>, #000 7%)`, a hardcoded step toward *black*, so in dark mode a
+   ghost button's hover is darker than whatever it sits on whichever way the ramp runs — on the
+   band that's RGB(17,21,27) against RGB(20,25,31), four code values in the wrong direction.
+   Lightening from base-content instead lands 36-37 code values off both the band and the page and
+   reads the same way in light. Covers every ghost button (toolbar, pickers, rendering strip,
+   Key/Style), so hover means one thing app-wide. */
 [data-theme="dark"] .btn-ghost:not(:disabled):not([aria-disabled="true"]):hover {
   background-color: color-mix(in oklab, var(--color-base-content) 15%, transparent);
+}
+
+/* A modal is raised chrome, so it takes the **band** surface. daisyUI gives `modal-box` base-100,
+   which under the roles above is the *page*, leaving only the stock `oklch(0 0 0 / 0.25)` shadow
+   between a box and what surrounds it — nothing at all against a near-black page. One rule rather
+   than a class on each caller, so Legend and ConfigPanel can't drift apart. */
+.modal-box {
+  background-color: var(--color-base-200);
 }
 
 html,

@@ -32,50 +32,65 @@ interface PickerOption {
 }
 
 interface SectionProps {
-  /** "Ontology" / "Example" — also the pill group's accessible name */
+  /** "Ontologies" / "Examples" — also the pill group's accessible name */
   label: string;
-  /** what the summary row reads to the right of the label */
-  summary: string;
+  /** the current selection, rendered parenthesised after the label */
+  selection: string;
   options: PickerOption[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-  /** rendered beside the summary-row toggle, as its sibling */
+  /** rendered beside the accordion header's toggle, as its sibling */
   action?: ReactNode;
 }
 
 /**
- * One accordion section: a summary row that always names the current selection, over a pill
- * list that can be collapsed. "Summary row" rather than "header" because that is what it is to
- * the list below it — the page already has a header, and this isn't one.
+ * One accordion section: a header that always names the current selection, over a pill list that
+ * can be collapsed.
  */
-function PickerSection({ label, summary, options, selectedId, onSelect, action }: SectionProps) {
-  // Desktop has room to show every option at once; a phone doesn't, and the collapsed summary
-  // row is written for exactly that case. Read once at mount rather than tracked across
-  // resizes: crossing the breakpoint mid-session is rare next to the cost of overriding a
-  // choice the reader has already made. A resize listener would go here if that changes.
+function PickerSection({ label, selection, options, selectedId, onSelect, action }: SectionProps) {
+  // Desktop has room to show every option at once; a phone doesn't, and the collapsed header
+  // naming the current selection is written for exactly that case. Read once at mount rather
+  // than tracked across resizes: crossing the breakpoint mid-session is rare next to the cost of
+  // overriding a choice the reader has already made. A resize listener would go here if that
+  // changes.
   const [open, setOpen] = useState(() => window.matchMedia?.(WIDE_QUERY).matches ?? true);
   const listId = useId();
 
   return (
-    <div className="border-b border-base-300">
+    <div>
       {/* The toggle is a button and `action` is its *sibling*: nesting a button inside a button
-          is invalid HTML, and Reset would toggle the accordion on its way to resetting.
+          is invalid HTML, and Reset would toggle the accordion on its way to resetting. The
+          toggle spans the row (`flex-1 justify-start`) for a large target.
 
-          The toggle spans the row (`flex-1 justify-start`) rather than hugging its text, which
-          buys a large target and hover across the whole width. It does *not* make the row look
-          clickable at rest: transparent full-width is pixel-identical to transparent
-          text-width until you happen to hover it. Giving the row a resting affordance is an
-          open design question — a background band was tried and backed out. */}
-      <div className="flex items-center gap-1 px-3 py-1">
+          The row takes the **band** surface every section header in the pane wears, which is what
+          makes it read as a header at rest.
+
+          The bottom border appears only while collapsed, which is the rule "draw a divider only
+          where two regions share a surface" applied to this row. Open, the band meets the pill
+          list and the surface step separates them. Collapsed, this band meets the *next* band —
+          `Examples` below `Ontologies`, the editor tab row below `Examples` — and without a line
+          the three merge into one slab. */}
+      <div
+        className={`flex items-center gap-1 bg-base-200 px-3 py-1 ${
+          open ? "" : "border-b border-base-300"
+        }`}
+      >
+        {/* `px-3` puts the label at the same 24px as the editor's `Code` tab, so all three of the
+            pane's headers start on one line. */}
         <button
-          className="btn btn-sm btn-ghost flex-1 justify-start gap-1.5 px-2 min-w-0 font-normal"
+          className="btn btn-sm btn-ghost flex-1 justify-start gap-1 px-3 min-w-0 section-header"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={listId}
         >
-          <span className="opacity-50">{open ? "▾" : "▸"}</span>
-          <span className="opacity-60">{label}:</span>
-          <span className="truncate font-semibold">{summary}</span>
+          <span>{label}</span>
+          {/* The selection is content rather than a header, so it drops to the body weight and
+              a lower value while keeping the header's size. */}
+          <span className="truncate font-normal opacity-70">({selection})</span>
+          {/* Trails the text, so the label keeps the header line rather than being pushed off it,
+              and `shrink-0` makes truncation eat the selection instead of the caret. ▾/▴ is the
+              app's convention for a caret that follows what it toggles (see the feature pills). */}
+          <span className="shrink-0 font-normal opacity-50">{open ? "▴" : "▾"}</span>
         </button>
         {action}
       </div>
@@ -85,7 +100,7 @@ function PickerSection({ label, summary, options, selectedId, onSelect, action }
           id={listId}
           role="group"
           aria-label={label}
-          className="flex flex-wrap gap-1 px-3 pb-1.5"
+          className="flex flex-wrap gap-1 px-3 py-1.5"
         >
           {options.map((option) => {
             const selected = option.id === selectedId;
@@ -93,31 +108,27 @@ function PickerSection({ label, summary, options, selectedId, onSelect, action }
             return (
               <button
                 key={option.id}
-                // A border on the unselected pills so they still read as pills rather than as
-                // loose text; `aria-pressed` matches how the toolbar's pane toggle says the
-                // same thing.
+                // A border on the unselected pills too, so they read as pills rather than as loose
+                // text; `option-selected` doubles its weight and adds a fill, and `aria-pressed`
+                // says the same thing the toolbar's pane toggle does.
                 //
                 // The unavailable colour is set here rather than left to daisyUI's `:disabled`,
-                // which is 20% alpha — about 1.9:1 against the dark theme's base-200, and
-                // barely legible. A disabled control is normally allowed to be that faint, but
-                // this one carries a message, and an unreadable message is no message.
-                className={`btn btn-xs font-normal ${
+                // which is 20% alpha — barely legible against the page surface these pills sit
+                // on. A disabled control is normally allowed to be that faint, but this one
+                // carries a message, and an unreadable message is no message.
+                className={`btn btn-xs btn-ghost border ${
                   selected
-                    ? "btn-primary"
-                    : `btn-ghost border border-base-content/20 ${
-                        unavailable
-                          ? "text-base-content/50 hover:bg-transparent cursor-not-allowed"
-                          : ""
-                      }`
+                    ? "option option-selected font-medium"
+                    : unavailable
+                      ? "border-base-content/20 font-normal text-base-content/50 hover:bg-transparent cursor-not-allowed"
+                      : "option border-base-content/20 font-normal"
                 }`}
                 aria-pressed={selected}
-                // `aria-disabled`, not `disabled`. `disabled` sets `pointer-events: none`, so
-                // the browser never delivers hover and the `title` below can never appear; it
-                // also drops the pill out of the tab order, so a keyboard or screen-reader user
-                // never learns the example exists. Both defeat the point of showing it at all.
-                // Clicking is still not a selection — `onSelect` explains itself instead (see
-                // App's switchExample), which is also the only route a touch device has, since
-                // it has no hover to show a tooltip with.
+                // `aria-disabled`, not `disabled`: `disabled` sets `pointer-events: none`, so the
+                // `title` below can never appear, and drops the pill out of the tab order, so a
+                // keyboard or screen-reader user never learns the example exists. Clicking is
+                // still not a selection — `onSelect` explains itself instead (see App's
+                // switchExample), the only route a touch device has.
                 aria-disabled={unavailable}
                 title={option.unavailable}
                 onClick={() => onSelect(option.id)}
@@ -170,31 +181,30 @@ export default function DocumentPicker({
   }));
 
   return (
-    // `text-sm` rather than the rendering strip's `text-xs`: this is the first thing a visitor
-    // needs to read — what they're looking at and what else there is — so it outranks the
-    // secondary bar over the diagram.
-    <div className="shrink-0 bg-base-200 text-sm">
+    // No surface of its own. Each section paints its own band and lets its pill list fall through
+    // to the page surface the column already sets, which is the alternation the pane is built on;
+    // a fill here would flatten both sections into one slab.
+    <div className="shrink-0">
       <PickerSection
-        label="Ontology"
-        summary={ontology.label}
+        label="Ontologies"
+        selection={ontology.label}
         options={ontologyList.map((o) => ({ id: o.id, label: o.label }))}
         selectedId={ontology.id}
         onSelect={onOntologyChange}
       />
       {/* `null` is the only route to "Custom" — `decodeState` normalises an example id this
-          ontology doesn't ship down to it — so no pill stands for it; the summary row does. */}
+          ontology doesn't ship down to it — so no pill stands for it; the header does. */}
       <PickerSection
-        label="Example"
-        summary={`${exampleLabel(exampleId) ?? "Custom"}${dirty ? " • edited" : ""}`}
+        label="Examples"
+        selection={`${exampleLabel(exampleId) ?? "Custom"}${dirty ? " • edited" : ""}`}
         options={exampleOptions}
         selectedId={exampleId}
         onSelect={onExampleChange}
         action={
           dirty && (
-            // Bordered rather than a bare ghost: `btn-ghost` only grows a background on hover,
-            // and that background is a light grey landing on this bar's light grey — at rest it
-            // read as text, not a control. The ↺ marks it as an action rather than one more
-            // pill in a row of them.
+            // Bordered rather than a bare ghost: `btn-ghost` only grows a background on hover, so
+            // at rest it reads as text rather than as a control. The ↺ marks it as an action
+            // rather than one more pill in a row of them.
             <button
               className="btn btn-xs btn-ghost border border-base-content/20 gap-1 shrink-0"
               onClick={onResetExample}

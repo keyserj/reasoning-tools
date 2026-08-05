@@ -47,14 +47,28 @@ export default function RenderingStrip({ features, state, onChange, onOpenStyle 
   const open = features.find((feature) => feature.id === openId);
 
   return (
-    <div className="border-b border-base-300 bg-base-200 text-xs">
-      <div className="flex flex-wrap items-center gap-2 px-3 py-1">
+    // The diagram column's **band**, the counterpart to the three in the left pane. No bottom
+    // border: it sits on the page-surfaced canvas, so the value step already separates them.
+    <div className="bg-base-200 text-xs">
+      {/* `min-h-10` rather than a height, so the row still grows when its pills wrap: it matches
+          the 40px of the left pane's three bands, which sit level with this one under the
+          toolbar. */}
+      <div className="flex flex-wrap items-center gap-2 px-3 py-1 min-h-10">
+        {/* Names the controls in the row rather than the diagram below, which needs no label to
+            be recognised as a diagram. */}
+        <span className="section-header">Diagram config</span>
+
         {features.map((feature) => {
           const isOpen = feature.id === openId;
           return (
+            // `option-selected` rather than daisyUI's `btn-active`, whose fill is a hardcoded step
+            // toward black — on this band in dark mode that measures four code values, which is
+            // not a visible state.
             <button
               key={feature.id}
-              className={`btn btn-xs font-normal ${isOpen ? "btn-active" : "btn-ghost"}`}
+              className={`btn btn-xs btn-ghost option font-normal ${
+                isOpen ? "option-selected" : ""
+              }`}
               onClick={() => setOpenId((id) => (id === feature.id ? null : feature.id))}
               aria-expanded={isOpen}
               title={feature.description}
@@ -82,7 +96,10 @@ export default function RenderingStrip({ features, state, onChange, onOpenStyle 
       {/* Expands *inside* the strip, pushing the diagram down rather than covering it, so an
           option can be changed while watching the graph. */}
       {open && (
-        <div className="border-t border-base-300 bg-base-100 px-3 py-2">
+        // Page surface under the band, so the step above needs no line — but the canvas below is
+        // page-surfaced too, and that edge is invisible without one. Hence `border-b` and no
+        // `border-t`: draw a divider only where two regions share a surface.
+        <div className="border-b border-base-300 bg-base-100 px-3 py-2">
           <div className="font-semibold">{open.label}</div>
           <p className="mt-0.5 opacity-70">{open.description}</p>
 
@@ -90,10 +107,13 @@ export default function RenderingStrip({ features, state, onChange, onOpenStyle 
               are both defensible, so the panel has to show what you'd be switching to. */}
           <div className="mt-2 flex flex-col gap-1">
             {open.options.map((o) => (
+              // The same `option-selected` the pills take: selection means one thing app-wide, and
+              // a `bg-base-200` fill would double-book the band token as a selection colour inside
+              // a content panel.
               <label
                 key={o.id}
-                className={`flex gap-2 rounded-box border px-2 py-1 ${
-                  optionOf(open) === o.id ? "border-base-content/30 bg-base-200" : "border-base-300"
+                className={`flex gap-2 rounded-box border px-2 py-1 option ${
+                  optionOf(open) === o.id ? "option-selected" : "border-base-300"
                 }`}
               >
                 <input

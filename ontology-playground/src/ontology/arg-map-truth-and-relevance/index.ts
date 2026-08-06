@@ -1,6 +1,7 @@
 import { defineOntology } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toMermaid } from "./toMermaid.ts";
+import { highlightLine } from "./highlight.ts";
 import type { ArgDoc } from "./model.ts";
 import { legend } from "./legend.ts";
 import { renderedNodeTypes } from "./renderedNodeTypes.ts";
@@ -21,6 +22,7 @@ export const argMapTruthAndRelevance = defineOntology<ArgDoc>({
   label: "Arg map: truth & relevance",
   parse,
   toMermaid,
+  highlightLine,
   legend,
   legendNote,
   renderedNodeTypes,

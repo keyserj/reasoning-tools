@@ -8,7 +8,8 @@ export const MAX_SCORE = 8;
 /** One score per perspective, in `%perspectives` order. `null` = that person didn't score it. */
 export type Scores = (number | null)[];
 
-const LEADING_BRACKET = /^\[([^\]]*)\]/;
+/** A score bracket where one may start. Exported for ./highlight.ts, which lexes the same span. */
+export const LEADING_BRACKET = /^\[([^\]]*)\]/;
 const UNSCORED_SLOT = "-";
 const DIGITS = /^\d+$/;
 

@@ -18,7 +18,7 @@ export default function Legend({ open, entries, note, onClose }: Props) {
           Only affects desktop — below the cap, modal-box's width: 91.6667% still governs. */}
       <div className="modal-box max-w-4xl">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-bold text-lg">Syntax key</h3>
+          <h3 className="font-bold text-lg">Syntax</h3>
           <button className="btn btn-sm btn-circle btn-ghost" onClick={onClose} aria-label="Close">
             ✕
           </button>

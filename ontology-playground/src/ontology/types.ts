@@ -102,6 +102,46 @@ export interface LegendEntry {
   icon: string;
 }
 
+// --- Syntax highlighting --------------------------------------------------------------
+//
+// The kinds are a fixed shell vocabulary: each ontology's tokenizer says which of them a
+// stretch of text is, and src/index.css alone says how a kind is painted, so no ontology
+// knows a color and the shell knows no ontology's words. `type` is the reason this exists —
+// a marker is drawn in the stroke its rendered type carries in the document's `StyleConfig`,
+// so the editor, the legend and the diagram can't disagree.
+//
+// `keyword` and `tag` are emitted by nobody today; they're the slots the Ameliorate syntax
+// (multiword edge words, `#action` subtype tags) needs, kept here so adding it isn't a change
+// to this contract.
+
+export type HighlightKind =
+  /** a marker or word that produces one of the ontology's rendered types */
+  | "type"
+  /** structural word with no type identity of its own */
+  | "keyword"
+  /** a whole meta-comment line */
+  | "comment"
+  /** `&id`: names the thing on this line */
+  | "id-decl"
+  /** `$id`: refers to something named elsewhere */
+  | "id-ref"
+  /** the `[`, `]` and `,` of a score bracket */
+  | "score-punct"
+  /** one score slot, digits or the unscored `-` */
+  | "score-value"
+  /** the `%key:` head of a property line; its value stays plain */
+  | "property"
+  /** a subtype tag, e.g. `#action` */
+  | "tag";
+
+export interface HighlightToken {
+  text: string;
+  /** absent = plain body text */
+  kind?: HighlightKind;
+  /** a `StyleConfig.types` key; present exactly when `kind` is `"type"` */
+  typeId?: string;
+}
+
 // --- Features -------------------------------------------------------------------------
 //
 // A feature is a switchable rendering lens an ontology declares and the shell renders
@@ -151,6 +191,13 @@ export interface Ontology {
   label: string;
   parse: (text: string) => ParseResult;
   toMermaid: (doc: unknown, config: StyleConfig, features: FeatureState) => string;
+  /**
+   * Tokenize one line for the editor's highlight overlay. Line-local by contract: no state
+   * carries between lines, since the overlay re-tokenizes only what changed. The tokens' texts
+   * must concatenate back to `line` exactly — the overlay renders them in order and does no
+   * index math of its own.
+   */
+  highlightLine: (line: string) => HighlightToken[];
   legend: LegendEntry[];
   /** Optional prose shown beneath the legend table. */
   legendNote?: string;

@@ -1,10 +1,29 @@
-import type { KeyboardEvent } from "react";
-import type { ParseError } from "../ontology/types.ts";
+import { type CSSProperties, Fragment, type KeyboardEvent, useMemo, useRef } from "react";
+import type { HighlightToken, ParseError, StyleConfig } from "../ontology/types.ts";
 
 export type EditorTab = "source" | "mermaid";
 
 /** What one indent level is worth. Two spaces, GitHub-style — the syntaxes nest by indentation. */
 const INDENT = "  ";
+
+/**
+ * Everything that decides where a glyph lands. The overlay is only invisible while it and the
+ * textarea agree on all of it, so they wear one string rather than two that look alike: the
+ * daisyUI box (border, radius, padding, min-height), the font metrics over it, and whether a
+ * long line wraps. 16px text on small screens keeps iOS Safari from zooming in when the textarea
+ * is focused.
+ *
+ * `whitespace-pre` scrolls a long line sideways instead of wrapping it, for the same reason code
+ * editors do: indentation is what a line says it belongs to here, and a wrapped continuation
+ * starts at column 0 looking like a sibling of the wrong depth. It also takes wrapping out of
+ * what the two elements can disagree about — the overlay tracks the textarea's `scrollLeft`
+ * exactly, where a wrap point only had to differ by a pixel to smear the whole file.
+ *
+ * `textarea-bordered` is deliberately absent: that's daisyUI v4's name and does nothing in v5,
+ * the same trap as `tabs-bordered` above — v5's `.textarea` already draws the border.
+ */
+const EDITOR_BOX =
+  "textarea w-full h-full font-mono text-base md:text-sm leading-relaxed whitespace-pre";
 
 interface Props {
   source: string;
@@ -16,6 +35,29 @@ interface Props {
   placeholder: string;
   errors: ParseError[];
   onOpenLegend: () => void;
+  onOpenMiscConfig: () => void;
+  highlightLine: (line: string) => HighlightToken[];
+  /** the document's live styling: where a `type` token's color comes from */
+  config: StyleConfig;
+  /** draw a `type` token on a tint of its own color, rather than as bare colored text */
+  typeBackgrounds: boolean;
+}
+
+/** One token. Plain text is bare, so the overlay's DOM stays close to the textarea's own. */
+function Token({ token, config }: { token: HighlightToken; config: StyleConfig }) {
+  if (token.kind === undefined) return token.text;
+
+  // An id the config doesn't style (an ontology naming a type it doesn't render) falls back to
+  // the CSS rule's `currentColor` rather than to a guess.
+  const stroke = token.typeId === undefined ? undefined : config.types[token.typeId]?.stroke;
+  return (
+    <span
+      className={`tok-${token.kind}`}
+      style={stroke === undefined ? undefined : ({ "--tok-hue": stroke } as CSSProperties)}
+    >
+      {token.text}
+    </span>
+  );
 }
 
 export default function EditorPane({
@@ -28,8 +70,20 @@ export default function EditorPane({
   placeholder,
   errors,
   onOpenLegend,
+  onOpenMiscConfig,
+  highlightLine,
+  config,
+  typeBackgrounds,
 }: Props) {
   const editing = activeTab === "source";
+  const overlay = useRef<HTMLPreElement>(null);
+
+  // Split on "\n" rather than the parser's /\r?\n/: a token's text has to be the source's own
+  // characters, and a swallowed "\r" is a character the textarea still lays out.
+  const lines = useMemo(
+    () => (editing ? source.split("\n").map(highlightLine) : []),
+    [editing, source, highlightLine],
+  );
 
   // Indent edits go through execCommand("insertText") rather than onSourceChange: the browser
   // applies them as real user edits, so the caret lands correctly, ctrl+z still undoes them, and
@@ -99,7 +153,7 @@ export default function EditorPane({
       <div className="flex items-center bg-base-200 px-3 shrink-0">
         {/* "Code" rather than the ontology's name: the picker above already names the ontology,
             and a fixed-width label keeps this row from being at the mercy of how long an
-            ontology chose to call itself — the pair plus the Key button has to fit 320px. */}
+            ontology chose to call itself — the pair plus both buttons has to fit 320px. */}
         <div role="tablist" className="tabs tabs-border">
           {/* daisyUI v5 spells the underline `tabs-border`; `tabs-bordered` is v4's name and is
               inert, so switching to it would leave the active tab unmarked with no error.
@@ -122,33 +176,95 @@ export default function EditorPane({
           </button>
         </div>
 
-        {/* Sits with the syntax it documents rather than in the page header, but stays a button
-            outside the tablist: a third tab would replace the textarea and be a mode to click
-            back out of, where the key is glance-and-dismiss. Shown on the Mermaid tab too —
-            it describes the ontology either way, and hiding it would make the row jump. */}
-        <button
-          className="btn btn-xs btn-ghost ml-auto"
-          onClick={onOpenLegend}
-          title={`How to read and write ${ontologyLabel}`}
-        >
-          Key
-        </button>
+        {/* Both sit with the editor they act on rather than in the page header, and both stay
+            buttons outside the tablist: a third tab would replace the textarea and be a mode to
+            click back out of, where a dialog is open-and-dismiss. They travel as one group so a
+            narrow row drops them together rather than splitting the pair.
+
+            Shown on the Mermaid tab too — the syntax describes the ontology either way, and
+            hiding either would make the row jump. */}
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            className="btn btn-xs btn-ghost"
+            onClick={onOpenLegend}
+            title={`How to read and write ${ontologyLabel}`}
+          >
+            Syntax
+          </button>
+          <button
+            className="btn btn-xs btn-ghost"
+            onClick={onOpenMiscConfig}
+            title="How the editor draws the source"
+          >
+            Misc config
+          </button>
+        </div>
       </div>
 
+      {/* The editor is a plain textarea with a highlighted copy of its own text behind it, rather
+          than a code-editor component: every marker in these syntaxes already has a color (the
+          stroke its type is drawn with), so the overlay is what makes a line of source and its
+          box in the diagram findable from each other — and keeping the textarea keeps the tab,
+          undo and mobile-input behaviour a replacement would have to re-earn.
+
+          Only the Code tab gets it. The Mermaid tab is generated output in someone else's
+          language, and this ontology's tokenizer would be reading a document it didn't write. */}
       <div className="flex-1 min-h-0 p-2">
-        {/* 16px text on small screens keeps iOS Safari from zooming in when the textarea is focused. */}
-        <textarea
-          className="textarea textarea-bordered w-full h-full font-mono text-base md:text-sm leading-relaxed resize-none"
-          spellCheck={false}
-          value={editing ? source : mermaidText}
-          onChange={(e) => onSourceChange(e.target.value)}
-          onKeyDown={handleKeyDown}
-          readOnly={!editing}
-          placeholder={editing ? placeholder : undefined}
-          aria-label={editing ? `${ontologyLabel} source` : "Generated mermaid source"}
-          aria-keyshortcuts={editing ? "Tab Shift+Tab Escape" : undefined}
-          title={editing ? "Tab/Shift+Tab indent/outdent. Escape exits the editor." : undefined}
-        />
+        {/* The overlay is positioned against this box rather than the padded one above, so that
+            `inset-0` and the `w-full h-full` both elements share describe the same rectangle —
+            against a padded containing block they'd disagree by the padding, and the pre would
+            wrap its lines at a different width than the textarea it's tracking. */}
+        <div className="relative h-full">
+          {editing && (
+            <pre
+              ref={overlay}
+              aria-hidden
+              className={`${EDITOR_BOX} syntax-overlay absolute inset-0 overflow-auto pointer-events-none border-transparent shadow-none ${
+                typeBackgrounds ? "type-backgrounds" : ""
+              }`}
+            >
+              {lines.map((tokens, i) => (
+                <Fragment key={i}>
+                  {i > 0 && "\n"}
+                  {tokens.map((token, j) => (
+                    <Token key={j} token={token} config={config} />
+                  ))}
+                </Fragment>
+              ))}
+              {/* A source ending in a newline leaves the textarea an empty last line; give the
+                  pre one too, or the two disagree about their height by a line. A trailing space
+                  hangs at the end of its line, so it can never move a wrap. */}{" "}
+            </pre>
+          )}
+          {/* `relative` only so the textarea paints over the absolutely positioned overlay:
+              without it, in-flow content sits below a positioned sibling whatever the DOM
+              order, and the transparent text would be hiding *behind* its own highlighting.
+
+              daisyUI's `.textarea:focus` changes three things, and only the first is kept: the
+              border darkens (`--input-color` swapping to full base-content, left alone here), a
+              2px outline appears, and the inset shadow becomes an outer one. The outline is off
+              because it rings a rectangle whose edges are already the pane's own, and the shadow
+              off in both states because a hairline flipping from inset to outer says nothing
+              about focus. What's left is the border doing that job by itself. */}
+          <textarea
+            className={`${EDITOR_BOX} syntax-input relative resize-none overflow-auto shadow-none focus:outline-none placeholder:text-base-content/40 ${
+              editing ? "bg-transparent text-transparent caret-base-content" : ""
+            }`}
+            spellCheck={false}
+            value={editing ? source : mermaidText}
+            onChange={(e) => onSourceChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            onScroll={(e) => {
+              if (overlay.current === null) return;
+              overlay.current.scrollTop = e.currentTarget.scrollTop;
+              overlay.current.scrollLeft = e.currentTarget.scrollLeft;
+            }}
+            readOnly={!editing}
+            placeholder={editing ? placeholder : undefined}
+            aria-label={editing ? `${ontologyLabel} source` : "Generated mermaid source"}
+            aria-keyshortcuts={editing ? "Tab Shift+Tab Escape" : undefined}
+          />
+        </div>
       </div>
 
       {errors.length > 0 && (

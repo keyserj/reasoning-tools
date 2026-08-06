@@ -1,6 +1,7 @@
 import { type Graph, defineOntology } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toMermaid } from "./toMermaid.ts";
+import { highlightLine } from "./highlight.ts";
 import { legend } from "./legend.ts";
 import { renderedNodeTypes } from "./renderedNodeTypes.ts";
 import { renderedEdgeTypes } from "./renderedEdgeTypes.ts";
@@ -17,6 +18,7 @@ export const ibis = defineOntology<Graph>({
   label: "IBIS",
   parse,
   toMermaid,
+  highlightLine,
   legend,
   legendNote,
   renderedNodeTypes,

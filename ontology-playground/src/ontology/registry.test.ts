@@ -45,6 +45,36 @@ describe.each(ontologyList.map((o) => [o.label, o] as const))("%s", (_label, ont
     }
   });
 
+  it("tokenizes every example line back into exactly that line", () => {
+    // What EditorPane's overlay rests on: it lays tokens out in order over a transparent
+    // textarea, so a tokenizer that drops or invents a character shifts every glyph after it
+    // out from under the caret.
+    for (const example of ontology.examples) {
+      for (const line of example.source.split("\n")) {
+        const tokens = ontology.highlightLine(line);
+        expect({ id: example.id, line: tokens.map((t) => t.text).join("") }).toEqual({
+          id: example.id,
+          line,
+        });
+        expect(tokens.every((t) => t.text !== "")).toBe(true);
+      }
+    }
+  });
+
+  it("names a rendered node type on every `type` token, and only on those", () => {
+    // The overlay colors a `type` token from `StyleConfig.types[typeId]`, which is keyed by
+    // rendered node type, so a typo in a tokenizer would silently drop back to plain text.
+    const typeIds = ontology.renderedNodeTypes.map((t) => t.id);
+    for (const example of ontology.examples) {
+      for (const line of example.source.split("\n")) {
+        for (const token of ontology.highlightLine(line)) {
+          if (token.kind === "type") expect(typeIds).toContain(token.typeId);
+          else expect(token.typeId).toBeUndefined();
+        }
+      }
+    }
+  });
+
   it("gives every feature a default option that is one of its own", () => {
     for (const feature of ontology.features) {
       expect(feature.options.map((o) => o.id)).toContain(feature.defaultOption);

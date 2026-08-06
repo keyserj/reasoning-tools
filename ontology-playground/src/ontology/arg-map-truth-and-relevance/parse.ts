@@ -2,11 +2,16 @@ import type { ParseError } from "../types.ts";
 import type { ArgDoc, Claim, Edge, Note } from "./model.ts";
 import {
   DESCRIPTION_KEY,
+  EDGE_TYPE_HEAD,
   EXPECTED_MARKERS,
   EDGE_TYPES,
   type EdgeType,
+  ID_SUFFIX,
+  LEADING_WS,
   MARKER_TO_KIND,
   PERSPECTIVES_KEY,
+  PROPERTY,
+  REF_BODY,
   isEdgeType,
 } from "./markers.ts";
 import { type Scores, takeScores } from "./scores.ts";
@@ -23,12 +28,6 @@ function indentWidth(ws: string): number {
   return col;
 }
 
-const LEADING_WS = /^[ \t]*/;
-// Ids are kebab-case here (`&wall-reduces`), so `-` is part of the charset.
-const ID_SUFFIX = /\s*&([A-Za-z0-9_-]+)\s*$/;
-const REF_BODY = /^\$([A-Za-z0-9_-]+)$/;
-const PROPERTY = /^%([A-Za-z0-9_-]+)\s*:\s*(.*)$/;
-const EDGE_TYPE_HEAD = /^([A-Za-z]+)/;
 const BRACKETED_LIST = /^\[(.*)\]$/;
 
 interface ClaimFrame {

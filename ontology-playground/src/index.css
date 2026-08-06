@@ -179,17 +179,28 @@
 }
 
 /* The highlight layer, sitting behind a transparent textarea it has to lay text out identically
-   to: same font utilities and the same daisyUI `.textarea` box (see EditorPane), plus the
-   soft-wrap rules a textarea has by UA default and a `pre` doesn't.
+   to: same font utilities, the same daisyUI `.textarea` box and the same `whitespace-pre` (see
+   EditorPane, which owns all three as one string).
 
-   It scrolls rather than clipping for one reason: a classic scrollbar takes its width out of the
-   text column, so a pre that never scrolled would wrap its lines ~15px later than the textarea
-   it's tracking, and every wrapped line would drift. Its scrollbar is painted away rather than
-   removed — `scrollbar-width: none` would take that width back and reintroduce the mismatch. */
+   Since neither element wraps, what this one has to do is *scroll*: the textarea's scroll handler
+   drives this element's `scrollTop`/`scrollLeft`, and a clipping box would pin both at 0 and hold
+   the highlighting still while the text moved under it. Its scrollbars are painted away rather
+   than removed with `scrollbar-width: none`, which keeps the overlay's content box the size the
+   textarea's is — the standing rule for anything here, since equal boxes are what make equal
+   layout. */
 .syntax-overlay {
-  white-space: pre-wrap;
-  overflow-wrap: break-word;
   scrollbar-color: transparent transparent;
+}
+
+/* The textarea over it. Its scrollbars are the ones you actually use, and on the Code tab they
+   are invisible without this: `scrollbar-color` is inherited, daisyUI sets it on `:root` as
+   `color-mix(in oklch, currentcolor 35%, transparent)`, and `currentcolor` here is the
+   *transparent* text that lets the overlay show through — so the thumb computes to a fully
+   transparent color while the gutter still takes its 15px. Naming base-content directly is the
+   same 35% every other scroller in the app resolves to, this textarea on the Mermaid tab
+   included; it just no longer travels through a color that has been zeroed out. */
+.syntax-input {
+  scrollbar-color: color-mix(in oklch, var(--color-base-content) 35%, transparent) transparent;
 }
 
 /* Not fixable by any ramp, which is worth knowing before anyone tries: daisyUI's button hover is
@@ -198,7 +209,7 @@
    band that's RGB(31,41,57) against RGB(35,46,63), a few code values in the wrong direction.
    Lightening from base-content instead lands 26 code values off the band and 29 off the page, and
    reads the same way in light. Covers every ghost button (toolbar, pickers, rendering strip,
-   Key/Style), so hover means one thing app-wide.
+   Syntax/Style), so hover means one thing app-wide.
 
    Selected options are carved out: the picker pills are ghost buttons too, and this selector's
    five class-weights would otherwise outrank `option-selected` and repaint the chosen pill at the

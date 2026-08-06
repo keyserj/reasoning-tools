@@ -9,13 +9,21 @@ const INDENT = "  ";
 /**
  * Everything that decides where a glyph lands. The overlay is only invisible while it and the
  * textarea agree on all of it, so they wear one string rather than two that look alike: the
- * daisyUI box (border, radius, padding, min-height) and the font metrics over it. 16px text on
- * small screens keeps iOS Safari from zooming in when the textarea is focused.
+ * daisyUI box (border, radius, padding, min-height), the font metrics over it, and whether a
+ * long line wraps. 16px text on small screens keeps iOS Safari from zooming in when the textarea
+ * is focused.
+ *
+ * `whitespace-pre` scrolls a long line sideways instead of wrapping it, for the same reason code
+ * editors do: indentation is what a line says it belongs to here, and a wrapped continuation
+ * starts at column 0 looking like a sibling of the wrong depth. It also takes wrapping out of
+ * what the two elements can disagree about — the overlay tracks the textarea's `scrollLeft`
+ * exactly, where a wrap point only had to differ by a pixel to smear the whole file.
  *
  * `textarea-bordered` is deliberately absent: that's daisyUI v4's name and does nothing in v5,
  * the same trap as `tabs-bordered` above — v5's `.textarea` already draws the border.
  */
-const EDITOR_BOX = "textarea w-full h-full font-mono text-base md:text-sm leading-relaxed";
+const EDITOR_BOX =
+  "textarea w-full h-full font-mono text-base md:text-sm leading-relaxed whitespace-pre";
 
 interface Props {
   source: string;
@@ -165,14 +173,14 @@ export default function EditorPane({
 
         {/* Sits with the syntax it documents rather than in the page header, but stays a button
             outside the tablist: a third tab would replace the textarea and be a mode to click
-            back out of, where the key is glance-and-dismiss. Shown on the Mermaid tab too —
+            back out of, where the dialog is glance-and-dismiss. Shown on the Mermaid tab too —
             it describes the ontology either way, and hiding it would make the row jump. */}
         <button
           className="btn btn-xs btn-ghost ml-auto"
           onClick={onOpenLegend}
           title={`How to read and write ${ontologyLabel}`}
         >
-          Key
+          Syntax
         </button>
       </div>
 
@@ -211,9 +219,16 @@ export default function EditorPane({
           )}
           {/* `relative` only so the textarea paints over the absolutely positioned overlay:
               without it, in-flow content sits below a positioned sibling whatever the DOM
-              order, and the transparent text would be hiding *behind* its own highlighting. */}
+              order, and the transparent text would be hiding *behind* its own highlighting.
+
+              daisyUI's `.textarea:focus` changes three things, and only the first is kept: the
+              border darkens (`--input-color` swapping to full base-content, left alone here), a
+              2px outline appears, and the inset shadow becomes an outer one. The outline is off
+              because it rings a rectangle whose edges are already the pane's own, and the shadow
+              off in both states because a hairline flipping from inset to outer says nothing
+              about focus. What's left is the border doing that job by itself. */}
           <textarea
-            className={`${EDITOR_BOX} relative resize-none overflow-auto placeholder:text-base-content/40 ${
+            className={`${EDITOR_BOX} syntax-input relative resize-none overflow-auto shadow-none focus:outline-none placeholder:text-base-content/40 ${
               editing ? "bg-transparent text-transparent caret-base-content" : ""
             }`}
             spellCheck={false}
@@ -229,7 +244,6 @@ export default function EditorPane({
             placeholder={editing ? placeholder : undefined}
             aria-label={editing ? `${ontologyLabel} source` : "Generated mermaid source"}
             aria-keyshortcuts={editing ? "Tab Shift+Tab Escape" : undefined}
-            title={editing ? "Tab/Shift+Tab indent/outdent. Escape exits the editor." : undefined}
           />
         </div>
       </div>

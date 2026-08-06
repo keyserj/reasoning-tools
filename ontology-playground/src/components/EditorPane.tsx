@@ -38,6 +38,8 @@ interface Props {
   highlightLine: (line: string) => HighlightToken[];
   /** the document's live styling: where a `type` token's color comes from */
   config: StyleConfig;
+  /** draw a `type` token on a tint of its own color, rather than as bare colored text */
+  typeBackgrounds: boolean;
 }
 
 /** One token. Plain text is bare, so the overlay's DOM stays close to the textarea's own. */
@@ -69,6 +71,7 @@ export default function EditorPane({
   onOpenLegend,
   highlightLine,
   config,
+  typeBackgrounds,
 }: Props) {
   const editing = activeTab === "source";
   const overlay = useRef<HTMLPreElement>(null);
@@ -202,7 +205,9 @@ export default function EditorPane({
             <pre
               ref={overlay}
               aria-hidden
-              className={`${EDITOR_BOX} syntax-overlay absolute inset-0 overflow-auto pointer-events-none border-transparent shadow-none`}
+              className={`${EDITOR_BOX} syntax-overlay absolute inset-0 overflow-auto pointer-events-none border-transparent shadow-none ${
+                typeBackgrounds ? "type-backgrounds" : ""
+              }`}
             >
               {lines.map((tokens, i) => (
                 <Fragment key={i}>

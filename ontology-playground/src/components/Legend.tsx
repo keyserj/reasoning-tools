@@ -4,20 +4,10 @@ interface Props {
   open: boolean;
   entries: LegendEntry[];
   note?: string;
-  /** whether the editor tints the background of the tokens naming a type; set from here */
-  typeBackgrounds: boolean;
-  onTypeBackgroundsChange: (typeBackgrounds: boolean) => void;
   onClose: () => void;
 }
 
-export default function Legend({
-  open,
-  entries,
-  note,
-  typeBackgrounds,
-  onTypeBackgroundsChange,
-  onClose,
-}: Props) {
+export default function Legend({ open, entries, note, onClose }: Props) {
   if (!open) return null;
   return (
     <div className="modal modal-open">
@@ -73,21 +63,6 @@ export default function Legend({
         </div>
 
         {note && <p className="text-xs opacity-70 mt-3 leading-relaxed">{note}</p>}
-
-        {/* Everything above is reference — what the syntax means, which is why you opened this.
-            What follows is the one thing you can change from here, so it sits after the reading
-            material behind its own heading rather than competing with it. `section-header` is the
-            app's "this names a section" type, the same as the band titles in the panes. */}
-        <h4 className="section-header mt-5 mb-1">Misc config</h4>
-        <label className="label cursor-pointer gap-2">
-          <input
-            type="checkbox"
-            className="toggle toggle-sm"
-            checked={typeBackgrounds}
-            onChange={(e) => onTypeBackgroundsChange(e.target.checked)}
-          />
-          <span className="label-text text-sm">Add type background colors</span>
-        </label>
 
         <div className="modal-action">
           <button className="btn btn-sm" onClick={onClose}>

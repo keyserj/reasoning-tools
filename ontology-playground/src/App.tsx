@@ -16,6 +16,7 @@ import DiagramPane from "./components/DiagramPane.tsx";
 import DocumentPicker from "./components/DocumentPicker.tsx";
 import RenderingStrip from "./components/RenderingStrip.tsx";
 import Legend from "./components/Legend.tsx";
+import MiscConfig from "./components/MiscConfig.tsx";
 import ConfigPanel from "./components/ConfigPanel.tsx";
 import type { MermaidTheme } from "./mermaidClient.ts";
 
@@ -60,9 +61,10 @@ export default function App() {
   const [activeTab, setActiveTab] = useState<EditorTab>("source");
   const [pane, setPane] = useState<PaneView>("edit");
   const [legendOpen, setLegendOpen] = useState(false);
+  const [miscConfigOpen, setMiscConfigOpen] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
-  // How the editor draws the tokens that name a type, set from the syntax dialog and read by the
-  // editor, so it sits above both rather than in either. Not in `shared`: it's how *you* like
+  // How the editor draws the tokens that name a type, set from the misc config dialog and read by
+  // the editor, so it sits above both rather than in either. Not in `shared`: it's how *you* like
   // reading the source, not part of the document, so it doesn't travel in a link someone sent.
   const [typeBackgrounds, setTypeBackgrounds] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
@@ -201,6 +203,7 @@ export default function App() {
             placeholder={ontology.placeholder}
             errors={parseResult.errors}
             onOpenLegend={() => setLegendOpen(true)}
+            onOpenMiscConfig={() => setMiscConfigOpen(true)}
             highlightLine={ontology.highlightLine}
             config={shared.config}
             typeBackgrounds={typeBackgrounds}
@@ -235,9 +238,13 @@ export default function App() {
         open={legendOpen}
         entries={ontology.legend}
         note={ontology.legendNote}
+        onClose={() => setLegendOpen(false)}
+      />
+      <MiscConfig
+        open={miscConfigOpen}
         typeBackgrounds={typeBackgrounds}
         onTypeBackgroundsChange={setTypeBackgrounds}
-        onClose={() => setLegendOpen(false)}
+        onClose={() => setMiscConfigOpen(false)}
       />
       <ConfigPanel
         open={configOpen}

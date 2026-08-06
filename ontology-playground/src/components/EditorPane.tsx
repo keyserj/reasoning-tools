@@ -35,6 +35,7 @@ interface Props {
   placeholder: string;
   errors: ParseError[];
   onOpenLegend: () => void;
+  onOpenMiscConfig: () => void;
   highlightLine: (line: string) => HighlightToken[];
   /** the document's live styling: where a `type` token's color comes from */
   config: StyleConfig;
@@ -69,6 +70,7 @@ export default function EditorPane({
   placeholder,
   errors,
   onOpenLegend,
+  onOpenMiscConfig,
   highlightLine,
   config,
   typeBackgrounds,
@@ -151,7 +153,7 @@ export default function EditorPane({
       <div className="flex items-center bg-base-200 px-3 shrink-0">
         {/* "Code" rather than the ontology's name: the picker above already names the ontology,
             and a fixed-width label keeps this row from being at the mercy of how long an
-            ontology chose to call itself — the pair plus the Key button has to fit 320px. */}
+            ontology chose to call itself — the pair plus both buttons has to fit 320px. */}
         <div role="tablist" className="tabs tabs-border">
           {/* daisyUI v5 spells the underline `tabs-border`; `tabs-bordered` is v4's name and is
               inert, so switching to it would leave the active tab unmarked with no error.
@@ -174,17 +176,29 @@ export default function EditorPane({
           </button>
         </div>
 
-        {/* Sits with the syntax it documents rather than in the page header, but stays a button
-            outside the tablist: a third tab would replace the textarea and be a mode to click
-            back out of, where the dialog is glance-and-dismiss. Shown on the Mermaid tab too —
-            it describes the ontology either way, and hiding it would make the row jump. */}
-        <button
-          className="btn btn-xs btn-ghost ml-auto"
-          onClick={onOpenLegend}
-          title={`How to read and write ${ontologyLabel}`}
-        >
-          Syntax
-        </button>
+        {/* Both sit with the editor they act on rather than in the page header, and both stay
+            buttons outside the tablist: a third tab would replace the textarea and be a mode to
+            click back out of, where a dialog is open-and-dismiss. They travel as one group so a
+            narrow row drops them together rather than splitting the pair.
+
+            Shown on the Mermaid tab too — the syntax describes the ontology either way, and
+            hiding either would make the row jump. */}
+        <div className="ml-auto flex items-center gap-1">
+          <button
+            className="btn btn-xs btn-ghost"
+            onClick={onOpenLegend}
+            title={`How to read and write ${ontologyLabel}`}
+          >
+            Syntax
+          </button>
+          <button
+            className="btn btn-xs btn-ghost"
+            onClick={onOpenMiscConfig}
+            title="How the editor draws the source"
+          >
+            Misc config
+          </button>
+        </div>
       </div>
 
       {/* The editor is a plain textarea with a highlighted copy of its own text behind it, rather

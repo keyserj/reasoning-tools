@@ -54,12 +54,7 @@ export const LAYOUT_DIRECTIONS = ["TB", "BT", "LR", "RL"] as const;
 
 export type LayoutDirection = (typeof LAYOUT_DIRECTIONS)[number];
 
-export interface NodeTypeStyle {
-  fill: string;
-  stroke: string;
-  /** text color */
-  color: string;
-}
+export type Theme = "light" | "dark";
 
 /** Everything an ontology declares about one of its node types, in one place. */
 export interface NodeTypeDef {
@@ -71,7 +66,8 @@ export interface NodeTypeDef {
   description: string;
   /** mermaid wrapping delimiters: [open, close]. Text goes between them, quoted. */
   shape: [string, string];
-  defaultStyle: NodeTypeStyle;
+  /** `#rrggbb`; fill, border and text are derived from it — see ./typeColors.ts */
+  defaultColor: string;
 }
 
 export interface EdgeTypeDef {
@@ -79,11 +75,11 @@ export interface EdgeTypeDef {
   /** mermaid connector, e.g. "-->" or "-.->" */
   connector: string;
   /**
-   * Line color, emitted as a `linkStyle`. Unlike node styles this isn't in `StyleConfig`:
-   * an edge type carries no fill or text color, so there'd be nothing for the style panel
-   * to offer beyond the one swatch.
+   * Line color, derived per theme like a node's border and emitted as a `linkStyle`. Unlike a
+   * node type's, it isn't in `StyleConfig`: a connector is only ever drawn in one role, so the
+   * style panel would be offering the same swatch twice.
    */
-  stroke?: string;
+  color?: string;
   /** Prefixed to a labeled edge's label when `showIcons` is on, as a node's icon is. */
   icon?: string;
 }
@@ -91,8 +87,9 @@ export interface EdgeTypeDef {
 export interface StyleConfig {
   direction: LayoutDirection;
   showIcons: boolean;
-  /** keyed by node type id */
-  types: Record<string, NodeTypeStyle>;
+  /** `#rrggbb` per node type id; how one becomes a fill, a border and a text color is
+   * ./typeColors.ts's business, and depends on the theme the diagram is drawn in. */
+  typeColors: Record<string, string>;
 }
 
 export interface LegendEntry {
@@ -107,7 +104,7 @@ export interface LegendEntry {
 // The kinds are a fixed shell vocabulary: each ontology's tokenizer says which of them a
 // stretch of text is, and src/index.css alone says how a kind is painted, so no ontology
 // knows a color and the shell knows no ontology's words. `type` is the reason this exists —
-// a marker is drawn in the stroke its rendered type carries in the document's `StyleConfig`,
+// a marker is drawn in the color its rendered type carries in the document's `StyleConfig`,
 // so the editor, the legend and the diagram can't disagree.
 //
 // `keyword` and `tag` are emitted by nobody today; they're the slots the Ameliorate syntax
@@ -138,7 +135,7 @@ export interface HighlightToken {
   text: string;
   /** absent = plain body text */
   kind?: HighlightKind;
-  /** a `StyleConfig.types` key; present exactly when `kind` is `"type"` */
+  /** a `StyleConfig.typeColors` key; present exactly when `kind` is `"type"` */
   typeId?: string;
 }
 
@@ -190,7 +187,13 @@ export interface Ontology {
   id: string;
   label: string;
   parse: (text: string) => ParseResult;
-  toMermaid: (doc: unknown, config: StyleConfig, features: FeatureState) => string;
+  /**
+   * `theme` decides how each type's one configured color becomes a fill, a border and a text
+   * color (./typeColors.ts). It is an argument rather than a `StyleConfig` field because it
+   * isn't part of the document: it's a local preference, and a document that carried one would
+   * impose the sender's theme on everyone they share a link with.
+   */
+  toMermaid: (doc: unknown, config: StyleConfig, features: FeatureState, theme: Theme) => string;
   /**
    * Tokenize one line for the editor's highlight overlay. Line-local by contract: no state
    * carries between lines, since the overlay re-tokenizes only what changed. The tokens' texts
@@ -232,7 +235,7 @@ export interface OntologyExample {
 export function defineOntology<Doc>(
   spec: Omit<Ontology, "parse" | "toMermaid"> & {
     parse: (text: string) => { doc: Doc; errors: ParseError[] };
-    toMermaid: (doc: Doc, config: StyleConfig, features: FeatureState) => string;
+    toMermaid: (doc: Doc, config: StyleConfig, features: FeatureState, theme: Theme) => string;
   },
 ): Ontology {
   return spec as Ontology;

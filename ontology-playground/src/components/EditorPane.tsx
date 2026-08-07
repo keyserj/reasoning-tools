@@ -49,11 +49,11 @@ function Token({ token, config }: { token: HighlightToken; config: StyleConfig }
 
   // An id the config doesn't style (an ontology naming a type it doesn't render) falls back to
   // the CSS rule's `currentColor` rather than to a guess.
-  const stroke = token.typeId === undefined ? undefined : config.types[token.typeId]?.stroke;
+  const color = token.typeId === undefined ? undefined : config.typeColors[token.typeId];
   return (
     <span
       className={`tok-${token.kind}`}
-      style={stroke === undefined ? undefined : ({ "--tok-hue": stroke } as CSSProperties)}
+      style={color === undefined ? undefined : ({ "--tok-color": color } as CSSProperties)}
     >
       {token.text}
     </span>

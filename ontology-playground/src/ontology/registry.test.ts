@@ -17,7 +17,7 @@ describe.each(ontologyList.map((o) => [o.label, o] as const))("%s", (_label, ont
 
   it("styles exactly its own node types by default, which url.ts's schema is built from", () => {
     const typeIds = ontology.renderedNodeTypes.map((t) => t.id);
-    expect(Object.keys(ontology.defaultConfig.types).sort()).toEqual([...typeIds].sort());
+    expect(Object.keys(ontology.defaultConfig.typeColors).sort()).toEqual([...typeIds].sort());
   });
 
   it("declares at least one node type, so a config schema can be built", () => {
@@ -41,7 +41,9 @@ describe.each(ontologyList.map((o) => [o.label, o] as const))("%s", (_label, ont
     for (const example of ontology.examples) {
       const { doc, errors } = ontology.parse(example.source);
       expect({ id: example.id, errors }).toEqual({ id: example.id, errors: [] });
-      expect(ontology.toMermaid(doc, ontology.defaultConfig, features)).toContain("flowchart");
+      expect(ontology.toMermaid(doc, ontology.defaultConfig, features, "light")).toContain(
+        "flowchart",
+      );
     }
   });
 
@@ -62,7 +64,7 @@ describe.each(ontologyList.map((o) => [o.label, o] as const))("%s", (_label, ont
   });
 
   it("names a rendered node type on every `type` token, and only on those", () => {
-    // The overlay colors a `type` token from `StyleConfig.types[typeId]`, which is keyed by
+    // The overlay colors a `type` token from `StyleConfig.typeColors[typeId]`, which is keyed by
     // rendered node type, so a typo in a tokenizer would silently drop back to plain text.
     const typeIds = ontology.renderedNodeTypes.map((t) => t.id);
     for (const example of ontology.examples) {

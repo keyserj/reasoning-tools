@@ -65,12 +65,12 @@ describe("share/url", () => {
       config: {
         ...shared.config,
         direction: "sideways",
-        types: { ...shared.config.types, con: { fill: "red", stroke: "red", color: "red" } },
+        typeColors: { ...shared.config.typeColors, con: "red" },
       },
     };
     const decoded = decodeState(encodeState(bad as unknown as ShareState));
     expect(decoded?.config.direction).toBe(ibis.defaultConfig.direction);
-    expect(decoded?.config.types.con).toEqual(ibis.defaultConfig.types.con);
+    expect(decoded?.config.typeColors.con).toEqual(ibis.defaultConfig.typeColors.con);
   });
 
   it("falls back to feature defaults for an unknown feature, option or param", () => {

@@ -1,4 +1,5 @@
-import type { EdgeTypeDef, Graph, NodeTypeDef, StyleConfig } from "./types.ts";
+import type { EdgeTypeDef, Graph, NodeTypeDef, StyleConfig, Theme } from "./types.ts";
+import { deriveTypeStyle } from "./typeColors.ts";
 
 // Shared mermaid-flowchart renderer. Every ontology's `toMermaid` is the same walk over
 // nodes and edges; only the lookup tables differ, so they live in the ontology and the
@@ -63,7 +64,12 @@ function buildIdMap(graph: Graph): Map<string, string> {
 }
 
 /** Convert a {@link Graph} + {@link StyleConfig} into a mermaid flowchart string. */
-export function flowchart(graph: Graph, config: StyleConfig, tables: FlowchartTables): string {
+export function flowchart(
+  graph: Graph,
+  config: StyleConfig,
+  tables: FlowchartTables,
+  theme: Theme,
+): string {
   if (graph.nodes.length === 0) {
     return `flowchart ${config.direction}\n  _empty["(nothing to show yet — start typing on the left)"]`;
   }
@@ -85,7 +91,7 @@ export function flowchart(graph: Graph, config: StyleConfig, tables: FlowchartTa
   // endpoint is missing (a dropped half-edge from an unresolved `$ref` — the normal state
   // mid-typing) emits nothing, which is why this can't just be the index in `graph.edges`:
   // that would paint the wrong edges, and shift the colors around as you type.
-  const strokeIndices = new Map<string, number[]>();
+  const colorIndices = new Map<string, number[]>();
   let emitted = 0;
   for (const edge of graph.edges) {
     const from = idMap.get(edge.from);
@@ -99,22 +105,26 @@ export function flowchart(graph: Graph, config: StyleConfig, tables: FlowchartTa
     const icon = config.showIcons && def?.icon ? `${def.icon} ` : "";
     const label = edge.label ? `|"${escapeLabel(`${icon}${edge.label}`)}"|` : "";
     lines.push(`  ${from} ${connector}${label} ${to}`);
-    if (def?.stroke) {
-      const forStroke = strokeIndices.get(def.stroke) ?? [];
-      forStroke.push(emitted);
-      strokeIndices.set(def.stroke, forStroke);
+    if (def?.color) {
+      const forColor = colorIndices.get(def.color) ?? [];
+      forColor.push(emitted);
+      colorIndices.set(def.color, forColor);
     }
     emitted++;
   }
 
-  for (const [type, style] of Object.entries(config.types)) {
+  for (const [type, color] of Object.entries(config.typeColors)) {
+    const style = deriveTypeStyle(color, theme);
     lines.push(
-      `  classDef ${type} fill:${style.fill},stroke:${style.stroke},color:${style.color},stroke-width:1.5px`,
+      `  classDef ${type} fill:${style.fill},stroke:${style.border},color:${style.text},stroke-width:1.5px`,
     );
   }
 
-  for (const [stroke, indices] of strokeIndices) {
-    lines.push(`  linkStyle ${indices.join(",")} stroke:${stroke},stroke-width:1.5px`);
+  // A connector is a line, so it takes the border role: unchanged in light, lifted in dark,
+  // where the colors these types are declared with would sit at ~2:1 against the canvas.
+  for (const [color, indices] of colorIndices) {
+    const { border } = deriveTypeStyle(color, theme);
+    lines.push(`  linkStyle ${indices.join(",")} stroke:${border},stroke-width:1.5px`);
   }
 
   return lines.join("\n");

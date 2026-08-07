@@ -6,5 +6,5 @@ import { renderedNodeTypes } from "./renderedNodeTypes.ts";
 export const defaultConfig: StyleConfig = {
   direction: "BT",
   showIcons: true,
-  types: Object.fromEntries(renderedNodeTypes.map((t) => [t.id, t.defaultStyle])),
+  typeColors: Object.fromEntries(renderedNodeTypes.map((t) => [t.id, t.defaultColor])),
 };

@@ -11,12 +11,12 @@ import type { NodeTypeDef } from "../types.ts";
 // carrying `%description` and the `%perspectives` key, without which a score row like [5,2,8]
 // can't be decoded). Only `claim` is a node type in the ontology proper.
 //
-// Colors follow the colorblind-safe red/blue axis that ameliorate-v2 already committed to —
-// see UX-design.md's "needs a colorblind-safe diverging palette, not red-green" and the
-// wireframes' `RB = { neg: "#b2182b", mid: "#e9e9e9", pos: "#2166ac" }`. `supports` vs
+// One color per type: the fill, border and text it's drawn in are derived from it, per theme
+// (../typeColors.ts). Colors follow the colorblind-safe red/blue axis that ameliorate-v2 already
+// committed to — see UX-design.md's "needs a colorblind-safe diverging palette, not red-green"
+// and the wireframes' `RB = { neg: "#b2182b", mid: "#e9e9e9", pos: "#2166ac" }`. `supports` vs
 // `critiques` is the one pair that *needs* color to separate it (same shape, same role), and
-// blue vs red survives both protanopia and deuteranopia. Claims are warm and pale on purpose:
-// they're the majority of boxes, so a loud fill would bury the edge boxes that matter most.
+// blue vs red survives both protanopia and deuteranopia.
 //
 // Icons carry the same distinction by silhouette: ✅ vs ⛔ reads as a check against a barred circle
 // at the ~12px they render at, which is what separates support from critique when color can't
@@ -30,7 +30,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "💬",
     description: "A statement phrased so a reader can say how much they believe it.",
     shape: ['["', '"]'],
-    defaultStyle: { fill: "#fef9c3", stroke: "#ca8a04", color: "#422006" },
+    defaultColor: "#ca8a04",
   },
   {
     id: "supports",
@@ -38,7 +38,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "✅",
     description: "An edge saying its source claim is a reason to believe its target.",
     shape: ['(["', '"])'],
-    defaultStyle: { fill: "#e7f0ff", stroke: "#2166ac", color: "#1b4fa8" },
+    defaultColor: "#2166ac",
   },
   {
     id: "critiques",
@@ -46,7 +46,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "⛔",
     description: "An edge saying its source claim is a reason to doubt its target.",
     shape: ['(["', '"])'],
-    defaultStyle: { fill: "#fdecea", stroke: "#b2182b", color: "#7f1d1d" },
+    defaultColor: "#b2182b",
   },
   {
     id: "note",
@@ -54,7 +54,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "📝",
     description: "An aside attached to its parent. Drawn in the diagram, but never scored.",
     shape: ['[/"', '"/]'],
-    defaultStyle: { fill: "#f1f5f9", stroke: "#64748b", color: "#0f172a" },
+    defaultColor: "#64748b",
   },
   {
     id: "topic",
@@ -62,7 +62,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "📋",
     description: "The header box: what this topic is and why it's worth discussing.",
     shape: ['[["', '"]]'],
-    defaultStyle: { fill: "#f3e8ff", stroke: "#7c3aed", color: "#2e1065" },
+    defaultColor: "#7c3aed",
   },
 ];
 

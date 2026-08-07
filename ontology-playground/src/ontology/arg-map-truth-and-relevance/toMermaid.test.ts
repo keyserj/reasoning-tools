@@ -12,7 +12,7 @@ const defaults: FeatureState = {};
 const implicit: FeatureState = { [EDGE_CLAIMS]: { option: IMPLICIT_ON_EDGE } };
 
 const render = (text: string, features = defaults, config = defaultConfig) =>
-  toMermaid(parse(text).doc, config, features);
+  toMermaid(parse(text).doc, config, features, "light");
 
 describe("toMermaid", () => {
   it("draws claims as rectangles joined by a labeled, colored edge", () => {
@@ -111,8 +111,8 @@ describe("toMermaid", () => {
   });
 
   it("matches the generated-mermaid snapshots for the bundled examples", () => {
-    expect(toMermaid(parse(sessionStorage).doc, defaultConfig, defaults)).toMatchSnapshot();
-    expect(toMermaid(parse(buildAWall).doc, defaultConfig, defaults)).toMatchSnapshot();
-    expect(toMermaid(parse(buildAWall).doc, defaultConfig, implicit)).toMatchSnapshot();
+    expect(render(sessionStorage)).toMatchSnapshot();
+    expect(render(buildAWall)).toMatchSnapshot();
+    expect(render(buildAWall, implicit)).toMatchSnapshot();
   });
 });

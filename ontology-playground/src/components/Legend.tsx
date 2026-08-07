@@ -48,6 +48,13 @@ export default function Legend({ open, entries, note, onClose }: Props) {
             own display rule for the class. */}
         <div className="hidden md:block">
           <table className="table table-sm">
+            <thead>
+              <tr>
+                <th>Marker</th>
+                <th>Name</th>
+                <th>Meaning</th>
+              </tr>
+            </thead>
             <tbody>
               {entries.map((e) => (
                 <tr key={e.marker}>

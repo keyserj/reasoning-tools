@@ -29,9 +29,12 @@
    rather than only by being lighter, so a neutral gray at this same lightness separates visibly
    less. base-content already sits at hue 257, so surfaces and the type on them agree.
 
-   App.tsx always writes an explicit data-theme, so this one selector covers both ways dark mode
-   is reached. */
-[data-theme="dark"] {
+   Not reached by `prefers-color-scheme` before App.tsx writes `data-theme`: daisyUI emits that
+   path as its own `:root:not([data-theme])` rule with the stock ramp, so a dark-preferring first
+   paint flashes daisyUI's dark. `prefersdark: true` closes it but adds a media block that must
+   restate `color-scheme: dark`; an inline pre-paint script in index.html is the better fix. */
+@plugin "daisyui/theme" {
+  name: "dark";
   --color-base-100: oklch(15% 0.035 259);
   --color-base-200: oklch(30% 0.035 259);
   --color-base-300: oklch(39% 0.035 259);
@@ -47,7 +50,8 @@
    Lightness is unchanged from daisyUI's stock 96/92.5%, itself already widened from its 98/95%:
    7 code values from page to band is too tight for a band to carry structure, 13 is enough. Dark
    needs ~32 for the same read, since away from black code values aren't the scarce resource. */
-[data-theme="light"] {
+@plugin "daisyui/theme" {
+  name: "light";
   --color-base-200: oklch(96% 0.01 259);
   --color-base-300: oklch(92.5% 0.016 259);
 }

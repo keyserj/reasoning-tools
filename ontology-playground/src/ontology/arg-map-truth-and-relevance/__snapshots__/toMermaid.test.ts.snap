@@ -19,7 +19,7 @@ exports[`toMermaid > matches the generated-mermaid snapshots for the bundled exa
   fast_supports_redis ~~~ redis
   t1 -.-> slow_reads
   redis ~~~ _topic
-  classDef claim fill:#fff4e6,stroke:#c2410c,color:#431407,stroke-width:1.5px
+  classDef claim fill:#fef9c3,stroke:#ca8a04,color:#422006,stroke-width:1.5px
   classDef supports fill:#e7f0ff,stroke:#2166ac,color:#1b4fa8,stroke-width:1.5px
   classDef critiques fill:#fdecea,stroke:#b2182b,color:#7f1d1d,stroke-width:1.5px
   classDef note fill:#f1f5f9,stroke:#64748b,color:#0f172a,stroke-width:1.5px
@@ -62,7 +62,7 @@ exports[`toMermaid > matches the generated-mermaid snapshots for the bundled exa
   climb_easy_supports ~~~ climb_over
   t1 -.-> crime_stat
   wall ~~~ _topic
-  classDef claim fill:#fff4e6,stroke:#c2410c,color:#431407,stroke-width:1.5px
+  classDef claim fill:#fef9c3,stroke:#ca8a04,color:#422006,stroke-width:1.5px
   classDef supports fill:#e7f0ff,stroke:#2166ac,color:#1b4fa8,stroke-width:1.5px
   classDef critiques fill:#fdecea,stroke:#b2182b,color:#7f1d1d,stroke-width:1.5px
   classDef note fill:#f1f5f9,stroke:#64748b,color:#0f172a,stroke-width:1.5px
@@ -125,7 +125,7 @@ exports[`toMermaid > matches the generated-mermaid snapshots for the bundled exa
   l8 --> more_judges
   t1 -.-> crime_stat
   wall ~~~ _topic
-  classDef claim fill:#fff4e6,stroke:#c2410c,color:#431407,stroke-width:1.5px
+  classDef claim fill:#fef9c3,stroke:#ca8a04,color:#422006,stroke-width:1.5px
   classDef supports fill:#e7f0ff,stroke:#2166ac,color:#1b4fa8,stroke-width:1.5px
   classDef critiques fill:#fdecea,stroke:#b2182b,color:#7f1d1d,stroke-width:1.5px
   classDef note fill:#f1f5f9,stroke:#64748b,color:#0f172a,stroke-width:1.5px

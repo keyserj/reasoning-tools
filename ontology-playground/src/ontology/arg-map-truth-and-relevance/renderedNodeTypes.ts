@@ -30,7 +30,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "💬",
     description: "A statement phrased so a reader can say how much they believe it.",
     shape: ['["', '"]'],
-    defaultStyle: { fill: "#fff4e6", stroke: "#c2410c", color: "#431407" },
+    defaultStyle: { fill: "#fef9c3", stroke: "#ca8a04", color: "#422006" },
   },
   {
     id: "supports",

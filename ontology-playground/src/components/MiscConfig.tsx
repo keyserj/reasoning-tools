@@ -1,8 +1,8 @@
 interface Props {
   open: boolean;
-  /** whether the editor tints the background of the tokens naming a type; set from here */
-  typeBackgrounds: boolean;
-  onTypeBackgroundsChange: (typeBackgrounds: boolean) => void;
+  /** whether the editor tints the background of a lone type marker; set from here */
+  markerHighlights: boolean;
+  onMarkerHighlightsChange: (markerHighlights: boolean) => void;
   onClose: () => void;
 }
 
@@ -11,8 +11,8 @@ interface Props {
 // here is a preference about reading, so none of it belongs in the document or in a shared link.
 export default function MiscConfig({
   open,
-  typeBackgrounds,
-  onTypeBackgroundsChange,
+  markerHighlights,
+  onMarkerHighlightsChange,
   onClose,
 }: Props) {
   if (!open) return null;
@@ -32,10 +32,10 @@ export default function MiscConfig({
           <input
             type="checkbox"
             className="toggle toggle-sm"
-            checked={typeBackgrounds}
-            onChange={(e) => onTypeBackgroundsChange(e.target.checked)}
+            checked={markerHighlights}
+            onChange={(e) => onMarkerHighlightsChange(e.target.checked)}
           />
-          <span className="label-text text-sm">Add type background colors</span>
+          <span className="label-text text-sm">Highlight lone type markers</span>
         </label>
 
         <div className="modal-action">

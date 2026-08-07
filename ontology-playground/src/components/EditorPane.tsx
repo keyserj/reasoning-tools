@@ -39,8 +39,8 @@ interface Props {
   highlightLine: (line: string) => HighlightToken[];
   /** the document's live styling: where a `type` token's color comes from */
   config: StyleConfig;
-  /** draw a `type` token on a tint of its own color, rather than as bare colored text */
-  typeBackgrounds: boolean;
+  /** draw a lone type marker on a tint of its own color, rather than as bare colored text */
+  markerHighlights: boolean;
 }
 
 /** One token. Plain text is bare, so the overlay's DOM stays close to the textarea's own. */
@@ -52,7 +52,7 @@ function Token({ token, config }: { token: HighlightToken; config: StyleConfig }
   const color = token.typeId === undefined ? undefined : config.typeColors[token.typeId];
   return (
     <span
-      className={`tok-${token.kind}`}
+      className={`tok-${token.kind}${token.loneMarker === true ? " tok-lone-marker" : ""}`}
       style={color === undefined ? undefined : ({ "--tok-color": color } as CSSProperties)}
     >
       {token.text}
@@ -73,7 +73,7 @@ export default function EditorPane({
   onOpenMiscConfig,
   highlightLine,
   config,
-  typeBackgrounds,
+  markerHighlights,
 }: Props) {
   const editing = activeTab === "source";
   const overlay = useRef<HTMLPreElement>(null);
@@ -220,7 +220,7 @@ export default function EditorPane({
               ref={overlay}
               aria-hidden
               className={`${EDITOR_BOX} syntax-overlay absolute inset-0 overflow-auto pointer-events-none border-transparent shadow-none ${
-                typeBackgrounds ? "type-backgrounds" : ""
+                markerHighlights ? "marker-highlights" : ""
               }`}
             >
               {lines.map((tokens, i) => (

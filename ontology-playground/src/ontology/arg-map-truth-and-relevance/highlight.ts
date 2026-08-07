@@ -72,14 +72,14 @@ export function highlightLine(line: string): HighlightToken[] {
 
   if (kind === "claim") {
     // Scores bind tightly to the marker (`=[4,1,8]`), so they're read before the body.
-    sink.type(marker, "claim");
+    sink.loneMarker(marker, "claim");
     pushBody(sink, pushScores(sink, content.slice(1)), ID_SUFFIX, REF_BODY);
     return sink.tokens;
   }
 
   if (kind === "note") {
     // No `$ref` here: a note's body is prose, and parse resolves no references in it.
-    sink.type(marker, "note");
+    sink.loneMarker(marker, "note");
     pushBody(sink, content.slice(1), ID_SUFFIX);
     return sink.tokens;
   }

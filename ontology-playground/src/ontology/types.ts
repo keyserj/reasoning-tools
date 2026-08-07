@@ -137,6 +137,13 @@ export interface HighlightToken {
   kind?: HighlightKind;
   /** a `StyleConfig.typeColors` key; present exactly when `kind` is `"type"` */
   typeId?: string;
+  /**
+   * This marker is the only thing on its line carrying its type's color, so the color has one
+   * glyph's worth of area to register in, and could use some help from an optional tint.
+   * This suits the two current ontologies and is worth revisiting once there are more to keep
+   * consistent.
+   */
+  loneMarker?: boolean;
 }
 
 // --- Features -------------------------------------------------------------------------

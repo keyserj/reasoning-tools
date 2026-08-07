@@ -30,7 +30,7 @@ export function highlightLine(line: string): HighlightToken[] {
     return sink.tokens;
   }
 
-  sink.type(marker, type);
+  sink.loneMarker(marker, type);
   pushBody(sink, content.slice(1), ID_SUFFIX, REF_BODY);
   return sink.tokens;
 }

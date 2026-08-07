@@ -51,16 +51,18 @@
     font-weight: 600;
   }
 
-  /* The one optional treatment here, worn by the overlay when the syntax dialog asks for it (see
-     Legend.tsx). A marker is a single glyph, too little area for its color to register, so this
-     paints behind it instead — anything that changed the space a glyph *occupies*, padding or a
-     larger font-size, would move columns out from under the textarea's own and smear the overlay.
+  /* The one optional treatment here, worn by the overlay when the misc config dialog asks for it
+     (see MiscConfig.tsx). A lone marker is a single glyph, too little area for its color to
+     register, so this paints behind it instead — anything that changed the space a glyph
+     *occupies*, padding or a larger font-size, would move columns out from under the textarea's
+     own and smear the overlay. Which markers qualify is the tokenizers' call, not a length test
+     here: see `HighlightToken.loneMarker`.
 
      Mixed from the raw `--tok-color` rather than from the lightened color above, so each theme keeps
      the pairing the diagram has: dark ink on a light tint, light ink on a dim one. A type the config
      doesn't style leaves `--tok-color` undefined, which makes the mix invalid at computed-value time
      and drops `background-color` to its initial `transparent` — bare text rather than a gray box. */
-  .type-backgrounds .tok-type {
+  .marker-highlights .tok-lone-marker {
     background-color: color-mix(in oklab, var(--tok-color) 22%, transparent);
     border-radius: 2px;
   }

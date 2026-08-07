@@ -60,10 +60,10 @@ export default function App() {
   const [legendOpen, setLegendOpen] = useState(false);
   const [miscConfigOpen, setMiscConfigOpen] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
-  // How the editor draws the tokens that name a type, set from the misc config dialog and read by
+  // How the editor draws the markers that name a type, set from the misc config dialog and read by
   // the editor, so it sits above both rather than in either. Not in `shared`: it's how *you* like
   // reading the source, not part of the document, so it doesn't travel in a link someone sent.
-  const [typeBackgrounds, setTypeBackgrounds] = useState(false);
+  const [markerHighlights, setMarkerHighlights] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(readInitialTheme);
   // Edits survive an ontology or example switch, but only for this page load: persisting
@@ -204,7 +204,7 @@ export default function App() {
             onOpenMiscConfig={() => setMiscConfigOpen(true)}
             highlightLine={ontology.highlightLine}
             config={shared.config}
-            typeBackgrounds={typeBackgrounds}
+            markerHighlights={markerHighlights}
           />
         </div>
         <div className="flex flex-col flex-1 min-w-0">
@@ -240,8 +240,8 @@ export default function App() {
       />
       <MiscConfig
         open={miscConfigOpen}
-        typeBackgrounds={typeBackgrounds}
-        onTypeBackgroundsChange={setTypeBackgrounds}
+        markerHighlights={markerHighlights}
+        onMarkerHighlightsChange={setMarkerHighlights}
         onClose={() => setMiscConfigOpen(false)}
       />
       <ConfigPanel

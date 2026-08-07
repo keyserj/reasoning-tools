@@ -1,0 +1,92 @@
+/* How each `HighlightKind` (./types.ts) is painted, in one place: an ontology's tokenizer says
+   *what* a stretch of text is and never what color it takes, so no ontology has an opinion about
+   the theme and no component has one about the syntax. It sits beside `highlight.ts` rather than
+   beside EditorPane because it belongs to the kind vocabulary, not to the editor.
+
+   The organizing principle is that hue means type identity. A `type` token is drawn in the
+   stroke its rendered type carries in the *document's* StyleConfig, threaded in as `--tok-hue`
+   by EditorPane — so restyling a type in the Style dialog moves the editor, the legend and the
+   diagram together. Everything structural but typeless is weight, opacity or italic instead, and
+   body prose keeps base-content: color in the editor should mean the same thing it means in the
+   diagram, and prose means nothing there.
+
+   Layered as `components` so utilities can override these; safe only because nothing here has to
+   outrank daisyUI (AGENTS.md). */
+@layer components {
+  /* One rule for every hued kind, so a new one can't be added without a dark mode. Dark is derived
+     rather than hand-picked: 55% of a stroke mixed with white lands each one near its Tailwind-400
+     sibling, which is about where a 600-weight stroke has to sit to read on the near-black page.
+     The `currentColor` fallback is what an unknown type id degrades to — plain body color, still
+     semibold, i.e. the `keyword` treatment, which is what an unrecognized structural word is. */
+  .tok-type,
+  .tok-id-decl,
+  .tok-id-ref {
+    color: var(--tok-hue, currentColor);
+  }
+
+  [data-theme="dark"] :is(.tok-type, .tok-id-decl, .tok-id-ref) {
+    color: color-mix(in oklab, var(--tok-hue, currentColor) 55%, white);
+  }
+
+  /* Ids are the one part of the syntax that isn't a type, so they take the one hue no node palette
+     uses (teal) and can never be mistaken for one. Declaring is quieter than using: `&id` names
+     something in passing, `$id` is a jump to it. */
+  .tok-id-decl,
+  .tok-id-ref {
+    --tok-hue: #0d9488;
+  }
+
+  .tok-id-decl {
+    opacity: 0.6;
+  }
+
+  .tok-id-ref {
+    text-decoration: underline;
+  }
+
+  /* A marker carries as much meaning as the sentence after it despite being one character, so it
+     takes weight as well as hue. `keyword` is the same shape for a structural word with no type. */
+  .tok-type,
+  .tok-keyword {
+    font-weight: 600;
+  }
+
+  /* The one optional treatment here, worn by the overlay when the syntax dialog asks for it (see
+     Legend.tsx). A marker is a single glyph, too little area for its color to register, so this
+     paints behind it instead — anything that changed the space a glyph *occupies*, padding or a
+     larger font-size, would move columns out from under the textarea's own and smear the overlay.
+
+     Mixed from the raw `--tok-hue` rather than from the lightened color above, so each theme keeps
+     the pairing the diagram has: dark ink on a light tint, light ink on a dim one. A type the config
+     doesn't style leaves `--tok-hue` undefined, which makes the mix invalid at computed-value time
+     and drops `background-color` to its initial `transparent` — bare text rather than a gray box. */
+  .type-backgrounds .tok-type {
+    background-color: color-mix(in oklab, var(--tok-hue) 22%, transparent);
+    border-radius: 2px;
+  }
+
+  .tok-comment {
+    font-style: italic;
+    opacity: 0.5;
+  }
+
+  /* A property's key is structure, its value is prose, so only the key is marked at all. */
+  .tok-property {
+    font-weight: 600;
+    opacity: 0.7;
+  }
+
+  /* Scores are dense punctuation the eye should be able to skip; the brackets and commas recede
+     further than the numbers they hold, leaving the digits legible without the row shouting. */
+  .tok-score-punct {
+    opacity: 0.4;
+  }
+
+  .tok-score-value {
+    opacity: 0.7;
+  }
+
+  .tok-tag {
+    opacity: 0.6;
+  }
+}

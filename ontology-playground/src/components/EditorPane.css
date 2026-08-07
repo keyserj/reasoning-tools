@@ -1,0 +1,31 @@
+/* Mechanics of keeping the highlight overlay and the transparent textarea over it in register;
+   how a token is *painted* belongs to the syntax theme (src/ontology/highlight.css).
+
+   Layered as `components`: `.syntax-input` looks like it is fighting daisyUI's `:root` value but
+   wins by inheritance, so it does not need the unlayered position. */
+@layer components {
+  /* The highlight layer, sitting behind a transparent textarea it has to lay text out identically
+     to: same font utilities, the same daisyUI `.textarea` box and the same `whitespace-pre` (see
+     EditorPane, which owns all three as one string).
+
+     Since neither element wraps, what this one has to do is *scroll*: the textarea's scroll handler
+     drives this element's `scrollTop`/`scrollLeft`, and a clipping box would pin both at 0 and hold
+     the highlighting still while the text moved under it. Its scrollbars are painted away rather
+     than removed with `scrollbar-width: none`, which keeps the overlay's content box the size the
+     textarea's is — the standing rule for anything here, since equal boxes are what make equal
+     layout. */
+  .syntax-overlay {
+    scrollbar-color: transparent transparent;
+  }
+
+  /* The textarea over it. Its scrollbars are the ones you actually use, and on the Code tab they
+     are invisible without this: `scrollbar-color` is inherited, daisyUI sets it on `:root` as
+     `color-mix(in oklch, currentcolor 35%, transparent)`, and `currentcolor` here is the
+     *transparent* text that lets the overlay show through — so the thumb computes to a fully
+     transparent color while the gutter still takes its 15px. Naming base-content directly is the
+     same 35% every other scroller in the app resolves to, this textarea on the Mermaid tab
+     included; it just no longer travels through a color that has been zeroed out. */
+  .syntax-input {
+    scrollbar-color: color-mix(in oklch, var(--color-base-content) 35%, transparent) transparent;
+  }
+}

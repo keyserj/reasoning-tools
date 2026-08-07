@@ -56,7 +56,7 @@ export default function RenderingStrip({ features, state, onChange, onOpenStyle 
       <div className="flex flex-wrap items-center gap-2 px-3 py-1 min-h-10">
         {/* Names the controls in the row rather than the diagram below, which needs no label to
             be recognised as a diagram. */}
-        <span className="section-header">Diagram config</span>
+        <span className="section-header">Rendering options</span>
 
         {features.map((feature) => {
           const isOpen = feature.id === openId;

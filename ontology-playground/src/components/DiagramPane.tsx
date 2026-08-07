@@ -1,10 +1,11 @@
 import { useEffect, useRef, useState } from "react";
 import svgPanZoom from "svg-pan-zoom";
-import { type MermaidTheme, renderMermaid } from "../mermaidClient.ts";
+import type { Theme } from "../ontology/types.ts";
+import { renderMermaid } from "../mermaidClient.ts";
 
 interface Props {
   mermaidText: string;
-  theme: MermaidTheme;
+  theme: Theme;
 }
 
 type PanZoom = ReturnType<typeof svgPanZoom>;

@@ -17,6 +17,8 @@ export interface TokenSink {
   mark(text: string, kind: HighlightKind): void;
   /** text that produces `typeId`, whose color the overlay reads from the document's StyleConfig */
   type(text: string, typeId: string): void;
+  /** a `type` that is its line's only glyph for `typeId`; see `HighlightToken.loneMarker` */
+  loneMarker(text: string, typeId: string): void;
 }
 
 export function createTokenSink(): TokenSink {
@@ -31,6 +33,9 @@ export function createTokenSink(): TokenSink {
     },
     type(text, typeId) {
       if (text !== "") tokens.push({ text, kind: "type", typeId });
+    },
+    loneMarker(text, typeId) {
+      if (text !== "") tokens.push({ text, kind: "type", typeId, loneMarker: true });
     },
   };
 }

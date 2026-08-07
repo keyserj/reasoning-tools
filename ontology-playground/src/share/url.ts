@@ -28,9 +28,8 @@ export interface ShareState {
   features: FeatureState;
 }
 
-const hexColor = z.string().regex(/^#[0-9a-fA-F]{3,8}$/);
-
-const styleSchema = z.object({ fill: hexColor, stroke: hexColor, color: hexColor });
+/** Exactly what `<input type="color">` produces, which is the only writer of these. */
+const hexColor = z.string().regex(/^#[0-9a-fA-F]{6}$/);
 
 /**
  * Ontology-independent outer shape; `config` and `features` are checked once the ontology is
@@ -55,13 +54,13 @@ const configSchema = (ontology: Ontology) =>
   z.object({
     direction: z.enum(LAYOUT_DIRECTIONS).catch(ontology.defaultConfig.direction),
     showIcons: z.boolean().catch(ontology.defaultConfig.showIcons),
-    types: z
+    typeColors: z
       .object(
         Object.fromEntries(
-          ontology.renderedNodeTypes.map((t) => [t.id, styleSchema.catch(t.defaultStyle)]),
+          ontology.renderedNodeTypes.map((t) => [t.id, hexColor.catch(t.defaultColor)]),
         ),
       )
-      .catch(ontology.defaultConfig.types),
+      .catch(ontology.defaultConfig.typeColors),
   });
 
 /**

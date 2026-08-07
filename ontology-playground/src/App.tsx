@@ -8,7 +8,7 @@ import {
   missingExampleNote,
 } from "./ontology/examples.ts";
 import { defaultFeatureState } from "./ontology/features.ts";
-import type { Ontology, OntologyExample } from "./ontology/types.ts";
+import type { Ontology, OntologyExample, Theme } from "./ontology/types.ts";
 import { type ShareState, decodeState, encodeState } from "./share/url.ts";
 import Toolbar, { type PaneView } from "./components/Toolbar.tsx";
 import EditorPane, { type EditorTab } from "./components/EditorPane.tsx";
@@ -18,9 +18,6 @@ import RenderingStrip from "./components/RenderingStrip.tsx";
 import Legend from "./components/Legend.tsx";
 import MiscConfig from "./components/MiscConfig.tsx";
 import ConfigPanel from "./components/ConfigPanel.tsx";
-import type { MermaidTheme } from "./mermaidClient.ts";
-
-type Theme = "light" | "dark";
 
 const THEME_KEY = "m2m-theme";
 
@@ -63,10 +60,10 @@ export default function App() {
   const [legendOpen, setLegendOpen] = useState(false);
   const [miscConfigOpen, setMiscConfigOpen] = useState(false);
   const [configOpen, setConfigOpen] = useState(false);
-  // How the editor draws the tokens that name a type, set from the misc config dialog and read by
+  // How the editor draws the markers that name a type, set from the misc config dialog and read by
   // the editor, so it sits above both rather than in either. Not in `shared`: it's how *you* like
   // reading the source, not part of the document, so it doesn't travel in a link someone sent.
-  const [typeBackgrounds, setTypeBackgrounds] = useState(true);
+  const [markerHighlights, setMarkerHighlights] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(readInitialTheme);
   // Edits survive an ontology or example switch, but only for this page load: persisting
@@ -88,11 +85,12 @@ export default function App() {
 
   const ontology = getOntology(shared.ontologyId);
   const parseResult = useMemo(() => ontology.parse(shared.source), [ontology, shared.source]);
+  // Depends on the theme because each type's one configured color resolves into a fill, a
+  // border and a text color differently in each (ontology/typeColors.ts).
   const mermaidText = useMemo(
-    () => ontology.toMermaid(parseResult.doc, shared.config, shared.features),
-    [ontology, parseResult, shared.config, shared.features],
+    () => ontology.toMermaid(parseResult.doc, shared.config, shared.features, theme),
+    [ontology, parseResult, shared.config, shared.features, theme],
   );
-  const mermaidTheme: MermaidTheme = theme === "dark" ? "dark" : "default";
 
   // "Dirty" is derived rather than stored, so an edit that happens to restore the original
   // text stops counting as one.
@@ -206,7 +204,7 @@ export default function App() {
             onOpenMiscConfig={() => setMiscConfigOpen(true)}
             highlightLine={ontology.highlightLine}
             config={shared.config}
-            typeBackgrounds={typeBackgrounds}
+            markerHighlights={markerHighlights}
           />
         </div>
         <div className="flex flex-col flex-1 min-w-0">
@@ -216,7 +214,7 @@ export default function App() {
             onChange={(features) => setShared((d) => ({ ...d, features }))}
             onOpenStyle={() => setConfigOpen(true)}
           />
-          <DiagramPane mermaidText={mermaidText} theme={mermaidTheme} />
+          <DiagramPane mermaidText={mermaidText} theme={theme} />
         </div>
 
         {/* Above both panes rather than inside the diagram column: on a phone the editor
@@ -242,14 +240,15 @@ export default function App() {
       />
       <MiscConfig
         open={miscConfigOpen}
-        typeBackgrounds={typeBackgrounds}
-        onTypeBackgroundsChange={setTypeBackgrounds}
+        markerHighlights={markerHighlights}
+        onMarkerHighlightsChange={setMarkerHighlights}
         onClose={() => setMiscConfigOpen(false)}
       />
       <ConfigPanel
         open={configOpen}
         config={shared.config}
         renderedNodeTypes={ontology.renderedNodeTypes}
+        theme={theme}
         onChange={(config) => setShared((d) => ({ ...d, config }))}
         onReset={() =>
           setShared((d) => ({ ...d, config: structuredClone(ontology.defaultConfig) }))

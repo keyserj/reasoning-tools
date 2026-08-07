@@ -1,4 +1,11 @@
 @import "tailwindcss";
+
+/* Component-scoped styling lives beside its component; this file keeps what is true app-wide.
+   Imported here rather than from a `.tsx` so these files stay in Tailwind's build graph and their
+   cascade position stays fixed. AGENTS.md has the rules for when a rule earns its own file. */
+@import "./ontology/highlight.css";
+@import "./components/EditorPane.css";
+
 @plugin "daisyui" {
   themes:
     light --default,
@@ -29,9 +36,12 @@
    rather than only by being lighter, so a neutral gray at this same lightness separates visibly
    less. base-content already sits at hue 257, so surfaces and the type on them agree.
 
-   App.tsx always writes an explicit data-theme, so this one selector covers both ways dark mode
-   is reached. */
-[data-theme="dark"] {
+   Not reached by `prefers-color-scheme` before App.tsx writes `data-theme`: daisyUI emits that
+   path as its own `:root:not([data-theme])` rule with the stock ramp, so a dark-preferring first
+   paint flashes daisyUI's dark. `prefersdark: true` closes it but adds a media block that must
+   restate `color-scheme: dark`; an inline pre-paint script in index.html is the better fix. */
+@plugin "daisyui/theme" {
+  name: "dark";
   --color-base-100: oklch(15% 0.035 259);
   --color-base-200: oklch(30% 0.035 259);
   --color-base-300: oklch(39% 0.035 259);
@@ -47,7 +57,8 @@
    Lightness is unchanged from daisyUI's stock 96/92.5%, itself already widened from its 98/95%:
    7 code values from page to band is too tight for a band to carry structure, 13 is enough. Dark
    needs ~32 for the same read, since away from black code values aren't the scarce resource. */
-[data-theme="light"] {
+@plugin "daisyui/theme" {
+  name: "light";
   --color-base-200: oklch(96% 0.01 259);
   --color-base-300: oklch(92.5% 0.016 259);
 }
@@ -101,120 +112,6 @@
   &:hover {
     background-color: color-mix(in oklab, var(--color-base-content) 30%, transparent);
   }
-}
-
-/* --- Editor syntax highlighting ---------------------------------------------------------
-   How each `HighlightKind` (src/ontology/types.ts) is painted, in one place: an ontology's
-   tokenizer says *what* a stretch of text is and never what color it takes, so no ontology has
-   an opinion about the theme and no component has one about the syntax.
-
-   The organizing principle is that hue means type identity. A `type` token is drawn in the
-   stroke its rendered type carries in the *document's* StyleConfig, threaded in as `--tok-hue`
-   by EditorPane — so restyling a type in the Style dialog moves the editor, the legend and the
-   diagram together. Everything structural but typeless is weight, opacity or italic instead, and
-   body prose keeps base-content: color in the editor should mean the same thing it means in the
-   diagram, and prose means nothing there. */
-
-/* One rule for every hued kind, so a new one can't be added without a dark mode. Dark is derived
-   rather than hand-picked: 55% of a stroke mixed with white lands each one near its Tailwind-400
-   sibling, which is about where a 600-weight stroke has to sit to read on the near-black page.
-   The `currentColor` fallback is what an unknown type id degrades to — plain body color, still
-   semibold, i.e. the `keyword` treatment, which is what an unrecognized structural word is. */
-.tok-type,
-.tok-id-decl,
-.tok-id-ref {
-  color: var(--tok-hue, currentColor);
-}
-
-[data-theme="dark"] :is(.tok-type, .tok-id-decl, .tok-id-ref) {
-  color: color-mix(in oklab, var(--tok-hue, currentColor) 55%, white);
-}
-
-/* Ids are the one part of the syntax that isn't a type, so they take the one hue no node palette
-   uses (teal) and can never be mistaken for one. Declaring is quieter than using: `&id` names
-   something in passing, `$id` is a jump to it. */
-.tok-id-decl,
-.tok-id-ref {
-  --tok-hue: #0d9488;
-}
-
-.tok-id-decl {
-  opacity: 0.6;
-}
-
-.tok-id-ref {
-  text-decoration: underline;
-}
-
-/* A marker carries as much meaning as the sentence after it despite being one character, so it
-   takes weight as well as hue. `keyword` is the same shape for a structural word with no type. */
-.tok-type,
-.tok-keyword {
-  font-weight: 600;
-}
-
-/* The one optional treatment here, worn by the overlay when the syntax dialog asks for it (see
-   Legend.tsx). A marker is a single glyph, too little area for its color to register, so this
-   paints behind it instead — anything that changed the space a glyph *occupies*, padding or a
-   larger font-size, would move columns out from under the textarea's own and smear the overlay.
-
-   Mixed from the raw `--tok-hue` rather than from the lightened color above, so each theme keeps
-   the pairing the diagram has: dark ink on a light tint, light ink on a dim one. A type the config
-   doesn't style leaves `--tok-hue` undefined, which makes the mix invalid at computed-value time
-   and drops `background-color` to its initial `transparent` — bare text rather than a gray box. */
-.type-backgrounds .tok-type {
-  background-color: color-mix(in oklab, var(--tok-hue) 22%, transparent);
-  border-radius: 2px;
-}
-
-.tok-comment {
-  font-style: italic;
-  opacity: 0.5;
-}
-
-/* A property's key is structure, its value is prose, so only the key is marked at all. */
-.tok-property {
-  font-weight: 600;
-  opacity: 0.7;
-}
-
-/* Scores are dense punctuation the eye should be able to skip; the brackets and commas recede
-   further than the numbers they hold, leaving the digits legible without the row shouting. */
-.tok-score-punct {
-  opacity: 0.4;
-}
-
-.tok-score-value {
-  opacity: 0.7;
-}
-
-.tok-tag {
-  opacity: 0.6;
-}
-
-/* The highlight layer, sitting behind a transparent textarea it has to lay text out identically
-   to: same font utilities, the same daisyUI `.textarea` box and the same `whitespace-pre` (see
-   EditorPane, which owns all three as one string).
-
-   Since neither element wraps, what this one has to do is *scroll*: the textarea's scroll handler
-   drives this element's `scrollTop`/`scrollLeft`, and a clipping box would pin both at 0 and hold
-   the highlighting still while the text moved under it. Its scrollbars are painted away rather
-   than removed with `scrollbar-width: none`, which keeps the overlay's content box the size the
-   textarea's is — the standing rule for anything here, since equal boxes are what make equal
-   layout. */
-.syntax-overlay {
-  scrollbar-color: transparent transparent;
-}
-
-/* The textarea over it. Its scrollbars are the ones you actually use, and on the Code tab they
-   are invisible without this: `scrollbar-color` is inherited, daisyUI sets it on `:root` as
-   `color-mix(in oklch, currentcolor 35%, transparent)`, and `currentcolor` here is the
-   *transparent* text that lets the overlay show through — so the thumb computes to a fully
-   transparent color while the gutter still takes its 15px. Naming base-content directly is the
-   same 35% every other scroller in the app resolves to, this textarea on the Mermaid tab
-   included; it just no longer travels through a color that has been zeroed out. */
-.syntax-input {
-  scrollbar-color: color-mix(in oklch, var(--color-base-content) 35%, transparent) transparent;
 }
 
 /* Not fixable by any ramp, which is worth knowing before anyone tries: daisyUI's button hover is

@@ -7,12 +7,13 @@ import type { NodeTypeDef } from "../types.ts";
 // Syntax (which marker produces which type) intentionally lives in ./parse.ts instead:
 // markers are this ontology's syntax, not its semantics.
 //
-// Colors avoid a red-green pro/con pair, which is the one distinction a reader most needs and
-// the hardest for the ~6% of men with deuteranomaly to make. They follow the same red/blue axis
-// as ameliorate-v2's wireframes (`RB = { neg: "#b2182b", ..., pos: "#2166ac" }`) and the
-// arg-map ontology, so the two ontologies are comparable on the same topic. `idea` takes the
-// yellow that `note` used to hold: it suits the 💡 icon, and blue-vs-yellow is the second
-// colorblind-safe axis, so ideas stay distinct from both pros and cons.
+// One color per type: the fill, border and text it's drawn in are derived from it, per theme
+// (../typeColors.ts). Colors avoid a red-green pro/con pair, which is the one distinction a
+// reader most needs and the hardest for the ~6% of men with deuteranomaly to make. They follow
+// the same red/blue axis as ameliorate-v2's wireframes (`RB = { neg: "#b2182b", ..., pos:
+// "#2166ac" }`) and the arg-map ontology, so the two ontologies are comparable on the same
+// topic. `idea` is yellow: it suits the 💡 icon, and blue-vs-yellow is the second colorblind-safe
+// axis, so ideas stay distinct from both pros and cons.
 export const renderedNodeTypes: NodeTypeDef[] = [
   {
     id: "question",
@@ -20,7 +21,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "❓",
     description: "A question or issue to resolve.",
     shape: ['{{"', '"}}'],
-    defaultStyle: { fill: "#ede9fe", stroke: "#7c3aed", color: "#2e1065" },
+    defaultColor: "#7c3aed",
   },
   {
     id: "idea",
@@ -28,7 +29,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "💡",
     description: "A possible answer to its parent question.",
     shape: ['["', '"]'],
-    defaultStyle: { fill: "#fef9c3", stroke: "#ca8a04", color: "#422006" },
+    defaultColor: "#ca8a04",
   },
   {
     id: "pro",
@@ -36,7 +37,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "✅",
     description: "An argument supporting its parent.",
     shape: ['["', '"]'],
-    defaultStyle: { fill: "#e7f0ff", stroke: "#2166ac", color: "#1b4fa8" },
+    defaultColor: "#2166ac",
   },
   {
     id: "con",
@@ -44,7 +45,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "⛔",
     description: "An argument objecting to its parent.",
     shape: ['["', '"]'],
-    defaultStyle: { fill: "#fdecea", stroke: "#b2182b", color: "#7f1d1d" },
+    defaultColor: "#b2182b",
   },
   {
     id: "note",
@@ -52,7 +53,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "📝",
     description: "A note shown attached to its parent.",
     shape: ['[/"', '"/]'],
-    defaultStyle: { fill: "#f1f5f9", stroke: "#64748b", color: "#0f172a" },
+    defaultColor: "#64748b",
   },
 ];
 

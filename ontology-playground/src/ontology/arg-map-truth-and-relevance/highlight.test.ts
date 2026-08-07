@@ -7,7 +7,7 @@ import { highlightLine } from "./highlight.ts";
 describe("highlightLine", () => {
   it("lexes a claim's scores between its marker and its body", () => {
     expect(highlightLine("=[4,1,8] The US should build a wall &wall")).toEqual([
-      { text: "=", kind: "type", typeId: "claim" },
+      { text: "=", kind: "type", typeId: "claim", loneMarker: true },
       { text: "[", kind: "score-punct" },
       { text: "4", kind: "score-value" },
       { text: ",", kind: "score-punct" },
@@ -20,6 +20,8 @@ describe("highlightLine", () => {
     ]);
   });
 
+  // Neither carries `loneMarker`, unlike the markers above: the word already shows the color at
+  // full width, so the `<` beside it needs no tint of its own.
   it("gives an edge line's marker and word the same type, so the pair reads as one statement", () => {
     expect(highlightLine("  < supports[8,-] &fast-supports-redis")).toEqual([
       { text: "  " },
@@ -50,7 +52,7 @@ describe("highlightLine", () => {
   it("marks a claim that is only a $ref", () => {
     expect(highlightLine("    = $ops-cost")).toEqual([
       { text: "    " },
-      { text: "=", kind: "type", typeId: "claim" },
+      { text: "=", kind: "type", typeId: "claim", loneMarker: true },
       { text: " " },
       { text: "$ops-cost", kind: "id-ref" },
     ]);
@@ -59,7 +61,7 @@ describe("highlightLine", () => {
   it("colors a note's marker and leaves its prose alone", () => {
     expect(highlightLine("      ~ measured on last year's hardware")).toEqual([
       { text: "      " },
-      { text: "~", kind: "type", typeId: "note" },
+      { text: "~", kind: "type", typeId: "note", loneMarker: true },
       { text: " measured on last year's hardware" },
     ]);
   });
@@ -73,7 +75,7 @@ describe("highlightLine", () => {
 
   it("leaves an unclosed score bracket plain rather than half-lexing it", () => {
     expect(highlightLine("=[4,1 half-typed")).toEqual([
-      { text: "=", kind: "type", typeId: "claim" },
+      { text: "=", kind: "type", typeId: "claim", loneMarker: true },
       { text: "[4,1 half-typed" },
     ]);
   });

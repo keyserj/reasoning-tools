@@ -25,9 +25,9 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the session-stor
   n6 -.-> n5
   q3 --> n5
   c1 --> n5
-  classDef question fill:#ede9fe,stroke:#7c3aed,color:#2e1065,stroke-width:1.5px
-  classDef idea fill:#fef9c3,stroke:#ca8a04,color:#422006,stroke-width:1.5px
-  classDef pro fill:#e7f0ff,stroke:#2166ac,color:#1b4fa8,stroke-width:1.5px
-  classDef con fill:#fdecea,stroke:#b2182b,color:#7f1d1d,stroke-width:1.5px
-  classDef note fill:#f1f5f9,stroke:#64748b,color:#0f172a,stroke-width:1.5px"
+  classDef question fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
+  classDef idea fill:#ffefda,stroke:#ca8a04,color:#462d00,stroke-width:1.5px
+  classDef pro fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
+  classDef con fill:#ffedec,stroke:#b2182b,color:#600d15,stroke-width:1.5px
+  classDef note fill:#edf2fa,stroke:#64748b,color:#2b3340,stroke-width:1.5px"
 `;

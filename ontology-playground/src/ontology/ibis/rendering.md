@@ -11,11 +11,11 @@ IBIS's model already _is_ a node-and-edge graph, so rendering doesn't actually a
 
 ## Colors and icons
 
-Colors follow the same red/blue axis as [ameliorate-v2's UX-design.md](../../../../ameliorate-v2/UX-design.md) and as the arg-map ontology uses, so the two ontologies stay comparable on the same topic.
+Colors follow the same red/blue axis as [ameliorate-v2's UX-design.md](../../../../ameliorate-v2/UX-design.md) and as the arg-map ontology uses, so the two ontologies stay comparable on the same topic. Each type declares one color, and the fill, border and text a box is drawn in are derived from it per theme (`../typeColors.ts`).
 
 - `pro` is blue and `con` red, reusing the wireframes' `RB = { neg: "#b2182b", pos: "#2166ac" }`
-- `idea` took over the yellow that `note` used to hold: it suits the 💡 icon, and blue-vs-yellow is the second colorblind-safe axis, so ideas stay distinct from both pros and cons
-- `note` is grey, which suits an annotation better than the yellow did
+- `idea` is yellow: it suits the 💡 icon, and blue-vs-yellow is the second colorblind-safe axis, so ideas stay distinct from both pros and cons
+- `note` is grey, which suits an annotation
 - icons work the same way as in the arg-map ontology: ✅ / ⛔ for the pro/con axis, unrelated pictograms (❓ 💡 📝) for the rest. Shape has to carry the pro/con distinction on its own for anyone who can't use the color, and a check against a barred circle does that at icon size
 
 ### Questions - Unanswered

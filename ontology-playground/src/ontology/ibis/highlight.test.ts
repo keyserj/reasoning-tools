@@ -8,14 +8,14 @@ describe("highlightLine", () => {
   it("colors a marker by the type it produces, leaving the body alone", () => {
     expect(highlightLine("  = Use Redis")).toEqual([
       { text: "  " },
-      { text: "=", kind: "type", typeId: "idea" },
+      { text: "=", kind: "type", typeId: "idea", loneMarker: true },
       { text: " Use Redis" },
     ]);
   });
 
   it("marks a trailing &id, and only the &id", () => {
     expect(highlightLine("? How should we handle session storage? &q1")).toEqual([
-      { text: "?", kind: "type", typeId: "question" },
+      { text: "?", kind: "type", typeId: "question", loneMarker: true },
       { text: " How should we handle session storage? " },
       { text: "&q1", kind: "id-decl" },
     ]);
@@ -24,7 +24,7 @@ describe("highlightLine", () => {
   it("marks a body that is only a $ref", () => {
     expect(highlightLine("    - $c1")).toEqual([
       { text: "    " },
-      { text: "-", kind: "type", typeId: "con" },
+      { text: "-", kind: "type", typeId: "con", loneMarker: true },
       { text: " " },
       { text: "$c1", kind: "id-ref" },
     ]);

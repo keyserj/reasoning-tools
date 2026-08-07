@@ -26,7 +26,7 @@ Every supports/critiques edge makes a claim — `A supports B` — which can its
 
 Because edges can become nodes, `renderedNodeTypes.ts` lists `supports` and `critiques` even though the ontology calls them edge types; because they can also become connectors, `renderedEdgeTypes.ts` lists them too. That's the point of the "rendered" prefix: what can appear as a box is not the same set as what the ontology is made of, and it depends on the lens.
 
-Labeled connectors are colored, since without color a supports and a critiques connector differ only by the word in the label. That color comes from `EdgeTypeDef.stroke` rather than from `StyleConfig`: a connector has no fill or text color, so there'd be nothing for the style panel to offer beyond one swatch — the cost is that recoloring "Supports" there doesn't move the connectors. (How mermaid's `linkStyle` indices are counted is a trap documented where it's handled, in `../mermaidFlowchart.ts`.)
+Labeled connectors are colored, since without color a supports and a critiques connector differ only by the word in the label. That color comes from `EdgeTypeDef.color` rather than from `StyleConfig`: a connector is only ever drawn in one role, so the style panel would be offering the same swatch twice — the cost is that recoloring "Supports" there doesn't move the connectors. It takes the same border role a node's outline does, so it lifts in dark mode instead of sinking into the canvas. (How mermaid's `linkStyle` indices are counted is a trap documented where it's handled, in `../mermaidFlowchart.ts`.)
 
 ### Questions - Unanswered
 
@@ -56,8 +56,7 @@ Left unconnected it was a graph component of its own, and dagre dropped it in am
 
 ## Colors and icons
 
-Colors follow the colorblind-safe red/blue axis that [ameliorate-v2's UX-design.md](../../../../ameliorate-v2/UX-design.md) requires ("needs a colorblind-safe diverging palette, not red-green"), reusing the wireframes' `RB = { neg: "#b2182b", pos: "#2166ac" }`.
+Colors follow the colorblind-safe red/blue axis that [ameliorate-v2's UX-design.md](../../../../ameliorate-v2/UX-design.md) requires ("needs a colorblind-safe diverging palette, not red-green"), reusing the wireframes' `RB = { neg: "#b2182b", pos: "#2166ac" }`. Each type declares one color, and the fill, border and text a box is drawn in are derived from it per theme (`../typeColors.ts`).
 
 - `supports` vs `critiques` is the one pair that _needs_ color to separate it — same shape, same structural role
-- claims are warm and pale on purpose: they're the majority of boxes, so a loud fill would bury the edge boxes that matter most
-- icons split the same way: ✅ / ⛔ for the support/critique axis, unrelated pictograms (💬 📝 📋) for content. The pair must stay distinguishable by _shape_ at the ~12px they render at, since that is what carries the distinction when color can't — a check against a barred circle survives that, same-shape 🔵 / 🔴 wouldn't. The emoji do carry their own green/red, the pairing the fills avoid, but it rides on top of shapes that already differ rather than doing the work
+- icons split the same way: ✅ / ⛔ for the support/critique axis, unrelated pictograms (💬 📝 📋) for content. The pair must stay distinguishable by _shape_ at the ~12px they render at, since that is what carries the distinction when color can't — a check against a barred circle survives that, same-shape 🔵 / 🔴 wouldn't. The emoji do carry their own green/red, the pairing the colors avoid, but it rides on top of shapes that already differ rather than doing the work

@@ -2,15 +2,16 @@ import type { Ontology } from "./types.ts";
 import { ibis } from "./ibis/index.ts";
 import { argMapTruthAndRelevance } from "./arg-map-truth-and-relevance/index.ts";
 
-// Insertion order drives the ontology dropdown.
+// Insertion order drives the ontology dropdown, so the default one leads it.
 export const ontologies: Record<string, Ontology> = {
-  [ibis.id]: ibis,
   [argMapTruthAndRelevance.id]: argMapTruthAndRelevance,
+  [ibis.id]: ibis,
 };
 
 export const ontologyList: Ontology[] = Object.values(ontologies);
 
-export const defaultOntologyId = ibis.id;
+// Arg map rather than ibis because it's the one with rendering features to show off.
+export const defaultOntologyId = argMapTruthAndRelevance.id;
 
 export function getOntology(id: string): Ontology {
   return ontologies[id] ?? ontologies[defaultOntologyId];

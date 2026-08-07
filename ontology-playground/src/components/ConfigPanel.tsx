@@ -1,4 +1,5 @@
-import type { LayoutDirection, NodeTypeDef, StyleConfig } from "../ontology/types.ts";
+import type { LayoutDirection, NodeTypeDef, StyleConfig, Theme } from "../ontology/types.ts";
+import { deriveTypeStyle } from "../ontology/typeColors.ts";
 
 const DIRECTIONS: { value: LayoutDirection; label: string }[] = [
   { value: "BT", label: "Bottom → Top" },
@@ -11,6 +12,7 @@ interface Props {
   open: boolean;
   config: StyleConfig;
   renderedNodeTypes: NodeTypeDef[];
+  theme: Theme;
   onChange: (config: StyleConfig) => void;
   onReset: () => void;
   onClose: () => void;
@@ -20,18 +22,15 @@ export default function ConfigPanel({
   open,
   config,
   renderedNodeTypes,
+  theme,
   onChange,
   onReset,
   onClose,
 }: Props) {
   if (!open) return null;
 
-  const setColor = (type: NodeTypeDef, key: "fill" | "stroke" | "color", value: string) => {
-    const base = config.types[type.id] ?? type.defaultStyle;
-    onChange({
-      ...config,
-      types: { ...config.types, [type.id]: { ...base, [key]: value } },
-    });
+  const setColor = (type: NodeTypeDef, value: string) => {
+    onChange({ ...config, typeColors: { ...config.typeColors, [type.id]: value } });
   };
 
   return (
@@ -78,45 +77,40 @@ export default function ConfigPanel({
             <thead>
               <tr>
                 <th>Type</th>
-                <th>Fill</th>
-                <th>Border</th>
-                <th>Text</th>
+                <th>Color</th>
+                <th>Preview</th>
               </tr>
             </thead>
             <tbody>
               {renderedNodeTypes.map((type) => {
-                const style = config.types[type.id] ?? type.defaultStyle;
+                const color = config.typeColors[type.id] ?? type.defaultColor;
+                const style = deriveTypeStyle(color, theme);
                 return (
                   <tr key={type.id}>
-                    <td className="whitespace-nowrap">
-                      {type.icon} {type.label}
-                    </td>
+                    <td className="whitespace-nowrap">{type.label}</td>
                     <td>
                       <input
                         type="color"
                         className="h-7 w-10 cursor-pointer"
-                        value={style.fill}
-                        onChange={(e) => setColor(type, "fill", e.target.value)}
-                        aria-label={`${type.label} fill`}
+                        value={color}
+                        onChange={(e) => setColor(type, e.target.value)}
+                        aria-label={`${type.label} color`}
                       />
                     </td>
+                    {/* A box as the diagram would draw it, icon included only while the diagram
+                        would show one. Border width matches the `classDef`'s stroke-width. */}
                     <td>
-                      <input
-                        type="color"
-                        className="h-7 w-10 cursor-pointer"
-                        value={style.stroke}
-                        onChange={(e) => setColor(type, "stroke", e.target.value)}
-                        aria-label={`${type.label} border`}
-                      />
-                    </td>
-                    <td>
-                      <input
-                        type="color"
-                        className="h-7 w-10 cursor-pointer"
-                        value={style.color}
-                        onChange={(e) => setColor(type, "color", e.target.value)}
-                        aria-label={`${type.label} text`}
-                      />
+                      <span
+                        className="inline-block whitespace-nowrap rounded border-[1.5px] px-2 py-1 text-xs"
+                        style={{
+                          backgroundColor: style.fill,
+                          borderColor: style.border,
+                          color: style.text,
+                        }}
+                      >
+                        {config.showIcons ? `${type.icon} ` : ""}
+                        {type.label}
+                      </span>
                     </td>
                   </tr>
                 );

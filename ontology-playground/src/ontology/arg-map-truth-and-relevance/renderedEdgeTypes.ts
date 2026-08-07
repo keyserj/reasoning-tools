@@ -12,9 +12,8 @@ import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 // say something the ontology cares about, which is why they don't take it.
 //
 // Color and icon are read off the matching node type so the two forms of one concept can't
-// drift apart. Only the *default* style is followed: a connector has no fill or text color,
-// so it isn't in `StyleConfig`, and recoloring "Supports" in the style panel leaves these
-// connectors where they are.
+// drift apart. Only the *default* color is followed: a connector isn't in `StyleConfig`, so
+// recoloring "Supports" in the style panel leaves these connectors where they are.
 export const renderedEdgeTypes: EdgeTypeDef[] = [
   { id: "link", connector: "-->" },
   // The two halves one ontology edge becomes when it's reified — see ./rendering.md on the
@@ -27,13 +26,13 @@ export const renderedEdgeTypes: EdgeTypeDef[] = [
   {
     id: "supports",
     connector: "-->",
-    stroke: renderedNodeTypesById.supports.defaultStyle.stroke,
+    color: renderedNodeTypesById.supports.defaultColor,
     icon: renderedNodeTypesById.supports.icon,
   },
   {
     id: "critiques",
     connector: "-->",
-    stroke: renderedNodeTypesById.critiques.defaultStyle.stroke,
+    color: renderedNodeTypesById.critiques.defaultColor,
     icon: renderedNodeTypesById.critiques.icon,
   },
   // Draws nothing. It exists only to give a node a rank relative to the argument, so dagre

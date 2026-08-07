@@ -3,10 +3,15 @@ import { ibis } from "../ontology/ibis/index.ts";
 import { argMapTruthAndRelevance } from "../ontology/arg-map-truth-and-relevance/index.ts";
 import { defaultExample, findExample } from "../ontology/examples.ts";
 import { defaultFeatureState } from "../ontology/features.ts";
+import { defaultOntologyId, getOntology } from "../ontology/registry.ts";
 import { type ShareState, decodeState, encodeState } from "./url.ts";
 
 const ibisExample = defaultExample(ibis);
 const argMapExample = defaultExample(argMapTruthAndRelevance);
+
+// Read from the registry so which ontology is the default stays that file's business.
+const defaultOntology = getOntology(defaultOntologyId);
+const defaultOntologyExample = defaultExample(defaultOntology);
 
 const shared: ShareState = {
   ontologyId: ibis.id,
@@ -21,7 +26,7 @@ describe("share/url", () => {
     expect(decodeState(encodeState(shared))).toEqual(shared);
   });
 
-  it("round-trips a document in a non-default ontology, keeping its own node types", () => {
+  it("round-trips a document in the other ontology, keeping its own node types", () => {
     const other: ShareState = {
       ontologyId: argMapTruthAndRelevance.id,
       exampleId: argMapExample.id,
@@ -49,9 +54,9 @@ describe("share/url", () => {
     const decoded = decodeState(encodeState({ ...shared, ontologyId: "no-such-ontology" }));
     // Reinterpreting a foreign syntax would just be a wall of parse errors, so the source
     // is replaced rather than carried over.
-    expect(decoded?.ontologyId).toBe(ibis.id);
-    expect(decoded?.source).toBe(ibisExample.source);
-    expect(decoded?.exampleId).toBe(ibisExample.id);
+    expect(decoded?.ontologyId).toBe(defaultOntology.id);
+    expect(decoded?.source).toBe(defaultOntologyExample.source);
+    expect(decoded?.exampleId).toBe(defaultOntologyExample.id);
   });
 
   it("returns null for a hash it cannot decode", () => {

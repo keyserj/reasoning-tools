@@ -1,5 +1,5 @@
 import { type CSSProperties, Fragment, type KeyboardEvent, useMemo, useRef } from "react";
-import type { HighlightToken, ParseError, StyleConfig } from "../ontology/types.ts";
+import type { HighlightToken, ParseError, StyleConfig } from "../../ontology/types.ts";
 
 export type EditorTab = "source" | "mermaid";
 

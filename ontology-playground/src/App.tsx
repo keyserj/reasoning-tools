@@ -11,7 +11,7 @@ import { defaultFeatureState } from "./ontology/features.ts";
 import type { Ontology, OntologyExample, Theme } from "./ontology/types.ts";
 import { type ShareState, decodeState, encodeState } from "./share/url.ts";
 import Toolbar, { type PaneView } from "./components/Toolbar.tsx";
-import EditorPane, { type EditorTab } from "./components/EditorPane.tsx";
+import EditorPane, { type EditorTab } from "./components/editor/EditorPane.tsx";
 import DiagramPane from "./components/DiagramPane.tsx";
 import DocumentPicker from "./components/DocumentPicker.tsx";
 import RenderingStrip from "./components/RenderingStrip.tsx";

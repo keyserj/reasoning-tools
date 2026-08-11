@@ -2,7 +2,32 @@
 
 Instructions for every agent working in this repo. See [README.md](./README.md) for what the repo is for.
 
-**Take this as current convention, not law.** The repo is largely vibe-coded and much of the rationale here was written alongside the code without audit, so challenge anything that looks wrong rather than building around it — and fix the doc when it is wrong.
+## Conventions
+
+**Take this as current convention, not law.** The repo is largely vibe-coded and much of the rationale here was written alongside the code without audit, so challenge anything that looks wrong rather than building around it.
+
+### Comments and docs
+
+- **Comment only non-obvious constraints and *why* decisions, never *what* the code does.** The code already says what it does; a comment that restates it earns nothing and goes stale on the next edit.
+
+  ```ts
+  // ✅ mermaid's classDef splits its style list on commas, so a derived color has to reach it as hex
+  const fill = toHex(deriveFill(color, theme));
+
+  // ❌ derive the fill from the configured color and convert it to hex
+  const fill = toHex(deriveFill(color, theme));
+  ```
+
+- **Default to fewer and shorter comments.** Take the lowest rung that works: nothing, 1-2 sentences where explanation is genuinely needed, a paragraph only when the information is critical. At 2+ paragraphs consider a separate doc, not a comment. This applies to prose in docs too, including this one.
+- **Keep it present-tense — a comment is not a change log.** Even a real *why* goes in the commit body if it's a why-it-*changed*: "tried X first and backed it out", "this used to hold the selects". Only the reason the code is what it stands as today survives the next edit. A warning about how something behaves now is not history and is worth keeping (`daisyUI v5 spells this tabs-border; tabs-bordered is v4's name and is inert`).
+- **Do comment an accepted compromise**, at the site of the awkwardness rather than only in a doc: what's awkward, why it was accepted, what the refactor would be.
+- **Every fact lives in one place.** A doc owns the *decision*: what was chosen, what the alternatives were, what's still open. A comment owns what someone editing that line can't infer from it, and points at the doc instead of restating it (e.g. `see ./rendering.md`).
+- **Never hard-wrap markdown** — one unbroken line per paragraph and per bullet, however long. Editors wrap; hard wraps only make diffs reflow lines that didn't change.
+
+### Workflow
+
+- Commits: `type(scope): lowercase summary` (e.g. `chore(mermaid): …`, `touchup(plgr): …`). Work on a branch and PR into `main`.
+- Before finishing playground work, run typecheck, test, lint, and `format:check`.
 
 ## Layout
 
@@ -64,9 +89,3 @@ App chrome is Tailwind v4 + daisyUI v5 (theme via `data-theme` on `<html>`). Dia
 Docs only. `ontology.md` (structure, score semantics, open questions) and `UX-design.md` (what to show in which state) are outline-style markdown with tab indentation and heavy internal anchor links. `ontology.md`'s "Build a wall" example is written in its own notation — read the syntax legend under **Example → Context** before touching the example.
 
 The docs are the source of truth; the wireframes under `wireframe/` are played around with to evaluate a design. Each `topic-landing-v<N>.html` is self-contained (no dependency beyond `versions.js`) and carries its own `CURRENT_VERSION` and inline "What's new" list, which is written once when that version is cut and not edited afterwards. To add a version: copy the newest wireframe to the next number, update its version and "What's new", and append one entry to `versions.js`.
-
-## Conventions
-
-- Every fact lives in one place. A doc owns the *decision*: what was chosen, what the alternatives were, what's still open. A comment owns what someone editing that line can't infer from it, and points at the doc instead of restating it (`see ./rendering.md`). A comment longer than ~3 lines that names no identifier in the code around it is likely prose that belongs in the doc.
-- Commits: `type(scope): lowercase summary` (e.g. `chore(mermaid): …`, `touchup(plgr): …`). Work on a branch and PR into `main`.
-- Before finishing playground work, run typecheck, test, lint, and `format:check` — CI runs the tests and build, and unformatted code shows up as noise in diffs.

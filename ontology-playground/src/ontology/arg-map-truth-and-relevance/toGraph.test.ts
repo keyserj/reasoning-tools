@@ -2,24 +2,24 @@ import { describe, expect, it } from "vitest";
 import type { FeatureState } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toGraph } from "./toGraph.ts";
-import { EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_SAME, IMPLICIT_ON_EDGE } from "./features.ts";
+import { EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_SAME, IMPLIED } from "./features.ts";
 
 // The two renderings the `Edge claims` feature switches between. An empty state is the
 // default one, which is what an old shared URL and a fresh document both decode to.
 
-const explicit = (): FeatureState => ({});
+const spelledOut = (): FeatureState => ({});
 
-const implicit: FeatureState = { [EDGE_CLAIMS]: { option: IMPLICIT_ON_EDGE } };
+const implied: FeatureState = { [EDGE_CLAIMS]: { option: IMPLIED } };
 
-const implicitSame: FeatureState = {
-  [EDGE_CLAIMS]: { option: IMPLICIT_ON_EDGE, params: { [EDGE_DISPLAY]: EDGE_DISPLAY_SAME } },
+const impliedSame: FeatureState = {
+  [EDGE_CLAIMS]: { option: IMPLIED, params: { [EDGE_DISPLAY]: EDGE_DISPLAY_SAME } },
 };
 
 const graphOf = (text: string, features: FeatureState) => toGraph(parse(text).doc, features);
 
-describe("toGraph — explicit, separate (default)", () => {
+describe("toGraph — spelled out (default)", () => {
   it("draws a plain edge as a labeled connector, with no node of its own", () => {
-    const graph = graphOf("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", explicit());
+    const graph = graphOf("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", spelledOut());
     expect(graph.nodes).toEqual([
       { id: "t", type: "claim", text: "Thesis" },
       { id: "r", type: "claim", text: "Reason" },
@@ -37,7 +37,7 @@ describe("toGraph — explicit, separate (default)", () => {
         "  < critiques[2] &crit",
         "    = Beside the point &btp",
       ].join("\n"),
-      explicit(),
+      spelledOut(),
     );
     // A plain claim, not a `supports` box: its own text says which it is, and the edge it
     // describes carries the color.
@@ -65,7 +65,7 @@ describe("toGraph — explicit, separate (default)", () => {
   it("anchors a detached node to the edge's target so dagre puts it nearby", () => {
     const graph = graphOf(
       "= Thesis &t\n  < supports &sup\n    = Reason &r\n= $sup\n  < critiques &c\n    = No &n",
-      explicit(),
+      spelledOut(),
     );
     expect(graph.edges).toContainEqual({ from: "sup", to: "t", type: "anchor" });
     // Not the source end: see toGraph.ts on why pinning both is worse.
@@ -73,12 +73,12 @@ describe("toGraph — explicit, separate (default)", () => {
   });
 
   it("gives a note-bearing edge a node too, so the note has something to hang off", () => {
-    const graph = graphOf("= A &a\n  < supports &l\n    ~ why &nt\n    = B &b", explicit());
+    const graph = graphOf("= A &a\n  < supports &l\n    ~ why &nt\n    = B &b", spelledOut());
     expect(graph.nodes.map((n) => n.id)).toContain("l");
     expect(graph.edges).toContainEqual({ from: "nt", to: "l", type: "note" });
   });
 
-  it("falls back to the endpoint's id for a nested implied claim, rather than recursing", () => {
+  it("falls back to the endpoint's id for a nested edge claim, rather than recursing", () => {
     const graph = graphOf(
       [
         "= Thesis &t",
@@ -91,7 +91,7 @@ describe("toGraph — explicit, separate (default)", () => {
         "  < critiques &meta",
         "    = Not so &ns",
       ].join("\n"),
-      explicit(),
+      spelledOut(),
     );
     // `crit`'s target is an edge, which has no claim text to quote. Its ② also shows markers
     // being numbered in source order — `sup` is argued about first, so it took ①.
@@ -106,36 +106,36 @@ describe("toGraph — explicit, separate (default)", () => {
     const long = "A claim long enough that quoting all of it would be unreadable";
     const graph = graphOf(
       `= ${long} &t\n  < supports &sup\n    = Reason &r\n= $sup\n  < critiques &c\n    = Nope &n`,
-      explicit(),
+      spelledOut(),
     );
     const node = graph.nodes.find((n) => n.id === "sup");
     expect(node?.text).toBe('① "Reason" supports "A claim long enough that quoting all of…"');
   });
 
   it("labels an edge with its type, plus its score row when someone scored it", () => {
-    const labelOf = (source: string) => graphOf(source, explicit()).edges[0].label;
+    const labelOf = (source: string) => graphOf(source, spelledOut()).edges[0].label;
     expect(labelOf("= A &a\n  < supports[8] &sup\n    = B &b")).toBe("supports [8]");
     expect(labelOf("= A &a\n  < supports &sup\n    = B &b")).toBe("supports");
   });
 
   it("drops an edge whose endpoint never resolved, as the other rendering does", () => {
-    const graph = graphOf("= A &a\n  < supports &l\n    = $nope", explicit());
+    const graph = graphOf("= A &a\n  < supports &l\n    = $nope", spelledOut());
     expect(graph.edges).toEqual([]);
   });
 
   it("keeps the topic header and its invisible anchor", () => {
     const graph = graphOf(
       "%perspectives: [alice]\n= Thesis &t\n  < supports[8] &sup\n    = Reason &r",
-      explicit(),
+      spelledOut(),
     );
     expect(graph.nodes[0]).toMatchObject({ id: "_topic", type: "topic" });
     expect(graph.edges).toContainEqual({ from: "t", to: "_topic", type: "anchor" });
   });
 });
 
-describe("toGraph — implicit, on the edge", () => {
+describe("toGraph — implied", () => {
   it("reifies an edge into a node between its child source and parent target", () => {
-    const graph = graphOf("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", implicit);
+    const graph = graphOf("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", implied);
     expect(graph.nodes).toEqual([
       { id: "t", type: "claim", text: "Thesis" },
       { id: "r", type: "claim", text: "Reason" },
@@ -150,7 +150,7 @@ describe("toGraph — implicit, on the edge", () => {
   });
 
   it("draws both halves as plain arrows under `all edges same`", () => {
-    const graph = graphOf("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", implicitSame);
+    const graph = graphOf("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", impliedSame);
     expect(graph.edges).toEqual([
       { from: "r", to: "sup", type: "link" },
       { from: "sup", to: "t", type: "link" },
@@ -167,7 +167,7 @@ describe("toGraph — implicit, on the edge", () => {
         "  < critiques[2] &crit",
         "    = Beside the point &btp",
       ].join("\n"),
-      implicit,
+      implied,
     );
     // `crit` targets an edge rather than a claim — the case the ontology exists for, and the
     // one the reified rendering otherwise draws like any other edge.
@@ -190,7 +190,7 @@ describe("toGraph — implicit, on the edge", () => {
         "  < supports &l2",
         "    = $s",
       ].join("\n"),
-      implicit,
+      implied,
     );
     expect(graph.nodes.filter((n) => n.id === "s")).toHaveLength(1);
     expect(graph.edges).toContainEqual({ from: "s", to: "l1", type: "edge-half" });
@@ -198,18 +198,18 @@ describe("toGraph — implicit, on the edge", () => {
   });
 
   it("keeps notes and drops half-edges from unresolved references", () => {
-    const graph = graphOf("= A &a\n  < supports &l\n    ~ a note &nt\n    = B &b", implicit);
+    const graph = graphOf("= A &a\n  < supports &l\n    ~ a note &nt\n    = B &b", implied);
     expect(graph.nodes).toContainEqual({ id: "nt", type: "note", text: "a note" });
     expect(graph.edges).toContainEqual({ from: "nt", to: "l", type: "note" });
 
-    const dangling = graphOf("= A &a\n  < supports &l\n    = $nope", implicit);
+    const dangling = graphOf("= A &a\n  < supports &l\n    = $nope", implied);
     expect(dangling.edges).toEqual([{ from: "l", to: "a", type: "link" }]);
   });
 
   it("builds a topic header from %description and %perspectives", () => {
     const graph = graphOf(
       "%description: Why we care\n%perspectives: [alice, bob]\n= A &a",
-      implicit,
+      implied,
     );
     expect(graph.nodes[0]).toEqual({
       id: "_topic",
@@ -219,7 +219,7 @@ describe("toGraph — implicit, on the edge", () => {
   });
 
   it("omits the topic header when the document declares neither property", () => {
-    const graph = graphOf("= A &a", implicit);
+    const graph = graphOf("= A &a", implied);
     expect(graph.nodes.map((n) => n.type)).not.toContain("topic");
     expect(graph.edges).toEqual([]);
   });

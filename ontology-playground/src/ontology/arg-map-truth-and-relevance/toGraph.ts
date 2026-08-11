@@ -5,8 +5,8 @@ import {
   EDGE_CLAIMS,
   EDGE_DISPLAY,
   EDGE_DISPLAY_DISTINGUISH,
-  EXPLICIT_SEPARATE,
-  IMPLICIT_ON_EDGE,
+  IMPLIED,
+  SPELLED_OUT,
 } from "./features.ts";
 import { type Scores, formatScores } from "./scores.ts";
 
@@ -65,7 +65,7 @@ function claimNodes(doc: ArgDoc): { nodes: GraphNode[]; known: Set<string> } {
 
 /**
  * Notes and the topic anchor, which attach the same way in both renderings. An owner with no
- * node of its own carries its notes nowhere: that's an un-argued edge under `explicit-separate`,
+ * node of its own carries its notes nowhere: that's an un-argued edge under `spelled out`,
  * where the note is what would have earned it a node in the first place.
  */
 function addNotesAndAnchor(
@@ -92,13 +92,13 @@ function addNotesAndAnchor(
 }
 
 /** Flatten an {@link ArgDoc} into the shared {@link Graph}, reifying every edge into a node. */
-function implicitOnEdge(doc: ArgDoc, distinguish: boolean): Graph {
+function impliedClaims(doc: ArgDoc, distinguish: boolean): Graph {
   const { nodes, known } = claimNodes(doc);
   const graphEdges: GraphEdge[] = [];
   const edgeIds = new Set(doc.edges.map((edge) => edge.id));
 
   // A reified node is labelled with its type — its text *is* "supports" / "critiques", which
-  // is what its implied claim asserts about the two claims it sits between.
+  // is what its edge claim asserts about the two claims it sits between.
   for (const edge of doc.edges) {
     nodes.push({ id: edge.id, type: edge.type, text: withScores(edge.type, edge.scores) });
     known.add(edge.id);
@@ -137,11 +137,11 @@ function truncate(text: string): string {
  * The claim an edge makes, spelled out: `"Redis is fast for hot reads" supports "We should…"`.
  *
  * A side falls back to the endpoint's id in the two cases where there is no claim text to
- * quote, both reachable: the endpoint is itself an edge (a nested implied claim — spelling
+ * quote, both reachable: the endpoint is itself an edge (a nested edge claim — spelling
  * that one out in full is unreadable), or it is an unresolved `$ref`, which is the normal
  * state while typing `= $foo` before `&foo` exists.
  */
-function impliedClaimText(edge: Edge, claimTextById: Map<string, string>): string {
+function edgeClaimText(edge: Edge, claimTextById: Map<string, string>): string {
   const side = (id: string) => truncate(claimTextById.get(id) ?? id);
   return `"${side(edge.sourceId)}" ${edge.type} "${side(edge.targetId)}"`;
 }
@@ -160,7 +160,7 @@ function marker(n: number): string {
  * Flatten an {@link ArgDoc} into the shared {@link Graph}, drawing edges as labeled connectors
  * and giving only the argued-about ones a detached node that spells their claim out.
  */
-function explicitSeparate(doc: ArgDoc): Graph {
+function spelledOutClaims(doc: ArgDoc): Graph {
   const { nodes, known } = claimNodes(doc);
   const graphEdges: GraphEdge[] = [];
   const claimTextById = new Map(doc.claims.map((claim) => [claim.id, claim.text]));
@@ -183,7 +183,7 @@ function explicitSeparate(doc: ArgDoc): Graph {
     nodes.push({
       id: edge.id,
       type: "claim",
-      text: withScores(`${mark} ${impliedClaimText(edge, claimTextById)}`, edge.scores),
+      text: withScores(`${mark} ${edgeClaimText(edge, claimTextById)}`, edge.scores),
     });
     known.add(edge.id);
   }
@@ -218,8 +218,8 @@ function explicitSeparate(doc: ArgDoc): Graph {
 
 /** Flatten an {@link ArgDoc} into the shared {@link Graph}, per the `Edge claims` feature. */
 export function toGraph(doc: ArgDoc, features: FeatureState): Graph {
-  const option = featureOption(features, EDGE_CLAIMS, EXPLICIT_SEPARATE);
-  if (option !== IMPLICIT_ON_EDGE) return explicitSeparate(doc);
+  const option = featureOption(features, EDGE_CLAIMS, SPELLED_OUT);
+  if (option !== IMPLIED) return spelledOutClaims(doc);
   const display = featureParam(features, EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_DISTINGUISH);
-  return implicitOnEdge(doc, display === EDGE_DISPLAY_DISTINGUISH);
+  return impliedClaims(doc, display === EDGE_DISPLAY_DISTINGUISH);
 }

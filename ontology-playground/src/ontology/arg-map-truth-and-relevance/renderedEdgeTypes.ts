@@ -3,7 +3,7 @@ import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 
 // What can appear as a *connector* in the diagram. Which of these are used depends on the
 // `Edge claims` feature (./features.ts): `link`, `edge-half` and `edge-to-edge` draw the
-// reified rendering, while `supports`/`critiques` draw the labeled-connector one — the same
+// `implied` rendering, while `supports`/`critiques` draw the `spelled out` one — the same
 // two ontology edge types that ./renderedNodeTypes.ts also renders as boxes, since either
 // rendering is possible and the feature picks between them.
 //

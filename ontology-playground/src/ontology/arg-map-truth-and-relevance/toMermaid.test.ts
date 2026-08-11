@@ -3,13 +3,13 @@ import type { FeatureState } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toMermaid } from "./toMermaid.ts";
 import { defaultConfig } from "./defaultConfig.ts";
-import { EDGE_CLAIMS, IMPLICIT_ON_EDGE } from "./features.ts";
+import { EDGE_CLAIMS, IMPLIED } from "./features.ts";
 import sessionStorage from "./examples/session-storage.txt?raw";
 import buildAWall from "./examples/build-a-wall.txt?raw";
 
 /** `{}` resolves to every feature's default, which is what a fresh document has. */
 const defaults: FeatureState = {};
-const implicit: FeatureState = { [EDGE_CLAIMS]: { option: IMPLICIT_ON_EDGE } };
+const implied: FeatureState = { [EDGE_CLAIMS]: { option: IMPLIED } };
 
 const render = (text: string, features = defaults, config = defaultConfig) =>
   toMermaid(parse(text).doc, config, features, "light");
@@ -43,8 +43,8 @@ describe("toMermaid", () => {
     expect(out).toContain("sup ~~~ t");
   });
 
-  it("reifies every edge into a stadium in the implicit rendering", () => {
-    const out = render("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", implicit);
+  it("reifies every edge into a stadium in the implied rendering", () => {
+    const out = render("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", implied);
     expect(out).toContain('sup(["✅ supports<br/>[8]"]):::supports');
     expect(out).toContain("r --- sup");
     expect(out).toContain("sup --> t");
@@ -54,7 +54,7 @@ describe("toMermaid", () => {
   it("thickens the connector that lands on another edge box", () => {
     const out = render(
       "= Thesis &t\n  < supports &sup\n    = Reason &r\n= $sup\n  < critiques &c\n    = No &n",
-      implicit,
+      implied,
     );
     expect(out).toContain("c ==> sup");
   });
@@ -113,6 +113,6 @@ describe("toMermaid", () => {
   it("matches the generated-mermaid snapshots for the bundled examples", () => {
     expect(render(sessionStorage)).toMatchSnapshot();
     expect(render(buildAWall)).toMatchSnapshot();
-    expect(render(buildAWall, implicit)).toMatchSnapshot();
+    expect(render(buildAWall, implied)).toMatchSnapshot();
   });
 });

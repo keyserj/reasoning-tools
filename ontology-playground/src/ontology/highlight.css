@@ -40,7 +40,7 @@
     opacity: 0.6;
   }
 
-  .tok-id-ref {
+  .ref-links .tok-id-ref {
     text-decoration: underline;
   }
 

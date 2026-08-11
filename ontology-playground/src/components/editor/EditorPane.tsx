@@ -1,5 +1,6 @@
 import { type CSSProperties, Fragment, type KeyboardEvent, useMemo, useRef } from "react";
 import type { HighlightToken, ParseError, StyleConfig } from "../../ontology/types.ts";
+import { useRefJump } from "./refJump.ts";
 
 export type EditorTab = "source" | "mermaid";
 
@@ -84,6 +85,8 @@ export default function EditorPane({
     () => (editing ? source.split("\n").map(highlightLine) : []),
     [editing, source, highlightLine],
   );
+
+  const { linkable, onClick } = useRefJump(lines, editing);
 
   // Indent edits go through execCommand("insertText") rather than onSourceChange: the browser
   // applies them as real user edits, so the caret lands correctly, ctrl+z still undoes them, and
@@ -221,7 +224,7 @@ export default function EditorPane({
               aria-hidden
               className={`${EDITOR_BOX} syntax-overlay absolute inset-0 overflow-auto pointer-events-none border-transparent shadow-none ${
                 markerHighlights ? "marker-highlights" : ""
-              }`}
+              } ${linkable ? "ref-links" : ""}`}
             >
               {lines.map((tokens, i) => (
                 <Fragment key={i}>
@@ -254,6 +257,7 @@ export default function EditorPane({
             value={editing ? source : mermaidText}
             onChange={(e) => onSourceChange(e.target.value)}
             onKeyDown={handleKeyDown}
+            onClick={onClick}
             onScroll={(e) => {
               if (overlay.current === null) return;
               overlay.current.scrollTop = e.currentTarget.scrollTop;

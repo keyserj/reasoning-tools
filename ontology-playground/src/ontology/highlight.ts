@@ -2,6 +2,7 @@
 // agnostic on purpose: it knows what a token *is* — see `HighlightToken` in ./types.ts — and
 // nothing about which characters mean what.
 
+import { LEADING_BRACKET } from "./scores.ts";
 import type { HighlightKind, HighlightToken } from "./types.ts";
 
 /**
@@ -41,8 +42,27 @@ export function createTokenSink(): TokenSink {
 }
 
 /**
- * Push a line's body, marking a trailing `&id` and a body that is nothing but `$id`. Both
- * ontologies spell those the same way over their own id charsets, so the regexes come from the
+ * Lex a leading `[8,-,2]` if there is one, and return what follows it. Whitespace around a slot
+ * rides along inside its `score-value` — it's that slot's own text, and space takes no color.
+ * The range a slot may hold is the parser's business, not the overlay's: a half-typed `[9]` in
+ * a 0-8 ontology colors like any other slot, and the error strip is what says it's wrong.
+ */
+export function pushScores(sink: TokenSink, text: string): string {
+  const match = LEADING_BRACKET.exec(text);
+  if (!match) return text;
+
+  sink.mark("[", "score-punct");
+  match[1].split(",").forEach((slot, i) => {
+    if (i > 0) sink.mark(",", "score-punct");
+    sink.mark(slot, "score-value");
+  });
+  sink.mark("]", "score-punct");
+  return text.slice(match[0].length);
+}
+
+/**
+ * Push a line's body, marking a trailing `&id` and a body that is nothing but `$id`. Every
+ * ontology spells those the same way over its own id charset, so the regexes come from the
  * caller's markers.ts; `refBody` is left off where a reference isn't valid, as in a note's body.
  */
 export function pushBody(sink: TokenSink, text: string, idSuffix: RegExp, refBody?: RegExp): void {

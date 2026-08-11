@@ -1,10 +1,9 @@
 import { type CSSProperties, Fragment, type KeyboardEvent, useMemo, useRef } from "react";
-import type { HighlightToken, ParseError, StyleConfig } from "../ontology/types.ts";
+import type { HighlightToken, ParseError, StyleConfig } from "../../ontology/types.ts";
+import { handleIndentKeys } from "./indent.ts";
+import { useRefJump } from "./refJump.ts";
 
 export type EditorTab = "source" | "mermaid";
-
-/** What one indent level is worth. Two spaces, GitHub-style — the syntaxes nest by indentation. */
-const INDENT = "  ";
 
 /**
  * Everything that decides where a glyph lands. The overlay is only invisible while it and the
@@ -85,13 +84,7 @@ export default function EditorPane({
     [editing, source, highlightLine],
   );
 
-  // Indent edits go through execCommand("insertText") rather than onSourceChange: the browser
-  // applies them as real user edits, so the caret lands correctly, ctrl+z still undoes them, and
-  // the resulting input event feeds React's onChange like any keystroke.
-  const insertText = (el: HTMLTextAreaElement, text: string, from: number, to: number) => {
-    el.setSelectionRange(from, to);
-    document.execCommand("insertText", false, text);
-  };
+  const { linkable, onClick } = useRefJump(lines, editing);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     // Tab is trapped for indenting, so Escape is the keyboard way back out of the textarea.
@@ -99,45 +92,7 @@ export default function EditorPane({
       e.currentTarget.blur();
       return;
     }
-    if (e.key !== "Tab" || !editing) return;
-    e.preventDefault();
-
-    const el = e.currentTarget;
-    const { value, selectionStart, selectionEnd } = el;
-
-    // Plain Tab with the selection inside one line: insert an indent like any other typed text.
-    if (!e.shiftKey && !value.slice(selectionStart, selectionEnd).includes("\n")) {
-      insertText(el, INDENT, selectionStart, selectionEnd);
-      return;
-    }
-
-    // Otherwise indent/outdent every line the selection touches, as one replacement.
-    const blockStart = value.lastIndexOf("\n", selectionStart - 1) + 1;
-    const lineEnd = value.indexOf("\n", selectionEnd);
-    const blockEnd = lineEnd === -1 ? value.length : lineEnd;
-    const block = value.slice(blockStart, blockEnd);
-
-    let firstDelta = 0;
-    const next = block
-      .split("\n")
-      .map((line, i) => {
-        const outdent = line.startsWith(INDENT) ? INDENT.length : line.startsWith(" ") ? 1 : 0;
-        if (i === 0) firstDelta = e.shiftKey ? -outdent : INDENT.length;
-        return e.shiftKey ? line.slice(outdent) : INDENT + line;
-      })
-      .join("\n");
-    if (next === block) return;
-
-    insertText(el, next, blockStart, blockEnd);
-
-    // insertText leaves the caret at the end of what it wrote. Reselect the block so repeated
-    // presses keep acting on the same lines; a bare caret stays a caret, shifted by its line.
-    if (selectionStart === selectionEnd) {
-      const caret = Math.max(blockStart, selectionStart + firstDelta);
-      el.setSelectionRange(caret, caret);
-    } else {
-      el.setSelectionRange(blockStart, blockStart + next.length);
-    }
+    if (editing) handleIndentKeys(e);
   };
 
   return (
@@ -221,7 +176,7 @@ export default function EditorPane({
               aria-hidden
               className={`${EDITOR_BOX} syntax-overlay absolute inset-0 overflow-auto pointer-events-none border-transparent shadow-none ${
                 markerHighlights ? "marker-highlights" : ""
-              }`}
+              } ${linkable ? "ref-links" : ""}`}
             >
               {lines.map((tokens, i) => (
                 <Fragment key={i}>
@@ -254,6 +209,7 @@ export default function EditorPane({
             value={editing ? source : mermaidText}
             onChange={(e) => onSourceChange(e.target.value)}
             onKeyDown={handleKeyDown}
+            onClick={onClick}
             onScroll={(e) => {
               if (overlay.current === null) return;
               overlay.current.scrollTop = e.currentTarget.scrollTop;

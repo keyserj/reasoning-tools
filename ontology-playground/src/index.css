@@ -4,7 +4,7 @@
    Imported here rather than from a `.tsx` so these files stay in Tailwind's build graph and their
    cascade position stays fixed. AGENTS.md has the rules for when a rule earns its own file. */
 @import "./ontology/highlight.css";
-@import "./components/EditorPane.css";
+@import "./components/editor/EditorPane.css";
 
 @plugin "daisyui" {
   themes:

@@ -26,7 +26,7 @@ Every supports/critiques edge makes a claim — `A supports B` — which can its
 
 Because edges can become nodes, `renderedNodeTypes.ts` lists `supports` and `critiques` even though the ontology calls them edge types; because they can also become connectors, `renderedEdgeTypes.ts` lists them too. That's the point of the "rendered" prefix: what can appear as a box is not the same set as what the ontology is made of, and it depends on the lens.
 
-Labeled connectors are colored, since without color a supports and a critiques connector differ only by the word in the label. That color comes from `EdgeTypeDef.color` rather than from `StyleConfig`: a connector is only ever drawn in one role, so the style panel would be offering the same swatch twice — the cost is that recoloring "Supports" there doesn't move the connectors. It takes the same border role a node's outline does, so it lifts in dark mode instead of sinking into the canvas. (How mermaid's `linkStyle` indices are counted is a trap documented where it's handled, in `../mermaidFlowchart.ts`.)
+Labeled connectors are colored, since without color a supports and a critiques connector differ only by the word in the label. The color is the one the document configures for the matching _node_ type: `EdgeTypeDef.colorTypeId` names that type rather than freezing a hex, so a connector and the box it is the other form of are one entry in the **Style** panel and always agree. It takes the same border role a node's outline does, so it lifts in dark mode instead of sinking into the canvas. (How mermaid's `linkStyle` indices are counted is a trap documented where it's handled, in `../mermaidFlowchart.ts`.)
 
 ### Questions - Unanswered
 

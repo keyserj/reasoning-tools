@@ -11,9 +11,10 @@ import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 // only because mermaid needs *something* between a box and its endpoint. The `edge-` names
 // say something the ontology cares about, which is why they don't take it.
 //
-// Color and icon are read off the matching node type so the two forms of one concept can't
-// drift apart. Only the *default* color is followed: a connector isn't in `StyleConfig`, so
-// recoloring "Supports" in the style panel leaves these connectors where they are.
+// A connector names the node type it is the other form of (`colorTypeId`) rather than holding
+// a color, so it is drawn in whatever that type is configured with and restyling "Supports"
+// moves its boxes and its connectors together. The icon is read off the same table for the
+// same reason: the two forms of one concept can't drift apart.
 export const renderedEdgeTypes: EdgeTypeDef[] = [
   { id: "link", connector: "-->" },
   // The two halves one ontology edge becomes when it's reified — see ./rendering.md on the
@@ -26,13 +27,13 @@ export const renderedEdgeTypes: EdgeTypeDef[] = [
   {
     id: "supports",
     connector: "-->",
-    color: renderedNodeTypesById.supports.defaultColor,
+    colorTypeId: "supports",
     icon: renderedNodeTypesById.supports.icon,
   },
   {
     id: "critiques",
     connector: "-->",
-    color: renderedNodeTypesById.critiques.defaultColor,
+    colorTypeId: "critiques",
     icon: renderedNodeTypesById.critiques.icon,
   },
   // Draws nothing. It exists only to give a node a rank relative to the argument, so dagre

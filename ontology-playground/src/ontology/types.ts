@@ -75,11 +75,12 @@ export interface EdgeTypeDef {
   /** mermaid connector, e.g. "-->" or "-.->" */
   connector: string;
   /**
-   * Line color, derived per theme like a node's border and emitted as a `linkStyle`. Unlike a
-   * node type's, it isn't in `StyleConfig`: a connector is only ever drawn in one role, so the
-   * style panel would be offering the same swatch twice.
+   * Draw this connector in the color the document configures for that *node* type, derived per
+   * theme like a node's border and emitted as a `linkStyle`. A connector and a box are two forms
+   * of one concept wherever an ontology can render a type either way, so they read one entry in
+   * `StyleConfig` and restyling that type moves both. Absent = the connector takes no color.
    */
-  color?: string;
+  colorTypeId?: string;
   /** Prefixed to a labeled edge's label when `showIcons` is on, as a node's icon is. */
   icon?: string;
 }

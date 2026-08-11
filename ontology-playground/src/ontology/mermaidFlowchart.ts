@@ -105,10 +105,14 @@ export function flowchart(
     const icon = config.showIcons && def?.icon ? `${def.icon} ` : "";
     const label = edge.label ? `|"${escapeLabel(`${icon}${edge.label}`)}"|` : "";
     lines.push(`  ${from} ${connector}${label} ${to}`);
-    if (def?.color) {
-      const forColor = colorIndices.get(def.color) ?? [];
+    // A colored connector reads the same `StyleConfig` entry its node-type twin does, so the
+    // two forms of one concept can't be styled apart. Grouping by the resolved color means two
+    // edge types pointing at one node type share a `linkStyle`, which is what they should do.
+    const color = def?.colorTypeId ? config.typeColors[def.colorTypeId] : undefined;
+    if (color) {
+      const forColor = colorIndices.get(color) ?? [];
       forColor.push(emitted);
-      colorIndices.set(def.color, forColor);
+      colorIndices.set(color, forColor);
     }
     emitted++;
   }

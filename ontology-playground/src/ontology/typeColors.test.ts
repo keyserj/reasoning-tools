@@ -14,12 +14,13 @@ function contrast(a: string, b: string): number {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-/** The five defaults plus the picks most likely to defeat a derivation. */
+/** Every shipped default plus the picks most likely to defeat a derivation. */
 const picks = [
-  "#ca8a04",
+  "#d97706",
   "#2166ac",
   "#b2182b",
-  "#64748b",
+  "#facc15",
+  "#71717a",
   "#7c3aed",
   "#ffffff",
   "#000000",

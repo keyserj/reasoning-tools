@@ -11,9 +11,10 @@ import type { NodeTypeDef } from "../types.ts";
 // (../typeColors.ts). Colors avoid a red-green pro/con pair, which is the one distinction a
 // reader most needs and the hardest for the ~6% of men with deuteranomaly to make. They follow
 // the same red/blue axis as ameliorate-v2's wireframes (`RB = { neg: "#b2182b", ..., pos:
-// "#2166ac" }`) and the arg-map ontology, so the two ontologies are comparable on the same
-// topic. `idea` is yellow: it suits the 💡 icon, and blue-vs-yellow is the second colorblind-safe
-// axis, so ideas stay distinct from both pros and cons.
+// "#2166ac" }`) and the arg-map ontology, so the ontologies are comparable on the same topic.
+// The warm end of the palette is shared with them too, and how it is divided is argued in
+// ./rendering.md: `idea` amber, `note` sticky-note yellow. `question` is grey because a question
+// is a prompt rather than something to take a position on.
 export const renderedNodeTypes: NodeTypeDef[] = [
   {
     id: "question",
@@ -21,7 +22,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "❓",
     description: "A question or issue to resolve.",
     shape: ['{{"', '"}}'],
-    defaultColor: "#7c3aed",
+    defaultColor: "#71717a",
   },
   {
     id: "idea",
@@ -29,7 +30,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "💡",
     description: "A possible answer to its parent question.",
     shape: ['["', '"]'],
-    defaultColor: "#ca8a04",
+    defaultColor: "#d97706",
   },
   {
     id: "pro",
@@ -53,7 +54,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "📝",
     description: "A note shown attached to its parent.",
     shape: ['[/"', '"/]'],
-    defaultColor: "#64748b",
+    defaultColor: "#facc15",
   },
 ];
 

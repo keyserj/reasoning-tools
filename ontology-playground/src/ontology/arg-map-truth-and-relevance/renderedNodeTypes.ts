@@ -16,7 +16,8 @@ import type { NodeTypeDef } from "../types.ts";
 // committed to — see UX-design.md's "needs a colorblind-safe diverging palette, not red-green"
 // and the wireframes' `RB = { neg: "#b2182b", mid: "#e9e9e9", pos: "#2166ac" }`. `supports` vs
 // `critiques` is the one pair that *needs* color to separate it (same shape, same role), and
-// blue vs red survives both protanopia and deuteranopia.
+// blue vs red survives both protanopia and deuteranopia. `claim` and `note` divide the warm end
+// of the palette between them, which is argued in ./rendering.md.
 //
 // Icons carry the same distinction by silhouette: ✅ vs ⛔ reads as a check against a barred circle
 // at the ~12px they render at, which is what separates support from critique when color can't
@@ -30,7 +31,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "💬",
     description: "A statement phrased so a reader can say how much they believe it.",
     shape: ['["', '"]'],
-    defaultColor: "#ca8a04",
+    defaultColor: "#d97706",
   },
   {
     id: "supports",
@@ -54,7 +55,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "📝",
     description: "An aside attached to its parent. Drawn in the diagram, but never scored.",
     shape: ['[/"', '"/]'],
-    defaultColor: "#64748b",
+    defaultColor: "#facc15",
   },
   {
     id: "topic",

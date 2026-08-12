@@ -54,7 +54,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "📝",
     description: "A note shown attached to its parent.",
     shape: ['[/"', '"/]'],
-    defaultColor: "#facc15",
+    defaultColor: "#d3ad20",
   },
 ];
 

@@ -19,7 +19,7 @@ const picks = [
   "#d97706",
   "#2166ac",
   "#b2182b",
-  "#facc15",
+  "#d3ad20",
   "#71717a",
   "#7c3aed",
   "#ffffff",

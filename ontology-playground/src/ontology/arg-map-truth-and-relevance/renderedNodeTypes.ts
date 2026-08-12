@@ -55,7 +55,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     icon: "📝",
     description: "An aside attached to its parent. Drawn in the diagram, but never scored.",
     shape: ['[/"', '"/]'],
-    defaultColor: "#facc15",
+    defaultColor: "#d3ad20",
   },
   {
     id: "topic",

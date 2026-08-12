@@ -29,5 +29,5 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the session-stor
   classDef idea fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef pro fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef con fill:#ffedec,stroke:#b2182b,color:#600d15,stroke-width:1.5px
-  classDef note fill:#fdf2ce,stroke:#facc15,color:#3f3100,stroke-width:1.5px"
+  classDef note fill:#fcf2d3,stroke:#d3ad20,color:#3f3100,stroke-width:1.5px"
 `;

@@ -34,7 +34,7 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the build-a-wall
   classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef pro fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef con fill:#ffedec,stroke:#b2182b,color:#600d15,stroke-width:1.5px
-  classDef note fill:#fdf2ce,stroke:#facc15,color:#3f3100,stroke-width:1.5px
+  classDef note fill:#fcf2d3,stroke:#d3ad20,color:#3f3100,stroke-width:1.5px
   classDef topic fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
   linkStyle 7 stroke:#b2182b,stroke-width:1.5px
   linkStyle 12 stroke:#2166ac,stroke-width:1.5px"
@@ -71,7 +71,7 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the session-stor
   classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef pro fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef con fill:#ffedec,stroke:#b2182b,color:#600d15,stroke-width:1.5px
-  classDef note fill:#fdf2ce,stroke:#facc15,color:#3f3100,stroke-width:1.5px
+  classDef note fill:#fcf2d3,stroke:#d3ad20,color:#3f3100,stroke-width:1.5px
   classDef topic fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
   linkStyle 5,10 stroke:#b2182b,stroke-width:1.5px
   linkStyle 8 stroke:#2166ac,stroke-width:1.5px"

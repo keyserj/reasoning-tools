@@ -40,7 +40,12 @@ export interface Thesis {
   claimId: string;
   /** `null` in a document with no `?` line, which is Kialo's single-thesis discussion */
   questionId: string | null;
-  /** how true, on its own terms; `null` = nobody voted */
+  /**
+   * how true, on its own terms; `null` = nobody voted.
+   * 
+   * This _could_ be on Claim, since it's unrelated to where the claim is used (unlike argument's
+   * impact). BUT Kialo scores the thesis directly, so we're putting it here to match.
+   */
   veracity: Scores | null;
 }
 

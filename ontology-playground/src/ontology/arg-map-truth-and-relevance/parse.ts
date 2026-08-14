@@ -66,10 +66,9 @@ interface PendingEdge {
 /**
  * Parse this ontology's syntax into its own {@link ArgDoc} model.
  *
- * Lines: `=` claim, `<`/`>` a supports/critiques edge, `~` note, `%key: value` document
- * property, `/` meta-comment (dropped). Scores follow their marker directly (`=[4,1,8]`,
- * `supports[8,2,8]`). `&id` names the claim or edge on the line; `= $id` references one
- * instead of declaring it, which is how an argument attaches to an *edge's* implied claim.
+ * Lines are read through the markers ./markers.ts defines. Scores follow their marker directly
+ * (`=[4,1,8]`, `supports[8,2,8]`), and `= $id` references a claim or edge instead of declaring
+ * one, which is how an argument attaches to an *edge's* implied claim.
  *
  * This is the whole of parsing: turning the model into something mermaid can draw is a
  * rendering decision, and lives in ./toGraph.ts behind the `Edge claims` feature.

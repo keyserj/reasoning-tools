@@ -35,13 +35,9 @@ interface PendingRef {
 }
 
 /**
- * Parse the IBIS markdown-ish syntax into an {@link IbisDoc}.
- *
- * Each non-blank line is one node, parented by indentation. Markers: `?` question,
- * `=` idea, `+` pro, `-` con, `~` note, `/` meta-comment (dropped). `&id` labels a
- * node; `$id` (as the whole body) references an existing node instead of making one.
- * Edges point child -> parent (argument-map direction) and hold nothing else — a
- * `$ref` line's own marker adds nothing the referenced node doesn't already say.
+ * Parse the IBIS markdown-ish syntax into an {@link IbisDoc}: one node per non-blank line,
+ * parented by indentation, read through the markers ./markers.ts defines. Edges point child ->
+ * parent and hold nothing else, which is ./model.ts's business.
  */
 export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
   const nodes: IbisNode[] = [];

@@ -59,6 +59,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
   // the only reason a line number outlives the loop; nothing in the model carries one.
   const scored: { scores: Scores; line: number }[] = [];
   const stack: Frame[] = [];
+  let lastNoteIndent: number | null = null;
   const autoCounters: Record<string, number> = {};
 
   let description: string | undefined;
@@ -97,6 +98,11 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
     const content = raw.slice(ws.length);
     const marker = content[0];
     const kind: LineKind | undefined = MARKER_TO_KIND[marker];
+
+    // A note is a leaf, so a `~` indented under one is annotating a note — which none of these
+    // ontologies express. Cleared by any other line, so a later sibling note is still fine.
+    const noteAbove = lastNoteIndent;
+    lastNoteIndent = kind === "note" ? indent : null;
 
     if (!kind) {
       errors.push({
@@ -209,6 +215,10 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
       const explicitId = idMatch?.[1];
       if (idMatch) body = body.slice(0, idMatch.index).trim();
 
+      if (noteAbove !== null && indent > noteAbove) {
+        errors.push({ line: lineNo, message: 'A "~" note can\'t hang off another note' });
+        continue;
+      }
       const id = takeId(explicitId, "n", lineNo);
       if (parent?.kind !== "claim") {
         // No claim above it: a note about the document rather than about any one claim.

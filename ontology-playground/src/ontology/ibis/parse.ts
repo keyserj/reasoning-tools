@@ -53,6 +53,7 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
   const pendingNotes: { note: Note; ownerId: string }[] = [];
   const docNotes: Note[] = [];
   const stack: StackFrame[] = [];
+  let lastNoteIndent: number | null = null;
   let autoCounter = 0;
 
   // Notes share the node id space, since both end up as boxes the diagram has to tell apart.
@@ -89,6 +90,11 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
     const content = raw.slice(ws.length);
     const marker = content[0];
 
+    // A note is a leaf, so a `~` indented under one is annotating a note — which none of these
+    // ontologies express. Cleared by any other line, so a later sibling note is still fine.
+    const noteAbove = lastNoteIndent;
+    lastNoteIndent = marker === NOTE_MARKER ? indent : null;
+
     // Meta-comment: parsed for syntax awareness but never added to the graph and
     // never pushed onto the stack (its would-be children attach to its parent).
     if (marker === META_MARKER) continue;
@@ -117,6 +123,10 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
     // under one attaches to the note's own parent — and `$id` in its body stays prose, since a
     // note is never a second placement of something.
     if (type === undefined) {
+      if (noteAbove !== null && indent > noteAbove) {
+        errors.push({ line: lineNo, message: 'A "~" note can\'t hang off another note' });
+        continue;
+      }
       const id = takeId(explicitId, lineNo);
       noteIds.add(id);
       // Nothing above it: a note about the document rather than about any one node.

@@ -94,6 +94,13 @@ describe("parse", () => {
     ]);
   });
 
+  it("rejects a `~` nested under another `~`, but not a sibling one", () => {
+    expect(messages("= T\n  ~ first\n    ~ second")).toEqual([
+      'A "~" note can\'t hang off another note',
+    ]);
+    expect(messages("= T\n  ~ first\n  ~ second")).toEqual([]);
+  });
+
   it("takes a `~` with no claim above it as a note on the document", () => {
     const { doc, errors } = parse("~ about the map itself\n? Q &q1");
     expect(errors).toEqual([]);

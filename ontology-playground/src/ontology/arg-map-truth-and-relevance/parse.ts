@@ -90,6 +90,7 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
   const scored: { scores: Scores; line: number }[] = [];
   const pendingEdges: PendingEdge[] = [];
   const stack: Frame[] = [];
+  let lastNoteIndent: number | null = null;
   const autoCounters: Record<string, number> = {};
   let description: string | undefined;
   let perspectives: string[] = [];
@@ -125,6 +126,11 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
     const content = raw.slice(ws.length);
     const marker = content[0];
     const kind = MARKER_TO_KIND[marker];
+
+    // A note is a leaf, so a `~` indented under one is annotating a note — which none of these
+    // ontologies express. Cleared by any other line, so a later sibling note is still fine.
+    const noteAbove = lastNoteIndent;
+    lastNoteIndent = kind === "note" ? indent : null;
 
     if (!kind) {
       errors.push({
@@ -257,6 +263,10 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
       const explicitId = idMatch?.[1];
       if (idMatch) body = body.slice(0, idMatch.index).trim();
 
+      if (noteAbove !== null && indent > noteAbove) {
+        errors.push({ line: lineNo, message: 'A "~" note can\'t hang off another note' });
+        continue;
+      }
       const id = takeId(explicitId, "t", lineNo);
       usedIds.add(id);
       if (!parent) {

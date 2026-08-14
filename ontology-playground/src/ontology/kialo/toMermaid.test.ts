@@ -14,7 +14,7 @@ describe("toMermaid", () => {
     const out = render("? Q &q\n  =[3] Thesis &t\n    +[4] Reason &r");
     expect(out.startsWith("flowchart BT")).toBe(true);
     expect(out).toContain('q{{"❓ Q"}}:::question');
-    expect(out).toContain('t["💬 Thesis<br/>[3]"]:::claim');
+    expect(out).toContain('t["💬 Thesis<br/>[3]"]:::thesis');
     expect(out).toContain('r["✅ Reason<br/>[4]"]:::pro');
     expect(out).toContain("t --> q");
   });

@@ -63,8 +63,8 @@ export function highlightLine(line: string): HighlightToken[] {
   }
 
   // A `=`, `+` or `-` line. Scores bind tightly to the marker (`=[3,1]`), so they're read
-  // before the body. A thesis marker takes `claim`'s color because that is the box it makes.
-  sink.loneMarker(marker, kind === "thesis" ? "claim" : kind);
+  // before the body.
+  sink.loneMarker(marker, kind);
   pushBody(sink, pushScores(sink, content.slice(1)), ID_SUFFIX, REF_BODY);
   return sink.tokens;
 }

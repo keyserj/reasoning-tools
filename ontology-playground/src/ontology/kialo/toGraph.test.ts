@@ -13,11 +13,11 @@ const node = (source: string, id: string, showIcons = true) =>
 const edgesFrom = (source: string, id: string) => graph(source).edges.filter((e) => e.from === id);
 
 describe("toGraph", () => {
-  it("draws a thesis as a plain claim carrying its veracity", () => {
+  it("draws a thesis carrying its veracity", () => {
     // A thesis has no stance to take: nothing sits above it to be a pro or a con of.
     expect(node("%perspectives: [a]\n=[3] Thesis &t", "t")).toEqual({
       id: "t",
-      type: "claim",
+      type: "thesis",
       text: "Thesis\n[3]",
     });
   });
@@ -38,9 +38,9 @@ describe("toGraph", () => {
     ]);
   });
 
-  it("shows a thesis's veracity even when it is also reused as someone's argument", () => {
+  it("keeps a thesis a thesis when it is also reused as someone's argument", () => {
     const source = "=[3] A &a\n=[2] B &b\n  +[4] $a";
-    expect(node(source, "a")).toEqual({ id: "a", type: "claim", text: "A\n[3]" });
+    expect(node(source, "a")).toEqual({ id: "a", type: "thesis", text: "A\n[3]" });
     expect(edgesFrom(source, "a")).toEqual([{ from: "a", to: "b", type: "pro", label: "[4]" }]);
   });
 

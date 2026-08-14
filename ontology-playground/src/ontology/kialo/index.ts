@@ -11,7 +11,7 @@ import buildAWall from "./examples/build-a-wall.txt?raw";
 import { defaultConfig } from "./defaultConfig.ts";
 
 const legendNote =
-  "Every claim is a pro or con of the claim above it, and its score is impact — how true it is and how much it bears on that parent, in one number 0-4. A thesis has nothing above it, so its score is veracity alone. A claim reused in two spots is scored separately in each, which is why its box goes plain and its connectors carry the scores.";
+  "Every claim is a pro or con of the claim above it, and its score is impact — how true it is and how much it bears on that parent, in one number 0-4. A thesis has nothing above it, so its score is veracity alone. A claim reused only as arguments is scored separately in each spot, which is why its box goes plain and its connectors carry the scores.";
 
 const placeholder =
   "%perspectives: [you]\n=[3] Your thesis here &thesis\n  +[4] A reason to believe it\n  -[2] A reason to doubt it";

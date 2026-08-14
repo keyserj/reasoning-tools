@@ -6,8 +6,7 @@ import { noteNodeType } from "../notes.ts";
 // marker produces which type) lives in ./markers.ts instead.
 //
 // These are not the ontology's own types — see ./ontology.md for those, and ./rendering.md for
-// how one becomes the other. There is no `thesis` type: a thesis and a claim reused elsewhere
-// are one rendering case, a box that can't carry a single stance, and both fall back to `claim`.
+// how one becomes the other.
 //
 // One color per type, which the fill, border and text are derived from per theme
 // (../typeColors.ts). Which color and which icon is argued in ./rendering.md.
@@ -21,11 +20,20 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     defaultColor: "#71717a",
   },
   {
+    id: "thesis",
+    label: "Thesis",
+    icon: "💬",
+    description: "An answer to the question above it, or the root of a question-less discussion.",
+    shape: ['["', '"]'],
+    defaultColor: "#d97706",
+  },
+  // Drawn exactly as a `thesis` on purpose because both are neutral. Can consider unique coloring
+  // later.
+  {
     id: "claim",
     label: "Claim",
     icon: "💬",
-    description:
-      "A thesis, or a claim reused in more than one spot — a box that can't take one stance.",
+    description: "A claim reused in more than one spot, so its box can't take one stance.",
     shape: ['["', '"]'],
     defaultColor: "#d97706",
   },

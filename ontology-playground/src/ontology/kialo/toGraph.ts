@@ -46,17 +46,17 @@ function foldedArgument(usages: ClaimUsage[]): Argument | null {
   return isArgument(only) ? only : null;
 }
 
-/** A claim's box: its stance if it has just one, the score that goes with it, and its sources. */
+/** A claim's box: which usage it speaks for, the score that goes with it, and its sources. */
 function claimNode(claim: Claim, usages: ClaimUsage[], showIcons: boolean): RenderNode {
   const folded = foldedArgument(usages);
-  // A usage is a thesis or an argument, never both, and a claim may be a thesis only once, so a
-  // box reaches here with at most one score to show and no precedence to settle.
+  // A claim may be a thesis only once, and a thesis usage never folds, so a box reaches here with
+  // at most one score to show.
   const thesis = usages.find(isThesis);
 
   const evidence = showIcons && claim.sources.length > 0 ? ` ${SOURCE_ICON}` : "";
   return {
     id: claim.id,
-    type: folded === null ? "claim" : folded.stance,
+    type: thesis !== undefined ? "thesis" : folded === null ? "claim" : folded.stance,
     text: withScores(`${claim.text}${evidence}`, thesis?.veracity ?? folded?.impact ?? null),
   };
 }

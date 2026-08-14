@@ -18,10 +18,9 @@ describe("highlightLine", () => {
     ]);
   });
 
-  it("gives a thesis marker the color of the box it makes", () => {
-    // `=` renders as a `claim`, not a type of its own — see ./renderedNodeTypes.ts.
+  it("colors a thesis marker and its scores", () => {
     expect(highlightLine("=[4] A thesis &t")).toEqual([
-      { text: "=", kind: "type", typeId: "claim", loneMarker: true },
+      { text: "=", kind: "type", typeId: "thesis", loneMarker: true },
       { text: "[", kind: "score-punct" },
       { text: "4", kind: "score-value" },
       { text: "]", kind: "score-punct" },

@@ -3,7 +3,7 @@
 exports[`toMermaid > matches the generated-mermaid snapshot for the build-a-wall example 1`] = `
 "flowchart BT
   _topic[["📋 Discussing how worthwhile it is to build a wall along the US's southern border.<br/>Scores: [alice, bob, casey]"]]:::topic
-  wall["💬 The US should build a wall along its southern border<br/>[2,0,4]"]:::claim
+  wall["💬 The US should build a wall along its southern border<br/>[2,0,4]"]:::thesis
   wall_reduces["✅ A border wall would substantially reduce illegal immigration<br/>[2,0,4]"]:::pro
   c1["✅ A wall physically stops crossings without needing continuous surveillance<br/>[4,1,4]"]:::pro
   climb_over["⛔ People will find a way over the barrier<br/>[3,4,1]"]:::con
@@ -31,6 +31,7 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the build-a-wall
   wall_cost -->|"✅ [3,3,2]"| more_judges
   wall ~~~ _topic
   classDef question fill:#f1f1f4,stroke:#71717a,color:#323237,stroke-width:1.5px
+  classDef thesis fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef pro fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef con fill:#ffedec,stroke:#b2182b,color:#600d15,stroke-width:1.5px
@@ -45,15 +46,15 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the session-stor
   _topic[["📋 We're trying to resolve some design decisions for a web app.<br/>Scores: [alice, bob]"]]:::topic
   q1{{"❓ How should we handle session storage?"}}:::question
   q2{{"❓ How do we run background jobs?"}}:::question
-  redis["💬 We should use Redis for session storage<br/>[3,1]"]:::claim
+  redis["💬 We should use Redis for session storage<br/>[3,1]"]:::thesis
   c1["✅ Redis is fast for hot reads 🔗<br/>[4,2]"]:::pro
   ops_cost["💬 It's another service to operate"]:::claim
   c2["⛔ We have many services already; we're efficient at setting up another one<br/>[3,2]"]:::con
-  c3["💬 We should use Postgres rows for session storage<br/>[2,3]"]:::claim
+  c3["💬 We should use Postgres rows for session storage<br/>[2,3]"]:::thesis
   c4["✅ One less dependency<br/>[3,4]"]:::pro
   c5["⛔ Postgres is slower for hot reads<br/>[3,1]"]:::con
   n1[/"📝 measured on last year's hardware"/]:::note
-  c6["💬 We should use a worker queue<br/>[3,2]"]:::claim
+  c6["💬 We should use a worker queue<br/>[3,2]"]:::thesis
   n1 -.-> c5
   redis --> q1
   c3 --> q1
@@ -68,6 +69,7 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the session-stor
   q1 ~~~ _topic
   q2 ~~~ _topic
   classDef question fill:#f1f1f4,stroke:#71717a,color:#323237,stroke-width:1.5px
+  classDef thesis fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef pro fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef con fill:#ffedec,stroke:#b2182b,color:#600d15,stroke-width:1.5px

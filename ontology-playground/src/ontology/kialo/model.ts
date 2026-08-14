@@ -2,11 +2,9 @@ import type { Note } from "../notes.ts";
 import type { Stance } from "./markers.ts";
 import type { Scores } from "./scores.ts";
 
-// The ontology's own model. Its shape is Kialo's two vote types: a thesis is a claim answering a
-// question (or the root of a question-less discussion), scored on **veracity**; an argument is a
-// pro supporting or a con critiquing another claim, scored on **impact**. The score belongs to
-// the thesis or argument rather than to the claim, which is what lets one claim be reused and
-// scored differently in each spot — as Kialo does, and as ./ontology.md explains.
+// The ontology's own model, shaped by Kialo's two vote types — see ./ontology.md. A score
+// belongs to the thesis or argument rather than to the claim, which is what lets one claim be
+// reused and scored differently in each spot.
 //
 // Two relations rather than one because their rules differ and are worth stating: a thesis's
 // parent is a question or nothing, an argument's parent is a claim, and neither can take the
@@ -42,7 +40,7 @@ export interface Thesis {
   questionId: string | null;
   /**
    * how true, on its own terms; `null` = nobody voted.
-   * 
+   *
    * This _could_ be on Claim, since it's unrelated to where the claim is used (unlike argument's
    * impact). BUT Kialo scores the thesis directly, so we're putting it here to match.
    */

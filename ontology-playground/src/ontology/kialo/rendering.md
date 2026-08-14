@@ -46,4 +46,4 @@ The palette is the other ontologies', so the same topic stays comparable across 
 
 - `pro` vs `con` is the pair that _needs_ color, and it needs it in two places at once — the box and the connector. Both read `StyleConfig` through `EdgeTypeDef.colorTypeId`, so restyling "Pro" moves them together
 - `question` is grey because a question is a prompt rather than something to take a position on, and because grey is what is left once amber, yellow, red, blue and violet are spoken for
-- icons carry the pro/con distinction by silhouette as well as hue: ✅ against ⛔ survives at the ~12px they render at, where same-shape 🔵 / 🔴 wouldn't
+- ✅ / ⛔ carry the same pair by silhouette, for the reason [arg-map's rendering.md](../arg-map-truth-and-relevance/rendering.md#colors-and-icons) gives

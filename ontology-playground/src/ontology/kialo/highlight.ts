@@ -7,12 +7,10 @@ import { ID_SUFFIX, LEADING_WS, MARKER_TO_KIND, PROPERTY, REF_BODY } from "./mar
  *
  * It reads a line the way ./parse.ts does, through the same ./markers.ts regexes, but only ever
  * *this* line: indentation is plain text here, since what a line is nested under changes nothing
- * about how it's written. That also means a `+` marker is drawn in `pro`'s color even where the
- * diagram will fold it into a neutral box — the editor colors what was *written*, and what a
- * line is nested under is exactly the cross-line fact it can't see.
- *
- * Anything malformed is left plain rather than flagged: the editor's error strip already carries
- * what `parse` found, and a half-typed line shouldn't turn red.
+ * about how it's written. So a `+` marker stays `pro`-colored even where the diagram will fold
+ * it into a neutral box — the editor colors what was *written*. Anything malformed is left plain
+ * rather than flagged: the editor's error strip already carries what `parse` found, and a
+ * half-typed line shouldn't turn red.
  */
 export function highlightLine(line: string): HighlightToken[] {
   const sink = createTokenSink();

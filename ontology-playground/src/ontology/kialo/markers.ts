@@ -16,14 +16,10 @@ export const MARKER_TO_KIND: Record<string, LineKind | undefined> = {
 };
 
 export type LineKind =
-  /** `?` — a discussion question, which only theses may nest under */
   | "question"
-  /** `=` — a claim used as an answer, carrying its veracity */
   | "thesis"
-  /** `+` / `-` — a claim supporting or critiquing the claim above, carrying its impact */
   | "pro"
   | "con"
-  /** `@` — a source for the claim above */
   | "source"
   | "note"
   | "property"

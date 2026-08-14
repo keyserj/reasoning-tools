@@ -32,9 +32,9 @@ function indentWidth(ws: string): number {
 const BRACKETED_LIST = /^\[(.*)\]$/;
 
 /**
- * What the lines nested under this one attach to. The two frames are the two things that can be
- * a parent, and they accept different children — a question takes theses, a claim takes
- * arguments, sources and notes — which is where most of this parser's errors come from.
+ * What the lines nested under this one attach to. The two frames accept different children — a
+ * question takes theses, a claim takes arguments, sources and notes — which is where most of
+ * this parser's errors come from.
  */
 type Frame =
   | { kind: "question"; indent: number; questionId: string }
@@ -226,7 +226,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
         continue;
       }
       pendingNotes.push({ note: { id, text: body }, claimId: parent.claimId });
-      // A note is a leaf too — it can't be argued about, and nothing nests under it.
+      // A note is a leaf too, so it never becomes a frame either.
       continue;
     }
 

@@ -5,24 +5,12 @@ import { noteNodeType } from "../notes.ts";
 // style-panel labels and the legend's type rows all derive from this table. Syntax (which
 // marker produces which type) lives in ./markers.ts instead.
 //
-// These are not the ontology's own types — see ontology.md for those, and rendering.md for how
-// one becomes the other. `pro` and `con` are claims arguing in support of or in critique of
-// another claim, drawn as boxes only where a claim has exactly one such usage; `claim` is what a
-// box falls back to when it can't carry one stance, which is a thesis or a claim reused
-// elsewhere. There is no `thesis` type for that reason. `topic` is the header carrying
-// `%description` and the `%perspectives` key, without which a score row like [3,1] can't be
-// decoded.
+// These are not the ontology's own types — see ./ontology.md for those, and ./rendering.md for
+// how one becomes the other. There is no `thesis` type: a thesis and a claim reused elsewhere
+// are one rendering case, a box that can't carry a single stance, and both fall back to `claim`.
 //
-// One color per type: the fill, border and text it's drawn in are derived from it, per theme
-// (../typeColors.ts). The palette is the one the other ontologies use, so the same topic stays
-// comparable across lenses — `pro` blue and `con` red from ameliorate-v2's colorblind-safe
-// `RB = { neg: "#b2182b", pos: "#2166ac" }`, `claim` amber and `note` yellow on the warm-band
-// split argued in ../arg-map-truth-and-relevance/rendering.md, and `question` grey because a
-// question is a prompt rather than something to take a position on.
-//
-// Icons carry the pro/con distinction by silhouette as well as by hue: ✅ against ⛔ reads as a
-// check against a barred circle at the ~12px they render at, which is what separates them when
-// color can't. Everything else takes an unrelated pictogram so nothing competes with that pair.
+// One color per type, which the fill, border and text are derived from per theme
+// (../typeColors.ts). Which color and which icon is argued in ./rendering.md.
 export const renderedNodeTypes: NodeTypeDef[] = [
   {
     id: "question",

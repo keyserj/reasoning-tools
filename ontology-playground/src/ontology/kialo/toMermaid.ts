@@ -10,7 +10,8 @@ import { DEFAULT_CONNECTOR, renderedEdgeTypesById } from "./renderedEdgeTypes.ts
  *
  * `showIcons` reaches ./toGraph.ts because a claim's sources are drawn as a 🔗 inside its text,
  * which is the one icon this ontology adds itself rather than leaving to the shared renderer.
- * The features argument is this ontology's unused one; `theme` is what the two after it are for.
+ * Kialo declares no feature to vary that by; the features argument is named only because `theme`
+ * follows it.
  */
 export function toMermaid(
   doc: KialoDoc,

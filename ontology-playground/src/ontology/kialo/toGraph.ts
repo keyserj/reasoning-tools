@@ -12,12 +12,9 @@ import {
 } from "./model.ts";
 import { type Scores, formatScores } from "./scores.ts";
 
-// How this ontology gets drawn — the one file to rewrite if the rendering should change; the
-// reasoning is in ./rendering.md.
-//
-// The problem it solves: a score and a stance belong to one usage of a claim, but a claim reused
-// elsewhere is still one box. So a box speaks for its usage only when it has exactly one, and
-// otherwise stays neutral and lets the connectors speak.
+// How this ontology gets drawn — the one file to rewrite if the rendering should change. A score
+// and a stance belong to one usage of a claim, but a claim reused elsewhere is still one box;
+// ./rendering.md lays out what this does about that.
 
 /** Id of the header node. Leading `_` is already a safe mermaid identifier. */
 const TOPIC_ID = "_topic";
@@ -42,14 +39,7 @@ function topicText(doc: KialoDoc): string {
   return parts.join("\n");
 }
 
-/**
- * The usage a claim's box speaks for, or `null` when it has to stay neutral.
- *
- * A single argument is folded into the box: that is the ordinary claim, and folding is what
- * keeps a Kialo diagram as plain as an IBIS one. Anything else — a thesis, which has a veracity
- * but no stance, or a claim reused elsewhere, whose usages disagree — leaves the box a plain
- * `claim` and pushes what the usages say onto the connectors.
- */
+/** The usage a claim's box speaks for, or `null` when it has to stay neutral — see ./rendering.md. */
 function foldedArgument(usages: ClaimUsage[]): Argument | null {
   if (usages.length !== 1) return null;
   const only = usages[0];
@@ -92,17 +82,16 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
     addNotes(nodes, edges, [claim]);
   }
 
-  // A thesis under a question is drawn plainly: which question it answers is the whole of what
-  // the connector says, and its veracity is already on the box.
+  // Plain: which question it answers is the whole of what the connector says, and the thesis's
+  // veracity is already on its box.
   for (const thesis of doc.theses) {
     if (thesis.questionId !== null) {
       edges.push({ from: thesis.claimId, to: thesis.questionId, type: "link" });
     }
   }
 
-  // An argument the box folded is drawn plainly too — repeating the stance on the connector
-  // would say it twice. An unfolded one is the only thing left to carry it, so it takes the
-  // stance's color and icon, plus its own impact, which is the score the box couldn't show.
+  // A folded argument is plain too — its box already says the stance. An unfolded one is the
+  // only thing left to carry it, so it takes the stance and the score the box couldn't show.
   for (const argument of doc.arguments) {
     const folded = foldedArgument(byClaim.get(argument.claimId) ?? []);
     if (folded !== null) {
@@ -124,10 +113,9 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
     ...doc.theses.filter((thesis) => thesis.questionId === null).map((thesis) => thesis.claimId),
   ];
 
-  // Direction is load-bearing: the default layout is BT, where an edge's *target* is ranked
-  // above its source, so a root is the source and the header the target. Every root is anchored
-  // rather than just the first, which is what keeps the header above the whole diagram instead
-  // of over one column of it.
+  // Direction is load-bearing and easy to get backwards: the default layout is BT, where an
+  // edge's *target* is ranked above its source, so a root is the source and the header the
+  // target. Anchoring every root rather than just the first is argued in ./rendering.md.
   if (header !== "") {
     for (const rootId of roots) edges.push({ from: rootId, to: TOPIC_ID, type: ANCHOR_TYPE_ID });
   }

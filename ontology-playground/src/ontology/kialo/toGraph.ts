@@ -1,4 +1,5 @@
 import type { RenderEdge, RenderNode, RenderGraph } from "../types.ts";
+import { addNotes } from "../notes.ts";
 import {
   type Argument,
   type Claim,
@@ -85,10 +86,9 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
   for (const claim of doc.claims) {
     const placements = byClaim.get(claim.id) ?? [];
     nodes.push(claimNode(claim, placements, showIcons));
-    for (const note of claim.notes) {
-      nodes.push({ id: note.id, type: "note", text: note.text });
-      edges.push({ from: note.id, to: claim.id, type: "note" });
-    }
+    // Per claim rather than in one pass, so a note's box is declared next to the claim it is
+    // about; mermaid draws boxes in the order they're emitted.
+    addNotes(nodes, edges, [claim]);
   }
 
   // A thesis under a question is drawn plainly: which question it answers is the whole of what

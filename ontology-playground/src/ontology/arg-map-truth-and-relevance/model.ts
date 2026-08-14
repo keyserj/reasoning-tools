@@ -1,3 +1,4 @@
+import type { Note } from "../notes.ts";
 import type { EdgeType } from "./markers.ts";
 import type { Scores } from "./scores.ts";
 
@@ -8,12 +9,6 @@ import type { Scores } from "./scores.ts";
 //
 // Nothing here records where in the source a thing was written: line numbers are a fact about
 // the syntax, and the only place they belong is `ParseError`.
-
-/** An aside hanging off the claim or edge it was nested under. */
-export interface Note {
-  id: string;
-  text: string;
-}
 
 export interface Claim {
   id: string;

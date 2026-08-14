@@ -1,4 +1,5 @@
 import type { EdgeTypeDef } from "../types.ts";
+import { noteEdgeType } from "../notes.ts";
 import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 
 // What can appear as a *connector* in the diagram.
@@ -22,7 +23,7 @@ export const renderedEdgeTypes: EdgeTypeDef[] = [
     colorTypeId: "con",
     icon: renderedNodeTypesById.con.icon,
   },
-  { id: "note", connector: "-.->" },
+  noteEdgeType,
   // Draws nothing. It exists only to rank the topic header above the argument, so dagre stops
   // parking it wherever it likes — see ./toGraph.ts.
   { id: "anchor", connector: "~~~" },

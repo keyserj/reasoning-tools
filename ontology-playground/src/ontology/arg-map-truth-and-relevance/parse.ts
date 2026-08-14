@@ -1,5 +1,6 @@
 import type { ParseError } from "../types.ts";
-import type { ArgDoc, Claim, Edge, Note } from "./model.ts";
+import type { Note } from "../notes.ts";
+import type { ArgDoc, Claim, Edge } from "./model.ts";
 import {
   DESCRIPTION_KEY,
   EDGE_TYPE_HEAD,

@@ -1,4 +1,5 @@
 import type { EdgeTypeDef } from "../types.ts";
+import { noteEdgeType } from "../notes.ts";
 import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 
 // What can appear as a *connector* in the diagram. Which of these are used depends on the
@@ -23,7 +24,7 @@ export const renderedEdgeTypes: EdgeTypeDef[] = [
   // already owns dashed.
   { id: "edge-half", connector: "---" },
   { id: "edge-to-edge", connector: "==>" },
-  { id: "note", connector: "-.->" },
+  noteEdgeType,
   {
     id: "supports",
     connector: "-->",

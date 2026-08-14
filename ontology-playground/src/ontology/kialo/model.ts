@@ -1,3 +1,4 @@
+import type { Note } from "../notes.ts";
 import type { Stance } from "./markers.ts";
 import type { Scores } from "./scores.ts";
 
@@ -19,12 +20,6 @@ export interface Source {
   url: string;
   /** the `@` line's text after the URL, if it gave one */
   label?: string;
-}
-
-/** An aside hanging off the claim it was nested under. */
-export interface Note {
-  id: string;
-  text: string;
 }
 
 export interface Claim {

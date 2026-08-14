@@ -1,4 +1,5 @@
 import type { FeatureState, RenderEdge, RenderNode, RenderGraph } from "../types.ts";
+import { addNotes } from "../notes.ts";
 import { featureOption, featureParam } from "../features.ts";
 import type { ArgDoc, Claim, Edge } from "./model.ts";
 import {
@@ -75,13 +76,11 @@ function addNotesAndAnchor(
   known: Set<string>,
 ) {
   const owners: (Claim | Edge)[] = [...doc.claims, ...doc.edges];
-  for (const owner of owners) {
-    if (!known.has(owner.id)) continue;
-    for (const note of owner.notes) {
-      nodes.push({ id: note.id, type: "note", text: note.text });
-      edges.push({ from: note.id, to: owner.id, type: "note" });
-    }
-  }
+  addNotes(
+    nodes,
+    edges,
+    owners.filter((owner) => known.has(owner.id)),
+  );
 
   // Direction matters: the default layout is BT, where an edge's *target* is ranked above its
   // source. So the root is the source and the header the target, which lands the header on top.

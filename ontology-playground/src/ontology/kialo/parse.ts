@@ -1,5 +1,6 @@
 import type { ParseError } from "../types.ts";
-import type { Argument, Claim, KialoDoc, Note, Question, Source, Thesis } from "./model.ts";
+import type { Note } from "../notes.ts";
+import type { Argument, Claim, KialoDoc, Question, Source, Thesis } from "./model.ts";
 import {
   DESCRIPTION_KEY,
   EXPECTED_MARKERS,

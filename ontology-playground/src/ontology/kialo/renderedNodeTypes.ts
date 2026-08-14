@@ -1,4 +1,5 @@
 import type { NodeTypeDef } from "../types.ts";
+import { noteNodeType } from "../notes.ts";
 
 // The single place a *rendered* node type is defined: icons, mermaid shapes, style defaults,
 // style-panel labels and the legend's type rows all derive from this table. Syntax (which
@@ -55,12 +56,8 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     defaultColor: "#b2182b",
   },
   {
-    id: "note",
-    label: "Note",
-    icon: "📝",
+    ...noteNodeType,
     description: "An aside attached to a claim. Drawn in the diagram, but never voted on.",
-    shape: ['[/"', '"/]'],
-    defaultColor: "#d3ad20",
   },
   {
     id: "topic",

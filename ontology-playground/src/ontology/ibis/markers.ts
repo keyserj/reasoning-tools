@@ -3,8 +3,11 @@
 // because another ontology may not use single-character markers at all. ./parse.ts and
 // ./highlight.ts both read a line through these, so the two can't drift on what the syntax is.
 
+/** What a marker declares, which is IBIS's whole vocabulary — an edge adds nothing to it. */
+export type NodeType = "question" | "idea" | "pro" | "con" | "note";
+
 /** Markers that create a node, mapped to the node type id they produce. */
-export const MARKER_TO_TYPE: Record<string, string> = {
+export const MARKER_TO_TYPE: Record<string, NodeType | undefined> = {
   "?": "question",
   "=": "idea",
   "+": "pro",

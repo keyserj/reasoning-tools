@@ -1,4 +1,5 @@
-import type { ParseError, RenderEdge, RenderGraph, RenderNode } from "../types.ts";
+import type { ParseError } from "../types.ts";
+import type { IbisDoc, IbisEdge, IbisNode } from "./model.ts";
 import { ID_SUFFIX, LEADING_WS, MARKER_TO_TYPE, META_MARKER, REF_BODY } from "./markers.ts";
 
 const TAB_SIZE = 4;
@@ -22,26 +23,23 @@ interface StackFrame {
 interface PendingRef {
   refId: string;
   parentId: string;
-  type: RenderNode["type"];
   line: number;
 }
 
 /**
- * Parse the IBIS markdown-ish syntax into a {@link RenderGraph}.
+ * Parse the IBIS markdown-ish syntax into an {@link IbisDoc}.
  *
  * Each non-blank line is one node, parented by indentation. Markers: `?` question,
  * `=` idea, `+` pro, `-` con, `~` note, `/` meta-comment (dropped). `&id` labels a
  * node; `$id` (as the whole body) references an existing node instead of making one.
- * Edges point child -> parent (argument-map direction).
- *
- * IBIS's own model *is* the shared `RenderGraph`, so the `doc` an ontology hands to its
- * `toMermaid` is that graph, with nothing left to flatten.
+ * Edges point child -> parent (argument-map direction) and hold nothing else — a
+ * `$ref` line's own marker adds nothing the referenced node doesn't already say.
  */
-export function parse(text: string): { doc: RenderGraph; errors: ParseError[] } {
-  const nodes: RenderNode[] = [];
-  const edges: RenderEdge[] = [];
+export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
+  const nodes: IbisNode[] = [];
+  const edges: IbisEdge[] = [];
   const errors: ParseError[] = [];
-  const byId = new Map<string, RenderNode>();
+  const byId = new Map<string, IbisNode>();
   const pendingRefs: PendingRef[] = [];
   const stack: StackFrame[] = [];
   let autoCounter = 0;
@@ -95,7 +93,7 @@ export function parse(text: string): { doc: RenderGraph; errors: ParseError[] } 
       if (parentId === null) {
         errors.push({ line: lineNo, message: `Reference "$${refId}" has no parent to attach to` });
       } else {
-        pendingRefs.push({ refId, parentId, type, line: lineNo });
+        pendingRefs.push({ refId, parentId, line: lineNo });
       }
       // Children indented under a $ref line attach to the referenced node.
       stack.push({ indent, nodeId: refId });
@@ -115,10 +113,10 @@ export function parse(text: string): { doc: RenderGraph; errors: ParseError[] } 
       id = nextAutoId();
     }
 
-    const node: RenderNode = { id, type, text: body };
+    const node: IbisNode = { id, type, text: body };
     nodes.push(node);
     byId.set(id, node);
-    if (parentId !== null) edges.push({ from: id, to: parentId, type });
+    if (parentId !== null) edges.push({ from: id, to: parentId });
 
     stack.push({ indent, nodeId: id });
   }
@@ -126,12 +124,12 @@ export function parse(text: string): { doc: RenderGraph; errors: ParseError[] } 
   // Resolve references now that every node id is known (forward refs allowed).
   for (const ref of pendingRefs) {
     if (byId.has(ref.refId)) {
-      edges.push({ from: ref.refId, to: ref.parentId, type: ref.type });
+      edges.push({ from: ref.refId, to: ref.parentId });
     } else {
       errors.push({ line: ref.line, message: `Unknown reference "$${ref.refId}"` });
     }
   }
 
-  const graph: RenderGraph = { nodes, edges };
-  return { doc: graph, errors };
+  const doc: IbisDoc = { nodes, edges };
+  return { doc, errors };
 }

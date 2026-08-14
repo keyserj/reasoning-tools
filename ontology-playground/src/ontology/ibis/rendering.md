@@ -1,6 +1,6 @@
 # Rendering: IBIS
 
-IBIS's model already _is_ a node-and-edge graph, so rendering doesn't actually add any new elements (as opposed to arg-map-truth-and-relevance, which e.g. renders edges into nodes so they can be pointed to).
+IBIS's model is already node-and-edge shaped, so rendering doesn't actually add any new elements (as opposed to arg-map-truth-and-relevance, which e.g. renders edges into nodes so they can be pointed to).
 
 ## Nodes and edges
 

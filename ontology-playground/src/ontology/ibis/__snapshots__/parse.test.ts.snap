@@ -1,62 +1,51 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`parse > matches the parsed-graph snapshot for the session-storage example 1`] = `
+exports[`parse > matches the parsed-model snapshot for the session-storage example 1`] = `
 {
   "edges": [
     {
       "from": "i1",
       "to": "q1",
-      "type": "idea",
     },
     {
       "from": "n1",
       "to": "i1",
-      "type": "pro",
     },
     {
       "from": "c1",
       "to": "i1",
-      "type": "con",
     },
     {
       "from": "n2",
       "to": "c1",
-      "type": "con",
     },
     {
       "from": "i2",
       "to": "q1",
-      "type": "idea",
     },
     {
       "from": "n3",
       "to": "i2",
-      "type": "pro",
     },
     {
       "from": "n4",
       "to": "i2",
-      "type": "con",
     },
     {
       "from": "n5",
       "to": "q2",
-      "type": "idea",
     },
     {
       "from": "n6",
       "to": "n5",
-      "type": "note",
     },
     {
       "from": "q3",
       "to": "n5",
-      "type": "question",
     },
     {
       "from": "c1",
       "to": "n5",
-      "type": "con",
     },
   ],
   "nodes": [

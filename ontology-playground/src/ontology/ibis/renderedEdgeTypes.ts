@@ -1,7 +1,7 @@
 import type { EdgeTypeDef } from "../types.ts";
 
-// IBIS types an edge by the child's marker, so there is one edge type per node type.
-// Ontologies with their own edge verbs (causes / reduces / guides) declare them here
+// An IBIS edge is typed by the child it runs from (./toGraph.ts), so there is one edge type per
+// node type. Ontologies with their own edge verbs (causes / reduces / guides) declare them here
 // independently of their node types.
 export const renderedEdgeTypes: EdgeTypeDef[] = [
   { id: "question", connector: "-->" },

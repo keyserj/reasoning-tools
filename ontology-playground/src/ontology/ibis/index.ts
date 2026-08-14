@@ -1,6 +1,7 @@
-import { type RenderGraph, defineOntology } from "../types.ts";
+import { defineOntology } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toMermaid } from "./toMermaid.ts";
+import type { IbisDoc } from "./model.ts";
 import { highlightLine } from "./highlight.ts";
 import { legend } from "./legend.ts";
 import { renderedNodeTypes } from "./renderedNodeTypes.ts";
@@ -13,7 +14,7 @@ const legendNote =
 
 const placeholder = "? Your question here &q1\n  = An idea &i1\n    + A pro\n    - A con";
 
-export const ibis = defineOntology<RenderGraph>({
+export const ibis = defineOntology<IbisDoc>({
   id: "ibis",
   label: "IBIS",
   parse,

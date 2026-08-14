@@ -26,12 +26,11 @@ describe("toMermaid", () => {
     expect(out).toContain("nt1 -.-> i1");
   });
 
-  it("draws a `$ref` edge from the referenced node's type, not the ref line's marker", () => {
-    const { doc } = parse("= Idea &i1\n= Other &i2\n  ~ $i1");
+  it("draws a note as its own box on a dotted connector", () => {
+    const { doc } = parse("= Idea &i1\n  ~ an aside &nt1");
     const out = render(doc);
-    expect(out).toContain('i1["💡 Idea"]:::idea');
-    // An idea's solid connector: the `~` places `i1` here, it doesn't make it a note.
-    expect(out).toContain("i1 --> i2");
+    expect(out).toContain('nt1[/"📝 an aside"/]:::note');
+    expect(out).toContain("nt1 -.-> i1");
   });
 
   it("omits icons when showIcons is false", () => {
@@ -42,7 +41,7 @@ describe("toMermaid", () => {
 
   it("escapes embedded quotes and sanitizes unsafe ids", () => {
     const doc: IbisDoc = {
-      nodes: [{ id: "weird-id", type: "idea", text: 'say "hi"' }],
+      nodes: [{ id: "weird-id", type: "idea", text: 'say "hi"', notes: [] }],
       edges: [],
     };
     const out = render(doc);
@@ -52,7 +51,7 @@ describe("toMermaid", () => {
 
   it("escapes markup so labels render as typed, keeping newlines as breaks", () => {
     const doc: IbisDoc = {
-      nodes: [{ id: "n1", type: "idea", text: "5 < 6 & <img src=x>\nsecond line" }],
+      nodes: [{ id: "n1", type: "idea", text: "5 < 6 & <img src=x>\nsecond line", notes: [] }],
       edges: [],
     };
     const out = render(doc);

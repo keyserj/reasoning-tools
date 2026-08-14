@@ -1,6 +1,14 @@
 import type { ParseError } from "../types.ts";
+import type { Note } from "../notes.ts";
 import type { IbisDoc, IbisEdge, IbisNode } from "./model.ts";
-import { ID_SUFFIX, LEADING_WS, MARKER_TO_TYPE, META_MARKER, REF_BODY } from "./markers.ts";
+import {
+  ID_SUFFIX,
+  LEADING_WS,
+  MARKER_TO_TYPE,
+  META_MARKER,
+  NOTE_MARKER,
+  REF_BODY,
+} from "./markers.ts";
 
 const TAB_SIZE = 4;
 
@@ -41,15 +49,31 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
   const errors: ParseError[] = [];
   const byId = new Map<string, IbisNode>();
   const pendingRefs: PendingRef[] = [];
+  // Filed at the end: a note under a `$ref` line owns an id that may be declared further down.
+  const pendingNotes: { note: Note; ownerId: string }[] = [];
   const stack: StackFrame[] = [];
   let autoCounter = 0;
+
+  // Notes share the node id space, since both end up as boxes the diagram has to tell apart.
+  const noteIds = new Set<string>();
+  const isIdTaken = (id: string): boolean => byId.has(id) || noteIds.has(id);
 
   const nextAutoId = (): string => {
     let id: string;
     do {
       id = `n${++autoCounter}`;
-    } while (byId.has(id));
+    } while (isIdTaken(id));
     return id;
+  };
+
+  /** An explicit `&id` if it's free, else a fresh one and a reported duplicate. */
+  const takeId = (explicitId: string | undefined, lineNo: number): string => {
+    if (explicitId === undefined) return nextAutoId();
+    if (isIdTaken(explicitId)) {
+      errors.push({ line: lineNo, message: `Duplicate id "&${explicitId}"` });
+      return nextAutoId();
+    }
+    return explicitId;
   };
 
   const lines = text.split(/\r?\n/);
@@ -69,7 +93,7 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
     if (marker === META_MARKER) continue;
 
     const type = MARKER_TO_TYPE[marker];
-    if (!type) {
+    if (type === undefined && marker !== NOTE_MARKER) {
       errors.push({
         line: lineNo,
         message: `Unrecognized marker "${marker ?? ""}" (expected ? = + - ~ /)`,
@@ -87,6 +111,21 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
     const explicitId = idMatch?.[1];
     if (idMatch) body = body.slice(0, idMatch.index).trim();
 
+    // The `~` note, which is the one marker with no node type: it annotates the line above
+    // rather than answering it. A note is a leaf and never becomes a frame, so a line nested
+    // under one attaches to the note's own parent — and `$id` in its body stays prose, since a
+    // note is never a second placement of something.
+    if (type === undefined) {
+      if (parentId === null) {
+        errors.push({ line: lineNo, message: 'A "~" note needs a line above it to attach to' });
+        continue;
+      }
+      const id = takeId(explicitId, lineNo);
+      noteIds.add(id);
+      pendingNotes.push({ note: { id, text: body }, ownerId: parentId });
+      continue;
+    }
+
     const refMatch = REF_BODY.exec(body);
     if (refMatch) {
       const refId = refMatch[1];
@@ -101,19 +140,8 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
     }
 
     // Normal node.
-    let id: string;
-    if (explicitId) {
-      if (byId.has(explicitId)) {
-        errors.push({ line: lineNo, message: `Duplicate id "&${explicitId}"` });
-        id = nextAutoId();
-      } else {
-        id = explicitId;
-      }
-    } else {
-      id = nextAutoId();
-    }
-
-    const node: IbisNode = { id, type, text: body };
+    const id = takeId(explicitId, lineNo);
+    const node: IbisNode = { id, type, text: body, notes: [] };
     nodes.push(node);
     byId.set(id, node);
     if (parentId !== null) edges.push({ from: id, to: parentId });
@@ -129,6 +157,11 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
       errors.push({ line: ref.line, message: `Unknown reference "$${ref.refId}"` });
     }
   }
+
+  // A note whose owner never resolved (`~` under a `$nope`) is dropped rather than left
+  // ownerless: the unknown reference is already reported, and keeping it would put a note box
+  // in the diagram attached to nothing.
+  for (const { note, ownerId } of pendingNotes) byId.get(ownerId)?.notes.push(note);
 
   const doc: IbisDoc = { nodes, edges };
   return { doc, errors };

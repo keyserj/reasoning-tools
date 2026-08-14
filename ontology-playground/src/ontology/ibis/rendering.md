@@ -1,10 +1,10 @@
 # Rendering: IBIS
 
-IBIS's model is already node-and-edge shaped, so rendering doesn't actually add any new elements (as opposed to arg-map-truth-and-relevance, which e.g. renders edges into nodes so they can be pointed to).
+IBIS's model is already node-and-edge shaped, so rendering adds nothing to the argument itself (as opposed to arg-map-truth-and-relevance, which e.g. renders edges into nodes so they can be pointed to). The one thing it does add is a box per note, which is the only form a note is ever drawn in.
 
 ## Nodes and edges
 
-- one rendered node type per ontology node type, so `renderedNodeTypes.ts` and the ontology agree exactly
+- one rendered node type per ontology node type, plus `note`, which is the playground's rather than IBIS's — see `../notes.ts`
 - questions are hexagons, everything else a rectangle, and notes a parallelogram to read as an aside
 - notes attach with a dotted edge; every other edge is a solid arrow
 - default layout is `BT`, so parent questions sit at the top while argument edges point upward at them, matching how the source text reads top-down

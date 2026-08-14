@@ -1,3 +1,4 @@
+import type { Note } from "../notes.ts";
 import type { NodeType } from "./markers.ts";
 
 // The ontology's own model. IBIS is nodes and one relation — a child responds to the parent it
@@ -6,6 +7,9 @@ import type { NodeType } from "./markers.ts";
 // already say. Giving an edge the type its connector is drawn from is therefore ./toGraph.ts's
 // job rather than a fact to store here.
 //
+// A `~` note is not one of the four things IBIS names, so it hangs off a node rather than being
+// one — see ../notes.ts, which every ontology here shares.
+//
 // Nothing here records where in the source a thing was written: line numbers are a fact about
 // the syntax, and the only place they belong is `ParseError`.
 
@@ -13,6 +17,7 @@ export interface IbisNode {
   id: string;
   type: NodeType;
   text: string;
+  notes: Note[];
 }
 
 export interface IbisEdge {
@@ -28,7 +33,7 @@ export interface IbisDoc {
 }
 
 /** IBIS's link vocabulary: what a child says to the parent it hangs under. */
-export type EdgeType = "questions" | "respondsTo" | "supports" | "objectsTo" | "note";
+export type EdgeType = "questions" | "respondsTo" | "supports" | "objectsTo";
 
 /**
  * An edge's meaning read off the child it runs from — total, which is what "the edge carries no
@@ -39,5 +44,4 @@ export const EDGE_TYPE_BY_NODE_TYPE: Record<NodeType, EdgeType> = {
   idea: "respondsTo", // offers a possible answer to it
   pro: "supports", // argues for it
   con: "objectsTo", // argues against it
-  note: "note", // annotates it — the playground's addition, not one of IBIS's links
 };

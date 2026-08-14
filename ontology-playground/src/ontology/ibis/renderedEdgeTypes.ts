@@ -1,4 +1,5 @@
 import type { EdgeTypeDef } from "../types.ts";
+import { noteEdgeType } from "../notes.ts";
 
 // One entry per link in IBIS's vocabulary (./model.ts), which ./toGraph.ts reads off the child an
 // edge runs from. Ontologies whose edges say something their endpoints don't (causes / reduces /
@@ -8,7 +9,7 @@ export const renderedEdgeTypes: EdgeTypeDef[] = [
   { id: "respondsTo", connector: "-->" },
   { id: "supports", connector: "-->" },
   { id: "objectsTo", connector: "-->" },
-  { id: "note", connector: "-.->" },
+  noteEdgeType,
 ];
 
 export const renderedEdgeTypesById: Record<string, EdgeTypeDef> = Object.fromEntries(

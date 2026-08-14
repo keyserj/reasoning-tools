@@ -4,7 +4,7 @@
 // ./highlight.ts both read a line through these, so the two can't drift on what the syntax is.
 
 /** What a marker declares, which is IBIS's whole vocabulary — an edge adds nothing to it. */
-export type NodeType = "question" | "idea" | "pro" | "con" | "note";
+export type NodeType = "question" | "idea" | "pro" | "con";
 
 /** Markers that create a node, mapped to the node type id they produce. */
 export const MARKER_TO_TYPE: Record<string, NodeType | undefined> = {
@@ -12,11 +12,13 @@ export const MARKER_TO_TYPE: Record<string, NodeType | undefined> = {
   "=": "idea",
   "+": "pro",
   "-": "con",
-  "~": "note",
 };
 
 /** Marker for a meta-comment: parsed but dropped from the diagram entirely. */
 export const META_MARKER = "/";
+
+/** Marker for a note: drawn in the diagram, but no part of IBIS — see ../notes.ts. */
+export const NOTE_MARKER = "~";
 
 /** Indentation, which is how a line says what it belongs to. */
 export const LEADING_WS = /^[ \t]*/;

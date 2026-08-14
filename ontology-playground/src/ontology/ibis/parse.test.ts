@@ -17,13 +17,32 @@ describe("parse", () => {
     expect(doc.nodes.map((n) => n.id)).toEqual(["n1", "n2"]);
   });
 
-  it("drops `/` meta-comments without error and keeps `~` notes", () => {
+  it("drops `/` meta-comments without error and hangs `~` notes off the line above", () => {
     const { doc, errors } = parse("= Idea &i1\n  / hidden\n  ~ shown note");
     expect(errors).toEqual([]);
-    const note = doc.nodes.find((n) => n.type === "note");
-    expect(note?.text).toBe("shown note");
     expect(doc.nodes.some((n) => n.text === "hidden")).toBe(false);
-    expect(doc.edges).toContainEqual({ from: note?.id, to: "i1" });
+    // A note is no node of IBIS's, so it adds neither a node nor an edge to the model.
+    expect(doc.nodes).toHaveLength(1);
+    expect(doc.edges).toEqual([]);
+    expect(doc.nodes[0].notes.map((n) => n.text)).toEqual(["shown note"]);
+  });
+
+  it("keeps a note a leaf, so a line nested under one attaches to the note's parent", () => {
+    const { doc, errors } = parse("= Idea &i1\n  ~ aside\n    + Pro &p1");
+    expect(errors).toEqual([]);
+    expect(doc.edges).toContainEqual({ from: "p1", to: "i1" });
+  });
+
+  it("takes `$id` in a note's body as prose rather than a reference", () => {
+    const { doc, errors } = parse("= Idea &i1\n= Other &i2\n  ~ $i1");
+    expect(errors).toEqual([]);
+    expect(doc.edges).toEqual([]);
+    expect(doc.nodes.find((n) => n.id === "i2")?.notes[0].text).toBe("$i1");
+  });
+
+  it("reports a `~` with nothing above it to attach to", () => {
+    const { errors } = parse("~ orphan");
+    expect(errors.some((e) => /needs a line above it/.test(e.message))).toBe(true);
   });
 
   it("resolves `$ref` to an edge without creating a node, leaving its type alone", () => {

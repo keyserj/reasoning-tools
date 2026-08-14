@@ -1,4 +1,5 @@
 import type { NodeTypeDef } from "../types.ts";
+import { noteNodeType } from "../notes.ts";
 
 // The single place an IBIS node type is defined. Icons, mermaid shapes, style defaults,
 // style-panel labels and the legend's type rows are all derived from this table, so
@@ -49,12 +50,8 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     defaultColor: "#b2182b",
   },
   {
-    id: "note",
-    label: "Note",
-    icon: "📝",
+    ...noteNodeType,
     description: "A note shown attached to its parent.",
-    shape: ['[/"', '"/]'],
-    defaultColor: "#d3ad20",
   },
 ];
 

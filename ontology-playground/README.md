@@ -14,7 +14,7 @@ LLMs are pretty great at plugging into this playground, so trying out your ideas
 
 ## Ontologies
 
-Each lives in `src/ontology/<id>/` and documents itself: `ontology.md` for what it is, `rendering.md` for how the playground draws it, `ideal-ux-design.md` for what an ideal app might look like (not all ontologies have this one). The full syntax key is also in the app under **Key**.
+Each lives in `src/ontology/<id>/` and documents itself: `ontology.md` for what it is, `rendering.md` for how the playground draws it, `ideal-ux-design.md` for what an ideal app might look like (not all ontologies have this one). The full syntax key is also in the app under **Syntax**.
 
 - **[IBIS](./src/ontology/ibis/ontology.md)** ([rendering](./src/ontology/ibis/rendering.md)) — the classic question / idea / pro / con argument map.
 - **[Argument map: truth and relevance](./src/ontology/arg-map-truth-and-relevance/ontology.md)** ([rendering](./src/ontology/arg-map-truth-and-relevance/rendering.md)) — claims joined by supports/critiques edges, where each edge is itself a claim that can be scored and argued about.

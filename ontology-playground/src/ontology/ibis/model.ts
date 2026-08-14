@@ -26,3 +26,18 @@ export interface IbisDoc {
   nodes: IbisNode[];
   edges: IbisEdge[];
 }
+
+/** IBIS's link vocabulary: what a child says to the parent it hangs under. */
+export type EdgeType = "questions" | "respondsTo" | "supports" | "objectsTo" | "note";
+
+/**
+ * An edge's meaning read off the child it runs from — total, which is what "the edge carries no
+ * information of its own" amounts to in code. ./toGraph.ts applies it; nothing stores the result.
+ */
+export const EDGE_TYPE_BY_NODE_TYPE: Record<NodeType, EdgeType> = {
+  question: "questions", // asks something about what it hangs under
+  idea: "respondsTo", // offers a possible answer to it
+  pro: "supports", // argues for it
+  con: "objectsTo", // argues against it
+  note: "note", // annotates it — the playground's addition, not one of IBIS's links
+};

@@ -12,7 +12,7 @@ This is a well-established ontology rather than one being designed here, so this
   - Pro / Con - an argument for or against whatever it hangs under
   - Note - an annotation, shown but not argued with
 - Edges
-  - one edge type per node type, always pointing from a child **up** to the parent it answers, supports or objects to
+  - one edge type per node type, always pointing from a child **up** to the parent it answers, supports or objects to: a question `questions` it, an idea `respondsTo` it, a pro `supports` it, a con `objectsTo` it
   - the edge carries no information of its own: which kind of edge it is follows entirely from the child's type, so there is nothing to say about an edge that the child doesn't already say
 
 ## Example

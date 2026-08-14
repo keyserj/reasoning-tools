@@ -54,6 +54,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
   // they are filed once every id is known.
   const pendingSources: { source: Source; claimId: string }[] = [];
   const pendingNotes: { note: Note; claimId: string }[] = [];
+  const docNotes: Note[] = [];
   // `%perspectives` may appear anywhere, so slot counts can't be checked until the end. This is
   // the only reason a line number outlives the loop; nothing in the model carries one.
   const scored: { scores: Scores; line: number }[] = [];
@@ -208,11 +209,12 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
       const explicitId = idMatch?.[1];
       if (idMatch) body = body.slice(0, idMatch.index).trim();
 
+      const id = takeId(explicitId, "n", lineNo);
       if (parent?.kind !== "claim") {
-        errors.push({ line: lineNo, message: 'A "~" note needs a claim above it to attach to' });
+        // No claim above it: a note about the document rather than about any one claim.
+        docNotes.push({ id, text: body });
         continue;
       }
-      const id = takeId(explicitId, "n", lineNo);
       pendingNotes.push({ note: { id, text: body }, claimId: parent.claimId });
       // A note is a leaf too — it can't be argued about, and nothing nests under it.
       continue;
@@ -322,7 +324,15 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
   errors.sort((a, b) => a.line - b.line);
 
   return {
-    doc: { description, perspectives, questions, claims, theses, arguments: argumentsList },
+    doc: {
+      description,
+      perspectives,
+      questions,
+      claims,
+      theses,
+      arguments: argumentsList,
+      notes: docNotes,
+    },
     errors,
   };
 }

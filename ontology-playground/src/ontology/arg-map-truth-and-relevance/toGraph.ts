@@ -1,5 +1,6 @@
 import type { FeatureState, RenderEdge, RenderNode, RenderGraph } from "../types.ts";
-import { addNotes } from "../notes.ts";
+import { ANCHOR_TYPE_ID } from "../anchoring.ts";
+import { addDocumentNotes, addNotes } from "../notes.ts";
 import { featureOption, featureParam } from "../features.ts";
 import type { ArgDoc, Claim, Edge } from "./model.ts";
 import {
@@ -22,10 +23,10 @@ const TOPIC_ID = "_topic";
 /** How much of an endpoint's text a spelled-out claim quotes before it stops being readable. */
 const SIDE_MAX = 40;
 
-/** A claim nothing argues *for* — the thesis, in a document with one. */
-function firstRootClaimId(doc: ArgDoc): string | null {
+/** Claims nothing argues *for* — the thesis, in a document with one. */
+function rootClaimIds(doc: ArgDoc): string[] {
   const sources = new Set(doc.edges.map((edge) => edge.sourceId));
-  return doc.claims.find((claim) => !sources.has(claim.id))?.id ?? null;
+  return doc.claims.filter((claim) => !sources.has(claim.id)).map((claim) => claim.id);
 }
 
 /** Scores go on their own line; ../mermaidFlowchart.ts turns the newline into a `<br/>`. */
@@ -82,12 +83,16 @@ function addNotesAndAnchor(
     owners.filter((owner) => known.has(owner.id)),
   );
 
+  const roots = rootClaimIds(doc);
+
   // Direction matters: the default layout is BT, where an edge's *target* is ranked above its
   // source. So the root is the source and the header the target, which lands the header on top.
-  if (known.has(TOPIC_ID)) {
-    const rootId = firstRootClaimId(doc);
-    if (rootId !== null) edges.push({ from: rootId, to: TOPIC_ID, type: "anchor" });
+  // Still only the first root — see ./rendering.md on what that costs.
+  if (known.has(TOPIC_ID) && roots.length > 0) {
+    edges.push({ from: roots[0], to: TOPIC_ID, type: ANCHOR_TYPE_ID });
   }
+
+  addDocumentNotes(nodes, edges, doc.notes, roots);
 }
 
 /** Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, reifying every edge into a node. */

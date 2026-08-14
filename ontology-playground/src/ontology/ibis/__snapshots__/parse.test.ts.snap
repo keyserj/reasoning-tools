@@ -117,5 +117,6 @@ exports[`parse > matches the parsed-model snapshot for the session-storage examp
       "type": "question",
     },
   ],
+  "notes": [],
 }
 `;

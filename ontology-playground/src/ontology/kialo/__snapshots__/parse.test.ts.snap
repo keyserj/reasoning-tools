@@ -135,6 +135,7 @@ exports[`parse > matches the parsed-model snapshot for the session-storage examp
     },
   ],
   "description": "We're trying to resolve some design decisions for a web app.",
+  "notes": [],
   "perspectives": [
     "alice",
     "bob",

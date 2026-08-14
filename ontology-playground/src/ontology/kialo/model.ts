@@ -63,6 +63,8 @@ export interface KialoDoc {
   claims: Claim[];
   theses: Thesis[];
   arguments: Argument[];
+  /** `~` lines with no claim above them: notes about the document rather than about a claim. */
+  notes: Note[];
 }
 
 /** Where a claim sits, which is the unit both the score and the stance belong to. */

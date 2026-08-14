@@ -84,6 +84,7 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
   // once the claim nested under it is read, and a `= $ref` block can point further down the
   // file. So notes are filed at the end, when every id is known.
   const pendingNotes: { note: Note; ownerId: string }[] = [];
+  const docNotes: Note[] = [];
   // `%perspectives` may appear anywhere, so slot counts can't be checked until the end. This
   // is the only reason a line number outlives the loop; nothing in the model carries one.
   const scored: { scores: Scores; line: number }[] = [];
@@ -256,12 +257,13 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
       const explicitId = idMatch?.[1];
       if (idMatch) body = body.slice(0, idMatch.index).trim();
 
-      if (!parent) {
-        errors.push({ line: lineNo, message: 'A "~" note needs a line above it to attach to' });
-        continue;
-      }
       const id = takeId(explicitId, "t", lineNo);
       usedIds.add(id);
+      if (!parent) {
+        // Nothing above it: a note about the document rather than about any one line.
+        docNotes.push({ id, text: body });
+        continue;
+      }
       pendingNotes.push({
         note: { id, text: body },
         ownerId: parent.kind === "claim" ? parent.id : parent.pending.id,
@@ -361,5 +363,5 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
 
   errors.sort((a, b) => a.line - b.line);
 
-  return { doc: { description, perspectives, claims, edges }, errors };
+  return { doc: { description, perspectives, claims, edges, notes: docNotes }, errors };
 }

@@ -43,6 +43,7 @@ describe("toMermaid", () => {
     const doc: IbisDoc = {
       nodes: [{ id: "weird-id", type: "idea", text: 'say "hi"', notes: [] }],
       edges: [],
+      notes: [],
     };
     const out = render(doc);
     expect(out).toContain("&quot;hi&quot;");
@@ -53,6 +54,7 @@ describe("toMermaid", () => {
     const doc: IbisDoc = {
       nodes: [{ id: "n1", type: "idea", text: "5 < 6 & <img src=x>\nsecond line", notes: [] }],
       edges: [],
+      notes: [],
     };
     const out = render(doc);
     expect(out).toContain("5 &lt; 6 &amp; &lt;img src=x&gt;");
@@ -60,7 +62,7 @@ describe("toMermaid", () => {
   });
 
   it("returns a placeholder for an empty graph", () => {
-    const out = render({ nodes: [], edges: [] });
+    const out = render({ nodes: [], edges: [], notes: [] });
     expect(out).toContain("_empty");
   });
 

@@ -51,6 +51,7 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
   const pendingRefs: PendingRef[] = [];
   // Filed at the end: a note under a `$ref` line owns an id that may be declared further down.
   const pendingNotes: { note: Note; ownerId: string }[] = [];
+  const docNotes: Note[] = [];
   const stack: StackFrame[] = [];
   let autoCounter = 0;
 
@@ -116,13 +117,11 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
     // under one attaches to the note's own parent — and `$id` in its body stays prose, since a
     // note is never a second placement of something.
     if (type === undefined) {
-      if (parentId === null) {
-        errors.push({ line: lineNo, message: 'A "~" note needs a line above it to attach to' });
-        continue;
-      }
       const id = takeId(explicitId, lineNo);
       noteIds.add(id);
-      pendingNotes.push({ note: { id, text: body }, ownerId: parentId });
+      // Nothing above it: a note about the document rather than about any one node.
+      if (parentId === null) docNotes.push({ id, text: body });
+      else pendingNotes.push({ note: { id, text: body }, ownerId: parentId });
       continue;
     }
 
@@ -163,6 +162,6 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
   // in the diagram attached to nothing.
   for (const { note, ownerId } of pendingNotes) byId.get(ownerId)?.notes.push(note);
 
-  const doc: IbisDoc = { nodes, edges };
+  const doc: IbisDoc = { nodes, edges, notes: docNotes };
   return { doc, errors };
 }

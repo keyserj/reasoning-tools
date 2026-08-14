@@ -1,6 +1,12 @@
 import type { RenderEdge, RenderGraph, RenderNode } from "../types.ts";
-import { addNotes } from "../notes.ts";
+import { addDocumentNotes, addNotes } from "../notes.ts";
 import { EDGE_TYPE_BY_NODE_TYPE, type IbisDoc } from "./model.ts";
+
+/** Nodes nothing hangs under: an edge's `from` is always the child, so a root is never one. */
+function rootNodeIds(doc: IbisDoc): string[] {
+  const children = new Set(doc.edges.map((edge) => edge.from));
+  return doc.nodes.filter((node) => !children.has(node.id)).map((node) => node.id);
+}
 
 /**
  * Flatten an {@link IbisDoc} into the shared {@link RenderGraph}.
@@ -25,6 +31,8 @@ export function toGraph(doc: IbisDoc): RenderGraph {
     const nodeType = typeById.get(from);
     if (nodeType !== undefined) edges.push({ from, to, type: EDGE_TYPE_BY_NODE_TYPE[nodeType] });
   }
+
+  addDocumentNotes(nodes, edges, doc.notes, rootNodeIds(doc));
 
   return { nodes, edges };
 }

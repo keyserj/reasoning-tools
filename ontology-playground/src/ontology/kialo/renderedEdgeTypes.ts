@@ -1,4 +1,5 @@
 import type { EdgeTypeDef } from "../types.ts";
+import { anchorEdgeType } from "../anchoring.ts";
 import { noteEdgeType } from "../notes.ts";
 import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 
@@ -26,7 +27,7 @@ export const renderedEdgeTypes: EdgeTypeDef[] = [
   noteEdgeType,
   // Draws nothing. It exists only to rank the topic header above the argument, so dagre stops
   // parking it wherever it likes — see ./toGraph.ts.
-  { id: "anchor", connector: "~~~" },
+  anchorEdgeType,
 ];
 
 export const renderedEdgeTypesById: Record<string, EdgeTypeDef> = Object.fromEntries(

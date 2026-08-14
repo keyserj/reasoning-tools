@@ -4,6 +4,7 @@
 // level, and an ontology's model only says which of the things it does own a note hangs off.
 
 import type { EdgeTypeDef, NodeTypeDef, RenderEdge, RenderNode } from "./types.ts";
+import { ANCHOR_TYPE_ID } from "./anchoring.ts";
 
 export interface Note {
   id: string;
@@ -50,6 +51,26 @@ export function addNotes(nodes: RenderNode[], edges: RenderEdge[], owners: NoteO
     for (const note of owner.notes) {
       nodes.push({ id: note.id, type: NOTE_TYPE_ID, text: note.text });
       edges.push({ from: note.id, to: owner.id, type: NOTE_TYPE_ID });
+    }
+  }
+}
+
+/**
+ * Draw notes that annotate the document rather than any one element: a box with nothing to point
+ * at, ranked above the roots so it reads as a caption instead of being parked in the argument.
+ *
+ * The anchor runs root -> note because `BT` ranks a target above its source — see ./anchoring.ts.
+ */
+export function addDocumentNotes(
+  nodes: RenderNode[],
+  edges: RenderEdge[],
+  notes: Note[],
+  rootIds: string[],
+): void {
+  for (const note of notes) {
+    nodes.push({ id: note.id, type: NOTE_TYPE_ID, text: note.text });
+    for (const rootId of rootIds) {
+      edges.push({ from: rootId, to: note.id, type: ANCHOR_TYPE_ID });
     }
   }
 }

@@ -36,4 +36,6 @@ export interface ArgDoc {
   perspectives: string[];
   claims: Claim[];
   edges: Edge[];
+  /** `~` lines with nothing above them: notes about the document rather than about a line. */
+  notes: Note[];
 }

@@ -40,9 +40,11 @@ describe("parse", () => {
     expect(doc.nodes.find((n) => n.id === "i2")?.notes[0].text).toBe("$i1");
   });
 
-  it("reports a `~` with nothing above it to attach to", () => {
-    const { errors } = parse("~ orphan");
-    expect(errors.some((e) => /needs a line above it/.test(e.message))).toBe(true);
+  it("takes a `~` with nothing above it as a note on the document", () => {
+    const { doc, errors } = parse("~ about the map itself\n? Q &q1");
+    expect(errors).toEqual([]);
+    expect(doc.notes.map((n) => n.text)).toEqual(["about the map itself"]);
+    expect(doc.nodes.flatMap((n) => n.notes)).toEqual([]);
   });
 
   it("resolves `$ref` to an edge without creating a node, leaving its type alone", () => {

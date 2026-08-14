@@ -1,5 +1,6 @@
 import type { RenderEdge, RenderNode, RenderGraph } from "../types.ts";
-import { addNotes } from "../notes.ts";
+import { ANCHOR_TYPE_ID } from "../anchoring.ts";
+import { addDocumentNotes, addNotes } from "../notes.ts";
 import {
   type Argument,
   type Claim,
@@ -118,17 +119,20 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
     });
   }
 
+  const roots = [
+    ...doc.questions.map((question) => question.id),
+    ...doc.theses.filter((thesis) => thesis.questionId === null).map((thesis) => thesis.claimId),
+  ];
+
   // Direction is load-bearing: the default layout is BT, where an edge's *target* is ranked
   // above its source, so a root is the source and the header the target. Every root is anchored
   // rather than just the first, which is what keeps the header above the whole diagram instead
   // of over one column of it.
   if (header !== "") {
-    const roots = [
-      ...doc.questions.map((question) => question.id),
-      ...doc.theses.filter((thesis) => thesis.questionId === null).map((thesis) => thesis.claimId),
-    ];
-    for (const rootId of roots) edges.push({ from: rootId, to: TOPIC_ID, type: "anchor" });
+    for (const rootId of roots) edges.push({ from: rootId, to: TOPIC_ID, type: ANCHOR_TYPE_ID });
   }
+
+  addDocumentNotes(nodes, edges, doc.notes, roots);
 
   return { nodes, edges };
 }

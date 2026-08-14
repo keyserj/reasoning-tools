@@ -88,11 +88,17 @@ describe("parse", () => {
     ]);
   });
 
-  it("rejects a source or note with nothing to attach to", () => {
+  it("rejects a source with nothing to attach to", () => {
     expect(messages("@ https://e.example")).toEqual([
       'A "@" source needs a claim above it to attach to',
     ]);
-    expect(messages("~ floating")).toEqual(['A "~" note needs a claim above it to attach to']);
+  });
+
+  it("takes a `~` with no claim above it as a note on the document", () => {
+    const { doc, errors } = parse("~ about the map itself\n? Q &q1");
+    expect(errors).toEqual([]);
+    expect(doc.notes.map((n) => n.text)).toEqual(["about the map itself"]);
+    expect(doc.claims.flatMap((c) => c.notes)).toEqual([]);
   });
 
   it("holds votes to 0-4 and to the perspective count", () => {

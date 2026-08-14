@@ -1,4 +1,5 @@
 import type { EdgeTypeDef } from "../types.ts";
+import { anchorEdgeType } from "../anchoring.ts";
 import { noteEdgeType } from "../notes.ts";
 import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 
@@ -40,7 +41,7 @@ export const renderedEdgeTypes: EdgeTypeDef[] = [
   // Draws nothing. It exists only to give a node a rank relative to the argument, so dagre
   // stops parking it wherever it likes: the topic header, and a detached edge-claim node,
   // which would otherwise float far from the edge it describes — see ./toGraph.ts.
-  { id: "anchor", connector: "~~~" },
+  anchorEdgeType,
 ];
 
 export const renderedEdgeTypesById: Record<string, EdgeTypeDef> = Object.fromEntries(

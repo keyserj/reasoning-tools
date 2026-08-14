@@ -30,6 +30,8 @@ export interface IbisEdge {
 export interface IbisDoc {
   nodes: IbisNode[];
   edges: IbisEdge[];
+  /** `~` lines with nothing above them: notes about the document rather than about a node. */
+  notes: Note[];
 }
 
 /** IBIS's link vocabulary: what a child says to the parent it hangs under. */

@@ -13,16 +13,13 @@ import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 // only because mermaid needs *something* between a box and its endpoint. The `edge-` names
 // say something the ontology cares about, which is why they don't take it.
 //
-// A connector names the node type it is the other form of (`colorTypeId`) rather than holding
-// a color, so it is drawn in whatever that type is configured with and restyling "Supports"
-// moves its boxes and its connectors together. The icon is read off the same table for the
-// same reason: the two forms of one concept can't drift apart.
+// A connector names the node type it is the other form of (`colorTypeId`) rather than holding a
+// color, and reads its icon off the same table, so the two forms of one concept can't drift
+// apart.
 export const renderedEdgeTypes: EdgeTypeDef[] = [
   { id: "link", connector: "-->" },
   // The two halves one ontology edge becomes when it's reified — see ./rendering.md on the
-  // `Edge display` param. `edge-half` carries no arrowhead because it is half of one arrow,
-  // not a relationship of its own; `edge-to-edge` is thick rather than dashed because `note`
-  // already owns dashed.
+  // `Edge display` param for why each is drawn the way it is.
   { id: "edge-half", connector: "---" },
   { id: "edge-to-edge", connector: "==>" },
   noteEdgeType,

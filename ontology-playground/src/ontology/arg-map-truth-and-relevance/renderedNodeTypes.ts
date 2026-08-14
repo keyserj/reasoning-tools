@@ -5,26 +5,14 @@ import { noteNodeType } from "../notes.ts";
 // style-panel labels and the legend's type rows all derive from this table. Syntax (which
 // marker produces which type) lives in ./markers.ts instead.
 //
-// These are deliberately not the ontology's semantic types — see ontology.md for those. A
+// These are deliberately not the ontology's semantic types — see ./ontology.md for those. A
 // rendered type is whatever can end up as a box in the diagram, which here means: `claim` (the
 // ontology's only real node type), `supports`/`critiques` (ontology *edge* types, which
 // ./toGraph.ts reifies into nodes so they can be argued about), `note`, and `topic` (the header
-// carrying `%description` and the `%perspectives` key, without which a score row like [5,2,8]
-// can't be decoded). Only `claim` is a node type in the ontology proper.
+// carrying `%description` and the `%perspectives` key).
 //
-// One color per type: the fill, border and text it's drawn in are derived from it, per theme
-// (../typeColors.ts). Colors follow the colorblind-safe red/blue axis that ameliorate-v2 already
-// committed to — see UX-design.md's "needs a colorblind-safe diverging palette, not red-green"
-// and the wireframes' `RB = { neg: "#b2182b", mid: "#e9e9e9", pos: "#2166ac" }`. `supports` vs
-// `critiques` is the one pair that *needs* color to separate it (same shape, same role), and
-// blue vs red survives both protanopia and deuteranopia. `claim` and `note` divide the warm end
-// of the palette between them, which is argued in ./rendering.md.
-//
-// Icons carry the same distinction by silhouette: ✅ vs ⛔ reads as a check against a barred circle
-// at the ~12px they render at, which is what separates support from critique when color can't
-// (same-shape 🔵 / 🔴 wouldn't). Content types take unrelated pictograms so nothing competes with
-// that pair. The two do come with their own green/red — the pairing the fills deliberately avoid —
-// but it lands as decoration over shapes that already differ, not as the thing doing the work.
+// One color per type, which the fill, border and text are derived from per theme
+// (../typeColors.ts). Which color and which icon is argued in ./rendering.md.
 export const renderedNodeTypes: NodeTypeDef[] = [
   {
     id: "claim",

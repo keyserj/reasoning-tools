@@ -1,10 +1,16 @@
 import type { LegendEntry } from "../types.ts";
 import { renderedNodeTypes } from "./renderedNodeTypes.ts";
-import { MARKER_TO_TYPE } from "./markers.ts";
 
-const markerByType: Record<string, string> = Object.fromEntries(
-  Object.entries(MARKER_TO_TYPE).map(([marker, type]) => [type, marker]),
-);
+// Which bit of syntax produces each node type. Hand-written rather than reversed out of
+// `MARKER_TO_TYPE`, which knows only IBIS's four: `~` makes a note, and a note is the
+// playground's rather than the ontology's — see ../notes.ts.
+const markerByType: Record<string, string> = {
+  question: "?",
+  idea: "=",
+  pro: "+",
+  con: "-",
+  note: "~",
+};
 
 // Node-type rows come from the one table; the rest are syntax that produces no node.
 const typeEntries: LegendEntry[] = renderedNodeTypes.map((t) => ({

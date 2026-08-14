@@ -1,12 +1,14 @@
-import type { FeatureState, Graph, GraphEdge, GraphNode } from "../types.ts";
+import type { FeatureState, RenderEdge, RenderNode, RenderGraph } from "../types.ts";
+import { ANCHOR_TYPE_ID } from "../anchoring.ts";
+import { addDocumentNotes, addNotes } from "../notes.ts";
 import { featureOption, featureParam } from "../features.ts";
 import type { ArgDoc, Claim, Edge } from "./model.ts";
 import {
   EDGE_CLAIMS,
   EDGE_DISPLAY,
   EDGE_DISPLAY_DISTINGUISH,
-  EXPLICIT_SEPARATE,
-  IMPLICIT_ON_EDGE,
+  IMPLIED,
+  SPELLED_OUT,
 } from "./features.ts";
 import { type Scores, formatScores } from "./scores.ts";
 
@@ -21,10 +23,10 @@ const TOPIC_ID = "_topic";
 /** How much of an endpoint's text a spelled-out claim quotes before it stops being readable. */
 const SIDE_MAX = 40;
 
-/** A claim nothing argues *for* — the thesis, in a document with one. */
-function firstRootClaimId(doc: ArgDoc): string | null {
+/** Claims nothing argues *for* — the thesis, in a document with one. */
+function rootClaimIds(doc: ArgDoc): string[] {
   const sources = new Set(doc.edges.map((edge) => edge.sourceId));
-  return doc.claims.find((claim) => !sources.has(claim.id))?.id ?? null;
+  return doc.claims.filter((claim) => !sources.has(claim.id)).map((claim) => claim.id);
 }
 
 /** Scores go on their own line; ../mermaidFlowchart.ts turns the newline into a `<br/>`. */
@@ -47,8 +49,8 @@ function topicText(doc: ArgDoc): string {
 }
 
 /** Topic header + one node per claim: the part both renderings share. */
-function claimNodes(doc: ArgDoc): { nodes: GraphNode[]; known: Set<string> } {
-  const nodes: GraphNode[] = [];
+function claimNodes(doc: ArgDoc): { nodes: RenderNode[]; known: Set<string> } {
+  const nodes: RenderNode[] = [];
   const known = new Set<string>();
 
   const header = topicText(doc);
@@ -65,40 +67,42 @@ function claimNodes(doc: ArgDoc): { nodes: GraphNode[]; known: Set<string> } {
 
 /**
  * Notes and the topic anchor, which attach the same way in both renderings. An owner with no
- * node of its own carries its notes nowhere: that's an un-argued edge under `explicit-separate`,
+ * node of its own carries its notes nowhere: that's an un-argued edge under `spelled out`,
  * where the note is what would have earned it a node in the first place.
  */
 function addNotesAndAnchor(
   doc: ArgDoc,
-  nodes: GraphNode[],
-  edges: GraphEdge[],
+  nodes: RenderNode[],
+  edges: RenderEdge[],
   known: Set<string>,
 ) {
   const owners: (Claim | Edge)[] = [...doc.claims, ...doc.edges];
-  for (const owner of owners) {
-    if (!known.has(owner.id)) continue;
-    for (const note of owner.notes) {
-      nodes.push({ id: note.id, type: "note", text: note.text });
-      edges.push({ from: note.id, to: owner.id, type: "note" });
-    }
-  }
+  addNotes(
+    nodes,
+    edges,
+    owners.filter((owner) => known.has(owner.id)),
+  );
+
+  const roots = rootClaimIds(doc);
 
   // Direction matters: the default layout is BT, where an edge's *target* is ranked above its
   // source. So the root is the source and the header the target, which lands the header on top.
-  if (known.has(TOPIC_ID)) {
-    const rootId = firstRootClaimId(doc);
-    if (rootId !== null) edges.push({ from: rootId, to: TOPIC_ID, type: "anchor" });
+  // Still only the first root — see ./rendering.md on what that costs.
+  if (known.has(TOPIC_ID) && roots.length > 0) {
+    edges.push({ from: roots[0], to: TOPIC_ID, type: ANCHOR_TYPE_ID });
   }
+
+  addDocumentNotes(nodes, edges, doc.notes, roots);
 }
 
-/** Flatten an {@link ArgDoc} into the shared {@link Graph}, reifying every edge into a node. */
-function implicitOnEdge(doc: ArgDoc, distinguish: boolean): Graph {
+/** Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, reifying every edge into a node. */
+function impliedClaims(doc: ArgDoc, distinguish: boolean): RenderGraph {
   const { nodes, known } = claimNodes(doc);
-  const graphEdges: GraphEdge[] = [];
+  const graphEdges: RenderEdge[] = [];
   const edgeIds = new Set(doc.edges.map((edge) => edge.id));
 
   // A reified node is labelled with its type — its text *is* "supports" / "critiques", which
-  // is what its implied claim asserts about the two claims it sits between.
+  // is what its edge claim asserts about the two claims it sits between.
   for (const edge of doc.edges) {
     nodes.push({ id: edge.id, type: edge.type, text: withScores(edge.type, edge.scores) });
     known.add(edge.id);
@@ -137,11 +141,11 @@ function truncate(text: string): string {
  * The claim an edge makes, spelled out: `"Redis is fast for hot reads" supports "We should…"`.
  *
  * A side falls back to the endpoint's id in the two cases where there is no claim text to
- * quote, both reachable: the endpoint is itself an edge (a nested implied claim — spelling
+ * quote, both reachable: the endpoint is itself an edge (a nested edge claim — spelling
  * that one out in full is unreadable), or it is an unresolved `$ref`, which is the normal
  * state while typing `= $foo` before `&foo` exists.
  */
-function impliedClaimText(edge: Edge, claimTextById: Map<string, string>): string {
+function edgeClaimText(edge: Edge, claimTextById: Map<string, string>): string {
   const side = (id: string) => truncate(claimTextById.get(id) ?? id);
   return `"${side(edge.sourceId)}" ${edge.type} "${side(edge.targetId)}"`;
 }
@@ -157,12 +161,12 @@ function marker(n: number): string {
 }
 
 /**
- * Flatten an {@link ArgDoc} into the shared {@link Graph}, drawing edges as labeled connectors
+ * Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, drawing edges as labeled connectors
  * and giving only the argued-about ones a detached node that spells their claim out.
  */
-function explicitSeparate(doc: ArgDoc): Graph {
+function spelledOutClaims(doc: ArgDoc): RenderGraph {
   const { nodes, known } = claimNodes(doc);
-  const graphEdges: GraphEdge[] = [];
+  const graphEdges: RenderEdge[] = [];
   const claimTextById = new Map(doc.claims.map((claim) => [claim.id, claim.text]));
 
   // An edge needs a node of its own exactly when something has to attach to it: another edge
@@ -183,7 +187,7 @@ function explicitSeparate(doc: ArgDoc): Graph {
     nodes.push({
       id: edge.id,
       type: "claim",
-      text: withScores(`${mark} ${impliedClaimText(edge, claimTextById)}`, edge.scores),
+      text: withScores(`${mark} ${edgeClaimText(edge, claimTextById)}`, edge.scores),
     });
     known.add(edge.id);
   }
@@ -216,10 +220,10 @@ function explicitSeparate(doc: ArgDoc): Graph {
   return { nodes, edges: graphEdges };
 }
 
-/** Flatten an {@link ArgDoc} into the shared {@link Graph}, per the `Edge claims` feature. */
-export function toGraph(doc: ArgDoc, features: FeatureState): Graph {
-  const option = featureOption(features, EDGE_CLAIMS, EXPLICIT_SEPARATE);
-  if (option !== IMPLICIT_ON_EDGE) return explicitSeparate(doc);
+/** Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, per the `Edge claims` feature. */
+export function toGraph(doc: ArgDoc, features: FeatureState): RenderGraph {
+  const option = featureOption(features, EDGE_CLAIMS, SPELLED_OUT);
+  if (option !== IMPLIED) return spelledOutClaims(doc);
   const display = featureParam(features, EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_DISTINGUISH);
-  return implicitOnEdge(doc, display === EDGE_DISPLAY_DISTINGUISH);
+  return impliedClaims(doc, display === EDGE_DISPLAY_DISTINGUISH);
 }

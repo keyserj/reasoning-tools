@@ -1,4 +1,4 @@
-import { type TokenSink, createTokenSink, pushBody } from "../highlight.ts";
+import { createTokenSink, pushBody, pushScores } from "../highlight.ts";
 import type { HighlightToken } from "../types.ts";
 import {
   EDGE_TYPE_HEAD,
@@ -9,24 +9,6 @@ import {
   REF_BODY,
   isEdgeType,
 } from "./markers.ts";
-import { LEADING_BRACKET } from "./scores.ts";
-
-/**
- * Lex a leading `[8,-,2]` if there is one, and return what follows it. Whitespace around a slot
- * rides along inside its `score-value` — it's that slot's own text, and space takes no color.
- */
-function pushScores(sink: TokenSink, text: string): string {
-  const match = LEADING_BRACKET.exec(text);
-  if (!match) return text;
-
-  sink.mark("[", "score-punct");
-  match[1].split(",").forEach((slot, i) => {
-    if (i > 0) sink.mark(",", "score-punct");
-    sink.mark(slot, "score-value");
-  });
-  sink.mark("]", "score-punct");
-  return text.slice(match[0].length);
-}
 
 /**
  * Tokenize one line of this ontology's source for the editor's highlight overlay.

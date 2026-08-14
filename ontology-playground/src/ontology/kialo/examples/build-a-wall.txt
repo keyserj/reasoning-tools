@@ -1,0 +1,40 @@
+%description: Discussing how worthwhile it is to build a wall along the US's southern border.
+%perspectives: [alice, bob, casey]
+  / personas: alice is moderate; bob doubts illegal immigration is a real problem and opposes the wall; casey wants illegal immigration reduced hard and favors the wall
+
+/ Adapted from the arg-map version so the two can be read side by side. Scores are 0-4 here and
+/ every one of them folds that ontology's two numbers - how true a claim is, and how much it
+/ bears on its parent - into one. The comments below mark where that costs something.
+
+=[2,0,4] The US should build a wall along its southern border &wall
+
+  +[2,0,4] A border wall would substantially reduce illegal immigration &wall-reduces
+    +[4,1,4] A wall physically stops crossings without needing continuous surveillance
+    -[3,4,1] People will find a way over the barrier &climb-over
+      +[4,4,1] It's easy to climb a chain-link fence &easy-climb
+        / casey in arg-map: the claim is true (8), and bears on this design hardly at all (2).
+        / One number has to blend those, and lands at 1
+        -[3,-,4] The proposed design is 30 feet tall, without handholds, and topped with barbed wire
+          / in arg-map this attacks the *edge* "easy-climb supports climb-over" rather than the
+          / claim. Kialo has no edge to attack, so it hangs on the claim itself
+    -[3,4,0] Most illegal immigrants enter legally and overstay visas, so they never cross the border &visa-overstay
+      / the mirror case, also casey: he thinks this is false (1) but would be decisive if true
+      / (8). That lands near 0 as well, so Kialo can't tell the two apart
+
+  -[3,4,2] The wall would cost tens of billions to build and maintain &wall-cost
+    + Concrete and steel prices rose sharply over the last decade
+      / nobody voted on this one, so it carries no brackets at all
+
+  -[1,4,0] Illegal immigration causes little net harm &little-harm
+    / in arg-map this critiques the edge "wall-reduces supports wall": bob's position is that
+    / the wall might work and that this barely bears on whether to build it. With no edge to
+    / argue about, the claim hangs on the thesis directly
+    +[2,3,0] Illegal immigrants are arrested for violent crimes at lower rates than native-born citizens
+      @ https://www.cato.org/ Cato Institute crime-rate analysis
+      ~ rates vary by year and state; this is a national average
+
+  -[3,3,1] Hiring more immigration judges would cut illegal immigration more cheaply than a wall &more-judges
+    / a top-level claim in arg-map, which has no thesis for it to hang on
+    +[3,3,2] $wall-cost
+      / wall-cost is used twice - against the wall, and for the cheaper alternative - so its
+      / box shows no scores and each of its connectors carries its own

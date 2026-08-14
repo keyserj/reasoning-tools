@@ -1,14 +1,18 @@
 import type { EdgeTypeDef } from "../types.ts";
+import { anchorEdgeType } from "../anchoring.ts";
+import { noteEdgeType } from "../notes.ts";
 
-// IBIS types an edge by the child's marker, so there is one edge type per node type.
-// Ontologies with their own edge verbs (causes / reduces / guides) declare them here
-// independently of their node types.
+// One entry per link in IBIS's vocabulary (./model.ts), which ./toGraph.ts reads off the child an
+// edge runs from. Ontologies whose edges say something their endpoints don't (causes / reduces /
+// guides) declare them there and here independently of their node types.
 export const renderedEdgeTypes: EdgeTypeDef[] = [
-  { id: "question", connector: "-->" },
-  { id: "idea", connector: "-->" },
-  { id: "pro", connector: "-->" },
-  { id: "con", connector: "-->" },
-  { id: "note", connector: "-.->" },
+  { id: "questions", connector: "-->" },
+  { id: "respondsTo", connector: "-->" },
+  { id: "supports", connector: "-->" },
+  { id: "objectsTo", connector: "-->" },
+  noteEdgeType,
+  // Draws nothing; it only ranks a document note above the argument — see ./toGraph.ts.
+  anchorEdgeType,
 ];
 
 export const renderedEdgeTypesById: Record<string, EdgeTypeDef> = Object.fromEntries(

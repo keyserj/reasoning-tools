@@ -8,18 +8,16 @@ import type { FeatureDef } from "../types.ts";
 // The ids are exported so ./toGraph.ts can't drift from the table the UI is built from.
 
 export const EDGE_CLAIMS = "edge-claims";
-export const EXPLICIT_SEPARATE = "explicit-separate";
-export const IMPLICIT_ON_EDGE = "implicit-on-edge";
+export const SPELLED_OUT = "spelled-out";
+export const IMPLIED = "implied";
 
 export const EDGE_DISPLAY = "edge-display";
 export const EDGE_DISPLAY_DISTINGUISH = "distinguish-edge-to-edge";
 export const EDGE_DISPLAY_SAME = "all-edges-same";
 
 /**
- * Explicit vs implicit is about how an edge's claim is *displayed*, not about what the author
- * wrote: spelled out as text, versus left for the reader to infer from the arrangement. The
- * two happen to coincide in the implementation — only argued-about edges get a spelled-out
- * node — but the display distinction is the one the names draw.
+ * The option names say what becomes of the claim an edge implies: `spelled out` writes it as
+ * text in a node of its own, `implied` leaves it to be read off the arrangement.
  *
  * A `label` has to fit a pill sitting above the diagram; the `description` is the full
  * phrasing, and the feature panel is where it gets read. See ./rendering.md for the argument
@@ -31,19 +29,19 @@ export const features: FeatureDef[] = [
     label: "Edge claims",
     description:
       "Every supports/critiques edge makes a claim about the two claims it joins. This is how that claim gets drawn.",
-    defaultOption: EXPLICIT_SEPARATE,
+    defaultOption: SPELLED_OUT,
     options: [
       {
-        id: EXPLICIT_SEPARATE,
-        label: "Explicit, separate",
+        id: SPELLED_OUT,
+        label: "spelled out",
         description:
-          'Separate nodes for explicit edge claims. The claim is spelled out as text — "A" supports "B" — in a node of its own, drawn apart from the edge it is about and tied to it by a ① marker on both. Only edges someone argued about get one; the rest are labeled connectors.',
+          'Only edges someone argued about get a box; the rest stay labeled connectors. That box sits apart from the edge and writes the claim as text — "A" supports "B" — tied back to its connector by a ① marker on both.',
       },
       {
-        id: IMPLICIT_ON_EDGE,
-        label: "Implicit, on the edge",
+        id: IMPLIED,
+        label: "implied",
         description:
-          "Nodes on the edge for implicit edge claims. The claim is never written out; you read it off the arrangement A ──▶ supports ──▶ B. Every edge gets a box, argued about or not.",
+          "Every edge gets a box, argued about or not, sitting on the edge between its endpoints. The claim is never written out; you read it off the arrangement A ──▶ supports ──▶ B.",
       },
     ],
     params: [
@@ -51,7 +49,7 @@ export const features: FeatureDef[] = [
         id: EDGE_DISPLAY,
         label: "Edge display",
         defaultOption: EDGE_DISPLAY_DISTINGUISH,
-        onlyForOptions: [IMPLICIT_ON_EDGE],
+        onlyForOptions: [IMPLIED],
         options: [
           {
             id: EDGE_DISPLAY_DISTINGUISH,

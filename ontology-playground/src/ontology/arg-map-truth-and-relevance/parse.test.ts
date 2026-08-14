@@ -77,6 +77,25 @@ describe("parse", () => {
     expect(doc.edges[0]).toMatchObject({ sourceId: "b", targetId: "a" });
   });
 
+  it("rejects a `~` nested under another `~`, but not a sibling one", () => {
+    const nested = parse("= A &a\n  ~ first\n    ~ second");
+    expect(nested.errors.map((e) => e.message)).toEqual([
+      'A "~" note can\'t hang off another note',
+    ]);
+    expect(nested.doc.claims[0].notes.map((n) => n.text)).toEqual(["first"]);
+
+    const siblings = parse("= A &a\n  ~ first\n  ~ second");
+    expect(siblings.errors).toEqual([]);
+    expect(siblings.doc.claims[0].notes.map((n) => n.text)).toEqual(["first", "second"]);
+  });
+
+  it("takes a `~` with nothing above it as a note on the document", () => {
+    const { doc, errors } = parse("~ about the map itself\n= A &a");
+    expect(errors).toEqual([]);
+    expect(doc.notes.map((n) => n.text)).toEqual(["about the map itself"]);
+    expect(doc.claims.flatMap((c) => c.notes)).toEqual([]);
+  });
+
   it("drops a note whose owner never resolved, rather than leaving it ownerless", () => {
     const { doc, errors } = parse("= A &a\n  < supports\n    = $nope\n      ~ orphan");
     expect(errors.map((e) => e.message)).toContain('Unknown reference "$nope"');

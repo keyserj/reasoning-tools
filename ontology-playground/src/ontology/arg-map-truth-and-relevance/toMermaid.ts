@@ -6,7 +6,7 @@ import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 import { DEFAULT_CONNECTOR, renderedEdgeTypesById } from "./renderedEdgeTypes.ts";
 
 /**
- * Convert an {@link ArgDoc} into mermaid: flatten it into a {@link Graph} the way the
+ * Convert an {@link ArgDoc} into mermaid: flatten it into a {@link RenderGraph} the way the
  * features ask for, then run the shared walk over it.
  */
 export function toMermaid(

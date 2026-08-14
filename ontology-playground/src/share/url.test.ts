@@ -44,7 +44,7 @@ describe("share/url", () => {
       source: argMapExample.source,
       config: structuredClone(argMapTruthAndRelevance.defaultConfig),
       features: {
-        "edge-claims": { option: "implicit-on-edge", params: { "edge-display": "all-edges-same" } },
+        "edge-claims": { option: "implied", params: { "edge-display": "all-edges-same" } },
       },
     };
     expect(decodeState(encodeState(other))?.features).toEqual(other.features);

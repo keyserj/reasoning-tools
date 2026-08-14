@@ -1,22 +1,22 @@
 # Rendering: argument map (truth and relevance)
 
-How the playground draws [this ontology](./ontology.md) — a separate question from what the ontology _is_, and a smaller one than an ideal app UX (this ontology has no equivalent of ameliorate-v2's `UX-design.md`). Nearly all of it lives in [toGraph.ts](./toGraph.ts), which flattens the parsed model into the shared `Graph`.
+How the playground draws [this ontology](./ontology.md) — a separate question from what the ontology _is_, and a smaller one than an ideal app UX (this ontology has no equivalent of ameliorate-v2's `UX-design.md`). Nearly all of it lives in [toGraph.ts](./toGraph.ts), which flattens the parsed model into the shared `RenderGraph`.
 
 ## Edge claims: two renderings, switchable
 
 Every supports/critiques edge makes a claim — `A supports B` — which can itself be scored and argued about, and mermaid can't point an arrow at another arrow. Both ways of drawing that are implemented, and the **Edge claims** feature ([features.ts](./features.ts)) switches between them live. Neither is obviously right, which is why this is a switch rather than a decision.
 
-**Explicit, separate** (the default). An edge is a labeled connector, `source ──"✅ ① supports [8,2,8]"──▶ target`. An edge someone argued about — one that is another edge's endpoint, or that carries a note — _additionally_ gets a **detached** node whose text spells its claim out (`① "wall-reduces" supports "wall"`, each side quoted and truncated to ~40 chars), and the arguments hang off that node instead of off either endpoint.
+**Spelled out** (the default). An edge is a labeled connector, `source ──"✅ ① supports [8,2,8]"──▶ target`. An edge someone argued about — one that is another edge's endpoint, or that carries a note — _additionally_ gets a **detached** node whose text spells its claim out (`① "wall-reduces" supports "wall"`, each side quoted and truncated to ~40 chars), and the arguments hang off that node instead of off either endpoint.
 
 - boxes appear only where something was actually argued, which is most of the box-count saving
 - the source text already reads this way: `= $reduction-supports-wall` is a block about a claim you can state in words
 - against: one concept has two visual forms, and a reader can't tell from the diagram which edges _could_ be argued about
 - the circled digit is what ties the two forms together — circled rather than `[1]`, which would read as a one-perspective score row. Numbered per document in source order; past ⑳ it falls back to `(21)`
 - the node is also anchored to the connector's **target** with the invisible `~~~` connector, which buys rank and nothing else: on build-a-wall ① still lands at the far side of the diagram, because the node's real edges (its arguers) pull it toward their own column
-- a detached node is a plain `claim`, not a `supports`/`critiques` box: its text already says which it is, and the connector carries the blue/red. The cost is that those two _node_ styles only bite in the implicit rendering, while the legend and style panel offer them either way
+- a detached node is a plain `claim`, not a `supports`/`critiques` box: its text already says which it is, and the connector carries the blue/red. The cost is that those two _node_ styles only bite in the **implied** rendering, while the legend and style panel offer them either way
 - a labeled connector always says type + scores; there is no param for saying less
 
-**Implicit, on the edge.** Every edge is reified into a node between its endpoints: `source ──▶ [✅ supports 8,2,8] ──▶ target`.
+**Implied.** Every edge is reified into a node between its endpoints: `source ──▶ [✅ supports 8,2,8] ──▶ target`.
 
 - arguing about an edge is then structurally identical to arguing about a claim, which is what this ontology says they are — every `$ref` resolves to a plain node and no case is special
 - it puts every score in a box, uniformly
@@ -26,7 +26,7 @@ Every supports/critiques edge makes a claim — `A supports B` — which can its
 
 Because edges can become nodes, `renderedNodeTypes.ts` lists `supports` and `critiques` even though the ontology calls them edge types; because they can also become connectors, `renderedEdgeTypes.ts` lists them too. That's the point of the "rendered" prefix: what can appear as a box is not the same set as what the ontology is made of, and it depends on the lens.
 
-Labeled connectors are colored, since without color a supports and a critiques connector differ only by the word in the label. That color comes from `EdgeTypeDef.color` rather than from `StyleConfig`: a connector is only ever drawn in one role, so the style panel would be offering the same swatch twice — the cost is that recoloring "Supports" there doesn't move the connectors. It takes the same border role a node's outline does, so it lifts in dark mode instead of sinking into the canvas. (How mermaid's `linkStyle` indices are counted is a trap documented where it's handled, in `../mermaidFlowchart.ts`.)
+Labeled connectors are colored, since without color a supports and a critiques connector differ only by the word in the label. The color is the one the document configures for the matching _node_ type: `EdgeTypeDef.colorTypeId` names that type rather than freezing a hex, so a connector and the box it is the other form of are one entry in the **Style** panel and always agree. It takes the same border role a node's outline does, so it lifts in dark mode instead of sinking into the canvas. (How mermaid's `linkStyle` indices are counted is a trap documented where it's handled, in `../mermaidFlowchart.ts`.)
 
 ### Questions - Unanswered
 
@@ -51,7 +51,7 @@ Left unconnected it was a graph component of its own, and dagre dropped it in am
 
 - is anchoring to only the first root right when a document has several unrelated top-level claims? The header will sit above one of them rather than above the whole diagram
   - [session-storage](./examples/session-storage.txt) makes this visible on a default example: its two competing root claims leave the header hanging above `redis` alone
-  - the alternative is mermaid frontmatter (`---\ntitle: "..."\n---`), a true caption outside the graph, which would need `title?: string` on the shared `Graph`. Titles are single-line with no wrapping, so a long `%description` becomes one very wide line
+  - the alternative is mermaid frontmatter (`---\ntitle: "..."\n---`), a true caption outside the graph, which would need `title?: string` on the shared `RenderGraph`. Titles are single-line with no wrapping, so a long `%description` becomes one very wide line
   - note a title would reach mermaid from the URL hash, so it would need newline-stripping and quote-escaping — same threat model as `src/share/url.ts`
 
 ## Colors and icons
@@ -59,4 +59,6 @@ Left unconnected it was a graph component of its own, and dagre dropped it in am
 Colors follow the colorblind-safe red/blue axis that [ameliorate-v2's UX-design.md](../../../../ameliorate-v2/UX-design.md) requires ("needs a colorblind-safe diverging palette, not red-green"), reusing the wireframes' `RB = { neg: "#b2182b", pos: "#2166ac" }`. Each type declares one color, and the fill, border and text a box is drawn in are derived from it per theme (`../typeColors.ts`).
 
 - `supports` vs `critiques` is the one pair that _needs_ color to separate it — same shape, same structural role
+- `claim` is amber `#d97706` and `note` sticky-note yellow `#d3ad20`. This is where the shared warm band gets divided, and the other ontologies follow it. `deriveTypeStyle` keeps only hue and chroma — lightness is a fixed per-theme target — so only a hue move is visible at all, and `critiques` red is pinned at 22° by `RB`, leaving `claim` and `note` to split 22°–92°. Amber-600 at 58° splits it evenly: 36° from red, 34° from yellow. Leaving `claim` at its old 76° put it 16° from a yellow `note`; pushing it to orange-600 would put it 19° from red
+- `claim` gets the wider side of that split because its neighbours have unequal backup: a note is a parallelogram on a dotted edge with 📝, while `claim` against `critiques` is rect-against-rect with only 💬/⛔. Red-against-orange is the pair protanopia compresses hardest, so this is the palette's thinnest margin — checked in the browser, not assumed
 - icons split the same way: ✅ / ⛔ for the support/critique axis, unrelated pictograms (💬 📝 📋) for content. The pair must stay distinguishable by _shape_ at the ~12px they render at, since that is what carries the distinction when color can't — a check against a barred circle survives that, same-shape 🔵 / 🔴 wouldn't. The emoji do carry their own green/red, the pairing the colors avoid, but it rides on top of shapes that already differ rather than doing the work

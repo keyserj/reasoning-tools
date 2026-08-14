@@ -43,7 +43,7 @@ The other examples live in [examples/](./examples/), each a writing of one of th
     - `= $some-id` on an edge's id: references the edge's claim, so it can be supported/critiqued
       - edge's claim: `$source-node [supports|critiques] $target-node`
     - a reference line never carries scores - the declaration holds them; where that hurts readability, the example echoes the referent's score in a `/` comment
-  - `~`: a note relevant to its parent line - it would show visually if this were rendered
+  - `~`: a note relevant to its parent line - it would show visually if this were rendered. With nothing above it, it annotates the document instead
   - `/`: a meta comment about the example, noting something about its parent line - it wouldn't show if rendered
 
 ### What the example shows

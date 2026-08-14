@@ -1,5 +1,6 @@
 import type { ParseError } from "../types.ts";
-import type { ArgDoc, Claim, Edge, Note } from "./model.ts";
+import type { Note } from "../notes.ts";
+import type { ArgDoc, Claim, Edge } from "./model.ts";
 import {
   DESCRIPTION_KEY,
   EDGE_TYPE_HEAD,
@@ -65,10 +66,9 @@ interface PendingEdge {
 /**
  * Parse this ontology's syntax into its own {@link ArgDoc} model.
  *
- * Lines: `=` claim, `<`/`>` a supports/critiques edge, `~` note, `%key: value` document
- * property, `/` meta-comment (dropped). Scores follow their marker directly (`=[4,1,8]`,
- * `supports[8,2,8]`). `&id` names the claim or edge on the line; `= $id` references one
- * instead of declaring it, which is how an argument attaches to an *edge's* implied claim.
+ * Lines are read through the markers ./markers.ts defines. Scores follow their marker directly
+ * (`=[4,1,8]`, `supports[8,2,8]`), and `= $id` references a claim or edge instead of declaring
+ * one, which is how an argument attaches to an *edge's* implied claim.
  *
  * This is the whole of parsing: turning the model into something mermaid can draw is a
  * rendering decision, and lives in ./toGraph.ts behind the `Edge claims` feature.
@@ -83,11 +83,13 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
   // once the claim nested under it is read, and a `= $ref` block can point further down the
   // file. So notes are filed at the end, when every id is known.
   const pendingNotes: { note: Note; ownerId: string }[] = [];
+  const docNotes: Note[] = [];
   // `%perspectives` may appear anywhere, so slot counts can't be checked until the end. This
   // is the only reason a line number outlives the loop; nothing in the model carries one.
   const scored: { scores: Scores; line: number }[] = [];
   const pendingEdges: PendingEdge[] = [];
   const stack: Frame[] = [];
+  let lastNoteIndent: number | null = null;
   const autoCounters: Record<string, number> = {};
   let description: string | undefined;
   let perspectives: string[] = [];
@@ -123,6 +125,11 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
     const content = raw.slice(ws.length);
     const marker = content[0];
     const kind = MARKER_TO_KIND[marker];
+
+    // A note is a leaf, so a `~` indented under one is annotating a note — which none of these
+    // ontologies express. Cleared by any other line, so a later sibling note is still fine.
+    const noteAbove = lastNoteIndent;
+    lastNoteIndent = kind === "note" ? indent : null;
 
     if (!kind) {
       errors.push({
@@ -255,12 +262,17 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
       const explicitId = idMatch?.[1];
       if (idMatch) body = body.slice(0, idMatch.index).trim();
 
-      if (!parent) {
-        errors.push({ line: lineNo, message: 'A "~" note needs a line above it to attach to' });
+      if (noteAbove !== null && indent > noteAbove) {
+        errors.push({ line: lineNo, message: 'A "~" note can\'t hang off another note' });
         continue;
       }
       const id = takeId(explicitId, "t", lineNo);
       usedIds.add(id);
+      if (!parent) {
+        // Nothing above it: a note about the document rather than about any one line.
+        docNotes.push({ id, text: body });
+        continue;
+      }
       pendingNotes.push({
         note: { id, text: body },
         ownerId: parent.kind === "claim" ? parent.id : parent.pending.id,
@@ -360,5 +372,5 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
 
   errors.sort((a, b) => a.line - b.line);
 
-  return { doc: { description, perspectives, claims, edges }, errors };
+  return { doc: { description, perspectives, claims, edges, notes: docNotes }, errors };
 }

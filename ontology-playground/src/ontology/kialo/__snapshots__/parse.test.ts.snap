@@ -1,0 +1,183 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parse > matches the parsed-model snapshot for the session-storage example 1`] = `
+{
+  "arguments": [
+    {
+      "claimId": "c1",
+      "id": "a1",
+      "impact": [
+        4,
+        2,
+      ],
+      "parentClaimId": "redis",
+      "stance": "pro",
+    },
+    {
+      "claimId": "ops-cost",
+      "id": "a2",
+      "impact": [
+        2,
+        3,
+      ],
+      "parentClaimId": "redis",
+      "stance": "con",
+    },
+    {
+      "claimId": "c2",
+      "id": "a3",
+      "impact": [
+        3,
+        2,
+      ],
+      "parentClaimId": "ops-cost",
+      "stance": "con",
+    },
+    {
+      "claimId": "c4",
+      "id": "a4",
+      "impact": [
+        3,
+        4,
+      ],
+      "parentClaimId": "c3",
+      "stance": "pro",
+    },
+    {
+      "claimId": "ops-cost",
+      "id": "a5",
+      "impact": [
+        3,
+        3,
+      ],
+      "parentClaimId": "c3",
+      "stance": "pro",
+    },
+    {
+      "claimId": "c5",
+      "id": "a6",
+      "impact": [
+        3,
+        1,
+      ],
+      "parentClaimId": "c3",
+      "stance": "con",
+    },
+    {
+      "claimId": "ops-cost",
+      "id": "a7",
+      "impact": [
+        3,
+        3,
+      ],
+      "parentClaimId": "c6",
+      "stance": "con",
+    },
+  ],
+  "claims": [
+    {
+      "id": "redis",
+      "notes": [],
+      "sources": [],
+      "text": "We should use Redis for session storage",
+    },
+    {
+      "id": "c1",
+      "notes": [],
+      "sources": [
+        {
+          "label": "Redis benchmarks",
+          "url": "https://redis.io/docs/latest/operate/oss_and_stack/management/optimization/benchmarks/",
+        },
+      ],
+      "text": "Redis is fast for hot reads",
+    },
+    {
+      "id": "ops-cost",
+      "notes": [],
+      "sources": [],
+      "text": "It's another service to operate",
+    },
+    {
+      "id": "c2",
+      "notes": [],
+      "sources": [],
+      "text": "We have many services already; we're efficient at setting up another one",
+    },
+    {
+      "id": "c3",
+      "notes": [],
+      "sources": [],
+      "text": "We should use Postgres rows for session storage",
+    },
+    {
+      "id": "c4",
+      "notes": [],
+      "sources": [],
+      "text": "One less dependency",
+    },
+    {
+      "id": "c5",
+      "notes": [
+        {
+          "id": "n1",
+          "text": "measured on last year's hardware",
+        },
+      ],
+      "sources": [],
+      "text": "Postgres is slower for hot reads",
+    },
+    {
+      "id": "c6",
+      "notes": [],
+      "sources": [],
+      "text": "We should use a worker queue",
+    },
+  ],
+  "description": "We're trying to resolve some design decisions for a web app.",
+  "notes": [],
+  "perspectives": [
+    "alice",
+    "bob",
+  ],
+  "questions": [
+    {
+      "id": "q1",
+      "text": "How should we handle session storage?",
+    },
+    {
+      "id": "q2",
+      "text": "How do we run background jobs?",
+    },
+  ],
+  "theses": [
+    {
+      "claimId": "redis",
+      "id": "t1",
+      "questionId": "q1",
+      "veracity": [
+        3,
+        1,
+      ],
+    },
+    {
+      "claimId": "c3",
+      "id": "t2",
+      "questionId": "q1",
+      "veracity": [
+        2,
+        3,
+      ],
+    },
+    {
+      "claimId": "c6",
+      "id": "t3",
+      "questionId": "q2",
+      "veracity": [
+        3,
+        2,
+      ],
+    },
+  ],
+}
+`;

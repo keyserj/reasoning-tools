@@ -1,0 +1,27 @@
+%description: We're trying to resolve some design decisions for a web app.
+%perspectives: [alice, bob]
+
+/ Kialo allows one root question per discussion. Two are used here so this example can cover
+/ the same ground as the IBIS and arg-map versions of it.
+
+? How should we handle session storage?
+
+  =[3,1] We should use Redis for session storage &redis
+    +[4,2] Redis is fast for hot reads
+      @ https://redis.io/docs/latest/operate/oss_and_stack/management/optimization/benchmarks/ Redis benchmarks
+    -[2,3] It's another service to operate &ops-cost
+      -[3,2] We have many services already; we're efficient at setting up another one
+
+  =[2,3] We should use Postgres rows for session storage
+    +[3,4] One less dependency
+    +[3,3] $ops-cost
+      / the same claim argues against Redis and for Postgres. Kialo links a claim rather than
+      / duplicating it, and scores each usage separately - so this one gets no score row on its
+      / box, and both of its connectors carry one instead
+    -[3,1] Postgres is slower for hot reads
+      ~ measured on last year's hardware
+
+? How do we run background jobs?
+
+  =[3,2] We should use a worker queue
+    -[3,3] $ops-cost

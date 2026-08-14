@@ -1,6 +1,14 @@
 import { createTokenSink, pushBody } from "../highlight.ts";
 import type { HighlightToken } from "../types.ts";
-import { ID_SUFFIX, LEADING_WS, MARKER_TO_TYPE, META_MARKER, REF_BODY } from "./markers.ts";
+import { NOTE_TYPE_ID } from "../notes.ts";
+import {
+  ID_SUFFIX,
+  LEADING_WS,
+  MARKER_TO_TYPE,
+  META_MARKER,
+  NOTE_MARKER,
+  REF_BODY,
+} from "./markers.ts";
 
 /**
  * Tokenize one line of IBIS source for the editor's highlight overlay.
@@ -21,6 +29,13 @@ export function highlightLine(line: string): HighlightToken[] {
   const marker = content[0];
   if (marker === META_MARKER) {
     sink.mark(content, "comment");
+    return sink.tokens;
+  }
+
+  if (marker === NOTE_MARKER) {
+    // No `$ref` here: a note's body is prose, and parse resolves no references in it.
+    sink.loneMarker(marker, NOTE_TYPE_ID);
+    pushBody(sink, content.slice(1), ID_SUFFIX);
     return sink.tokens;
   }
 

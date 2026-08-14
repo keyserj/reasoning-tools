@@ -74,7 +74,7 @@ Per keystroke: editor text → `ontology.parse` → the ontology's own model →
 
 Two invariants span files, so no one file owns them:
 
-- **Adding an ontology is a new `src/ontology/<id>/` plus one line in `registry.ts`, with no UI change.** If it seems to need one, the missing piece belongs in the contract, not in a component.
+- **Adding an ontology is a new `src/ontology/<id>/` plus one line in `registry.ts`, with no UI change.** If it seems to need one, the missing piece belongs in the contract, not in a component. The order that work goes in is [.claude/skills/add-ontology/SKILL.md](./.claude/skills/add-ontology/SKILL.md).
 - **A type carries one colour, decided once in the document's `StyleConfig`**, and everything showing that type reads it from there: the diagram's `classDef`, the legend, and the editor. Restyling a type in the **Style** dialog has to move all three together.
 
 ## ameliorate-v2

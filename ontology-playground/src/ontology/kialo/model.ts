@@ -2,11 +2,11 @@ import type { Note } from "../notes.ts";
 import type { Stance } from "./markers.ts";
 import type { Scores } from "./scores.ts";
 
-// The ontology's own model. Its shape is Kialo's two vote types: a claim is placed either as a
-// thesis (answering a question, scored on **veracity**) or as an argument (a pro or con of
-// another claim, scored on **impact**), and the score lives on the placement rather than on the
-// claim. That is what lets one claim be placed twice and scored differently in each spot, which
-// Kialo does and which ./ontology.md explains.
+// The ontology's own model. Its shape is Kialo's two vote types: a thesis is a claim answering a
+// question (or the root of a question-less discussion), scored on **veracity**; an argument is a
+// pro supporting or a con critiquing another claim, scored on **impact**. The score belongs to
+// the thesis or argument rather than to the claim, which is what lets one claim be reused and
+// scored differently in each spot — as Kialo does, and as ./ontology.md explains.
 //
 // Two relations rather than one because their rules differ and are worth stating: a thesis's
 // parent is a question or nothing, an argument's parent is a claim, and neither can take the
@@ -15,7 +15,7 @@ import type { Scores } from "./scores.ts";
 // Nothing here records where in the source a thing was written: line numbers are a fact about
 // the syntax, and the only place they belong is `ParseError`.
 
-/** Evidence for a claim. Follows the claim to every place it is placed, as it does in Kialo. */
+/** Evidence for a claim. Follows the claim to every usage of it, as it does in Kialo. */
 export interface Source {
   url: string;
   /** the `@` line's text after the URL, if it gave one */
@@ -34,7 +34,7 @@ export interface Question {
   text: string;
 }
 
-/** A claim placed as an answer to a question, or as the root of a question-less document. */
+/** A claim used as an answer to a question, or as the root of a question-less document. */
 export interface Thesis {
   id: string;
   claimId: string;
@@ -44,7 +44,7 @@ export interface Thesis {
   veracity: Scores | null;
 }
 
-/** A claim placed as a pro or con of another claim. */
+/** A claim used to support or critique another claim. */
 export interface Argument {
   id: string;
   claimId: string;
@@ -57,7 +57,7 @@ export interface Argument {
 export interface KialoDoc {
   /** `%description` — why the topic is being discussed */
   description?: string;
-  /** `%perspectives` — whose votes appear, and in what order the slots are read */
+  /** `%perspectives` — whose scores appear, and in what order the slots are read */
   perspectives: string[];
   questions: Question[];
   claims: Claim[];
@@ -67,24 +67,24 @@ export interface KialoDoc {
   notes: Note[];
 }
 
-/** Where a claim sits, which is the unit both the score and the stance belong to. */
-export type Placement = Thesis | Argument;
+/** One use of a claim, which is the unit both the score and the stance belong to. */
+export type ClaimUsage = Thesis | Argument;
 
-export function isArgument(placement: Placement): placement is Argument {
-  return "stance" in placement;
+export function isArgument(usage: ClaimUsage): usage is Argument {
+  return "stance" in usage;
 }
 
-export function isThesis(placement: Placement): placement is Thesis {
-  return !isArgument(placement);
+export function isThesis(usage: ClaimUsage): usage is Thesis {
+  return !isArgument(usage);
 }
 
-/** Every placement of each claim, keyed by claim id — what ./toGraph.ts decides a box from. */
-export function placementsByClaim(doc: KialoDoc): Map<string, Placement[]> {
-  const byClaim = new Map<string, Placement[]>();
-  for (const placement of [...doc.theses, ...doc.arguments]) {
-    const found = byClaim.get(placement.claimId);
-    if (found) found.push(placement);
-    else byClaim.set(placement.claimId, [placement]);
+/** Every usage of each claim, keyed by claim id — what ./toGraph.ts decides a box from. */
+export function usagesByClaim(doc: KialoDoc): Map<string, ClaimUsage[]> {
+  const byClaim = new Map<string, ClaimUsage[]>();
+  for (const usage of [...doc.theses, ...doc.arguments]) {
+    const found = byClaim.get(usage.claimId);
+    if (found) found.push(usage);
+    else byClaim.set(usage.claimId, [usage]);
   }
   return byClaim;
 }

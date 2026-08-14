@@ -7,17 +7,14 @@ This is an existing ontology rather than one being designed here, so this doc re
 ## Structure
 
 - Nodes
-  - Question — what a set of theses are competing answers to. Only at the root, and only in a multi-thesis discussion
-  - Claim — everything else. A claim is not pro or con in itself; it becomes one by where it is placed
-  - Source — evidence attached to a claim
-- Placements — where a claim sits, and the thing a vote actually belongs to
-  - Thesis — a claim placed as an answer to a question, or as the root of a question-less discussion
-  - Argument — a claim placed as a **pro** or a **con** of another claim
-- Votes, 0–4
-  - a thesis is voted on **veracity**: how true it is. Nothing sits above it for it to be relevant to
-  - an argument is voted on **impact**: [Kialo defines this](https://support.kialo-edu.com/en/hc/about-voting/) as the claim's veracity _and_ its relevance to the parent, together in one number
+  - Question — `?`. What a set of theses are competing answers to. Only at the root, and only in a multi-thesis discussion
+  - Thesis — `=`. A claim answering the question, or the root of a question-less discussion
+  - Pro / Con — `+` / `-`. A claim supporting or critiquing the claim above it
+- Scores, 0–4
+  - a thesis is scored on **veracity**: how true it is. Nothing sits above it for it to be relevant to
+  - a pro/con is scored on **impact**: [Kialo defines this](https://support.kialo-edu.com/en/hc/about-voting/) as the claim's veracity _and_ its relevance to the parent, together in one number
 
-Kialo scores per placement, so one claim placed in two spots is voted on separately in each — and can be a pro in one and a con in the other. That is why the vote lives on the placement and a `Claim` here holds only content.
+One claim can be used in more than one spot — `$id`, which is Kialo's _link_. Each usage is scored separately and takes its own stance, so the same claim can be a pro in one place and a con in another, and at most one of its usages may be a thesis. Text, sources and notes are shared across usages; scores and stance are not.
 
 ## What one number costs
 
@@ -41,26 +38,26 @@ A question is core to [IBIS](../ibis/ontology.md): a topic starts with one, and 
   - indentation nests a line under the line above
   - `?`: a discussion question, at column 0 only. Its children are theses
   - `=`: a thesis. Its children are arguments
-  - `+` / `-`: a claim placed as a pro or a con of the claim above
+  - `+` / `-`: a claim supporting or critiquing the claim above
   - `@ [url] [label]`: a source for the claim above. The label is optional
   - `~`: a note on the claim above — an authoring aside, never voted on. With no claim above it, it annotates the document instead
   - `/`: a meta comment about the example - not shown in the diagram
   - `%[key]: [value]`: document-level property (must be at column 0)
     - `%description`: what the discussion is about
-    - `%perspectives: [person1, person2]`: whose votes appear, and in what order the slots are read
-  - `[X,Y]`: votes, 0-4, one slot per person in the `%perspectives` order
+    - `%perspectives: [person1, person2]`: whose scores appear, and in what order the slots are read
+  - `[X,Y]`: scores, 0-4, one slot per person in the `%perspectives` order
     - on a `=` line: veracity
-    - on a `+` / `-` line: that placement's impact
+    - on a `+` / `-` line: that usage's impact
     - `-` in a slot: that person didn't vote
     - no brackets at all: nobody voted
   - `&some-id`: sets an id on the claim whose line it appears on
-  - `$some-id`: places that claim here as well, which is Kialo's _link_. A linked claim keeps one text, one set of sources and one set of children everywhere, but takes its own stance and its own votes in each spot
+  - `$some-id`: reuses that claim here, which is Kialo's _link_. A linked claim keeps one text, one set of sources and one set of children everywhere, but takes its own stance and its own scores in each usage
 
 ## Structure Details
 
 ### Sources
 
-Kialo attaches sources to the claim rather than to the placement, so they follow it everywhere it is linked, as edits to a linked claim do. This ontology does the same. The playground shows only that evidence exists — see [rendering.md](./rendering.md).
+Kialo attaches sources to the claim rather than to the thesis or pro/con that uses it, so they follow it everywhere it is linked, as edits to a linked claim do. This ontology does the same. The playground shows only that evidence exists — see [rendering.md](./rendering.md).
 
 ### Notes
 

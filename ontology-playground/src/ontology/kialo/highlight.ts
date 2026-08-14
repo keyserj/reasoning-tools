@@ -49,7 +49,7 @@ export function highlightLine(line: string): HighlightToken[] {
   }
 
   if (kind === "question" || kind === "note") {
-    // No `$ref` in either body: a question is never a second placement, and a note is prose.
+    // No `$ref` in either body: a question is never reused, and a note is prose.
     sink.loneMarker(marker, kind === "question" ? "question" : "note");
     pushBody(sink, content.slice(1), ID_SUFFIX);
     return sink.tokens;

@@ -18,9 +18,9 @@ export const MARKER_TO_KIND: Record<string, LineKind | undefined> = {
 export type LineKind =
   /** `?` — a discussion question, which only theses may nest under */
   | "question"
-  /** `=` — a claim placed as an answer, carrying its veracity */
+  /** `=` — a claim used as an answer, carrying its veracity */
   | "thesis"
-  /** `+` / `-` — a claim placed as a pro or con of the claim above, carrying its impact */
+  /** `+` / `-` — a claim supporting or critiquing the claim above, carrying its impact */
   | "pro"
   | "con"
   /** `@` — a source for the claim above */
@@ -32,7 +32,7 @@ export type LineKind =
 
 export const EXPECTED_MARKERS = "? = + - @ ~ % /";
 
-/** The two stances a claim can be placed with; also the ids of the types they render as. */
+/** The two stances an argument can take; also the ids of the types they render as. */
 export type Stance = "pro" | "con";
 
 export function isStance(kind: LineKind): kind is Stance {
@@ -51,7 +51,7 @@ export const LEADING_WS = /^[ \t]*/;
 /** A trailing `&id`, naming the claim the line declares. */
 export const ID_SUFFIX = /\s*&([A-Za-z0-9_-]+)\s*$/;
 
-/** A body that is only `$id`: a second placement of a claim declared elsewhere. */
+/** A body that is only `$id`: reusing a claim declared elsewhere. */
 export const REF_BODY = /^\$([A-Za-z0-9_-]+)$/;
 
 /** A `%key: value` line, split into its key and its value. */

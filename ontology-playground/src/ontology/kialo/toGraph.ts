@@ -4,19 +4,19 @@ import { addDocumentNotes, addNotes } from "../notes.ts";
 import {
   type Argument,
   type Claim,
+  type ClaimUsage,
   type KialoDoc,
-  type Placement,
   isArgument,
   isThesis,
-  placementsByClaim,
+  usagesByClaim,
 } from "./model.ts";
 import { type Scores, formatScores } from "./scores.ts";
 
 // How this ontology gets drawn — the one file to rewrite if the rendering should change; the
 // reasoning is in ./rendering.md.
 //
-// The problem it solves: a score and a stance belong to a *placement*, but a claim placed twice
-// is still one box. So a box speaks for its placement only when it has exactly one, and
+// The problem it solves: a score and a stance belong to one usage of a claim, but a claim reused
+// elsewhere is still one box. So a box speaks for its usage only when it has exactly one, and
 // otherwise stays neutral and lets the connectors speak.
 
 /** Id of the header node. Leading `_` is already a safe mermaid identifier. */
@@ -38,30 +38,30 @@ function withScores(text: string, scores: Scores | null): string {
 function topicText(doc: KialoDoc): string {
   const parts: string[] = [];
   if (doc.description) parts.push(doc.description);
-  if (doc.perspectives.length > 0) parts.push(`Votes: [${doc.perspectives.join(", ")}]`);
+  if (doc.perspectives.length > 0) parts.push(`Scores: [${doc.perspectives.join(", ")}]`);
   return parts.join("\n");
 }
 
 /**
- * The placement a claim's box speaks for, or `null` when it has to stay neutral.
+ * The usage a claim's box speaks for, or `null` when it has to stay neutral.
  *
  * A single argument is folded into the box: that is the ordinary claim, and folding is what
  * keeps a Kialo diagram as plain as an IBIS one. Anything else — a thesis, which has a veracity
- * but no stance, or a claim placed twice, whose placements disagree — leaves the box a plain
- * `claim` and pushes what the placements say onto the connectors.
+ * but no stance, or a claim reused elsewhere, whose usages disagree — leaves the box a plain
+ * `claim` and pushes what the usages say onto the connectors.
  */
-function foldedArgument(placements: Placement[]): Argument | null {
-  if (placements.length !== 1) return null;
-  const only = placements[0];
+function foldedArgument(usages: ClaimUsage[]): Argument | null {
+  if (usages.length !== 1) return null;
+  const only = usages[0];
   return isArgument(only) ? only : null;
 }
 
 /** A claim's box: its stance if it has just one, the score that goes with it, and its sources. */
-function claimNode(claim: Claim, placements: Placement[], showIcons: boolean): RenderNode {
-  const folded = foldedArgument(placements);
-  // A placement is a thesis or an argument, never both, and a claim may be a thesis only once,
-  // so a box reaches here with at most one score to show and no precedence to settle.
-  const thesis = placements.find(isThesis);
+function claimNode(claim: Claim, usages: ClaimUsage[], showIcons: boolean): RenderNode {
+  const folded = foldedArgument(usages);
+  // A usage is a thesis or an argument, never both, and a claim may be a thesis only once, so a
+  // box reaches here with at most one score to show and no precedence to settle.
+  const thesis = usages.find(isThesis);
 
   const evidence = showIcons && claim.sources.length > 0 ? ` ${SOURCE_ICON}` : "";
   return {
@@ -75,7 +75,7 @@ function claimNode(claim: Claim, placements: Placement[], showIcons: boolean): R
 export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
   const nodes: RenderNode[] = [];
   const edges: RenderEdge[] = [];
-  const byClaim = placementsByClaim(doc);
+  const byClaim = usagesByClaim(doc);
 
   const header = topicText(doc);
   if (header !== "") nodes.push({ id: TOPIC_ID, type: "topic", text: header });
@@ -85,8 +85,8 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
   }
 
   for (const claim of doc.claims) {
-    const placements = byClaim.get(claim.id) ?? [];
-    nodes.push(claimNode(claim, placements, showIcons));
+    const usages = byClaim.get(claim.id) ?? [];
+    nodes.push(claimNode(claim, usages, showIcons));
     // Per claim rather than in one pass, so a note's box is declared next to the claim it is
     // about; mermaid draws boxes in the order they're emitted.
     addNotes(nodes, edges, [claim]);

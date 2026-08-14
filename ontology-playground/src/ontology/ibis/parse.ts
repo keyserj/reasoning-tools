@@ -121,7 +121,7 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
     // The `~` note, which is the one marker with no node type: it annotates the line above
     // rather than answering it. A note is a leaf and never becomes a frame, so a line nested
     // under one attaches to the note's own parent — and `$id` in its body stays prose, since a
-    // note is never a second placement of something.
+    // note never reuses something declared elsewhere.
     if (type === undefined) {
       if (noteAbove !== null && indent > noteAbove) {
         errors.push({ line: lineNo, message: 'A "~" note can\'t hang off another note' });

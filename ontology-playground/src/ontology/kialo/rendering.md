@@ -2,38 +2,38 @@
 
 How the playground draws [this ontology](./ontology.md) — a separate question from what the ontology _is_. Nearly all of it lives in [toGraph.ts](./toGraph.ts), which flattens the parsed model into the shared `RenderGraph`.
 
-## One box, two placements
+## One box, two usages
 
-A vote and a stance belong to a _placement_, not to a claim ([ontology.md](./ontology.md)), but a claim placed twice is still one box in the diagram. Kialo's own UI dodges this by showing one location at a time; a whole-tree diagram can't.
+A score and a stance belong to one usage of a claim, not to the claim itself ([ontology.md](./ontology.md)), but a claim reused elsewhere is still one box in the diagram. Kialo's own UI dodges this by showing one location at a time; a whole-tree diagram can't.
 
-So a box speaks for its placement only when it has exactly one, and otherwise stays neutral and lets the connectors speak:
+So a box speaks for its usage only when it has exactly one, and otherwise stays neutral and lets the connectors speak:
 
-- **exactly one argument** → a `pro` / `con` box carrying that argument's impact, and a plain connector. This is the ordinary claim, and folding is what keeps a Kialo diagram as plain as an IBIS one
+- **exactly one pro/con** → a `pro` / `con` box carrying that usage's impact, and a plain connector. This is the ordinary claim, and folding is what keeps a Kialo diagram as plain as an IBIS one
 - **a thesis** → a plain `claim` box carrying its veracity. There is no stance to show: nothing sits above it
-- **placed twice or more** → a plain `claim` box with no votes on it, and every connector takes its placement's stance color, icon and impact
+- **reused, so two usages or more** → a plain `claim` box with no scores on it, and every connector takes its usage's stance color, icon and impact
 
-That last case is why there is no `thesis` node type: a thesis and a twice-placed claim are one rendering case, a box that can't carry a single stance, so both are `claim`. It leaves six node types, and makes this palette IBIS's plus a `topic`.
+That last case is why there is no `thesis` node type: a thesis and a reused claim are one rendering case, a box that can't carry a single stance, so both are `claim`. It leaves six node types, and makes this palette IBIS's plus a `topic`.
 
-An unfolded connector with no votes is drawn colored but unlabeled — the color still says which stance it is, and mermaid hangs the edge icon off the label, so that goes too.
+An unfolded connector with no scores is drawn colored but unlabeled — the color still says which stance it is, and mermaid hangs the edge icon off the label, so that goes too.
 
 ### Questions - Unanswered
 
 - is the neutral box findable? A reader scanning for red and blue may read amber as "not an argument" rather than "an argument twice over". The connectors say it, but only if you follow them
-- three placements of one claim ([session-storage](./examples/session-storage.txt)'s `ops-cost`) is where this gets busiest. It reads at that size; it isn't obvious it would at ten
+- three usages of one claim ([session-storage](./examples/session-storage.txt)'s `ops-cost`) is where this gets busiest. It reads at that size; it isn't obvious it would at ten
 
 ## Sources
 
 A claim with sources gets a `🔗` appended to its text, and the URL never reaches the diagram. Sources are the one thing a real Kialo discussion has dozens of — the map this ontology was reviewed against carries 64 — so a box each would swamp the argument, and the useful fact at a glance is that evidence exists at all. It's an icon, so it rides on `showIcons` like every other; that's the one icon this ontology adds itself rather than leaving to the shared renderer, which is why `toMermaid` passes `showIcons` down into `toGraph`.
 
-## Votes
+## Scores
 
-Votes render on a second line, in the same `[3,1]` form as the source, so a claim reads as its text then its votes. `toGraph.ts` puts a newline in the node's text and the shared renderer turns it into a `<br/>`.
+Scores render on a second line, in the same `[3,1]` form as the source, so a claim reads as its text then its scores. `toGraph.ts` puts a newline in the node's text and the shared renderer turns it into a `<br/>`.
 
 Kialo itself draws a four-bar impact meter showing the crowd's average, plus a gauge for how many people voted. Per-perspective slots are the playground's shape instead, so the same document can be written in any of the three ontologies and compared slot for slot. The average is derivable from them; which way round to store it isn't a close call.
 
 ## The topic header
 
-`%description` and `%perspectives` render as one `topic` box. It earns its place: a vote row like `[3,1]` can't be decoded without knowing the slot order.
+`%description` and `%perspectives` render as one `topic` box. It earns its place: a score row like `[3,1]` can't be decoded without knowing the slot order.
 
 Left unconnected it would be a graph component of its own, and dagre drops those in among the claims where they read like part of the argument. Every root — each question, plus any thesis with no question — is anchored to it by an `anchor` edge, which uses mermaid's invisible `~~~` connector so it draws nothing and only fixes rank.
 

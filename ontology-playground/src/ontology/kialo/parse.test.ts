@@ -5,7 +5,7 @@ import example from "./examples/session-storage.txt?raw";
 const messages = (source: string) => parse(source).errors.map((e) => e.message);
 
 describe("parse", () => {
-  it("places a claim under a question as a thesis, scored on veracity", () => {
+  it("uses a claim under a question as a thesis, scored on veracity", () => {
     const { doc, errors } = parse("? Q &q\n  =[3] Thesis &t");
     expect(errors).toEqual([]);
     expect(doc.questions).toEqual([{ id: "q", text: "Q" }]);
@@ -19,7 +19,7 @@ describe("parse", () => {
     expect(doc.theses[0]).toMatchObject({ claimId: "t", questionId: null, veracity: [4] });
   });
 
-  it("places a claim under a claim as an argument, scored on impact", () => {
+  it("uses a claim under a claim as an argument, scored on impact", () => {
     const { doc, errors } = parse("= Thesis &t\n  +[3] Pro &p\n  -[1] Con &c");
     expect(errors).toEqual([]);
     expect(doc.arguments).toMatchObject([
@@ -28,7 +28,7 @@ describe("parse", () => {
     ]);
   });
 
-  it("gives a `$ref` its own placement and its own score, one claim in two spots", () => {
+  it("gives a `$ref` its own usage and its own score, one claim in two spots", () => {
     const { doc, errors } = parse("= A &a\n  -[1] Cost &cost\n= B &b\n  +[4] $cost");
     expect(errors).toEqual([]);
     expect(doc.claims.filter((c) => c.id === "cost")).toHaveLength(1);
@@ -58,7 +58,7 @@ describe("parse", () => {
     ]);
   });
 
-  it("keeps the claim but drops the placement when a line is nested somewhere impossible", () => {
+  it("keeps the claim but drops the usage when a line is nested somewhere impossible", () => {
     // The claim still stands so its own children have somewhere to attach, and the error strip
     // is what says the line is wrong.
     const nested = parse("= T &t\n  = Nope &n");
@@ -82,7 +82,7 @@ describe("parse", () => {
     ]);
   });
 
-  it("rejects a second thesis placement, which would mean two veracities for one claim", () => {
+  it("rejects a second thesis usage, which would mean two veracities for one claim", () => {
     expect(messages("? A &qa\n  =[1] T &t\n? B &qb\n  =[4] $t")).toEqual([
       "A claim can only be a thesis once — it would have two veracity scores",
     ]);
@@ -108,7 +108,7 @@ describe("parse", () => {
     expect(doc.claims.flatMap((c) => c.notes)).toEqual([]);
   });
 
-  it("holds votes to 0-4 and to the perspective count", () => {
+  it("holds scores to 0-4 and to the perspective count", () => {
     expect(messages("%perspectives: [a, b]\n=[5,1] T")).toEqual(['Score "5" is out of range 0-4']);
     expect(messages("%perspectives: [a, b]\n=[1] T")).toEqual([
       "Expected 2 scores to match %perspectives, got 1",

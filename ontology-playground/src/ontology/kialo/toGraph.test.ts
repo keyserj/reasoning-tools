@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { parse } from "./parse.ts";
 import { toGraph } from "./toGraph.ts";
 
-// The fold rule, case by case. A score and a stance belong to a *placement*, but a claim placed
-// twice is still one box, so which of them a box may speak for is the decision this ontology's
-// rendering turns on — see ./rendering.md. A mermaid snapshot records what happened without
-// saying what was meant, which is why these are separate from ./toMermaid.test.ts.
+// The fold rule, case by case. A score and a stance belong to one usage of a claim, but a reused
+// claim is still one box, so which of its usages a box may speak for is the decision this
+// ontology's rendering turns on — see ./rendering.md. A mermaid snapshot records what happened
+// without saying what was meant, which is why these are separate from ./toMermaid.test.ts.
 
 const graph = (source: string, showIcons = true) => toGraph(parse(source).doc, showIcons);
 const node = (source: string, id: string, showIcons = true) =>
@@ -28,8 +28,8 @@ describe("toGraph", () => {
     expect(edgesFrom(source, "o")).toEqual([{ from: "o", to: "t", type: "link" }]);
   });
 
-  it("keeps a claim placed twice neutral, and puts each placement on its own connector", () => {
-    // Two placements disagree about both stance and score, so the box can't speak for either.
+  it("keeps a reused claim neutral, and puts each usage on its own connector", () => {
+    // Two usages disagree about both stance and score, so the box can't speak for either.
     const source = "= A &a\n  -[1] Shared &s\n= B &b\n  +[4] $s";
     expect(node(source, "s")).toEqual({ id: "s", type: "claim", text: "Shared" });
     expect(edgesFrom(source, "s")).toEqual([
@@ -38,7 +38,7 @@ describe("toGraph", () => {
     ]);
   });
 
-  it("shows a thesis's veracity even when it is also placed as someone's argument", () => {
+  it("shows a thesis's veracity even when it is also reused as someone's argument", () => {
     const source = "=[3] A &a\n=[2] B &b\n  +[4] $a";
     expect(node(source, "a")).toEqual({ id: "a", type: "claim", text: "A\n[3]" });
     expect(edgesFrom(source, "a")).toEqual([{ from: "a", to: "b", type: "pro", label: "[4]" }]);

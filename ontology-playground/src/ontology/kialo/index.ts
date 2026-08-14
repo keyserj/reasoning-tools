@@ -11,7 +11,7 @@ import buildAWall from "./examples/build-a-wall.txt?raw";
 import { defaultConfig } from "./defaultConfig.ts";
 
 const legendNote =
-  "Every claim is a pro or con of the claim above it, and its vote is impact — how true it is and how much it bears on that parent, in one number 0-4. A thesis has nothing above it, so its vote is veracity alone. A claim placed in two spots is voted on separately in each, which is why its box goes plain and its connectors carry the votes.";
+  "Every claim is a pro or con of the claim above it, and its score is impact — how true it is and how much it bears on that parent, in one number 0-4. A thesis has nothing above it, so its score is veracity alone. A claim reused in two spots is scored separately in each, which is why its box goes plain and its connectors carry the scores.";
 
 const placeholder =
   "%perspectives: [you]\n=[3] Your thesis here &thesis\n  +[4] A reason to believe it\n  -[2] A reason to doubt it";
@@ -32,8 +32,8 @@ export const kialo = defineOntology<KialoDoc>({
     { id: "session-storage", source: sessionStorage },
     { id: "build-a-wall", source: buildAWall },
   ],
-  // Nothing here poses a rendering question worth switching between — how a placed-twice claim
-  // is drawn is settled in ./rendering.md, not offered as a lens.
+  // Nothing here poses a rendering question worth switching between — how a reused claim is
+  // drawn is settled in ./rendering.md, not offered as a lens.
   features: [],
   placeholder,
   defaultConfig,

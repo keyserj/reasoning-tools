@@ -2,7 +2,7 @@
 %perspectives: [alice, bob, casey]
   / personas: alice is moderate; bob doubts illegal immigration is a real problem and opposes the wall; casey wants illegal immigration reduced hard and favors the wall
 
-/ Adapted from the arg-map version so the two can be read side by side. Votes are 0-4 here and
+/ Adapted from the arg-map version so the two can be read side by side. Scores are 0-4 here and
 / every one of them folds that ontology's two numbers - how true a claim is, and how much it
 / bears on its parent - into one. The comments below mark where that costs something.
 
@@ -36,5 +36,5 @@
   -[3,3,1] Hiring more immigration judges would cut illegal immigration more cheaply than a wall &more-judges
     / a top-level claim in arg-map, which has no thesis for it to hang on
     +[3,3,2] $wall-cost
-      / wall-cost is placed twice - against the wall, and for the cheaper alternative - so its
-      / box shows no votes and each of its connectors carries its own
+      / wall-cost is used twice - against the wall, and for the cheaper alternative - so its
+      / box shows no scores and each of its connectors carries its own

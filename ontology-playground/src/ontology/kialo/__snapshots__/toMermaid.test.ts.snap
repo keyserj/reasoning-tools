@@ -2,7 +2,7 @@
 
 exports[`toMermaid > matches the generated-mermaid snapshot for the build-a-wall example 1`] = `
 "flowchart BT
-  _topic[["📋 Discussing how worthwhile it is to build a wall along the US's southern border.<br/>Votes: [alice, bob, casey]"]]:::topic
+  _topic[["📋 Discussing how worthwhile it is to build a wall along the US's southern border.<br/>Scores: [alice, bob, casey]"]]:::topic
   wall["💬 The US should build a wall along its southern border<br/>[2,0,4]"]:::claim
   wall_reduces["✅ A border wall would substantially reduce illegal immigration<br/>[2,0,4]"]:::pro
   c1["✅ A wall physically stops crossings without needing continuous surveillance<br/>[4,1,4]"]:::pro
@@ -42,7 +42,7 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the build-a-wall
 
 exports[`toMermaid > matches the generated-mermaid snapshot for the session-storage example 1`] = `
 "flowchart BT
-  _topic[["📋 We're trying to resolve some design decisions for a web app.<br/>Votes: [alice, bob]"]]:::topic
+  _topic[["📋 We're trying to resolve some design decisions for a web app.<br/>Scores: [alice, bob]"]]:::topic
   q1{{"❓ How should we handle session storage?"}}:::question
   q2{{"❓ How do we run background jobs?"}}:::question
   redis["💬 We should use Redis for session storage<br/>[3,1]"]:::claim

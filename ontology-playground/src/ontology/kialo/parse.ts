@@ -49,7 +49,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
 
   const usedIds = new Set<string>();
   const claimIds = new Set<string>();
-  const refUses: { refId: string; line: number }[] = [];
+  const refUsages: { refId: string; line: number }[] = [];
   // Sources and notes name their claim by id, and a `$ref` may point further down the file, so
   // they are filed once every id is known.
   const pendingSources: { source: Source; claimId: string }[] = [];
@@ -230,7 +230,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
       continue;
     }
 
-    // A `=`, `+` or `-` line: a claim, plus the placement that puts it where it is.
+    // A `=`, `+` or `-` line: a claim, plus the usage that puts it where it is.
     // Scores bind tightly to the marker (`=[3,1]`), so they're read before trimming.
     const { scores, rest, messages } = takeScores(content.slice(1));
     for (const message of messages) errors.push({ line: lineNo, message });
@@ -247,7 +247,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
       if (explicitId !== undefined) {
         errors.push({ line: lineNo, message: `"$${claimId}" can't also set an id with "&"` });
       }
-      refUses.push({ refId: claimId, line: lineNo });
+      refUsages.push({ refId: claimId, line: lineNo });
     } else {
       if (body === "") {
         errors.push({ line: lineNo, message: "A claim needs some text" });
@@ -262,7 +262,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
 
     if (kind === "thesis") {
       if (parent?.kind === "claim") {
-        // No placement: the line says "answer to a question" and there is no question here.
+        // No usage: the line says "answer to a question" and there is no question here.
         // The claim still stands, so its own children have somewhere to attach.
         errors.push({
           line: lineNo,
@@ -308,7 +308,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
   }
 
   // Resolved last so a reference may point at something declared further down the file.
-  for (const use of refUses) {
+  for (const use of refUsages) {
     if (!claimIds.has(use.refId)) {
       errors.push({ line: use.line, message: `Unknown reference "$${use.refId}"` });
     }

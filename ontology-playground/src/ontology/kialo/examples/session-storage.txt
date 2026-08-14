@@ -16,8 +16,8 @@
     +[3,4] One less dependency
     +[3,3] $ops-cost
       / the same claim argues against Redis and for Postgres. Kialo links a claim rather than
-      / duplicating it, and votes on each placement separately - so this one gets no score row
-      / on its box, and both of its connectors carry one instead
+      / duplicating it, and scores each usage separately - so this one gets no score row on its
+      / box, and both of its connectors carry one instead
     -[3,1] Postgres is slower for hot reads
       ~ measured on last year's hardware
 

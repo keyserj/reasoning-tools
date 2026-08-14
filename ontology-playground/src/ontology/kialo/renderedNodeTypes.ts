@@ -6,11 +6,12 @@ import { noteNodeType } from "../notes.ts";
 // marker produces which type) lives in ./markers.ts instead.
 //
 // These are not the ontology's own types — see ontology.md for those, and rendering.md for how
-// one becomes the other. `pro` and `con` are *placements* of a claim, drawn as boxes only where
-// a claim has exactly one of them; `claim` is what a box falls back to when it can't carry one
-// stance, which is a thesis or a claim placed twice. There is no `thesis` type for that reason.
-// `topic` is the header carrying `%description` and the `%perspectives` key, without which a
-// score row like [3,1] can't be decoded.
+// one becomes the other. `pro` and `con` are claims arguing in support of or in critique of
+// another claim, drawn as boxes only where a claim has exactly one such usage; `claim` is what a
+// box falls back to when it can't carry one stance, which is a thesis or a claim reused
+// elsewhere. There is no `thesis` type for that reason. `topic` is the header carrying
+// `%description` and the `%perspectives` key, without which a score row like [3,1] can't be
+// decoded.
 //
 // One color per type: the fill, border and text it's drawn in are derived from it, per theme
 // (../typeColors.ts). The palette is the one the other ontologies use, so the same topic stays
@@ -35,7 +36,8 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     id: "claim",
     label: "Claim",
     icon: "💬",
-    description: "A thesis, or a claim placed in more than one spot — a box with no one stance.",
+    description:
+      "A thesis, or a claim reused in more than one spot — a box that can't take one stance.",
     shape: ['["', '"]'],
     defaultColor: "#d97706",
   },
@@ -43,7 +45,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     id: "pro",
     label: "Pro",
     icon: "✅",
-    description: "A claim placed as a reason to believe the claim above it.",
+    description: "A reason to believe the claim above it.",
     shape: ['["', '"]'],
     defaultColor: "#2166ac",
   },
@@ -51,7 +53,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     id: "con",
     label: "Con",
     icon: "⛔",
-    description: "A claim placed as a reason to doubt the claim above it.",
+    description: "A reason to doubt the claim above it.",
     shape: ['["', '"]'],
     defaultColor: "#b2182b",
   },
@@ -63,7 +65,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     id: "topic",
     label: "Topic",
     icon: "📋",
-    description: "The header box: what this discussion is and whose votes the slots are.",
+    description: "The header box: what this discussion is and whose scores the slots are.",
     shape: ['[["', '"]]'],
     defaultColor: "#7c3aed",
   },

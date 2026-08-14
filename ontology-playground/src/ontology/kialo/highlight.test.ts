@@ -5,7 +5,7 @@ import { highlightLine } from "./highlight.ts";
 // a token boundary in the wrong place colors the wrong characters even when every kind is right.
 // The concatenation invariant itself is checked over every shipped example in ../registry.test.ts.
 describe("highlightLine", () => {
-  it("colors a pro marker and its votes, leaving the body alone", () => {
+  it("colors a pro marker and its scores, leaving the body alone", () => {
     expect(highlightLine("  +[3,1] Redis is fast")).toEqual([
       { text: "  " },
       { text: "+", kind: "type", typeId: "pro", loneMarker: true },
@@ -30,7 +30,7 @@ describe("highlightLine", () => {
     ]);
   });
 
-  it("marks a body that is only a $ref, votes and all", () => {
+  it("marks a body that is only a $ref, scores and all", () => {
     expect(highlightLine("    -[2,0] $ops-cost")).toEqual([
       { text: "    " },
       { text: "-", kind: "type", typeId: "con", loneMarker: true },

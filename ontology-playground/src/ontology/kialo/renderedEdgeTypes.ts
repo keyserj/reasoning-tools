@@ -6,8 +6,8 @@ import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 // What can appear as a *connector* in the diagram.
 //
 // `link` is the common case and carries nothing: a claim whose box already says which stance it
-// was placed with has nothing left for its connector to say. `pro` and `con` are for the claims
-// whose box couldn't — see ./rendering.md — and they name the node type they take their color
+// takes has nothing left for its connector to say. `pro` and `con` are for the claims whose box
+// couldn't — see ./rendering.md — and they name the node type they take their color
 // from (`colorTypeId`) rather than holding a hex, so restyling "Pro" moves its boxes and its
 // connectors together.
 export const renderedEdgeTypes: EdgeTypeDef[] = [

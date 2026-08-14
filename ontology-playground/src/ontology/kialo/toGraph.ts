@@ -1,4 +1,4 @@
-import type { Graph, GraphEdge, GraphNode } from "../types.ts";
+import type { RenderEdge, RenderNode, RenderGraph } from "../types.ts";
 import {
   type Argument,
   type Claim,
@@ -55,7 +55,7 @@ function foldedArgument(placements: Placement[]): Argument | null {
 }
 
 /** A claim's box: its stance if it has just one, the score that goes with it, and its sources. */
-function claimNode(claim: Claim, placements: Placement[], showIcons: boolean): GraphNode {
+function claimNode(claim: Claim, placements: Placement[], showIcons: boolean): RenderNode {
   const folded = foldedArgument(placements);
   // A placement is a thesis or an argument, never both, and a claim may be a thesis only once,
   // so a box reaches here with at most one score to show and no precedence to settle.
@@ -69,10 +69,10 @@ function claimNode(claim: Claim, placements: Placement[], showIcons: boolean): G
   };
 }
 
-/** Flatten a {@link KialoDoc} into the shared {@link Graph}. */
-export function toGraph(doc: KialoDoc, showIcons: boolean): Graph {
-  const nodes: GraphNode[] = [];
-  const edges: GraphEdge[] = [];
+/** Flatten a {@link KialoDoc} into the shared {@link RenderGraph}. */
+export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
+  const nodes: RenderNode[] = [];
+  const edges: RenderEdge[] = [];
   const byClaim = placementsByClaim(doc);
 
   const header = topicText(doc);

@@ -1,4 +1,4 @@
-import type { FeatureState, Graph, GraphEdge, GraphNode } from "../types.ts";
+import type { FeatureState, RenderEdge, RenderNode, RenderGraph } from "../types.ts";
 import { featureOption, featureParam } from "../features.ts";
 import type { ArgDoc, Claim, Edge } from "./model.ts";
 import {
@@ -47,8 +47,8 @@ function topicText(doc: ArgDoc): string {
 }
 
 /** Topic header + one node per claim: the part both renderings share. */
-function claimNodes(doc: ArgDoc): { nodes: GraphNode[]; known: Set<string> } {
-  const nodes: GraphNode[] = [];
+function claimNodes(doc: ArgDoc): { nodes: RenderNode[]; known: Set<string> } {
+  const nodes: RenderNode[] = [];
   const known = new Set<string>();
 
   const header = topicText(doc);
@@ -70,8 +70,8 @@ function claimNodes(doc: ArgDoc): { nodes: GraphNode[]; known: Set<string> } {
  */
 function addNotesAndAnchor(
   doc: ArgDoc,
-  nodes: GraphNode[],
-  edges: GraphEdge[],
+  nodes: RenderNode[],
+  edges: RenderEdge[],
   known: Set<string>,
 ) {
   const owners: (Claim | Edge)[] = [...doc.claims, ...doc.edges];
@@ -91,10 +91,10 @@ function addNotesAndAnchor(
   }
 }
 
-/** Flatten an {@link ArgDoc} into the shared {@link Graph}, reifying every edge into a node. */
-function impliedClaims(doc: ArgDoc, distinguish: boolean): Graph {
+/** Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, reifying every edge into a node. */
+function impliedClaims(doc: ArgDoc, distinguish: boolean): RenderGraph {
   const { nodes, known } = claimNodes(doc);
-  const graphEdges: GraphEdge[] = [];
+  const graphEdges: RenderEdge[] = [];
   const edgeIds = new Set(doc.edges.map((edge) => edge.id));
 
   // A reified node is labelled with its type — its text *is* "supports" / "critiques", which
@@ -157,12 +157,12 @@ function marker(n: number): string {
 }
 
 /**
- * Flatten an {@link ArgDoc} into the shared {@link Graph}, drawing edges as labeled connectors
+ * Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, drawing edges as labeled connectors
  * and giving only the argued-about ones a detached node that spells their claim out.
  */
-function spelledOutClaims(doc: ArgDoc): Graph {
+function spelledOutClaims(doc: ArgDoc): RenderGraph {
   const { nodes, known } = claimNodes(doc);
-  const graphEdges: GraphEdge[] = [];
+  const graphEdges: RenderEdge[] = [];
   const claimTextById = new Map(doc.claims.map((claim) => [claim.id, claim.text]));
 
   // An edge needs a node of its own exactly when something has to attach to it: another edge
@@ -216,8 +216,8 @@ function spelledOutClaims(doc: ArgDoc): Graph {
   return { nodes, edges: graphEdges };
 }
 
-/** Flatten an {@link ArgDoc} into the shared {@link Graph}, per the `Edge claims` feature. */
-export function toGraph(doc: ArgDoc, features: FeatureState): Graph {
+/** Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, per the `Edge claims` feature. */
+export function toGraph(doc: ArgDoc, features: FeatureState): RenderGraph {
   const option = featureOption(features, EDGE_CLAIMS, SPELLED_OUT);
   if (option !== IMPLIED) return spelledOutClaims(doc);
   const display = featureParam(features, EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_DISTINGUISH);

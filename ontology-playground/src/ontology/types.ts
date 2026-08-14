@@ -1,5 +1,5 @@
-// Shared, ontology-agnostic data model and the contract every ontology implements.
-// The UI shell only ever talks to these types + the registry, never to a concrete
+// Shared, ontology-agnostic types: the renderer's data model plus the contract every ontology
+// implements. The UI shell only ever talks to these types + the registry, never to a concrete
 // ontology (IBIS and the truth-and-relevance argument map today, "Contested Causal
 // Diagrams" later).
 //
@@ -7,19 +7,19 @@
 // own vocabulary (IBIS's question/idea/pro/con/note, a causal map's concept/action/
 // criterion + causes/reduces/guides edges) via the tables below.
 //
-// `parse` produces the ontology's *own* model, and `toMermaid` flattens it into the shared
-// `Graph` on the way out — see arg-map-truth-and-relevance/toGraph.ts, which turns edges
+// `parse` produces the ontology's *own* semantic model, and `toMermaid` flattens it into a
+// `RenderGraph` on the way out — see arg-map-truth-and-relevance/toGraph.ts, which turns edges
 // into nodes because an edge there can be argued about like any other claim. Flattening sits
 // on the render side because how a model is drawn is a rendering decision: it can depend on
-// the features below, and an ontology whose model *is* a `Graph` simply hands it through.
+// the features below, and an ontology whose model *is* a `RenderGraph` simply hands it through.
 
-export interface GraphNode {
+export interface RenderNode {
   id: string;
   type: string;
   text: string;
 }
 
-export interface GraphEdge {
+export interface RenderEdge {
   /** child / argument (the thing doing the supporting, objecting, answering) */
   from: string;
   /** parent / target (the thing being argued about) */
@@ -30,9 +30,13 @@ export interface GraphEdge {
   label?: string;
 }
 
-export interface Graph {
-  nodes: GraphNode[];
-  edges: GraphEdge[];
+/**
+ * The renderer's projection of an ontology model. It holds only what `flowchart` needs to emit
+ * Mermaid; an ontology's semantic model may preserve richer meaning before it reaches here.
+ */
+export interface RenderGraph {
+  nodes: RenderNode[];
+  edges: RenderEdge[];
 }
 
 export interface ParseError {

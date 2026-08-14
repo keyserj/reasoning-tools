@@ -1,4 +1,4 @@
-import type { Graph, GraphEdge, GraphNode, ParseError } from "../types.ts";
+import type { ParseError, RenderEdge, RenderGraph, RenderNode } from "../types.ts";
 import { ID_SUFFIX, LEADING_WS, MARKER_TO_TYPE, META_MARKER, REF_BODY } from "./markers.ts";
 
 const TAB_SIZE = 4;
@@ -22,26 +22,26 @@ interface StackFrame {
 interface PendingRef {
   refId: string;
   parentId: string;
-  type: GraphNode["type"];
+  type: RenderNode["type"];
   line: number;
 }
 
 /**
- * Parse the IBIS markdown-ish syntax into a {@link Graph}.
+ * Parse the IBIS markdown-ish syntax into a {@link RenderGraph}.
  *
  * Each non-blank line is one node, parented by indentation. Markers: `?` question,
  * `=` idea, `+` pro, `-` con, `~` note, `/` meta-comment (dropped). `&id` labels a
  * node; `$id` (as the whole body) references an existing node instead of making one.
  * Edges point child -> parent (argument-map direction).
  *
- * IBIS's own model *is* the shared `Graph`, so the `doc` an ontology hands to its
+ * IBIS's own model *is* the shared `RenderGraph`, so the `doc` an ontology hands to its
  * `toMermaid` is that graph, with nothing left to flatten.
  */
-export function parse(text: string): { doc: Graph; errors: ParseError[] } {
-  const nodes: GraphNode[] = [];
-  const edges: GraphEdge[] = [];
+export function parse(text: string): { doc: RenderGraph; errors: ParseError[] } {
+  const nodes: RenderNode[] = [];
+  const edges: RenderEdge[] = [];
   const errors: ParseError[] = [];
-  const byId = new Map<string, GraphNode>();
+  const byId = new Map<string, RenderNode>();
   const pendingRefs: PendingRef[] = [];
   const stack: StackFrame[] = [];
   let autoCounter = 0;
@@ -115,7 +115,7 @@ export function parse(text: string): { doc: Graph; errors: ParseError[] } {
       id = nextAutoId();
     }
 
-    const node: GraphNode = { id, type, text: body };
+    const node: RenderNode = { id, type, text: body };
     nodes.push(node);
     byId.set(id, node);
     if (parentId !== null) edges.push({ from: id, to: parentId, type });
@@ -132,6 +132,6 @@ export function parse(text: string): { doc: Graph; errors: ParseError[] } {
     }
   }
 
-  const graph: Graph = { nodes, edges };
+  const graph: RenderGraph = { nodes, edges };
   return { doc: graph, errors };
 }

@@ -1,6 +1,6 @@
 # Rendering: argument map (truth and relevance)
 
-How the playground draws [this ontology](./ontology.md) — a separate question from what the ontology _is_, and a smaller one than an ideal app UX (this ontology has no equivalent of ameliorate-v2's `UX-design.md`). Nearly all of it lives in [toGraph.ts](./toGraph.ts), which flattens the parsed model into the shared `Graph`.
+How the playground draws [this ontology](./ontology.md) — a separate question from what the ontology _is_, and a smaller one than an ideal app UX (this ontology has no equivalent of ameliorate-v2's `UX-design.md`). Nearly all of it lives in [toGraph.ts](./toGraph.ts), which flattens the parsed model into the shared `RenderGraph`.
 
 ## Edge claims: two renderings, switchable
 
@@ -51,7 +51,7 @@ Left unconnected it was a graph component of its own, and dagre dropped it in am
 
 - is anchoring to only the first root right when a document has several unrelated top-level claims? The header will sit above one of them rather than above the whole diagram
   - [session-storage](./examples/session-storage.txt) makes this visible on a default example: its two competing root claims leave the header hanging above `redis` alone
-  - the alternative is mermaid frontmatter (`---\ntitle: "..."\n---`), a true caption outside the graph, which would need `title?: string` on the shared `Graph`. Titles are single-line with no wrapping, so a long `%description` becomes one very wide line
+  - the alternative is mermaid frontmatter (`---\ntitle: "..."\n---`), a true caption outside the graph, which would need `title?: string` on the shared `RenderGraph`. Titles are single-line with no wrapping, so a long `%description` becomes one very wide line
   - note a title would reach mermaid from the URL hash, so it would need newline-stripping and quote-escaping — same threat model as `src/share/url.ts`
 
 ## Colors and icons

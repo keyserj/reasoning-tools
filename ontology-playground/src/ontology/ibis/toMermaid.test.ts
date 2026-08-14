@@ -1,12 +1,13 @@
 import { describe, expect, it } from "vitest";
-import type { Graph } from "../types.ts";
+import type { RenderGraph } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toMermaid } from "./toMermaid.ts";
 import { defaultConfig } from "./defaultConfig.ts";
 import example from "./examples/session-storage.txt?raw";
 
 /** The features argument is IBIS's unused one; `theme` is what the two after it are here for. */
-const render = (graph: Graph, config = defaultConfig) => toMermaid(graph, config, {}, "light");
+const render = (graph: RenderGraph, config = defaultConfig) =>
+  toMermaid(graph, config, {}, "light");
 
 describe("toMermaid", () => {
   it("emits a flowchart with shapes, classes and child -> parent edges", () => {
@@ -33,7 +34,7 @@ describe("toMermaid", () => {
   });
 
   it("escapes embedded quotes and sanitizes unsafe ids", () => {
-    const graph: Graph = {
+    const graph: RenderGraph = {
       nodes: [{ id: "weird-id", type: "idea", text: 'say "hi"' }],
       edges: [],
     };
@@ -43,7 +44,7 @@ describe("toMermaid", () => {
   });
 
   it("escapes markup so labels render as typed, keeping newlines as breaks", () => {
-    const graph: Graph = {
+    const graph: RenderGraph = {
       nodes: [{ id: "n1", type: "idea", text: "5 < 6 & <img src=x>\nsecond line" }],
       edges: [],
     };

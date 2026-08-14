@@ -1,4 +1,4 @@
-import type { EdgeTypeDef, Graph, NodeTypeDef, StyleConfig, Theme } from "./types.ts";
+import type { EdgeTypeDef, NodeTypeDef, RenderGraph, StyleConfig, Theme } from "./types.ts";
 import { deriveTypeStyle } from "./typeColors.ts";
 
 // Shared mermaid-flowchart renderer. Every ontology's `toMermaid` is the same walk over
@@ -48,7 +48,7 @@ function escapeLabel(text: string): string {
 }
 
 /** Map arbitrary node ids to safe mermaid identifiers, preserving uniqueness. */
-function buildIdMap(graph: Graph): Map<string, string> {
+function buildIdMap(graph: RenderGraph): Map<string, string> {
   const map = new Map<string, string>();
   const used = new Set<string>();
   for (const node of graph.nodes) {
@@ -63,9 +63,9 @@ function buildIdMap(graph: Graph): Map<string, string> {
   return map;
 }
 
-/** Convert a {@link Graph} + {@link StyleConfig} into a mermaid flowchart string. */
+/** Convert a {@link RenderGraph} + {@link StyleConfig} into a mermaid flowchart string. */
 export function flowchart(
-  graph: Graph,
+  graph: RenderGraph,
   config: StyleConfig,
   tables: FlowchartTables,
   theme: Theme,

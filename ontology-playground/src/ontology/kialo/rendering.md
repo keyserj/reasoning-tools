@@ -1,6 +1,6 @@
 # Rendering: Kialo
 
-How the playground draws [this ontology](./ontology.md) — a separate question from what the ontology _is_. Nearly all of it lives in [toGraph.ts](./toGraph.ts), which flattens the parsed model into the shared `Graph`.
+How the playground draws [this ontology](./ontology.md) — a separate question from what the ontology _is_. Nearly all of it lives in [toGraph.ts](./toGraph.ts), which flattens the parsed model into the shared `RenderGraph`.
 
 ## One box, two placements
 

@@ -19,20 +19,14 @@ describe("toMermaid", () => {
     expect(out).toContain("t --> q");
   });
 
-  it("colors an unfolded connector from the same config entry its box type uses", () => {
-    // Restyling "Pro" has to move its connectors as well as its boxes, which is what
-    // `EdgeTypeDef.colorTypeId` buys — see ../types.ts.
-    const source = "= A &a\n  -[1] Shared &s\n= B &b\n  +[4] $s";
-    expect(render(source)).toContain('s -->|"⛔ [1]"| a');
-    expect(render(source)).toContain(`stroke:${defaultConfig.typeColors.pro}`);
-
-    const restyled = {
-      ...defaultConfig,
-      typeColors: { ...defaultConfig.typeColors, pro: "#00aa77" },
-    };
-    // Light mode draws a border in exactly the color picked, so the connector says it plainly.
-    expect(render(source, restyled)).toContain("stroke:#00aa77");
-    expect(render(source, restyled)).not.toContain(`stroke:${defaultConfig.typeColors.pro}`);
+  it("dashes a copy with a second class, so it keeps its stance type's fill and stroke", () => {
+    // Mermaid appends both classes and concatenates their styles — see ../mermaidFlowchart.ts.
+    const out = render("= A &a\n  -[1] Shared &s\n= B &b\n  +[4] $s");
+    expect(out).toContain('a2["✅ Shared 🔀<br/>[4]"]:::pro');
+    expect(out).toContain("classDef dashed stroke-dasharray:4 3");
+    expect(out).toContain("class a2 dashed");
+    // No connector here carries a stance, so nothing asks for a linkStyle.
+    expect(out).not.toContain("linkStyle");
   });
 
   it("omits icons when showIcons is false, including a claim's source marker", () => {

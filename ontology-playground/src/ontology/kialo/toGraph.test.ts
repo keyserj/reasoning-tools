@@ -2,10 +2,10 @@ import { describe, expect, it } from "vitest";
 import { parse } from "./parse.ts";
 import { toGraph } from "./toGraph.ts";
 
-// The fold rule, case by case. A score and a stance belong to one usage of a claim, but a reused
-// claim is still one box, so which of its usages a box may speak for is the decision this
-// ontology's rendering turns on — see ./rendering.md. A mermaid snapshot records what happened
-// without saying what was meant, which is why these are separate from ./toMermaid.test.ts.
+// A box per usage, case by case. A score and a stance belong to one usage of a claim, so a `$id`
+// usage gets a copy of the box rather than another connector into one — see ./rendering.md. A
+// mermaid snapshot records what happened without saying what was meant, which is why these are
+// separate from ./toMermaid.test.ts.
 
 const graph = (source: string, showIcons = true) => toGraph(parse(source).doc, showIcons);
 const node = (source: string, id: string, showIcons = true) =>
@@ -22,34 +22,60 @@ describe("toGraph", () => {
     });
   });
 
-  it("folds a claim's single argument into its box, leaving the connector plain", () => {
+  it("gives a claim used once a box in its own stance, on a plain connector", () => {
     const source = "= T &t\n  -[1] Only &o";
     expect(node(source, "o")).toEqual({ id: "o", type: "con", text: "Only\n[1]" });
     expect(edgesFrom(source, "o")).toEqual([{ from: "o", to: "t", type: "link" }]);
   });
 
-  it("keeps a reused claim neutral, and puts each usage on its own connector", () => {
-    // Two usages disagree about both stance and score, so the box can't speak for either.
+  it("draws a `$ref` usage as a dashed copy taking its own stance and score", () => {
+    // The two usages disagree about both, which is exactly what a box per usage can say.
     const source = "= A &a\n  -[1] Shared &s\n= B &b\n  +[4] $s";
-    expect(node(source, "s")).toEqual({ id: "s", type: "claim", text: "Shared" });
-    expect(edgesFrom(source, "s")).toEqual([
-      { from: "s", to: "a", type: "con", label: "[1]" },
-      { from: "s", to: "b", type: "pro", label: "[4]" },
-    ]);
+    expect(node(source, "s")).toEqual({ id: "s", type: "con", text: "Shared 🔀\n[1]" });
+    expect(node(source, "a2")).toEqual({
+      id: "a2",
+      type: "pro",
+      text: "Shared 🔀\n[4]",
+      dashed: true,
+    });
+    expect(edgesFrom(source, "s")).toEqual([{ from: "s", to: "a", type: "link" }]);
+    expect(edgesFrom(source, "a2")).toEqual([{ from: "a2", to: "b", type: "link" }]);
   });
 
-  it("keeps a thesis a thesis when it is also reused as someone's argument", () => {
-    const source = "=[3] A &a\n=[2] B &b\n  +[4] $a";
-    expect(node(source, "a")).toEqual({ id: "a", type: "thesis", text: "A\n[3]" });
-    expect(edgesFrom(source, "a")).toEqual([{ from: "a", to: "b", type: "pro", label: "[4]" }]);
+  it("hangs a reused claim's children off the box that declares it, not off a copy", () => {
+    const source = "= A &a\n  - Shared &s\n    + Child &c\n= B &b\n  + $s";
+    expect(edgesFrom(source, "c")).toEqual([{ from: "c", to: "s", type: "link" }]);
   });
 
-  it("leaves an unfolded connector unlabeled when nobody voted, since color still says which", () => {
+  it("marks every box of a reused claim, and only while icons are on", () => {
     const source = "= A &a\n  - Shared &s\n= B &b\n  + $s";
-    expect(edgesFrom(source, "s")).toEqual([
-      { from: "s", to: "a", type: "con" },
-      { from: "s", to: "b", type: "pro" },
-    ]);
+    expect(node(source, "s")?.text).toBe("Shared 🔀");
+    expect(node(source, "a2")?.text).toBe("Shared 🔀");
+    expect(node(source, "s", false)?.text).toBe("Shared");
+  });
+
+  it("draws a thesis reused as an argument as a copy, like any other `$ref`", () => {
+    const source = "=[3] A &a\n=[2] B &b\n  +[4] $a";
+    expect(node(source, "a")).toEqual({ id: "a", type: "thesis", text: "A 🔀\n[3]" });
+    expect(node(source, "a1")).toEqual({
+      id: "a1",
+      type: "pro",
+      text: "A 🔀\n[4]",
+      dashed: true,
+    });
+  });
+
+  it("draws a `= $ref` thesis as a dashed thesis", () => {
+    // The compromise ./rendering.md accepts: the box under the question is the copy, and the
+    // arguments hang off the `+` that declared the text.
+    const source = "? Q &q\n  =[2] $s\n= T &t\n  +[1] Shared &s";
+    expect(node(source, "t1")).toEqual({
+      id: "t1",
+      type: "thesis",
+      text: "Shared 🔀\n[2]",
+      dashed: true,
+    });
+    expect(edgesFrom(source, "t1")).toEqual([{ from: "t1", to: "q", type: "link" }]);
   });
 
   it("marks a claim that has sources, and only while icons are on", () => {

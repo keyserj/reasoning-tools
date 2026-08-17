@@ -1,26 +1,21 @@
 import type { RenderEdge, RenderNode, RenderGraph } from "../types.ts";
 import { ANCHOR_TYPE_ID } from "../anchoring.ts";
 import { addDocumentNotes, addNotes } from "../notes.ts";
-import {
-  type Argument,
-  type Claim,
-  type ClaimUsage,
-  type KialoDoc,
-  isArgument,
-  isThesis,
-  usagesByClaim,
-} from "./model.ts";
+import { type Claim, type ClaimUsage, type KialoDoc, isArgument, usagesByClaim } from "./model.ts";
 import { type Scores, formatScores } from "./scores.ts";
 
 // How this ontology gets drawn — the one file to rewrite if the rendering should change. A score
-// and a stance belong to one usage of a claim, but a claim reused elsewhere is still one box;
-// ./rendering.md lays out what this does about that.
+// and a stance belong to one usage of a claim, so a usage rather than a claim is what gets a box;
+// ./rendering.md lays out what that costs.
 
 /** Id of the header node. Leading `_` is already a safe mermaid identifier. */
 const TOPIC_ID = "_topic";
 
 /** Marks a claim as having evidence without putting a URL in the diagram. */
 const SOURCE_ICON = "🔗";
+
+/** Marks every box of a claim that is used in more than one place. */
+const REUSE_ICON = "🔀";
 
 /** Scores go on their own line; ../mermaidFlowchart.ts turns the newline into a `<br/>`. */
 function withScores(text: string, scores: Scores | null): string {
@@ -39,26 +34,31 @@ function topicText(doc: KialoDoc): string {
   return parts.join("\n");
 }
 
-/** The usage a claim's box speaks for, or `null` when it has to stay neutral — see ./rendering.md. */
-function foldedArgument(usages: ClaimUsage[]): Argument | null {
-  if (usages.length !== 1) return null;
-  const only = usages[0];
-  return isArgument(only) ? only : null;
+/** The box a usage draws as, see ./rendering.md for details. */
+function usageNode(
+  claim: Claim,
+  usage: ClaimUsage,
+  reused: boolean,
+  showIcons: boolean,
+): RenderNode {
+  const badges = showIcons
+    ? `${reused ? ` ${REUSE_ICON}` : ""}${claim.sources.length > 0 ? ` ${SOURCE_ICON}` : ""}`
+    : "";
+  return {
+    id: boxId(claim.id, usage),
+    type: isArgument(usage) ? usage.stance : "thesis",
+    text: withScores(`${claim.text}${badges}`, isArgument(usage) ? usage.impact : usage.veracity),
+    ...(usage.viaRef ? { dashed: true } : {}),
+  };
 }
 
-/** A claim's box: which usage it speaks for, the score that goes with it, and its sources. */
-function claimNode(claim: Claim, usages: ClaimUsage[], showIcons: boolean): RenderNode {
-  const folded = foldedArgument(usages);
-  // A claim may be a thesis only once, and a thesis usage never folds, so a box reaches here with
-  // at most one score to show.
-  const thesis = usages.find(isThesis);
-
-  const evidence = showIcons && claim.sources.length > 0 ? ` ${SOURCE_ICON}` : "";
-  return {
-    id: claim.id,
-    type: thesis !== undefined ? "thesis" : folded === null ? "claim" : folded.stance,
-    text: withScores(`${claim.text}${evidence}`, thesis?.veracity ?? folded?.impact ?? null),
-  };
+/**
+ * Which box a usage is. The declaring usage takes the claim's own id, so everything that names a
+ * claim — a note's owner, a child's parent — lands on it without a lookup; a copy takes its own,
+ * which `parse.ts` has already kept clear of every claim id.
+ */
+function boxId(claimId: string, usage: ClaimUsage): string {
+  return usage.viaRef ? usage.id : claimId;
 }
 
 /** Flatten a {@link KialoDoc} into the shared {@link RenderGraph}. */
@@ -76,41 +76,36 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
 
   for (const claim of doc.claims) {
     const usages = byClaim.get(claim.id) ?? [];
-    nodes.push(claimNode(claim, usages, showIcons));
+    for (const usage of usages) nodes.push(usageNode(claim, usage, usages.length > 1, showIcons));
     // Per claim rather than in one pass, so a note's box is declared next to the claim it is
-    // about; mermaid draws boxes in the order they're emitted.
-    addNotes(nodes, edges, [claim]);
+    // about; mermaid draws boxes in the order they're emitted. A claim whose declaring line was
+    // rejected has no box for a note to hang off, and ../notes.ts asks callers to say so.
+    addNotes(nodes, edges, usages.some((usage) => !usage.viaRef) ? [claim] : []);
   }
 
-  // Plain: which question it answers is the whole of what the connector says, and the thesis's
-  // veracity is already on its box.
+  // Every connector is plain: each box carries its own stance and score, so which question a
+  // thesis answers, or which claim an argument is about, is the whole of what one says.
   for (const thesis of doc.theses) {
     if (thesis.questionId !== null) {
-      edges.push({ from: thesis.claimId, to: thesis.questionId, type: "link" });
+      edges.push({ from: boxId(thesis.claimId, thesis), to: thesis.questionId, type: "link" });
     }
   }
 
-  // A folded argument is plain too — its box already says the stance. An unfolded one is the
-  // only thing left to carry it, so it takes the stance and the score the box couldn't show.
+  // A parent is named by claim, so it resolves to the box that declares it — which is what
+  // leaves a copy childless without anything here having to suppress children.
   for (const argument of doc.arguments) {
-    const folded = foldedArgument(byClaim.get(argument.claimId) ?? []);
-    if (folded !== null) {
-      edges.push({ from: argument.claimId, to: argument.parentClaimId, type: "link" });
-      continue;
-    }
     edges.push({
-      from: argument.claimId,
+      from: boxId(argument.claimId, argument),
       to: argument.parentClaimId,
-      type: argument.stance,
-      // No label when nobody voted: the color still says which stance it is, and an empty
-      // label would only reserve space. The icon rides on the label, so it goes too.
-      ...(argument.impact === null ? {} : { label: formatScores(argument.impact) }),
+      type: "link",
     });
   }
 
   const roots = [
     ...doc.questions.map((question) => question.id),
-    ...doc.theses.filter((thesis) => thesis.questionId === null).map((thesis) => thesis.claimId),
+    ...doc.theses
+      .filter((thesis) => thesis.questionId === null)
+      .map((thesis) => boxId(thesis.claimId, thesis)),
   ];
 
   // Direction is load-bearing and easy to get backwards: the default layout is BT, where an

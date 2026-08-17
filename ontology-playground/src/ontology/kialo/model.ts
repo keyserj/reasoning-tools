@@ -32,10 +32,20 @@ export interface Question {
   text: string;
 }
 
-/** A claim used as an answer to a question, or as the root of a question-less document. */
-export interface Thesis {
+/**
+ * Not sure a better name to distinguish from `ClaimUsage` - this interface identifies the properties
+ * across usages of a claim, and that `ClaimUsage` identifies the full object types that implement this
+ * interface.
+ */
+interface Usage {
   id: string;
   claimId: string;
+  /** written as `$id` rather than on the line that declares the claim */
+  viaRef: boolean;
+}
+
+/** A claim used as an answer to a question, or as the root of a question-less document. */
+export interface Thesis extends Usage {
   /** `null` in a document with no `?` line, which is Kialo's single-thesis discussion */
   questionId: string | null;
   /**
@@ -48,9 +58,7 @@ export interface Thesis {
 }
 
 /** A claim used to support or critique another claim. */
-export interface Argument {
-  id: string;
-  claimId: string;
+export interface Argument extends Usage {
   parentClaimId: string;
   stance: Stance;
   /** veracity and relevance to the parent, folded into one number; `null` = nobody voted */
@@ -75,10 +83,6 @@ export type ClaimUsage = Thesis | Argument;
 
 export function isArgument(usage: ClaimUsage): usage is Argument {
   return "stance" in usage;
-}
-
-export function isThesis(usage: ClaimUsage): usage is Thesis {
-  return !isArgument(usage);
 }
 
 /** Every usage of each claim, keyed by claim id — what ./toGraph.ts decides a box from. */

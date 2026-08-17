@@ -10,7 +10,8 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the build-a-wall
   easy_climb["✅ It's easy to climb a chain-link fence<br/>[4,4,1]"]:::pro
   c2["⛔ The proposed design is 30 feet tall, without handholds, and topped with barbed wire<br/>[3,-,4]"]:::con
   visa_overstay["⛔ Most illegal immigrants enter legally and overstay visas, so they never cross the border<br/>[3,4,0]"]:::con
-  wall_cost["💬 The wall would cost tens of billions to build and maintain"]:::claim
+  wall_cost["⛔ The wall would cost tens of billions to build and maintain 🔀<br/>[3,4,2]"]:::con
+  a12["✅ The wall would cost tens of billions to build and maintain 🔀<br/>[3,3,2]"]:::pro
   c3["✅ Concrete and steel prices rose sharply over the last decade"]:::pro
   little_harm["⛔ Illegal immigration causes little net harm<br/>[1,4,0]"]:::con
   c4["✅ Illegal immigrants are arrested for violent crimes at lower rates than native-born citizens 🔗<br/>[2,3,0]"]:::pro
@@ -23,22 +24,21 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the build-a-wall
   easy_climb --> climb_over
   c2 --> easy_climb
   visa_overstay --> wall_reduces
-  wall_cost -->|"⛔ [3,4,2]"| wall
+  wall_cost --> wall
   c3 --> wall_cost
   little_harm --> wall
   c4 --> little_harm
   more_judges --> wall
-  wall_cost -->|"✅ [3,3,2]"| more_judges
+  a12 --> more_judges
   wall ~~~ _topic
   classDef question fill:#f1f1f4,stroke:#71717a,color:#323237,stroke-width:1.5px
   classDef thesis fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
-  classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef pro fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef con fill:#ffedec,stroke:#b2182b,color:#600d15,stroke-width:1.5px
   classDef note fill:#fcf2d3,stroke:#d3ad20,color:#3f3100,stroke-width:1.5px
   classDef topic fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
-  linkStyle 7 stroke:#b2182b,stroke-width:1.5px
-  linkStyle 12 stroke:#2166ac,stroke-width:1.5px"
+  classDef dashed stroke-dasharray:4 3
+  class a12 dashed"
 `;
 
 exports[`toMermaid > matches the generated-mermaid snapshot for the session-storage example 1`] = `
@@ -48,7 +48,9 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the session-stor
   q2{{"❓ How do we run background jobs?"}}:::question
   redis["💬 We should use Redis for session storage<br/>[3,1]"]:::thesis
   c1["✅ Redis is fast for hot reads 🔗<br/>[4,2]"]:::pro
-  ops_cost["💬 It's another service to operate"]:::claim
+  ops_cost["⛔ It's another service to operate 🔀<br/>[2,3]"]:::con
+  a5["✅ It's another service to operate 🔀<br/>[3,3]"]:::pro
+  a7["⛔ It's another service to operate 🔀<br/>[3,3]"]:::con
   c2["⛔ We have many services already; we're efficient at setting up another one<br/>[3,2]"]:::con
   c3["💬 We should use Postgres rows for session storage<br/>[2,3]"]:::thesis
   c4["✅ One less dependency<br/>[3,4]"]:::pro
@@ -60,21 +62,20 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the session-stor
   c3 --> q1
   c6 --> q2
   c1 --> redis
-  ops_cost -->|"⛔ [2,3]"| redis
+  ops_cost --> redis
   c2 --> ops_cost
   c4 --> c3
-  ops_cost -->|"✅ [3,3]"| c3
+  a5 --> c3
   c5 --> c3
-  ops_cost -->|"⛔ [3,3]"| c6
+  a7 --> c6
   q1 ~~~ _topic
   q2 ~~~ _topic
   classDef question fill:#f1f1f4,stroke:#71717a,color:#323237,stroke-width:1.5px
   classDef thesis fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
-  classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef pro fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef con fill:#ffedec,stroke:#b2182b,color:#600d15,stroke-width:1.5px
   classDef note fill:#fcf2d3,stroke:#d3ad20,color:#3f3100,stroke-width:1.5px
   classDef topic fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
-  linkStyle 5,10 stroke:#b2182b,stroke-width:1.5px
-  linkStyle 8 stroke:#2166ac,stroke-width:1.5px"
+  classDef dashed stroke-dasharray:4 3
+  class a5,a7 dashed"
 `;

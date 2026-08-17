@@ -15,7 +15,7 @@ Read `types.ts`, whatever sits directly in `src/ontology/` as shared plumbing, a
 
 **`model.ts`.** The closest modelling of the actual ontology, not a shape chosen because it will be convenient to draw: `RenderGraph` is what serves mermaid, and `toGraph.ts` is where the model gets projected onto it. A model that already looks like a render graph has usually thrown away something the ontology cares about.
 
-**Rendering.** Which types are boxes and which are connectors, and what the legend says. Then the same question in the other direction: does deriving that from the model need real logic? It often does, and it's the interesting part — Kialo folds a claim used in several spots into one neutral box whose connectors carry the scores.
+**Rendering.** Which types are boxes and which are connectors, and what the legend says. Then the same question in the other direction: does deriving that from the model need real logic? It often does, and it's the interesting part — Kialo draws a box per _usage_ of a claim, so one claim used in three spots is three boxes, each with its own stance and score.
 
 **Examples.** Which ids from `examples.ts` this ontology will ship, and what each will look like.
 

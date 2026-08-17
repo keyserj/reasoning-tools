@@ -17,6 +17,12 @@ export interface RenderNode {
   id: string;
   type: string;
   text: string;
+  /**
+   * Draw this one box's border dashed. The only per-*node* styling there is: everything else a
+   * box looks like comes from its type's row in `NodeTypeDef`, and this can't, because what it
+   * marks (kialo's copy of a reused claim) crosses several types at once.
+   */
+  dashed?: boolean;
 }
 
 export interface RenderEdge {

@@ -10,6 +10,14 @@ import { deriveTypeStyle } from "./typeColors.ts";
 
 const FALLBACK_SHAPE: [string, string] = ['["', '"]'];
 
+/**
+ * `RenderNode.dashed` rides on a second class rather than on the node's `:::type`, since a node
+ * may only name one there. Mermaid appends both to the same list and concatenates their styles,
+ * so the type's fill and stroke survive and only the dash is added. The dasharray is
+ * space-separated because `classDef` splits its style list on commas — see ./typeColors.ts.
+ */
+const DASHED_CLASS = "dashed";
+
 export interface FlowchartTables {
   renderedNodeTypesById: Record<string, NodeTypeDef>;
   renderedEdgeTypesById: Record<string, EdgeTypeDef>;
@@ -78,12 +86,15 @@ export function flowchart(
   const idMap = buildIdMap(graph);
   const lines: string[] = [`flowchart ${config.direction}`];
 
+  const dashedIds: string[] = [];
   for (const node of graph.nodes) {
     const def = renderedNodeTypesById[node.type];
     const [open, close] = def?.shape ?? FALLBACK_SHAPE;
     const icon = config.showIcons && def ? `${def.icon} ` : "";
     const label = escapeLabel(`${icon}${node.text}`);
-    lines.push(`  ${idMap.get(node.id)}${open}${label}${close}:::${node.type}`);
+    const id = idMap.get(node.id);
+    if (node.dashed && id) dashedIds.push(id);
+    lines.push(`  ${id}${open}${label}${close}:::${node.type}`);
   }
 
   // mermaid can't name an edge: `linkStyle` targets edges by the position they were
@@ -122,6 +133,11 @@ export function flowchart(
     lines.push(
       `  classDef ${type} fill:${style.fill},stroke:${style.border},color:${style.text},stroke-width:1.5px`,
     );
+  }
+
+  if (dashedIds.length > 0) {
+    lines.push(`  classDef ${DASHED_CLASS} stroke-dasharray:4 3`);
+    lines.push(`  class ${dashedIds.join(",")} ${DASHED_CLASS}`);
   }
 
   // A connector is a line, so it takes the border role: unchanged in light, lifted in dark,

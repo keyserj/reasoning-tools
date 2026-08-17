@@ -2,9 +2,7 @@ import type { LegendEntry } from "../types.ts";
 import { renderedNodeTypes } from "./renderedNodeTypes.ts";
 import { MAX_SCORE, MIN_SCORE } from "./scores.ts";
 
-// Which bit of syntax produces each node type. `claim` is absent on purpose: nothing writes a
-// neutral box directly, it's what using a claim twice leaves behind, so its row shows no marker
-// and the `$id` row below carries the consequence.
+// Which bit of syntax produces each node type.
 const markerByType: Record<string, string> = {
   question: "?",
   thesis: "=",
@@ -52,7 +50,7 @@ const syntaxEntries: LegendEntry[] = [
     marker: "$id",
     label: "Link",
     meaning:
-      "Reuse an existing claim here. It keeps its own score in each spot. The box goes neutral unless the claim is also a thesis.",
+      "Reuse an existing claim here, with its own stance and score. Drawn as a dashed copy, childless; every box of a reused claim is marked 🔀.",
     icon: "🔀",
   },
   { marker: "/", label: "Meta-comment", meaning: "A comment hidden from the diagram.", icon: "🚫" },

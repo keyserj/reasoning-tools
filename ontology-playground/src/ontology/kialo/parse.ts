@@ -277,6 +277,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
         theses.push({
           id: nextAutoId("t"),
           claimId,
+          viaRef: refMatch !== null,
           questionId: parent?.kind === "question" ? parent.questionId : null,
           veracity: scores,
         });
@@ -297,6 +298,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
         argumentsList.push({
           id: nextAutoId("a"),
           claimId,
+          viaRef: refMatch !== null,
           parentClaimId: parent.claimId,
           stance,
           impact: scores,

@@ -2,28 +2,21 @@
 
 How the playground draws [this ontology](./ontology.md) — a separate question from what the ontology _is_. Nearly all of it lives in [toGraph.ts](./toGraph.ts), which flattens the parsed model into the shared `RenderGraph`.
 
-## One box, two usages
+## A box per usage
 
-A score and a stance belong to one usage of a claim, not to the claim itself ([ontology.md](./ontology.md)), but a claim reused elsewhere is still one box in the diagram. Kialo's own UI dodges this by showing one location at a time; a whole-tree diagram can't.
+A score and a stance belong to one usage of a claim, not to the claim itself ([ontology.md](./ontology.md)), so a usage is what gets a box. Every box is then colored by its own stance and carries its own score, and every connector is plain.
 
-So a box speaks for its usage only when it has exactly one, and otherwise stays neutral and lets the connectors speak. In precedence order:
+The usage written as `$id` draws as a **copy**: dashed border, no children, and 🔀 on it and on every other box of that claim. Children hang off the claim, so they reach the box that declares it without being suppressed here — a reader who wants them looks at the original. This is what Kialo's own UI does, showing a linked claim inline wherever it is used.
 
-- **a thesis** → a `thesis` box carrying its veracity. There is no stance to show: nothing sits above it. This wins over reuse, so a claim that is a thesis _and_ reused elsewhere is still a `thesis` box — veracity is the one thing that box can say, and the argument usages still speak through their connectors
-- **exactly one pro/con** → a `pro` / `con` box carrying that usage's impact, and a plain connector. This is the ordinary claim, and folding is what keeps a Kialo diagram as plain as an IBIS one
-- **reused, so two usages or more** → a plain `claim` box with no scores on it, and every connector takes its usage's stance color, icon and impact
+The cost is that the drawn graph is a tree: two branches sharing a claim are matched by eye, by their text and their 🔀, rather than traced along an edge. A later lens that moves stance onto the connectors would restore the shared box, and copies are still expected to be the default.
 
-`thesis` and `claim` are separate types drawn identically: same amber, same 💬. The split is about naming rather than color — "Claim" is the wrong word in the **Syntax** and **Style** dialogs for the box a `=` line makes — and amber already says what both boxes are doing, which is taking no stance. Keeping them as two types means Thesis can be restyled without touching reused-claim boxes, so the first open question below is answerable by a restyle instead of by a new type. The palette is still IBIS's plus a `topic`.
+A `= $id` thesis is no special case — it is a dashed `thesis`, which means it can draw as a childless box under its question while the arguments hang off the `+` or `-` that declared the text. Accepted: treating every `$id` alike is worth more than the exception, and moving the `$` to the other usage is a one-line edit.
 
-An unfolded connector with no scores is drawn colored but unlabeled — the color still says which stance it is, and mermaid hangs the edge icon off the label, so that goes too.
-
-### Questions - Unanswered
-
-- is the neutral box findable? A reader scanning for red and blue may read amber as "not an argument" rather than "an argument twice over", and a thesis is amber too, so the color doesn't separate those either. The connectors say it, but only if you follow them
-- three usages of one claim ([session-storage](./examples/session-storage.txt)'s `ops-cost`) is where this gets busiest. It reads at that size; it isn't obvious it would at ten
+`thesis` and `claim` are separate types for naming rather than color — "Claim" is the wrong word in the **Syntax** and **Style** dialogs for the box a `=` line makes — which is why `claim` sits commented out in [renderedNodeTypes.ts](./renderedNodeTypes.ts) rather than deleted, waiting for the lens above.
 
 ## Sources
 
-A claim with sources gets a `🔗` appended to its text, and the URL never reaches the diagram. Sources are the one thing a real Kialo discussion has dozens of — the map this ontology was reviewed against carries 64 — so a box each would swamp the argument, and the useful fact at a glance is that evidence exists at all. It's an icon, so it rides on `showIcons` like every other; that's the one icon this ontology adds itself rather than leaving to the shared renderer, which is why `toMermaid` passes `showIcons` down into `toGraph`.
+A claim with sources gets a `🔗` appended to its text and the URL never reaches the diagram. Sources are the one thing a real Kialo discussion has dozens of — the map this ontology was reviewed against carries 64 — so a box each would swamp the argument, and the useful fact at a glance is that evidence exists at all. It's an icon, so it rides on `showIcons` like every other; that's the one icon this ontology adds itself rather than leaving to the shared renderer, which is why `toMermaid` passes `showIcons` down into `toGraph`.
 
 ## Scores
 
@@ -44,6 +37,6 @@ Left unconnected it would be a graph component of its own, and dagre drops those
 
 The palette is the other ontologies', so the same topic stays comparable across lenses: `pro` blue and `con` red from ameliorate-v2's colorblind-safe `RB = { neg: "#b2182b", pos: "#2166ac" }`, `thesis` and `claim` amber and `note` yellow on the warm-band split argued in [the arg-map ontology's rendering.md](../arg-map-truth-and-relevance/rendering.md#colors-and-icons), `question` grey, `topic` violet.
 
-- `pro` vs `con` is the pair that _needs_ color, and it needs it in two places at once — the box and the connector. Both read `StyleConfig` through `EdgeTypeDef.colorTypeId`, so restyling "Pro" moves them together
+- `pro` vs `con` is the pair that _needs_ color, and a box is the only place it appears: no connector here is colored, since none of them carries a stance
 - `question` is grey because a question is a prompt rather than something to take a position on, and because grey is what is left once amber, yellow, red, blue and violet are spoken for
 - ✅ / ⛔ carry the same pair by silhouette, for the reason [arg-map's rendering.md](../arg-map-truth-and-relevance/rendering.md#colors-and-icons) gives

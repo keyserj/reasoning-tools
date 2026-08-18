@@ -14,17 +14,17 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the session-stor
   n5["💡 Use a worker queue"]:::idea
   n6[/"📝 worker queues hit the same operational cost"/]:::note
   q3{{"❓ Which broker?"}}:::question
-  n6 -.-> n5
-  i1 --> q1
-  n1 --> i1
-  c1 --> i1
-  n2 --> c1
-  i2 --> q1
-  n3 --> i2
-  n4 --> i2
-  n5 --> q2
-  q3 --> n5
-  c1 --> n5
+  n6 e0@-.-> n5
+  i1 e1@--> q1
+  n1 e2@--> i1
+  c1 e3@--> i1
+  n2 e4@--> c1
+  i2 e5@--> q1
+  n3 e6@--> i2
+  n4 e7@--> i2
+  n5 e8@--> q2
+  q3 e9@--> n5
+  c1 e10@--> n5
   classDef question fill:#f1f1f4,stroke:#71717a,color:#323237,stroke-width:1.5px
   classDef idea fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef pro fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px

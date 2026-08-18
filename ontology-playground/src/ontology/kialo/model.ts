@@ -1,3 +1,4 @@
+import type { SourceLines } from "../types.ts";
 import type { Note } from "../notes.ts";
 import type { Stance } from "./markers.ts";
 import type { Scores } from "./scores.ts";
@@ -10,8 +11,8 @@ import type { Scores } from "./scores.ts";
 // parent is a question or nothing, an argument's parent is a claim, and neither can take the
 // other's. A `Claim` is then pure content.
 //
-// Nothing here records where in the source a thing was written: line numbers are a fact about
-// the syntax, and the only place they belong is `ParseError`.
+// Where a thing was written stays off the entities and rides on the doc instead — see
+// ../pipeline.md.
 
 /** Evidence for a claim. Follows the claim to every usage of it, as it does in Kialo. */
 export interface Source {
@@ -76,6 +77,8 @@ export interface KialoDoc {
   arguments: Argument[];
   /** `~` lines with no claim above them: notes about the document rather than about a claim. */
   notes: Note[];
+  /** Where each of the above was written, by id; the `%` lines file under the topic's. */
+  sourceLines: SourceLines;
 }
 
 /** One use of a claim, which is the unit both the score and the stance belong to. */

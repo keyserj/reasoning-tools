@@ -3,13 +3,25 @@ import { parse } from "./parse.ts";
 import example from "./examples/session-storage.txt?raw";
 
 describe("parse", () => {
+  it("keeps a written id clear of the ones it mints for edges and notes", () => {
+    // Every id in a document is unique whoever minted it, so `sourceLines` can key them all.
+    const { doc } = parse("= Idea &n1\n  + Nested &n2\n    ~ aside &n3");
+    const ids = [
+      ...doc.nodes.map((node) => node.id),
+      ...doc.nodes.flatMap((node) => node.notes.map((note) => note.id)),
+      ...doc.edges.map((edge) => edge.id),
+    ];
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(Object.keys(doc.sourceLines).sort()).toEqual([...ids].sort());
+  });
+
   it("builds child -> parent edges from indentation", () => {
     const { doc, errors } = parse("? Q &q1\n  = Idea &i1\n    + Pro &p1\n    - Con &c1");
     expect(errors).toEqual([]);
     expect(doc.nodes).toHaveLength(4);
-    expect(doc.edges).toContainEqual({ from: "i1", to: "q1" });
-    expect(doc.edges).toContainEqual({ from: "p1", to: "i1" });
-    expect(doc.edges).toContainEqual({ from: "c1", to: "i1" });
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "i1", to: "q1" }));
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "p1", to: "i1" }));
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "c1", to: "i1" }));
   });
 
   it("auto-assigns stable ids to unlabeled nodes", () => {
@@ -30,7 +42,7 @@ describe("parse", () => {
   it("keeps a note a leaf, so a line nested under one attaches to the note's parent", () => {
     const { doc, errors } = parse("= Idea &i1\n  ~ aside\n    + Pro &p1");
     expect(errors).toEqual([]);
-    expect(doc.edges).toContainEqual({ from: "p1", to: "i1" });
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "p1", to: "i1" }));
   });
 
   it("takes `$id` in a note's body as prose rather than a reference", () => {
@@ -66,12 +78,12 @@ describe("parse", () => {
     const b = doc.nodes.find((n) => n.text === "B");
     // The `-` places `a1` under B but can't restate what it is: `a1` is still an idea.
     expect(doc.nodes.find((n) => n.id === "a1")?.type).toBe("idea");
-    expect(doc.edges).toContainEqual({ from: "a1", to: b?.id });
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "a1", to: b?.id }));
   });
 
   it("nests deeper indentation even with mixed tabs and spaces", () => {
     const { doc } = parse("- Con &c1\n\t  - Rebuttal &r1");
-    expect(doc.edges).toContainEqual({ from: "r1", to: "c1" });
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "r1", to: "c1" }));
   });
 
   it("reports duplicate ids and unknown references as non-fatal errors", () => {

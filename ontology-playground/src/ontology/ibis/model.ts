@@ -1,3 +1,4 @@
+import type { SourceLines } from "../types.ts";
 import type { Note } from "../notes.ts";
 import type { NodeType } from "./markers.ts";
 
@@ -10,8 +11,8 @@ import type { NodeType } from "./markers.ts";
 // A `~` note is not one of the four things IBIS names, so it hangs off a node rather than being
 // one — see ../notes.ts, which every ontology here shares.
 //
-// Nothing here records where in the source a thing was written: line numbers are a fact about
-// the syntax, and the only place they belong is `ParseError`.
+// Where a thing was written stays off the entities and rides on the doc instead — see
+// ../pipeline.md.
 
 export interface IbisNode {
   id: string;
@@ -21,6 +22,8 @@ export interface IbisNode {
 }
 
 export interface IbisEdge {
+  /** its own, since a node can be answered in one place and `$ref`d under another */
+  id: string;
   /** the responding child */
   from: string;
   /** what is being responded to */
@@ -32,6 +35,8 @@ export interface IbisDoc {
   edges: IbisEdge[];
   /** `~` lines with nothing above them: notes about the document rather than about a node. */
   notes: Note[];
+  /** Where each of the above was written, by id. */
+  sourceLines: SourceLines;
 }
 
 /** IBIS's link vocabulary: what a child says to the parent it hangs under. */

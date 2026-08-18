@@ -118,7 +118,7 @@ export default function App() {
   const parseResult = useMemo(() => ontology.parse(shared.source), [ontology, shared.source]);
   // Depends on the theme because each type's one configured color resolves into a fill, a
   // border and a text color differently in each (ontology/typeColors.ts).
-  const mermaidText = useMemo(
+  const mermaidOutput = useMemo(
     () => ontology.toMermaid(parseResult.doc, shared.config, shared.features, theme),
     [ontology, parseResult, shared.config, shared.features, theme],
   );
@@ -227,7 +227,7 @@ export default function App() {
           <EditorPane
             source={shared.source}
             onSourceChange={(source) => setShared((d) => ({ ...d, source }))}
-            mermaidText={mermaidText}
+            mermaidText={mermaidOutput.text}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             ontologyLabel={ontology.label}
@@ -249,7 +249,7 @@ export default function App() {
             onChange={(features) => setShared((d) => ({ ...d, features }))}
             onOpenStyle={() => setConfigOpen(true)}
           />
-          <DiagramPane mermaidText={mermaidText} theme={theme} />
+          <DiagramPane mermaidText={mermaidOutput.text} theme={theme} />
         </div>
 
         {/* Above both panes rather than inside the diagram column: on a phone the editor

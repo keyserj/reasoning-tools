@@ -1,4 +1,5 @@
-import type { ParseError } from "../types.ts";
+import type { ParseError, SourceLines } from "../types.ts";
+import { TOPIC_ID } from "../topic.ts";
 import type { Note } from "../notes.ts";
 import type { ArgDoc, Claim, Edge } from "./model.ts";
 import {
@@ -78,14 +79,14 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
   const edges: Edge[] = [];
   const errors: ParseError[] = [];
   const usedIds = new Set<string>();
+  const sourceLines: SourceLines = {};
   const refUses: { refId: string; line: number }[] = [];
   // A note names its owner by id, and the owner may not exist yet: an edge only materializes
   // once the claim nested under it is read, and a `= $ref` block can point further down the
   // file. So notes are filed at the end, when every id is known.
   const pendingNotes: { note: Note; ownerId: string }[] = [];
   const docNotes: Note[] = [];
-  // `%perspectives` may appear anywhere, so slot counts can't be checked until the end. This
-  // is the only reason a line number outlives the loop; nothing in the model carries one.
+  // `%perspectives` may appear anywhere, so slot counts can't be checked until the end.
   const scored: { scores: Scores; line: number }[] = [];
   const pendingEdges: PendingEdge[] = [];
   const stack: Frame[] = [];
@@ -93,6 +94,11 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
   const autoCounters: Record<string, number> = {};
   let description: string | undefined;
   let perspectives: string[] = [];
+
+  /** File the line a thing was written on under its id. The topic collects every line feeding it. */
+  const fileLine = (id: string, line: number) => {
+    (sourceLines[id] ??= []).push(line);
+  };
 
   const nextAutoId = (prefix: string): string => {
     let id: string;
@@ -163,6 +169,7 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
         });
       } else if (key === DESCRIPTION_KEY) {
         description = value.trim();
+        fileLine(TOPIC_ID, lineNo);
       } else if (key === PERSPECTIVES_KEY) {
         const list = BRACKETED_LIST.exec(value.trim());
         if (!list) {
@@ -175,6 +182,7 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
             .split(",")
             .map((name) => name.trim())
             .filter((name) => name !== "");
+          fileLine(TOPIC_ID, lineNo);
         }
       } else {
         errors.push({
@@ -217,6 +225,7 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
         }
         nodeId = takeId(explicitId, "c", lineNo);
         usedIds.add(nodeId);
+        fileLine(nodeId, lineNo);
         claims.push({ id: nodeId, text: body, scores, notes: [] });
         if (scores !== null) scored.push({ scores, line: lineNo });
       }
@@ -268,6 +277,7 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
       }
       const id = takeId(explicitId, "t", lineNo);
       usedIds.add(id);
+      fileLine(id, lineNo);
       if (!parent) {
         // Nothing above it: a note about the document rather than about any one line.
         docNotes.push({ id, text: body });
@@ -321,6 +331,7 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
 
     const id = takeId(explicitId, "l", lineNo);
     usedIds.add(id);
+    fileLine(id, lineNo);
     const pending: PendingEdge = {
       id,
       type: edgeType ?? "supports",
@@ -372,5 +383,8 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
 
   errors.sort((a, b) => a.line - b.line);
 
-  return { doc: { description, perspectives, claims, edges, notes: docNotes }, errors };
+  return {
+    doc: { description, perspectives, claims, edges, notes: docNotes, sourceLines },
+    errors,
+  };
 }

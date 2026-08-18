@@ -19,32 +19,41 @@ describe("toGraph", () => {
       id: "t",
       type: "thesis",
       text: "Thesis\n[3]",
+      lines: [2],
     });
   });
 
   it("gives a claim used once a box in its own stance, on a plain connector", () => {
     const source = "= T &t\n  -[1] Only &o";
-    expect(node(source, "o")).toEqual({ id: "o", type: "con", text: "Only\n[1]" });
-    expect(edgesFrom(source, "o")).toEqual([{ from: "o", to: "t", type: "link" }]);
+    expect(node(source, "o")).toEqual({ id: "o", type: "con", text: "Only\n[1]", lines: [2] });
+    // The `-` line writes the claim *and* attaches it, so it draws the connector too.
+    expect(edgesFrom(source, "o")).toEqual([{ from: "o", to: "t", type: "link", lines: [2] }]);
   });
 
   it("draws a `$ref` usage as a dashed copy taking its own stance and score", () => {
     // The two usages disagree about both, which is exactly what a box per usage can say.
     const source = "= A &a\n  -[1] Shared &s\n= B &b\n  +[4] $s";
-    expect(node(source, "s")).toEqual({ id: "s", type: "con", text: "Shared 🔀\n[1]" });
+    expect(node(source, "s")).toEqual({
+      id: "s",
+      type: "con",
+      text: "Shared 🔀\n[1]",
+      lines: [2],
+    });
+    // The copy points at the `$s` line that reuses the claim, not at the one declaring it.
     expect(node(source, "a2")).toEqual({
       id: "a2",
       type: "pro",
       text: "Shared 🔀\n[4]",
       dashed: true,
+      lines: [4],
     });
-    expect(edgesFrom(source, "s")).toEqual([{ from: "s", to: "a", type: "link" }]);
-    expect(edgesFrom(source, "a2")).toEqual([{ from: "a2", to: "b", type: "link" }]);
+    expect(edgesFrom(source, "s")).toEqual([{ from: "s", to: "a", type: "link", lines: [2] }]);
+    expect(edgesFrom(source, "a2")).toEqual([{ from: "a2", to: "b", type: "link", lines: [4] }]);
   });
 
   it("hangs a reused claim's children off the box that declares it, not off a copy", () => {
     const source = "= A &a\n  - Shared &s\n    + Child &c\n= B &b\n  + $s";
-    expect(edgesFrom(source, "c")).toEqual([{ from: "c", to: "s", type: "link" }]);
+    expect(edgesFrom(source, "c")).toEqual([{ from: "c", to: "s", type: "link", lines: [3] }]);
   });
 
   it("marks every box of a reused claim, and only while icons are on", () => {
@@ -56,12 +65,13 @@ describe("toGraph", () => {
 
   it("draws a thesis reused as an argument as a copy, like any other `$ref`", () => {
     const source = "=[3] A &a\n=[2] B &b\n  +[4] $a";
-    expect(node(source, "a")).toEqual({ id: "a", type: "thesis", text: "A 🔀\n[3]" });
+    expect(node(source, "a")).toEqual({ id: "a", type: "thesis", text: "A 🔀\n[3]", lines: [1] });
     expect(node(source, "a1")).toEqual({
       id: "a1",
       type: "pro",
       text: "A 🔀\n[4]",
       dashed: true,
+      lines: [3],
     });
   });
 
@@ -74,8 +84,9 @@ describe("toGraph", () => {
       type: "thesis",
       text: "Shared 🔀\n[2]",
       dashed: true,
+      lines: [2],
     });
-    expect(edgesFrom(source, "t1")).toEqual([{ from: "t1", to: "q", type: "link" }]);
+    expect(edgesFrom(source, "t1")).toEqual([{ from: "t1", to: "q", type: "link", lines: [2] }]);
   });
 
   it("marks a claim that has sources, and only while icons are on", () => {
@@ -94,6 +105,17 @@ describe("toGraph", () => {
       { from: "qb", to: "_topic", type: "anchor" },
       { from: "l", to: "_topic", type: "anchor" },
     ]);
+  });
+
+  it("points a note's box and connector at the `~` line that wrote both", () => {
+    const source = "= T &t\n  ~ an aside &nt";
+    expect(node(source, "nt")).toEqual({ id: "nt", type: "note", text: "an aside", lines: [2] });
+    expect(edgesFrom(source, "nt")).toEqual([{ from: "nt", to: "t", type: "note", lines: [2] }]);
+  });
+
+  it("gives the header every `%` line it was built from", () => {
+    const source = "%description: D\n%perspectives: [a]\n= T &t";
+    expect(node(source, "_topic")?.lines).toEqual([1, 2]);
   });
 
   it("omits the header entirely when there is nothing for it to say", () => {

@@ -1,3 +1,4 @@
+import type { SourceLines } from "../types.ts";
 import type { Note } from "../notes.ts";
 import type { EdgeType } from "./markers.ts";
 import type { Scores } from "./scores.ts";
@@ -7,8 +8,8 @@ import type { Scores } from "./scores.ts";
 // (that's what a `= $some-edge-id` block argues about). `RenderGraph` can't express that, so
 // ./toGraph.ts flattens this down to something mermaid can draw.
 //
-// Nothing here records where in the source a thing was written: line numbers are a fact about
-// the syntax, and the only place they belong is `ParseError`.
+// Where a thing was written stays off the entities and rides on the doc instead — see
+// ../pipeline.md.
 
 export interface Claim {
   id: string;
@@ -38,4 +39,6 @@ export interface ArgDoc {
   edges: Edge[];
   /** `~` lines with nothing above them: notes about the document rather than about a line. */
   notes: Note[];
+  /** Where each of the above was written, by id; the `%` lines file under the topic's. */
+  sourceLines: SourceLines;
 }

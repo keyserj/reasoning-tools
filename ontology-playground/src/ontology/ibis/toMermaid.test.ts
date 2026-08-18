@@ -6,7 +6,10 @@ import { defaultConfig } from "./defaultConfig.ts";
 import example from "./examples/session-storage.txt?raw";
 
 /** The features argument is IBIS's unused one; `theme` is what the two after it are here for. */
-const render = (doc: IbisDoc, config = defaultConfig) => toMermaid(doc, config, {}, "light");
+const render = (doc: IbisDoc, config = defaultConfig) => toMermaid(doc, config, {}, "light").text;
+
+const sourceMap = (source: string) =>
+  toMermaid(parse(source).doc, defaultConfig, {}, "light").sourceMap;
 
 describe("toMermaid", () => {
   it("emits a flowchart with shapes, classes and child -> parent edges", () => {
@@ -15,7 +18,7 @@ describe("toMermaid", () => {
     expect(out.startsWith("flowchart BT")).toBe(true);
     expect(out).toContain('q1{{"❓ Q"}}:::question');
     expect(out).toContain('i1["💡 Idea"]:::idea');
-    expect(out).toContain("i1 --> q1");
+    expect(out).toContain("i1 e0@--> q1");
     expect(out).toContain("classDef question");
   });
 
@@ -23,14 +26,14 @@ describe("toMermaid", () => {
     const { doc } = parse("= Idea &i1\n  ~ a note &nt1");
     const out = render(doc);
     expect(out).toContain('nt1[/"📝 a note"/]:::note');
-    expect(out).toContain("nt1 -.-> i1");
+    expect(out).toContain("nt1 e0@-.-> i1");
   });
 
   it("draws a note as its own box on a dotted connector", () => {
     const { doc } = parse("= Idea &i1\n  ~ an aside &nt1");
     const out = render(doc);
     expect(out).toContain('nt1[/"📝 an aside"/]:::note');
-    expect(out).toContain("nt1 -.-> i1");
+    expect(out).toContain("nt1 e0@-.-> i1");
   });
 
   it("omits icons when showIcons is false", () => {
@@ -44,6 +47,7 @@ describe("toMermaid", () => {
       nodes: [{ id: "weird-id", type: "idea", text: 'say "hi"', notes: [] }],
       edges: [],
       notes: [],
+      sourceLines: {},
     };
     const out = render(doc);
     expect(out).toContain("&quot;hi&quot;");
@@ -55,6 +59,7 @@ describe("toMermaid", () => {
       nodes: [{ id: "n1", type: "idea", text: "5 < 6 & <img src=x>\nsecond line", notes: [] }],
       edges: [],
       notes: [],
+      sourceLines: {},
     };
     const out = render(doc);
     expect(out).toContain("5 &lt; 6 &amp; &lt;img src=x&gt;");
@@ -62,11 +67,24 @@ describe("toMermaid", () => {
   });
 
   it("returns a placeholder for an empty graph", () => {
-    const out = render({ nodes: [], edges: [], notes: [] });
+    const out = render({ nodes: [], edges: [], notes: [], sourceLines: {} });
     expect(out).toContain("_empty");
   });
 
   it("matches the generated-mermaid snapshot for the session-storage example", () => {
     expect(render(parse(example).doc)).toMatchSnapshot();
+  });
+});
+
+describe("sourceMap", () => {
+  it("maps each box and the connector its nesting drew back to their lines", () => {
+    const map = sourceMap("? Q &q1\n  = Idea &i1");
+    expect(map.nodes).toEqual({ q1: [1], i1: [2] });
+    expect(map.edges).toEqual({ e0: [2] });
+  });
+
+  it("points a `$ref` connector at the ref line, not at the node it reuses", () => {
+    const map = sourceMap("= Idea &i1\n= Other &i2\n  + $i1");
+    expect(map.edges).toEqual({ e0: [3] });
   });
 });

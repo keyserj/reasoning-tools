@@ -70,12 +70,13 @@ Vitest only collects `src/**/*.test.ts` in a `node` environment — there's no D
 
 ### Architecture
 
-Per keystroke: editor text → `ontology.parse` → the ontology's own model → `ontology.toMermaid` → mermaid source → SVG injected into `DiagramPane`. Start at `src/ontology/types.ts`, which carries the whole shell↔ontology contract; each other file's header comment owns the reasoning behind that file, so read it there.
+Per keystroke: editor text → `ontology.parse` → the ontology's own model → `ontology.toMermaid` → mermaid source plus a source map → SVG injected into `DiagramPane`. Start at `src/ontology/types.ts`, which carries the whole shell↔ontology contract, and [`src/ontology/pipeline.md`](./ontology-playground/src/ontology/pipeline.md), which owns the division of labour between an ontology's four files; each other file's header comment owns the reasoning behind that file, so read it there.
 
-Two invariants span files, so no one file owns them:
+Three invariants span files, so no one file owns them:
 
 - **Adding an ontology is a new `src/ontology/<id>/` plus one line in `registry.ts`, with no UI change.** If it seems to need one, the missing piece belongs in the contract, not in a component. The order that work goes in is [.claude/skills/add-ontology/SKILL.md](./.claude/skills/add-ontology/SKILL.md).
 - **A type carries one color, decided once in the document's `StyleConfig`**, and everything showing that type reads it from there: the diagram's `classDef`, the legend, and the editor. Restyling a type in the **Style** dialog has to move all three together.
+- **A drawn element carries the source lines it was written on**, which is what links the caret's line to its box and back. An ontology that doesn't fill `sourceLines` loses that silently — `pipeline.md` has the rule and `registry.test.ts` the backstop.
 
 ## ameliorate-v2
 

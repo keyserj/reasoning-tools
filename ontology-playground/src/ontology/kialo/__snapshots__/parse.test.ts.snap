@@ -157,6 +157,75 @@ exports[`parse > matches the parsed-model snapshot for the session-storage examp
       "text": "How do we run background jobs?",
     },
   ],
+  "sourceLines": {
+    "_topic": [
+      1,
+      2,
+    ],
+    "a1": [
+      10,
+    ],
+    "a2": [
+      12,
+    ],
+    "a3": [
+      13,
+    ],
+    "a4": [
+      16,
+    ],
+    "a5": [
+      17,
+    ],
+    "a6": [
+      21,
+    ],
+    "a7": [
+      27,
+    ],
+    "c1": [
+      10,
+    ],
+    "c2": [
+      13,
+    ],
+    "c3": [
+      15,
+    ],
+    "c4": [
+      16,
+    ],
+    "c5": [
+      21,
+    ],
+    "c6": [
+      26,
+    ],
+    "n1": [
+      22,
+    ],
+    "ops-cost": [
+      12,
+    ],
+    "q1": [
+      7,
+    ],
+    "q2": [
+      24,
+    ],
+    "redis": [
+      9,
+    ],
+    "t1": [
+      9,
+    ],
+    "t2": [
+      15,
+    ],
+    "t3": [
+      26,
+    ],
+  },
   "theses": [
     {
       "claimId": "redis",

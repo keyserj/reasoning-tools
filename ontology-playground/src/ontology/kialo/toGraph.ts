@@ -1,15 +1,13 @@
 import type { RenderEdge, RenderNode, RenderGraph } from "../types.ts";
 import { ANCHOR_TYPE_ID } from "../anchoring.ts";
 import { addDocumentNotes, addNotes } from "../notes.ts";
+import { TOPIC_ID } from "../topic.ts";
 import { type Claim, type ClaimUsage, type KialoDoc, isArgument, usagesByClaim } from "./model.ts";
 import { type Scores, formatScores } from "./scores.ts";
 
 // How this ontology gets drawn — the one file to rewrite if the rendering should change. A score
 // and a stance belong to one usage of a claim, so a usage rather than a claim is what gets a box;
 // ./rendering.md lays out what that costs.
-
-/** Id of the header node. Leading `_` is already a safe mermaid identifier. */
-const TOPIC_ID = "_topic";
 
 /** Marks a claim as having evidence without putting a URL in the diagram. */
 const SOURCE_ICON = "🔗";
@@ -40,6 +38,7 @@ function usageNode(
   usage: ClaimUsage,
   reused: boolean,
   showIcons: boolean,
+  lines: number[] | undefined,
 ): RenderNode {
   const badges = showIcons
     ? `${reused ? ` ${REUSE_ICON}` : ""}${claim.sources.length > 0 ? ` ${SOURCE_ICON}` : ""}`
@@ -49,6 +48,7 @@ function usageNode(
     type: isArgument(usage) ? usage.stance : "thesis",
     text: withScores(`${claim.text}${badges}`, isArgument(usage) ? usage.impact : usage.veracity),
     ...(usage.viaRef ? { dashed: true } : {}),
+    ...(lines ? { lines } : {}),
   };
 }
 
@@ -68,26 +68,40 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
   const byClaim = usagesByClaim(doc);
 
   const header = topicText(doc);
-  if (header !== "") nodes.push({ id: TOPIC_ID, type: "topic", text: header });
+  if (header !== "") {
+    nodes.push({ id: TOPIC_ID, type: "topic", text: header, lines: doc.sourceLines[TOPIC_ID] });
+  }
 
   for (const question of doc.questions) {
-    nodes.push({ id: question.id, type: "question", text: question.text });
+    nodes.push({
+      id: question.id,
+      type: "question",
+      text: question.text,
+      lines: doc.sourceLines[question.id],
+    });
   }
 
   for (const claim of doc.claims) {
     const usages = byClaim.get(claim.id) ?? [];
-    for (const usage of usages) nodes.push(usageNode(claim, usage, usages.length > 1, showIcons));
+    for (const usage of usages) {
+      nodes.push(usageNode(claim, usage, usages.length > 1, showIcons, doc.sourceLines[usage.id]));
+    }
     // Per claim rather than in one pass, so a note's box is declared next to the claim it is
     // about; mermaid draws boxes in the order they're emitted. A claim whose declaring line was
     // rejected has no box for a note to hang off, and ../notes.ts asks callers to say so.
-    addNotes(nodes, edges, usages.some((usage) => !usage.viaRef) ? [claim] : []);
+    addNotes(nodes, edges, usages.some((usage) => !usage.viaRef) ? [claim] : [], doc.sourceLines);
   }
 
   // Every connector is plain: each box carries its own stance and score, so which question a
   // thesis answers, or which claim an argument is about, is the whole of what one says.
   for (const thesis of doc.theses) {
     if (thesis.questionId !== null) {
-      edges.push({ from: boxId(thesis.claimId, thesis), to: thesis.questionId, type: "link" });
+      edges.push({
+        from: boxId(thesis.claimId, thesis),
+        to: thesis.questionId,
+        type: "link",
+        lines: doc.sourceLines[thesis.id],
+      });
     }
   }
 
@@ -98,6 +112,7 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
       from: boxId(argument.claimId, argument),
       to: argument.parentClaimId,
       type: "link",
+      lines: doc.sourceLines[argument.id],
     });
   }
 
@@ -115,7 +130,7 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
     for (const rootId of roots) edges.push({ from: rootId, to: TOPIC_ID, type: ANCHOR_TYPE_ID });
   }
 
-  addDocumentNotes(nodes, edges, doc.notes, roots);
+  addDocumentNotes(nodes, edges, doc.notes, roots, doc.sourceLines);
 
   return { nodes, edges };
 }

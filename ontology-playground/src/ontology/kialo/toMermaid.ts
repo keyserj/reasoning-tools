@@ -1,4 +1,4 @@
-import type { FeatureState, StyleConfig, Theme } from "../types.ts";
+import type { FeatureState, MermaidOutput, StyleConfig, Theme } from "../types.ts";
 import { flowchart } from "../mermaidFlowchart.ts";
 import type { KialoDoc } from "./model.ts";
 import { toGraph } from "./toGraph.ts";
@@ -6,7 +6,7 @@ import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 import { DEFAULT_CONNECTOR, renderedEdgeTypesById } from "./renderedEdgeTypes.ts";
 
 /**
- * Convert a {@link KialoDoc} + {@link StyleConfig} into a mermaid flowchart string.
+ * Convert a {@link KialoDoc} + {@link StyleConfig} into a mermaid flowchart.
  *
  * `showIcons` reaches ./toGraph.ts because a claim's sources are drawn as a 🔗 inside its text,
  * which is the one icon this ontology adds itself rather than leaving to the shared renderer.
@@ -18,7 +18,7 @@ export function toMermaid(
   config: StyleConfig,
   _features: FeatureState,
   theme: Theme,
-): string {
+): MermaidOutput {
   return flowchart(
     toGraph(doc, config.showIcons),
     config,

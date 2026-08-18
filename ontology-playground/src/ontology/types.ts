@@ -9,9 +9,8 @@
 //
 // `parse` produces the ontology's *own* semantic model, and `toMermaid` flattens it into a
 // `RenderGraph` on the way out — see arg-map-truth-and-relevance/toGraph.ts, which turns edges
-// into nodes because an edge there can be argued about like any other claim. Flattening sits
-// on the render side because how a model is drawn is a rendering decision: it can depend on
-// the features below, and an ontology whose model *is* a `RenderGraph` simply hands it through.
+// into nodes because an edge there can be argued about like any other claim. Which layer may
+// know what, and why the flattening sits on the render side, is ./pipeline.md's.
 
 export interface RenderNode {
   id: string;
@@ -23,6 +22,8 @@ export interface RenderNode {
    * marks (kialo's copy of a reused claim) crosses several types at once.
    */
   dashed?: boolean;
+  /** {@link SourceLines} for this box; absent when the document didn't write it. */
+  lines?: number[];
 }
 
 export interface RenderEdge {
@@ -34,6 +35,33 @@ export interface RenderEdge {
   type: string;
   /** drawn on the connector; how an ontology says something about an edge without a box */
   label?: string;
+  /** {@link SourceLines} for this connector, which is the line that says the two are related. */
+  lines?: number[];
+}
+
+/**
+ * Where each thing a document declares was written, per id, 1-based as `ParseError.line` is.
+ * It rides on the doc rather than on the entities because a line number is a fact about the
+ * *syntax* an entity was written in, not about what the entity means — see ./pipeline.md.
+ */
+export type SourceLines = Record<string, number[]>;
+
+/**
+ * Which source lines each *drawn* element came from, keyed by the id mermaid gives it in the SVG.
+ * This is the far end of `SourceLines`: `toMermaid` is what knows which boxes and connectors a
+ * line finally became, since that depends on the lens the document is drawn through.
+ */
+export interface SourceMap {
+  /** mermaid node id — the `<id>` in the SVG's `flowchart-<id>-<n>` */
+  nodes: Record<string, number[]>;
+  /** the id emitted for the edge, which mermaid writes onto the path as `data-id` */
+  edges: Record<string, number[]>;
+}
+
+/** The drawn document: mermaid to render, plus the way back from it to the text. */
+export interface MermaidOutput {
+  text: string;
+  sourceMap: SourceMap;
 }
 
 /**
@@ -211,7 +239,12 @@ export interface Ontology {
    * isn't part of the document: it's a local preference, and a document that carried one would
    * impose the sender's theme on everyone they share a link with.
    */
-  toMermaid: (doc: unknown, config: StyleConfig, features: FeatureState, theme: Theme) => string;
+  toMermaid: (
+    doc: unknown,
+    config: StyleConfig,
+    features: FeatureState,
+    theme: Theme,
+  ) => MermaidOutput;
   /**
    * Tokenize one line for the editor's highlight overlay. Line-local by contract: no state
    * carries between lines, since the overlay re-tokenizes only what changed. The tokens' texts
@@ -253,7 +286,12 @@ export interface OntologyExample {
 export function defineOntology<Doc>(
   spec: Omit<Ontology, "parse" | "toMermaid"> & {
     parse: (text: string) => { doc: Doc; errors: ParseError[] };
-    toMermaid: (doc: Doc, config: StyleConfig, features: FeatureState, theme: Theme) => string;
+    toMermaid: (
+      doc: Doc,
+      config: StyleConfig,
+      features: FeatureState,
+      theme: Theme,
+    ) => MermaidOutput;
   },
 ): Ontology {
   return spec as Ontology;

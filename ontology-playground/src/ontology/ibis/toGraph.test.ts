@@ -2,7 +2,14 @@ import { describe, expect, it } from "vitest";
 import { parse } from "./parse.ts";
 import { toGraph } from "./toGraph.ts";
 
-const graph = (source: string) => toGraph(parse(source).doc);
+// Shape only: every box and connector also carries the line it was written on, which the block
+// at the bottom is about.
+const graph = (source: string) => {
+  const { nodes, edges } = toGraph(parse(source).doc);
+  const drop = <T extends { lines?: number[] }>(items: T[]) =>
+    items.map(({ lines: _lines, ...rest }) => rest);
+  return { nodes: drop(nodes), edges: drop(edges) };
+};
 
 // The link names are the only thing this file decides, and mermaid can't show them: IBIS gives
 // every link the same `-->` and no color, so ../ibis/toMermaid.test.ts would pass either way.
@@ -26,5 +33,18 @@ describe("toGraph", () => {
     const { nodes, edges } = graph("= Idea &i1\n  ~ an aside &nt1");
     expect(nodes).toContainEqual({ id: "nt1", type: "note", text: "an aside" });
     expect(edges).toContainEqual({ from: "nt1", to: "i1", type: "note" });
+  });
+});
+
+describe("toGraph — source lines", () => {
+  it("points a node's box and the connector it nests under at its own line", () => {
+    const { nodes, edges } = toGraph(parse("? Q &q1\n  = Idea &i1").doc);
+    expect(nodes.find((n) => n.id === "i1")?.lines).toEqual([2]);
+    expect(edges.find((e) => e.from === "i1")?.lines).toEqual([2]);
+  });
+
+  it("points a `$ref` connector at the ref line rather than at the node it reuses", () => {
+    const { edges } = toGraph(parse("= Idea &i1\n= Other &i2\n  + $i1").doc);
+    expect(edges.find((e) => e.from === "i1" && e.to === "i2")?.lines).toEqual([3]);
   });
 });

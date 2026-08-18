@@ -17,19 +17,19 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the build-a-wall
   c4["✅ Illegal immigrants are arrested for violent crimes at lower rates than native-born citizens 🔗<br/>[2,3,0]"]:::pro
   n1[/"📝 rates vary by year and state; this is a national average"/]:::note
   more_judges["⛔ Hiring more immigration judges would cut illegal immigration more cheaply than a wall<br/>[3,3,1]"]:::con
-  n1 -.-> c4
-  wall_reduces --> wall
-  c1 --> wall_reduces
-  climb_over --> wall_reduces
-  easy_climb --> climb_over
-  c2 --> easy_climb
-  visa_overstay --> wall_reduces
-  wall_cost --> wall
-  c3 --> wall_cost
-  little_harm --> wall
-  c4 --> little_harm
-  more_judges --> wall
-  a12 --> more_judges
+  n1 e0@-.-> c4
+  wall_reduces e1@--> wall
+  c1 e2@--> wall_reduces
+  climb_over e3@--> wall_reduces
+  easy_climb e4@--> climb_over
+  c2 e5@--> easy_climb
+  visa_overstay e6@--> wall_reduces
+  wall_cost e7@--> wall
+  c3 e8@--> wall_cost
+  little_harm e9@--> wall
+  c4 e10@--> little_harm
+  more_judges e11@--> wall
+  a12 e12@--> more_judges
   wall ~~~ _topic
   classDef question fill:#f1f1f4,stroke:#71717a,color:#323237,stroke-width:1.5px
   classDef thesis fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
@@ -57,17 +57,17 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the session-stor
   c5["⛔ Postgres is slower for hot reads<br/>[3,1]"]:::con
   n1[/"📝 measured on last year's hardware"/]:::note
   c6["💬 We should use a worker queue<br/>[3,2]"]:::thesis
-  n1 -.-> c5
-  redis --> q1
-  c3 --> q1
-  c6 --> q2
-  c1 --> redis
-  ops_cost --> redis
-  c2 --> ops_cost
-  c4 --> c3
-  a5 --> c3
-  c5 --> c3
-  a7 --> c6
+  n1 e0@-.-> c5
+  redis e1@--> q1
+  c3 e2@--> q1
+  c6 e3@--> q2
+  c1 e4@--> redis
+  ops_cost e5@--> redis
+  c2 e6@--> ops_cost
+  c4 e7@--> c3
+  a5 e8@--> c3
+  c5 e9@--> c3
+  a7 e10@--> c6
   q1 ~~~ _topic
   q2 ~~~ _topic
   classDef question fill:#f1f1f4,stroke:#71717a,color:#323237,stroke-width:1.5px

@@ -1,6 +1,7 @@
 import type { FeatureState, RenderEdge, RenderNode, RenderGraph } from "../types.ts";
 import { ANCHOR_TYPE_ID } from "../anchoring.ts";
 import { addDocumentNotes, addNotes } from "../notes.ts";
+import { TOPIC_ID } from "../topic.ts";
 import { featureOption, featureParam } from "../features.ts";
 import type { ArgDoc, Claim, Edge } from "./model.ts";
 import {
@@ -16,9 +17,6 @@ import { type Scores, formatScores } from "./scores.ts";
 // Every supports/critiques edge makes a claim that can itself be argued about, and mermaid
 // can't point an arrow at another arrow; the `Edge claims` feature switches between the two
 // answers to that, which ./rendering.md lays out and compares.
-
-/** Id of the header node. Leading `_` is already a safe mermaid identifier. */
-const TOPIC_ID = "_topic";
 
 /** How much of an endpoint's text a spelled-out claim quotes before it stops being readable. */
 const SIDE_MAX = 40;
@@ -55,11 +53,16 @@ function claimNodes(doc: ArgDoc): { nodes: RenderNode[]; known: Set<string> } {
 
   const header = topicText(doc);
   if (header !== "") {
-    nodes.push({ id: TOPIC_ID, type: "topic", text: header });
+    nodes.push({ id: TOPIC_ID, type: "topic", text: header, lines: doc.sourceLines[TOPIC_ID] });
     known.add(TOPIC_ID);
   }
   for (const claim of doc.claims) {
-    nodes.push({ id: claim.id, type: "claim", text: withScores(claim.text, claim.scores) });
+    nodes.push({
+      id: claim.id,
+      type: "claim",
+      text: withScores(claim.text, claim.scores),
+      lines: doc.sourceLines[claim.id],
+    });
     known.add(claim.id);
   }
   return { nodes, known };
@@ -81,6 +84,7 @@ function addNotesAndAnchor(
     nodes,
     edges,
     owners.filter((owner) => known.has(owner.id)),
+    doc.sourceLines,
   );
 
   const roots = rootClaimIds(doc);
@@ -92,7 +96,7 @@ function addNotesAndAnchor(
     edges.push({ from: roots[0], to: TOPIC_ID, type: ANCHOR_TYPE_ID });
   }
 
-  addDocumentNotes(nodes, edges, doc.notes, roots);
+  addDocumentNotes(nodes, edges, doc.notes, roots, doc.sourceLines);
 }
 
 /** Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, reifying every edge into a node. */
@@ -104,7 +108,12 @@ function impliedClaims(doc: ArgDoc, distinguish: boolean): RenderGraph {
   // A reified node is labeled with its type — its text *is* "supports" / "critiques", which
   // is what its edge claim asserts about the two claims it sits between.
   for (const edge of doc.edges) {
-    nodes.push({ id: edge.id, type: edge.type, text: withScores(edge.type, edge.scores) });
+    nodes.push({
+      id: edge.id,
+      type: edge.type,
+      text: withScores(edge.type, edge.scores),
+      lines: doc.sourceLines[edge.id],
+    });
     known.add(edge.id);
   }
 
@@ -117,6 +126,7 @@ function impliedClaims(doc: ArgDoc, distinguish: boolean): RenderGraph {
         from: edge.sourceId,
         to: edge.id,
         type: distinguish ? "edge-half" : "link",
+        lines: doc.sourceLines[edge.id],
       });
     }
     if (known.has(edge.targetId)) {
@@ -124,6 +134,7 @@ function impliedClaims(doc: ArgDoc, distinguish: boolean): RenderGraph {
         from: edge.id,
         to: edge.targetId,
         type: distinguish && edgeIds.has(edge.targetId) ? "edge-to-edge" : "link",
+        lines: doc.sourceLines[edge.id],
       });
     }
   }
@@ -188,6 +199,7 @@ function spelledOutClaims(doc: ArgDoc): RenderGraph {
       id: edge.id,
       type: "claim",
       text: withScores(`${mark} ${edgeClaimText(edge, claimTextById)}`, edge.scores),
+      lines: doc.sourceLines[edge.id],
     });
     known.add(edge.id);
   }
@@ -203,6 +215,7 @@ function spelledOutClaims(doc: ArgDoc): RenderGraph {
       to: edge.targetId,
       type: edge.type,
       label: mark === undefined ? edgeLabel(edge) : `${mark} ${edgeLabel(edge)}`,
+      lines: doc.sourceLines[edge.id],
     });
   }
 

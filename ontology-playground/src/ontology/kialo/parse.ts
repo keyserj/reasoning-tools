@@ -1,5 +1,6 @@
-import type { ParseError } from "../types.ts";
+import type { ParseError, SourceLines } from "../types.ts";
 import type { Note } from "../notes.ts";
+import { TOPIC_ID } from "../topic.ts";
 import type { Argument, Claim, KialoDoc, Question, Source, Thesis } from "./model.ts";
 import {
   DESCRIPTION_KEY,
@@ -49,14 +50,14 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
 
   const usedIds = new Set<string>();
   const claimIds = new Set<string>();
+  const sourceLines: SourceLines = {};
   const refUsages: { refId: string; line: number }[] = [];
   // Sources and notes name their claim by id, and a `$ref` may point further down the file, so
   // they are filed once every id is known.
   const pendingSources: { source: Source; claimId: string }[] = [];
   const pendingNotes: { note: Note; claimId: string }[] = [];
   const docNotes: Note[] = [];
-  // `%perspectives` may appear anywhere, so slot counts can't be checked until the end. This is
-  // the only reason a line number outlives the loop; nothing in the model carries one.
+  // `%perspectives` may appear anywhere, so slot counts can't be checked until the end.
   const scored: { scores: Scores; line: number }[] = [];
   const stack: Frame[] = [];
   let lastNoteIndent: number | null = null;
@@ -73,6 +74,11 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
     } while (usedIds.has(id));
     usedIds.add(id);
     return id;
+  };
+
+  /** File the line a thing was written on under its id. The topic collects every line feeding it. */
+  const fileLine = (id: string, line: number) => {
+    (sourceLines[id] ??= []).push(line);
   };
 
   /** Claim the line's `&id`, falling back to an auto id when it's missing or taken. */
@@ -136,6 +142,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
         });
       } else if (key === DESCRIPTION_KEY) {
         description = value.trim();
+        fileLine(TOPIC_ID, lineNo);
       } else if (key === PERSPECTIVES_KEY) {
         const list = BRACKETED_LIST.exec(value.trim());
         if (!list) {
@@ -148,6 +155,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
             .split(",")
             .map((name) => name.trim())
             .filter((name) => name !== "");
+          fileLine(TOPIC_ID, lineNo);
         }
       } else {
         errors.push({
@@ -182,6 +190,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
       }
 
       const id = takeId(explicitId, "q", lineNo);
+      fileLine(id, lineNo);
       questions.push({ id, text: body });
       stack.push({ kind: "question", indent, questionId: id });
       continue;
@@ -220,6 +229,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
         continue;
       }
       const id = takeId(explicitId, "n", lineNo);
+      fileLine(id, lineNo);
       if (parent?.kind !== "claim") {
         // No claim above it: a note about the document rather than about any one claim.
         docNotes.push({ id, text: body });
@@ -254,6 +264,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
         continue;
       }
       claimId = takeId(explicitId, "c", lineNo);
+      fileLine(claimId, lineNo);
       claimIds.add(claimId);
       claims.push({ id: claimId, text: body, sources: [], notes: [] });
     }
@@ -274,8 +285,10 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
           message: "A claim can only be a thesis once — it would have two veracity scores",
         });
       } else {
+        const usageId = nextAutoId("t");
+        fileLine(usageId, lineNo);
         theses.push({
-          id: nextAutoId("t"),
+          id: usageId,
           claimId,
           viaRef: refMatch !== null,
           questionId: parent?.kind === "question" ? parent.questionId : null,
@@ -295,8 +308,10 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
           message: `A "${marker}" line can't nest under a question — a question's answers are "=" theses`,
         });
       } else {
+        const usageId = nextAutoId("a");
+        fileLine(usageId, lineNo);
         argumentsList.push({
-          id: nextAutoId("a"),
+          id: usageId,
           claimId,
           viaRef: refMatch !== null,
           parentClaimId: parent.claimId,
@@ -344,6 +359,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
       theses,
       arguments: argumentsList,
       notes: docNotes,
+      sourceLines,
     },
     errors,
   };

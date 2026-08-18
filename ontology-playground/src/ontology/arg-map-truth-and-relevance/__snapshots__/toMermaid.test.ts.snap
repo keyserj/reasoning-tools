@@ -11,13 +11,13 @@ exports[`toMermaid > matches the generated-mermaid snapshots for the bundled exa
   not_hot["💬 Our session reads aren't hot enough for speed to matter<br/>[5,2]"]:::claim
   fast_supports_redis["💬 ① &quot;Redis is fast for hot reads&quot; supports &quot;We should use Redis for session storage&quot;<br/>[8,4]"]:::claim
   t1[/"📝 measured on last year's hardware"/]:::note
-  fast -->|"✅ ① supports [8,4]"| redis
-  ops_cost -->|"⛔ critiques [5,7]"| redis
-  ops_cost -->|"✅ supports [7,7]"| postgres
-  slow_reads -->|"⛔ critiques [6,-]"| postgres
-  not_hot -->|"⛔ critiques [7,2]"| fast_supports_redis
+  fast e0@-->|"✅ ① supports [8,4]"| redis
+  ops_cost e1@-->|"⛔ critiques [5,7]"| redis
+  ops_cost e2@-->|"✅ supports [7,7]"| postgres
+  slow_reads e3@-->|"⛔ critiques [6,-]"| postgres
+  not_hot e4@-->|"⛔ critiques [7,2]"| fast_supports_redis
   fast_supports_redis ~~~ redis
-  t1 -.-> slow_reads
+  t1 e6@-.-> slow_reads
   redis ~~~ _topic
   classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef supports fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
@@ -46,21 +46,21 @@ exports[`toMermaid > matches the generated-mermaid snapshots for the bundled exa
   reduction_supports_wall["💬 ① &quot;A border wall would substantially reduc…&quot; supports &quot;The US should build a wall along its so…&quot;<br/>[8,2,8]"]:::claim
   climb_easy_supports["💬 ② &quot;It's easy to climb a chain-link fence&quot; supports &quot;People will find a way over the barrier&quot;<br/>[8,8,2]"]:::claim
   t1[/"📝 rates vary by year and state; this is a national average"/]:::note
-  wall_reduces -->|"✅ ① supports [8,2,8]"| wall
-  physical_barrier -->|"✅ supports [8,3,8]"| wall_reduces
-  climb_over -->|"⛔ critiques [7,8,6]"| wall_reduces
-  easy_climb -->|"✅ ② supports [8,8,2]"| climb_over
-  visa_overstay -->|"⛔ critiques [7,7,8]"| wall_reduces
-  wall_cost -->|"⛔ critiques [7,8,4]"| wall
-  material_prices -->|"✅ supports"| wall_cost
-  little_harm -->|"⛔ critiques [6,8,2]"| reduction_supports_wall
-  crime_stat -->|"✅ supports [5,7,1]"| little_harm
-  unclimbable -->|"⛔ critiques [7,6,8]"| climb_easy_supports
-  more_judges -->|"⛔ critiques [6,7,2]"| wall
-  wall_cost -->|"✅ supports [6,7,4]"| more_judges
+  wall_reduces e0@-->|"✅ ① supports [8,2,8]"| wall
+  physical_barrier e1@-->|"✅ supports [8,3,8]"| wall_reduces
+  climb_over e2@-->|"⛔ critiques [7,8,6]"| wall_reduces
+  easy_climb e3@-->|"✅ ② supports [8,8,2]"| climb_over
+  visa_overstay e4@-->|"⛔ critiques [7,7,8]"| wall_reduces
+  wall_cost e5@-->|"⛔ critiques [7,8,4]"| wall
+  material_prices e6@-->|"✅ supports"| wall_cost
+  little_harm e7@-->|"⛔ critiques [6,8,2]"| reduction_supports_wall
+  crime_stat e8@-->|"✅ supports [5,7,1]"| little_harm
+  unclimbable e9@-->|"⛔ critiques [7,6,8]"| climb_easy_supports
+  more_judges e10@-->|"⛔ critiques [6,7,2]"| wall
+  wall_cost e11@-->|"✅ supports [6,7,4]"| more_judges
   reduction_supports_wall ~~~ wall
   climb_easy_supports ~~~ climb_over
-  t1 -.-> crime_stat
+  t1 e14@-.-> crime_stat
   wall ~~~ _topic
   classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef supports fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
@@ -99,31 +99,31 @@ exports[`toMermaid > matches the generated-mermaid snapshots for the bundled exa
   l7(["⛔ critiques<br/>[6,7,2]"]):::critiques
   l8(["✅ supports<br/>[6,7,4]"]):::supports
   t1[/"📝 rates vary by year and state; this is a national average"/]:::note
-  wall_reduces --- reduction_supports_wall
-  reduction_supports_wall --> wall
-  physical_barrier --- barrier_supports_reduction
-  barrier_supports_reduction --> wall_reduces
-  climb_over --- l1
-  l1 --> wall_reduces
-  easy_climb --- climb_easy_supports
-  climb_easy_supports --> climb_over
-  visa_overstay --- l2
-  l2 --> wall_reduces
-  wall_cost --- cost_critiques_wall
-  cost_critiques_wall --> wall
-  material_prices --- l3
-  l3 --> wall_cost
-  little_harm --- l4
-  l4 ==> reduction_supports_wall
-  crime_stat --- l5
-  l5 --> little_harm
-  unclimbable --- l6
-  l6 ==> climb_easy_supports
-  more_judges --- l7
-  l7 --> wall
-  wall_cost --- l8
-  l8 --> more_judges
-  t1 -.-> crime_stat
+  wall_reduces e0@--- reduction_supports_wall
+  reduction_supports_wall e1@--> wall
+  physical_barrier e2@--- barrier_supports_reduction
+  barrier_supports_reduction e3@--> wall_reduces
+  climb_over e4@--- l1
+  l1 e5@--> wall_reduces
+  easy_climb e6@--- climb_easy_supports
+  climb_easy_supports e7@--> climb_over
+  visa_overstay e8@--- l2
+  l2 e9@--> wall_reduces
+  wall_cost e10@--- cost_critiques_wall
+  cost_critiques_wall e11@--> wall
+  material_prices e12@--- l3
+  l3 e13@--> wall_cost
+  little_harm e14@--- l4
+  l4 e15@==> reduction_supports_wall
+  crime_stat e16@--- l5
+  l5 e17@--> little_harm
+  unclimbable e18@--- l6
+  l6 e19@==> climb_easy_supports
+  more_judges e20@--- l7
+  l7 e21@--> wall
+  wall_cost e22@--- l8
+  l8 e23@--> more_judges
+  t1 e24@-.-> crime_stat
   wall ~~~ _topic
   classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef supports fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px

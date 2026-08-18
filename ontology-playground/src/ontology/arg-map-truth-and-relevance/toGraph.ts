@@ -101,7 +101,7 @@ function impliedClaims(doc: ArgDoc, distinguish: boolean): RenderGraph {
   const graphEdges: RenderEdge[] = [];
   const edgeIds = new Set(doc.edges.map((edge) => edge.id));
 
-  // A reified node is labelled with its type — its text *is* "supports" / "critiques", which
+  // A reified node is labeled with its type — its text *is* "supports" / "critiques", which
   // is what its edge claim asserts about the two claims it sits between.
   for (const edge of doc.edges) {
     nodes.push({ id: edge.id, type: edge.type, text: withScores(edge.type, edge.scores) });

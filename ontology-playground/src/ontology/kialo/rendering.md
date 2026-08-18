@@ -35,8 +35,8 @@ Left unconnected it would be a graph component of its own, and dagre drops those
 
 ## Colors and icons
 
-The palette is the other ontologies', so the same topic stays comparable across lenses: `pro` blue and `con` red from ameliorate-v2's colorblind-safe `RB = { neg: "#b2182b", pos: "#2166ac" }`, `thesis` and `claim` amber and `note` yellow on the warm-band split argued in [the arg-map ontology's rendering.md](../arg-map-truth-and-relevance/rendering.md#colors-and-icons), `question` grey, `topic` violet.
+The palette is the other ontologies', so the same topic stays comparable across lenses: `pro` blue and `con` red from ameliorate-v2's colorblind-safe `RB = { neg: "#b2182b", pos: "#2166ac" }`, `thesis` and `claim` amber and `note` yellow on the warm-band split argued in [the arg-map ontology's rendering.md](../arg-map-truth-and-relevance/rendering.md#colors-and-icons), `question` gray, `topic` violet.
 
 - `pro` vs `con` is the pair that _needs_ color, and a box is the only place it appears: no connector here is colored, since none of them carries a stance
-- `question` is grey because a question is a prompt rather than something to take a position on, and because grey is what is left once amber, yellow, red, blue and violet are spoken for
+- `question` is gray because a question is a prompt rather than something to take a position on, and because gray is what is left once amber, yellow, red, blue and violet are spoken for
 - ✅ / ⛔ carry the same pair by silhouette, for the reason [arg-map's rendering.md](../arg-map-truth-and-relevance/rendering.md#colors-and-icons) gives

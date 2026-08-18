@@ -28,10 +28,10 @@ Instructions for every agent working in this repo. See [README.md](./README.md) 
 
 - **The source ontology owns its words; the playground owns the cross-ontology ones.** Kialo has theses, pros and cons, links and votes; IBIS has issues and positions — use those, and don't coin anything that could pass for them, since a reader takes it for the source's and goes hunting for a concept that isn't there. A word neither side has should be plainly generic, like `ClaimUsage`. Where the playground does the naming its word wins, so one document stays comparable across lenses: `Scores`, the `%perspectives` slots, notes. When both own a concept, split by role — the playground's word for the value it renders, the source's for the act: Kialo renders `Scores: [alice, bob]` and still says "nobody voted".
 
-### Colour
+### Color
 
-- **Colours follow the colorblind-safe red/blue axis** `ameliorate-v2/UX-design.md` requires, never a red-green pro/con pair — and an icon has to carry the same distinction by *shape* at the ~12px it renders at, which is why support/critique is ✅/⛔ rather than same-shape 🔵/🔴.
-- **Measure a colour rather than eyeballing it**: paint the computed value onto a 1px canvas and compare *sRGB code values*, since `getComputedStyle` returns `oklch`/`oklab` and will silently poison a contrast calculation.
+- **Colors follow the colorblind-safe red/blue axis** `ameliorate-v2/UX-design.md` requires, never a red-green pro/con pair — and an icon has to carry the same distinction by *shape* at the ~12px it renders at, which is why support/critique is ✅/⛔ rather than same-shape 🔵/🔴.
+- **Measure a color rather than eyeballing it**: paint the computed value onto a 1px canvas and compare *sRGB code values*, since `getComputedStyle` returns `oklch`/`oklab` and will silently poison a contrast calculation.
 
 ### CSS
 
@@ -39,7 +39,7 @@ App chrome is Tailwind v4 + daisyUI v5 (theme via `data-theme` on `<html>`). `in
 
 - **Write CSS at all only when a `className` can't express the rule.** A rule that earns its own file sits beside its component (`ontology/highlight.css`, `components/EditorPane.css`) and is `@import`ed from `index.css` rather than from a `.tsx`, so it stays in Tailwind's build graph.
 - **Wrap component-scoped CSS in `@layer components`** so utilities can override it. Anything that must outrank daisyUI stays unlayered in `index.css`, since `components` sorts before the `utilities` layer daisyUI nests inside.
-- **Reach for the shared vocabulary before inventing one**: band titles take `section-header`, selectables take `option`/`option-selected`, and small controls take content-derived borders (`border-base-content/20`) rather than `border-base-300`, which is a surface colour too weak for a 1px line on a pill.
+- **Reach for the shared vocabulary before inventing one**: band titles take `section-header`, selectables take `option`/`option-selected`, and small controls take content-derived borders (`border-base-content/20`) rather than `border-base-300`, which is a surface color too weak for a 1px line on a pill.
 
 ### Workflow
 
@@ -75,7 +75,7 @@ Per keystroke: editor text → `ontology.parse` → the ontology's own model →
 Two invariants span files, so no one file owns them:
 
 - **Adding an ontology is a new `src/ontology/<id>/` plus one line in `registry.ts`, with no UI change.** If it seems to need one, the missing piece belongs in the contract, not in a component. The order that work goes in is [.claude/skills/add-ontology/SKILL.md](./.claude/skills/add-ontology/SKILL.md).
-- **A type carries one colour, decided once in the document's `StyleConfig`**, and everything showing that type reads it from there: the diagram's `classDef`, the legend, and the editor. Restyling a type in the **Style** dialog has to move all three together.
+- **A type carries one color, decided once in the document's `StyleConfig`**, and everything showing that type reads it from there: the diagram's `classDef`, the legend, and the editor. Restyling a type in the **Style** dialog has to move all three together.
 
 ## ameliorate-v2
 

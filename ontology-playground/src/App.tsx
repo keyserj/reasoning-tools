@@ -142,7 +142,7 @@ export default function App() {
   /** Within one ontology, only the document changes — style and features are left alone. */
   const switchExample = (id: string) => {
     const target = findExample(ontology, id);
-    // The picker shows examples this ontology hasn't written, greyed rather than hidden, so
+    // The picker shows examples this ontology hasn't written, grayed rather than hidden, so
     // clicking one is expected and has to answer rather than do nothing. It's also the only
     // route a touch device has to the reason, having no hover to raise the tooltip with.
     if (!target) {

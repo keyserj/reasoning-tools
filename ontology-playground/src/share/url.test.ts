@@ -98,7 +98,7 @@ describe("share/url", () => {
     // Shared ids outlive any one ontology's writing of them, so "in the shared table" isn't
     // enough: claiming an example the ontology doesn't ship would select a pill the picker
     // renders as unavailable, and leave the document permanently un-dirty (no Reset, no draft
-    // stashed). Normalising to null instead is what makes it read honestly as "Custom".
+    // stashed). Normalizing to null instead is what makes it read honestly as "Custom".
     const unshipped = "build-a-wall";
     expect(findExample(argMapTruthAndRelevance, unshipped)).toBeDefined();
     expect(findExample(ibis, unshipped)).toBeUndefined();

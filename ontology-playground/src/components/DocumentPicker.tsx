@@ -112,7 +112,7 @@ function PickerSection({ label, selection, options, selectedId, onSelect, action
                 // text; `option-selected` doubles its weight and adds a fill, and `aria-pressed`
                 // says the same thing the toolbar's pane toggle does.
                 //
-                // The unavailable colour is set here rather than left to daisyUI's `:disabled`,
+                // The unavailable color is set here rather than left to daisyUI's `:disabled`,
                 // which is 20% alpha — barely legible against the page surface these pills sit
                 // on. A disabled control is normally allowed to be that faint, but this one
                 // carries a message, and an unreadable message is no message.
@@ -168,7 +168,7 @@ export default function DocumentPicker({
   onResetExample,
 }: Props) {
   // Driven by the shared table rather than `ontology.examples`, so an example this ontology
-  // hasn't written is shown greyed instead of vanishing. Which reasoning a lens can't yet
+  // hasn't written is shown grayed instead of vanishing. Which reasoning a lens can't yet
   // express is worth seeing — it's half of what comparing ontologies is for — and a list that
   // changed length as you switched ontology would read as a bug.
   const exampleOptions: PickerOption[] = examples.map((example) => ({
@@ -192,7 +192,7 @@ export default function DocumentPicker({
         selectedId={ontology.id}
         onSelect={onOntologyChange}
       />
-      {/* `null` is the only route to "Custom" — `decodeState` normalises an example id this
+      {/* `null` is the only route to "Custom" — `decodeState` normalizes an example id this
           ontology doesn't ship down to it — so no pill stands for it; the header does. */}
       <PickerSection
         label="Examples"

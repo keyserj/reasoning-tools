@@ -160,7 +160,7 @@ export default function EditorPane({
           than a code-editor component: every marker in these syntaxes already has a color (the
           stroke its type is drawn with), so the overlay is what makes a line of source and its
           box in the diagram findable from each other — and keeping the textarea keeps the tab,
-          undo and mobile-input behaviour a replacement would have to re-earn.
+          undo and mobile-input behavior a replacement would have to re-earn.
 
           Only the Code tab gets it. The Mermaid tab is generated output in someone else's
           language, and this ontology's tokenizer would be reading a document it didn't write. */}

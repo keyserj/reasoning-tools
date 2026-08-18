@@ -40,7 +40,7 @@ export function findExample(ontology: Ontology, id: string | null): OntologyExam
 
 /**
  * Why an ontology can't show one of the shared examples. Lives here, next to the table it
- * talks about, because two places say it: the picker's tooltip on the greyed pill, and the
+ * talks about, because two places say it: the picker's tooltip on the grayed pill, and the
  * notice raised when someone clicks that pill — and the two drifting apart would be worse
  * than either being slightly redundant.
  */

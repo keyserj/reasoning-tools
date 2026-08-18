@@ -5,6 +5,7 @@
    cascade position stays fixed. AGENTS.md has the rules for when a rule earns its own file. */
 @import "./ontology/highlight.css";
 @import "./components/editor/EditorPane.css";
+@import "./components/DiagramPane.css";
 
 @plugin "daisyui" {
   themes:

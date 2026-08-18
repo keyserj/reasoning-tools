@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { lineAt } from "./caret.ts";
+import { lineAt, offsetOfLine } from "./caret.ts";
 
 describe("lineAt", () => {
   it("counts from 1, as a parse error does", () => {
@@ -25,5 +25,28 @@ describe("lineAt", () => {
 
   it("reads an offset past the end as the last line", () => {
     expect(lineAt("= One\n= Two", 99)).toBe(2);
+  });
+});
+
+describe("offsetOfLine", () => {
+  it("finds where each line starts", () => {
+    expect(offsetOfLine("= One\n  + Two", 1)).toBe(0);
+    expect(offsetOfLine("= One\n  + Two", 2)).toBe(6);
+  });
+
+  it("lands on a blank line rather than skipping it", () => {
+    expect(offsetOfLine("= One\n\n= Two", 2)).toBe(6);
+  });
+
+  it("clamps a line past the end to the end of the text", () => {
+    expect(offsetOfLine("= One", 9)).toBe(5);
+  });
+
+  // The pair has to agree, since one places the caret and the other reads it back.
+  it("round-trips with lineAt", () => {
+    const text = "%description: D\n\n? Q &q\n  = T &t\n";
+    for (let line = 1; line <= text.split("\n").length; line++) {
+      expect(lineAt(text, offsetOfLine(text, line))).toBe(line);
+    }
   });
 });

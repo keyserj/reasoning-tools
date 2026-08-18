@@ -1,0 +1,39 @@
+/* How the diagram marks the element the caret's line drew, and says which elements can be clicked
+   back. The elements are mermaid's, injected as SVG, so these selectors name mermaid's classes;
+   what a *type* looks like stays in the emitted `classDef` (see ontology/mermaidFlowchart.ts). */
+@layer components {
+  /* Only what the source map knows: the empty-graph placeholder and the invisible anchors are
+     not links back to anything, and a pointer over them would say they were. */
+  .diagram-pane .is-linked {
+    cursor: pointer;
+  }
+
+  /* A halo rather than a heavier border, because a box's fill and stroke reach it as an inline
+     `!important` on the shape — measured, and unreachable from a stylesheet at any specificity or
+     layer. `filter` is a property mermaid never sets, so it is the one that lands.
+
+     Tight and near-opaque rather than wide and faint: a wide halo diffuses into the canvas and
+     reads as a shadow the box always had, where a close one reads as a ring around it. */
+  .diagram-pane g.node.is-active {
+    filter: drop-shadow(0 0 2px color-mix(in oklab, var(--color-base-content) 90%, transparent))
+      drop-shadow(0 0 5px color-mix(in oklab, var(--color-base-content) 60%, transparent));
+  }
+
+  /* `filter` replaces rather than accumulates, so hover has to stand aside for the mark it would
+     otherwise outrank — a pick *is* a click on a hovered box, and the strong halo is the point. */
+  .diagram-pane g.node.is-linked:not(.is-active):hover {
+    filter: drop-shadow(0 0 2px color-mix(in oklab, var(--color-base-content) 35%, transparent));
+  }
+
+  /* A connector's color is an inline style too, but only the *color*: its width is left to the
+     stylesheet, so unlike a node this one can be marked by weight. */
+  .diagram-pane path.flowchart-link.is-active {
+    stroke-width: 3.5px !important;
+  }
+
+  /* The label is a separate element from the path, so both have to be marked for a labeled
+     connector to read as one thing. */
+  .diagram-pane g.label.is-active {
+    filter: drop-shadow(0 0 3px color-mix(in oklab, var(--color-base-content) 55%, transparent));
+  }
+}

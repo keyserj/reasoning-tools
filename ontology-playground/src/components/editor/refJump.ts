@@ -62,11 +62,13 @@ export function refTargetAt(index: RefIndex, offset: number): Span | undefined {
 }
 
 /**
- * Scroll a jumped-to line into view, centered, when it isn't already visible. Only vertical: an
- * `&id` sits at the end of its line, and scrolling sideways to it would leave the line's own text
- * off-screen, which is the part you jumped to read.
+ * Scroll a line into view, centered, when it isn't already visible. `line` is 0-based — an index
+ * into the tokenized lines, not the 1-based number a `ParseError` or the source map speaks.
+ *
+ * Only vertical, because what a caller wants visible is the line's own text: a jumped-to `&id`
+ * sits at the end of its line, and scrolling sideways to it would push that text off-screen.
  */
-function revealLine(el: HTMLTextAreaElement, line: number) {
+export function revealLine(el: HTMLTextAreaElement, line: number) {
   const style = getComputedStyle(el);
   const lineHeight = parseFloat(style.lineHeight);
   if (Number.isNaN(lineHeight)) return; // a `normal` line-height; leave the scrolling to the browser

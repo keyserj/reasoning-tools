@@ -7,3 +7,14 @@
 export function lineAt(text: string, offset: number): number {
   return text.slice(0, offset).split("\n").length;
 }
+
+/** Where a 1-based line starts. A line past the end lands at the end of the text. */
+export function offsetOfLine(text: string, line: number): number {
+  let offset = 0;
+  for (let i = 1; i < line; i++) {
+    const next = text.indexOf("\n", offset);
+    if (next === -1) return text.length;
+    offset = next + 1;
+  }
+  return offset;
+}

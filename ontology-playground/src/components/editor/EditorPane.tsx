@@ -3,13 +3,14 @@ import {
   type KeyboardEvent,
   type MouseEvent,
   type SyntheticEvent,
+  useEffect,
   useMemo,
   useRef,
 } from "react";
 import type { HighlightToken, ParseError, StyleConfig } from "../../ontology/types.ts";
-import { lineAt } from "./caret.ts";
+import { lineAt, offsetOfLine } from "./caret.ts";
 import { handleIndentKeys } from "./indent.ts";
-import { useRefJump } from "./refJump.ts";
+import { revealLine, useRefJump } from "./refJump.ts";
 
 export type EditorTab = "source" | "mermaid";
 
@@ -51,6 +52,12 @@ interface Props {
   /** 1-based line being pointed at, banded here; `null` when nothing is */
   activeLine: number | null;
   onActiveLineChange: (line: number | null) => void;
+  /**
+   * Put the caret on this line and scroll it into view. Carries a nonce because the same line can
+   * be asked for twice running — clicking one box, looking elsewhere, clicking it again — and a
+   * bare line number would look unchanged the second time.
+   */
+  caretRequest: { line: number; nonce: number } | null;
 }
 
 /** One token. Plain text is bare, so the overlay's DOM stays close to the textarea's own. */
@@ -86,9 +93,11 @@ export default function EditorPane({
   markerHighlights,
   activeLine,
   onActiveLineChange,
+  caretRequest,
 }: Props) {
   const editing = activeTab === "source";
   const overlay = useRef<HTMLPreElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
 
   // Split on "\n" rather than the parser's /\r?\n/: a token's text has to be the source's own
   // characters, and a swallowed "\r" is a character the textarea still lays out.
@@ -118,6 +127,24 @@ export default function EditorPane({
     onRefJumpClick(e);
     reportCaretLine(e);
   };
+
+  // Answer each request once, by nonce: the effect re-runs on every edit, and moving the caret
+  // again there would drag it back out of wherever the typing had taken it. A request that
+  // arrives while the Mermaid tab is up waits for the Code tab rather than being dropped —
+  // the textarea is showing generated output, which the line means nothing in.
+  //
+  // Deliberately without `.focus()`: the click that asked for this landed on the diagram, and
+  // taking the keyboard away from it would also raise the on-screen keyboard on a phone.
+  const answered = useRef(0);
+  useEffect(() => {
+    const el = input.current;
+    if (caretRequest === null || caretRequest.nonce === answered.current) return;
+    if (el === null || !editing) return;
+    answered.current = caretRequest.nonce;
+    const offset = offsetOfLine(source, caretRequest.line);
+    el.setSelectionRange(offset, offset);
+    revealLine(el, caretRequest.line - 1);
+  }, [caretRequest, editing, source]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     // Tab is trapped for indenting, so Escape is the keyboard way back out of the textarea.
@@ -238,6 +265,7 @@ export default function EditorPane({
               off in both states because a hairline flipping from inset to outer says nothing
               about focus. What's left is the border doing that job by itself. */}
           <textarea
+            ref={input}
             className={`${EDITOR_BOX} syntax-input relative resize-none overflow-auto shadow-none focus:outline-none placeholder:text-base-content/40 ${
               editing ? "bg-transparent text-transparent caret-base-content" : ""
             }`}

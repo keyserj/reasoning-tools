@@ -13,7 +13,7 @@ Each `src/ontology/<id>/` is the same four steps, and most questions about "wher
 
 A line number is a fact about how a document was _written_, not about what it means — the same argument reads the same whether it starts on line 1 or line 40. So the entities in `model.ts` don't carry one. They come out of `parse.ts` in a table beside them instead: `SourceLines`, keyed by the id of the thing the line declared (`types.ts`).
 
-`toGraph.ts` is what reads it: it copies the lines onto each `RenderNode`/`RenderEdge` it builds, so `flowchart()` can emit a `SourceMap` keyed by the mermaid ids it mints. That map is what lets a line of text and the box it drew find each other in the UI. (`ParseError` carries a line of its own, straight off the parser's loop — it never needs the table.)
+`toGraph.ts` is what reads it: it copies the lines onto each `RenderNode`/`RenderEdge` it builds, so `flowchart()` can emit a `SourceMap` keyed by the mermaid ids it mints. That map is what lets a line of text and the box it drew find each other: `components/DiagramPane.tsx` marks what the caret's line drew, and `components/diagramTargets.ts` reads a tap back the other way. (`ParseError` carries a line of its own, straight off the parser's loop — it never needs the table.)
 
 The consequence worth knowing: **an ontology that doesn't fill `sourceLines` loses editor↔diagram linking, and nothing else breaks.** No type error, no failing render — the boxes simply stop lighting up. `registry.test.ts` fails an ontology whose examples map nothing, which is the backstop.
 

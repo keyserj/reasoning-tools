@@ -70,6 +70,9 @@ export default function App() {
   // that the diagram can read the same line the text does. Not in `shared`: where you are looking
   // isn't part of the document, so it doesn't travel in a link you send.
   const [activeLine, setActiveLine] = useState<number | null>(null);
+  // A pick has to *move* the caret, which the line alone can't say: clicking the same box twice
+  // asks for the same line twice, and only the nonce tells the second ask from no ask at all.
+  const [caretRequest, setCaretRequest] = useState<{ line: number; nonce: number } | null>(null);
   // Edits survive an ontology or example switch, but only for this page load: persisting
   // them is a separate decision (which storage, and for how long) than keeping the switch
   // from feeling destructive.
@@ -87,31 +90,16 @@ export default function App() {
     return () => clearTimeout(handle);
   }, [notice]);
 
-  // Pointing at nothing clears the line: a click on the chrome or the pickers means you've stopped
-  // pointing, and Escape says so from the keyboard. A gesture that begins in the text is still
-  // pointing at it however far out it ends, which is what keeps a selection dragged past the pane's
-  // edge from clearing the line it started on.
+  // Each pane answers for itself — the editor sets the line from its caret, the diagram from what
+  // a tap landed on, or clears it for a tap on bare canvas — so the only clearing left to do here
+  // is the keyboard's. Chrome deliberately doesn't clear: reaching for the style dialog, or for
+  // the Edit tab on a phone to go read the line you just tapped, is not letting go of it.
   useEffect(() => {
-    const inText = (node: EventTarget | null) =>
-      node instanceof Element && node.closest("textarea") !== null;
-    let startedInText = false;
-    const onMouseDown = (e: MouseEvent) => {
-      startedInText = inText(e.target);
-    };
-    const onClick = (e: MouseEvent) => {
-      if (!startedInText && !inText(e.target)) setActiveLine(null);
-    };
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setActiveLine(null);
     };
-    document.addEventListener("mousedown", onMouseDown);
-    document.addEventListener("click", onClick);
     document.addEventListener("keydown", onKeyDown);
-    return () => {
-      document.removeEventListener("mousedown", onMouseDown);
-      document.removeEventListener("click", onClick);
-      document.removeEventListener("keydown", onKeyDown);
-    };
+    return () => document.removeEventListener("keydown", onKeyDown);
   }, []);
 
   const ontology = getOntology(shared.ontologyId);
@@ -135,6 +123,18 @@ export default function App() {
     }, 300);
     return () => clearTimeout(handle);
   }, [shared]);
+
+  /**
+   * A click in the diagram, in the terms both panes speak. It moves the caret as well as the
+   * band so the text is ready to edit at the line you pointed at — and it has to reach the Code
+   * tab first, since the Mermaid tab is showing generated output the caret means nothing in.
+   */
+  const pickLine = (line: number | null) => {
+    setActiveLine(line);
+    if (line === null) return;
+    setActiveTab("source");
+    setCaretRequest((previous) => ({ line, nonce: (previous?.nonce ?? 0) + 1 }));
+  };
 
   /** Stash the current source so switching away from an edited example isn't destructive. */
   const stashDraft = () => {
@@ -240,6 +240,7 @@ export default function App() {
             markerHighlights={markerHighlights}
             activeLine={activeLine}
             onActiveLineChange={setActiveLine}
+            caretRequest={caretRequest}
           />
         </div>
         <div className="flex flex-col flex-1 min-w-0">
@@ -249,7 +250,12 @@ export default function App() {
             onChange={(features) => setShared((d) => ({ ...d, features }))}
             onOpenStyle={() => setConfigOpen(true)}
           />
-          <DiagramPane mermaidText={mermaidOutput.text} theme={theme} />
+          <DiagramPane
+            mermaid={mermaidOutput}
+            theme={theme}
+            activeLine={activeLine}
+            onPickLine={pickLine}
+          />
         </div>
 
         {/* Above both panes rather than inside the diagram column: on a phone the editor

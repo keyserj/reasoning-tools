@@ -66,6 +66,10 @@ export default function App() {
   const [markerHighlights, setMarkerHighlights] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(readInitialTheme);
+  // Which line of the document is being pointed at. It sits above the editor rather than in it so
+  // that the diagram can read the same line the text does. Not in `shared`: where you are looking
+  // isn't part of the document, so it doesn't travel in a link you send.
+  const [activeLine, setActiveLine] = useState<number | null>(null);
   // Edits survive an ontology or example switch, but only for this page load: persisting
   // them is a separate decision (which storage, and for how long) than keeping the switch
   // from feeling destructive.
@@ -82,6 +86,33 @@ export default function App() {
     const handle = setTimeout(() => setNotice(null), NOTICE_MS);
     return () => clearTimeout(handle);
   }, [notice]);
+
+  // Pointing at nothing clears the line: a click on the chrome or the pickers means you've stopped
+  // pointing, and Escape says so from the keyboard. A gesture that begins in the text is still
+  // pointing at it however far out it ends, which is what keeps a selection dragged past the pane's
+  // edge from clearing the line it started on.
+  useEffect(() => {
+    const inText = (node: EventTarget | null) =>
+      node instanceof Element && node.closest("textarea") !== null;
+    let startedInText = false;
+    const onMouseDown = (e: MouseEvent) => {
+      startedInText = inText(e.target);
+    };
+    const onClick = (e: MouseEvent) => {
+      if (!startedInText && !inText(e.target)) setActiveLine(null);
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setActiveLine(null);
+    };
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("click", onClick);
+    document.addEventListener("keydown", onKeyDown);
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("click", onClick);
+      document.removeEventListener("keydown", onKeyDown);
+    };
+  }, []);
 
   const ontology = getOntology(shared.ontologyId);
   const parseResult = useMemo(() => ontology.parse(shared.source), [ontology, shared.source]);
@@ -120,6 +151,7 @@ export default function App() {
     const next = getOntology(id);
     if (next.id === ontology.id) return;
     stashDraft();
+    setActiveLine(null);
 
     // The same example id in another ontology is the whole point: one click, same reasoning,
     // different lens. When it isn't there, say so — a silently swapped document is the main
@@ -151,6 +183,7 @@ export default function App() {
     }
     if (id === shared.exampleId) return;
     stashDraft();
+    setActiveLine(null);
     setShared((d) => ({ ...d, exampleId: target.id, source: sourceFor(ontology, target) }));
   };
 
@@ -205,6 +238,8 @@ export default function App() {
             highlightLine={ontology.highlightLine}
             config={shared.config}
             markerHighlights={markerHighlights}
+            activeLine={activeLine}
+            onActiveLineChange={setActiveLine}
           />
         </div>
         <div className="flex flex-col flex-1 min-w-0">

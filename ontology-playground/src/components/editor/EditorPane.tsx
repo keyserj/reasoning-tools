@@ -1,5 +1,13 @@
-import { type CSSProperties, Fragment, type KeyboardEvent, useMemo, useRef } from "react";
+import {
+  type CSSProperties,
+  type KeyboardEvent,
+  type MouseEvent,
+  type SyntheticEvent,
+  useMemo,
+  useRef,
+} from "react";
 import type { HighlightToken, ParseError, StyleConfig } from "../../ontology/types.ts";
+import { lineAt } from "./caret.ts";
 import { handleIndentKeys } from "./indent.ts";
 import { useRefJump } from "./refJump.ts";
 
@@ -40,6 +48,9 @@ interface Props {
   config: StyleConfig;
   /** draw a lone type marker on a tint of its own color, rather than as bare colored text */
   markerHighlights: boolean;
+  /** 1-based line being pointed at, banded here; `null` when nothing is */
+  activeLine: number | null;
+  onActiveLineChange: (line: number | null) => void;
 }
 
 /** One token. Plain text is bare, so the overlay's DOM stays close to the textarea's own. */
@@ -73,6 +84,8 @@ export default function EditorPane({
   highlightLine,
   config,
   markerHighlights,
+  activeLine,
+  onActiveLineChange,
 }: Props) {
   const editing = activeTab === "source";
   const overlay = useRef<HTMLPreElement>(null);
@@ -84,7 +97,27 @@ export default function EditorPane({
     [editing, source, highlightLine],
   );
 
-  const { linkable, onClick } = useRefJump(lines, editing);
+  const { linkable, onClick: onRefJumpClick } = useRefJump(lines, editing);
+
+  /**
+   * Where the caret is, read off the element rather than the props: at event time the textarea is
+   * what has just moved it. A selection reports the end it grew *toward*, which is the end the
+   * caret is drawn at.
+   */
+  const reportCaretLine = (e: SyntheticEvent<HTMLTextAreaElement>) => {
+    if (!editing) return;
+    const el = e.currentTarget;
+    const caret = el.selectionDirection === "backward" ? el.selectionStart : el.selectionEnd;
+    onActiveLineChange(lineAt(el.value, caret));
+  };
+
+  // `select` misses a caret the *code* moved — `setSelectionRange` fires nothing — so a click
+  // reports too: it's how the ref jump lands, and how you point at a line you're already on
+  // after a click somewhere else cleared it.
+  const handleClick = (e: MouseEvent<HTMLTextAreaElement>) => {
+    onRefJumpClick(e);
+    reportCaretLine(e);
+  };
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     // Tab is trapped for indenting, so Escape is the keyboard way back out of the textarea.
@@ -178,17 +211,20 @@ export default function EditorPane({
                 markerHighlights ? "marker-highlights" : ""
               } ${linkable ? "ref-links" : ""}`}
             >
-              {lines.map((tokens, i) => (
-                <Fragment key={i}>
-                  {i > 0 && "\n"}
-                  {tokens.map((token, j) => (
-                    <Token key={j} token={token} config={config} />
-                  ))}
-                </Fragment>
-              ))}
-              {/* A source ending in a newline leaves the textarea an empty last line; give the
-                  pre one too, or the two disagree about their height by a line. A trailing space
-                  hangs at the end of its line, so it can never move a wrap. */}{" "}
+              {/* One block per line, so the caret's line can be painted as a whole rather than
+                  measured and drawn over. Both classes are laid out in ./EditorPane.css. */}
+              <span className="editor-lines">
+                {lines.map((tokens, i) => (
+                  <span
+                    key={i}
+                    className={`editor-line${i + 1 === activeLine ? " editor-line-active" : ""}`}
+                  >
+                    {tokens.map((token, j) => (
+                      <Token key={j} token={token} config={config} />
+                    ))}
+                  </span>
+                ))}
+              </span>
             </pre>
           )}
           {/* `relative` only so the textarea paints over the absolutely positioned overlay:
@@ -209,7 +245,8 @@ export default function EditorPane({
             value={editing ? source : mermaidText}
             onChange={(e) => onSourceChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            onClick={onClick}
+            onClick={handleClick}
+            onSelect={reportCaretLine}
             onScroll={(e) => {
               if (overlay.current === null) return;
               overlay.current.scrollTop = e.currentTarget.scrollTop;

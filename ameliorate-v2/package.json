@@ -1,0 +1,26 @@
+{
+  "name": "ameliorate-v2-scripts",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Derives each ameliorate-v2 wireframe view's data from the ontology's example syntax, and is the executable reference implementation of the ontology's math.",
+  "engines": {
+    "node": ">=24.18.0"
+  },
+  "scripts": {
+    "serve": "python3 -m http.server 8777 --directory wireframe",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "lint": "oxlint scripts",
+    "format": "oxfmt scripts",
+    "format:check": "oxfmt --check scripts"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.1",
+    "oxfmt": "^0.55.0",
+    "oxlint": "^1.70.0",
+    "typescript": "^6.0.0",
+    "vitest": "^4.1.0"
+  }
+}

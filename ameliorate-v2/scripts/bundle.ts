@@ -13,6 +13,7 @@ import { findTopic, impliedClaimText } from "./model.ts";
 import { type GuidingQuestion, guidingQuestions } from "./questions.ts";
 import type { Ranked } from "./ranking.ts";
 import type { Scores } from "./scores.ts";
+import type { EdgeTypeName } from "./markers.ts";
 import { type Tradeoffs, tradeoffs } from "./tradeoffs.ts";
 
 /** A question is guiding or clarifying by the edge that reaches it, not by its `?` marker. */
@@ -37,12 +38,21 @@ export interface ClaimNode {
   children: ClaimNode[];
 }
 
+export interface BundleEdge {
+  sourceId: string;
+  targetId: string;
+  type: EdgeTypeName;
+  scores: Scores | null;
+}
+
 export interface Bundle {
   perspectives: string[];
   topic: { id: string; description: string } | null;
   nodes: Record<string, BundleNode>;
+  /** every relation, so a view can name the two ends of one it wasn't handed */
+  edges: Record<string, BundleEdge>;
   questions: GuidingQuestion[];
-  highlights: { top: Ranked[]; byCategory: Record<string, Ranked[]> };
+  highlights: { ranked: Ranked[]; byCategory: Record<string, Ranked[]> };
   diagram: { nodeIds: string[]; edges: DiagramEdge[] };
   tradeoffs: Tradeoffs | null;
   /** keyed by what is argued about; only what the diagram can reach */
@@ -71,10 +81,21 @@ export function buildBundle(doc: Doc): Bundle {
     argued[id] = { ...calculatedArguments(doc, id), claims: claimsAbout(doc, id) };
   }
 
+  const edges: Record<string, BundleEdge> = {};
+  for (const edge of doc.edges) {
+    edges[edge.id] = {
+      sourceId: edge.sourceId,
+      targetId: edge.targetId,
+      type: edge.type,
+      scores: edge.scores,
+    };
+  }
+
   return {
     perspectives: doc.perspectives,
     topic: topic ? { id: topic.id, description: topic.properties.description ?? "" } : null,
     nodes,
+    edges,
     questions,
     highlights: highlights(doc),
     diagram: drawn,

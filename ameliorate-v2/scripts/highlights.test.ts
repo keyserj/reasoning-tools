@@ -7,7 +7,7 @@ import { parse } from "./parse.ts";
 const buildAWall = readFileSync(join(import.meta.dirname, "../examples/build-a-wall.txt"), "utf8");
 
 describe("highlights", () => {
-  const { top, byCategory } = highlights(parse(buildAWall).doc);
+  const { ranked: top, byCategory } = highlights(parse(buildAWall).doc, 5);
 
   it("leads with the topic's sharpest disagreement", () => {
     expect(top[0].id).toBe("wall-reduces");

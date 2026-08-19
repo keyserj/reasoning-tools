@@ -15,8 +15,14 @@ export interface GuidingQuestion {
   text: string;
   /** 0..1: how much of the topic runs through this question */
   priority: number;
-  /** what the question's `guides` edge points at, which is what its view is about */
+  /** what the question's `guides` edge points at */
   guidesId: string;
+  /**
+   * What the question is ultimately about: `guidesId`, or what that question is about when a
+   * question guides another. A view has to draw a concept, and "what causes this question?"
+   * isn't a thing that can be answered.
+   */
+  subjectId: string;
 }
 
 // Only `guides`. A guiding question's chain runs question -> question -> topic, so every hop is
@@ -54,7 +60,21 @@ export function guidingQuestions(doc: Doc): GuidingQuestion[] {
       }
     }
     // kept even at zero: a question about something off the causal web still sets an agenda
-    questions.push({ id: node.id, text: node.text, priority, guidesId });
+    questions.push({ id: node.id, text: node.text, priority, guidesId, subjectId: guidesId });
+  }
+
+  const byId = new Map(doc.nodes.map((node) => [node.id, node]));
+  const guidesIdOf = new Map(questions.map((q) => [q.id, q.guidesId]));
+  for (const question of questions) {
+    const seen = new Set([question.id]);
+    let subjectId = question.guidesId;
+    while (byId.get(subjectId)?.type === "question" && !seen.has(subjectId)) {
+      seen.add(subjectId);
+      const next = guidesIdOf.get(subjectId);
+      if (next === undefined) break;
+      subjectId = next;
+    }
+    question.subjectId = subjectId;
   }
 
   return questions.sort((a, b) => b.priority - a.priority || a.id.localeCompare(b.id));

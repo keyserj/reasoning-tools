@@ -36,6 +36,12 @@ describe("guidingQuestions", () => {
     expect(find("best-ways")?.guidesId).toBe("illegal-immig");
   });
 
+  it("follows a question that guides a question through to the concept underneath", () => {
+    // why-immigrate guides best-ways, which is about illegal-immig
+    expect(find("why-immigrate")?.guidesId).toBe("best-ways");
+    expect(find("why-immigrate")?.subjectId).toBe("illegal-immig");
+  });
+
   it("says nothing about a document with no topic to be central to", () => {
     expect(guidingQuestions(parse("* A concept &c\n? Q &q\n  > guides[8]\n    * $c").doc)).toEqual(
       [],
@@ -46,6 +52,8 @@ describe("guidingQuestions", () => {
     const doc = parse(
       ["*[8] The topic &t #topic", "? Q &q", "  > guides[8]", "    * Unconnected &u"].join("\n"),
     ).doc;
-    expect(guidingQuestions(doc)).toEqual([{ id: "q", text: "Q", priority: 0, guidesId: "u" }]);
+    expect(guidingQuestions(doc)).toEqual([
+      { id: "q", text: "Q", priority: 0, guidesId: "u", subjectId: "u" },
+    ]);
   });
 });

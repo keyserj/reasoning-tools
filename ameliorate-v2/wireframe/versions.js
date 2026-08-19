@@ -17,4 +17,5 @@ window.WIREFRAME_VERSIONS = [
   { v: "2", desc: "layered diagram, smooth score gradients" },
   { v: "3", desc: "focus &amp; inspect: claim inspector, colour key" },
   { v: "4", desc: "hard colour bands, per-question views, resizable split" },
+  { v: "5", desc: "data derived from the ontology; ranked diagram with indirect edges" },
 ];

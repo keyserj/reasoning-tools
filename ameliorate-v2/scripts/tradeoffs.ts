@@ -46,7 +46,7 @@ export function tradeoffs(doc: Doc, questionId: string): Tradeoffs | null {
 
   // what the question is about, resolved the one way ./questions.ts resolves it, so the table and
   // the agenda pane can't disagree about which question opens which view
-  const subjectId = guidingQuestions(doc).find((q) => q.id === questionId)?.guidesId;
+  const subjectId = guidingQuestions(doc).find((q) => q.id === questionId)?.subjectId;
   if (subjectId === undefined) return null;
 
   // Any causal path counts, whichever way it points: an action that only makes the situation

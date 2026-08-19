@@ -57,3 +57,69 @@ export function takeScores(text: string): TakeScoresResult {
 
   return { scores, rest, messages };
 }
+
+// --- reading a row ---------------------------------------------------------
+//
+// Three normalizations do different jobs and are easy to confuse. A chain weight keeps its sign,
+// because that's what says whether a path increases or decreases what it ends at. A magnitude
+// drops it, because "how much does this matter" has no direction. The third - the 0..1 position
+// a colour is picked from, `(s + 8) / 16` for a bipolar scale - is a rendering decision and lives
+// with the rendering, in `UX-design.md`.
+
+/** What `ontology.md` says an unscored thing should count as: no need to change. */
+export const UNSCORED_CONCEPT = 0;
+/** ...and "somewhat", for a relation or a question nobody weighed. */
+export const UNSCORED_RELATION = 4;
+
+export function presentScores(scores: Scores | null): number[] {
+  return scores === null ? [] : scores.filter((score): score is number => score !== null);
+}
+
+/** `null` when nobody scored it, which is not the same as everybody scoring it 0. */
+export function average(scores: Scores | null): number | null {
+  const present = presentScores(scores);
+  if (present.length === 0) return null;
+  return present.reduce((total, score) => total + score, 0) / present.length;
+}
+
+export function averageOr(scores: Scores | null, fallback: number): number {
+  return average(scores) ?? fallback;
+}
+
+/**
+ * How far apart the perspectives are, as a population standard deviation - population because
+ * these are the scores themselves, not a sample of some larger set of scorers.
+ */
+export function deviation(scores: Scores | null): number {
+  const present = presentScores(scores);
+  if (present.length < 2) return 0;
+  const mean = present.reduce((total, score) => total + score, 0) / present.length;
+  const variance =
+    present.reduce((total, score) => total + (score - mean) ** 2, 0) / present.length;
+  return Math.sqrt(variance);
+}
+
+/** A score as a -1..1 weight, sign kept: what a directional chain multiplies. */
+export function normalize(score: number): number {
+  return score / MAX_SCORE;
+}
+
+/** A score as a 0..1 weight, sign dropped: how much of something there is, either way. */
+export function magnitude(score: number): number {
+  return Math.abs(score) / MAX_SCORE;
+}
+
+/**
+ * How strongly the perspectives weigh something, ignoring which way each of them leans.
+ *
+ * This is deliberately not `Math.abs(average(...))`. A relation everyone calls strong while
+ * disagreeing about its direction - `wall reduces[3,-5,8] illegal-immig` - averages to nearly
+ * nothing, and reading that as "barely a relation" would push the topic's most contested branch
+ * out of view. For "how much is there here", each perspective's magnitude counts; for "which way
+ * does it point", use the signed average instead.
+ */
+export function averageMagnitude(scores: Scores | null, fallback: number): number {
+  const present = presentScores(scores);
+  if (present.length === 0) return Math.abs(fallback);
+  return present.reduce((total, score) => total + Math.abs(score), 0) / present.length;
+}

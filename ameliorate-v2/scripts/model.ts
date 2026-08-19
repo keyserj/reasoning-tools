@@ -58,3 +58,8 @@ export function scoresOf(node: Node, doc: Doc): Scores | null {
     doc.edges.find((e) => e.id === node.impliedForId);
   return referent?.scores ?? null;
 }
+
+/** The `#topic` concept: what every score is relative to, and what distance is measured from. */
+export function findTopic(doc: Doc): Node | undefined {
+  return doc.nodes.find((node) => node.tags.includes("topic"));
+}

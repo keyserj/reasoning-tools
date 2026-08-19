@@ -3,7 +3,7 @@ import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   CAUSAL_TYPES,
-  GUIDING_TYPES,
+  type WalkOptions,
   magnitudeProduct,
   reach,
   signedProduct,
@@ -121,7 +121,7 @@ describe("reach", () => {
 
 describe("chaining a question's priority", () => {
   const { doc } = parse(buildAWall);
-  const guiding = { types: GUIDING_TYPES, direction: "forward" } as const;
+  const guiding: WalkOptions = { types: ["guides"], direction: "forward" };
   const priority = (from: string, to: string): number => {
     const path = walk(doc, from, guiding).find((p) => p.toId === to)!;
     return magnitudeProduct(path, UNSCORED_RELATION);

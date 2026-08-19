@@ -7,7 +7,7 @@
 // thing being "hot" or "controversial". What it does supply is every input - change importance,
 // the spread between perspectives, and the causal distance a score is discounted by.
 
-import { CAUSAL_TYPES, reachFrom, stepMagnitude } from "./chains.ts";
+import { CAUSAL_TYPES, topicReach } from "./chains.ts";
 import type { Doc, Edge, Node } from "./model.ts";
 import { findTopic } from "./model.ts";
 import {
@@ -15,9 +15,7 @@ import {
   UNSCORED_CONCEPT,
   UNSCORED_RELATION,
   averageMagnitude,
-  averageOr,
   deviation,
-  magnitude,
 } from "./scores.ts";
 
 /**
@@ -46,14 +44,6 @@ const NO_SIGNALS: Record<Signal, number> = {
 };
 
 /**
- * Relevance runs both ways along an edge. `ontology.md` leaves open whether an *incoming* edge
- * argues about a node's score, and this isn't that question: a cause of the topic is worth
- * reading about whether or not it also argues for a score. Following arrows only would strand
- * everything upstream of the topic, which here is most of the document.
- */
-const relevance = { types: CAUSAL_TYPES, direction: "either" } as const;
-
-/**
  * Rank everything a reader might be pointed at. The topic itself is left out: it's the thing
  * being read about, so "look at the topic" is not a finding.
  */
@@ -61,9 +51,7 @@ export function rank(doc: Doc): Ranked[] {
   const topic = findTopic(doc);
   if (!topic) return [];
 
-  // one relaxation from the topic answers every distance question below
-  const reaches = reachFrom(doc, topic.id, relevance);
-  addCriteria(doc, reaches);
+  const reaches = topicReach(doc, topic.id);
   const reachOf = (id: string): number => reaches.get(id) ?? 0;
   // A question with any answer has stopped being an unknown, however split those answers are.
   // The `answers` weights are ignored, so a contested answer reads as settled - the compromise
@@ -108,7 +96,7 @@ export function rank(doc: Doc): Ranked[] {
         "node",
         node.id,
         {
-          "change-importance": magnitude(averageOr(node.scores, UNSCORED_CONCEPT)),
+          "change-importance": averageMagnitude(node.scores, UNSCORED_CONCEPT) / MAX_SCORE,
           controversy: deviation(node.scores) / MAX_SCORE,
         },
         reachOf(node.id),
@@ -158,21 +146,4 @@ function reachOfClarified(
   const edge = doc.edges.find((e) => e.id === referentId);
   if (edge) return Math.max(reachOf(edge.sourceId), reachOf(edge.targetId));
   return reachOf(referentId);
-}
-
-/**
- * Let a criterion inherit reach from whatever fulfils it - it hangs off the causal web rather
- * than sitting in it, and `UX-design.md` asks for the top concepts, not the top causal ones.
- *
- * One step only, and never onward: two actions that fulfil the same criterion are being weighed
- * against each other, not causally connected, so treating the criterion as a through-route would
- * make every option look adjacent to every other.
- */
-function addCriteria(doc: Doc, reaches: Map<string, number>): void {
-  for (const edge of doc.edges) {
-    if (edge.type !== "fulfils") continue;
-    const from = reaches.get(edge.sourceId) ?? 0;
-    const candidate = from * stepMagnitude(edge, UNSCORED_RELATION);
-    if (candidate > (reaches.get(edge.targetId) ?? 0)) reaches.set(edge.targetId, candidate);
-  }
 }

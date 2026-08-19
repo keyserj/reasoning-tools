@@ -14,9 +14,6 @@ import { MAX_SCORE, UNSCORED_RELATION, averageMagnitude, averageOr, normalize } 
 /** `ontology.md`'s causal core: the relations a "how does this move that" question follows. */
 export const CAUSAL_TYPES: EdgeTypeName[] = ["causes", "reduces", "impedes"];
 
-/** Question priority chains through these, per `ontology.md`'s Guides and Clarifies notes. */
-export const GUIDING_TYPES: EdgeTypeName[] = ["guides", "clarifies"];
-
 export interface Step {
   edge: Edge;
   /** the node this step arrived at */
@@ -156,4 +153,28 @@ export function reach(
   fallback = UNSCORED_RELATION,
 ): number {
   return reachFrom(doc, fromId, options, fallback).get(toId) ?? 0;
+}
+
+/**
+ * How far everything sits from the topic - the one answer to "how much does this matter here",
+ * so no view has to re-derive it and none of them can disagree.
+ *
+ * Relevance runs both ways along an edge. `ontology.md` leaves open whether an *incoming* edge
+ * argues about a node's score; this isn't that question, since a cause of the topic is worth
+ * reading about whether or not it also argues for a score, and following arrows only would
+ * strand everything upstream of the topic.
+ *
+ * A criterion is then reached through whatever fulfils it, one step and never onward: two
+ * options fulfilling the same criterion are being weighed against each other, not causally
+ * connected, so routing through one would make every option look adjacent to every other. See
+ * `UX-design.md`'s "how to scale scores by distance to topic node?".
+ */
+export function topicReach(doc: Doc, topicId: string): Map<string, number> {
+  const reaches = reachFrom(doc, topicId, { types: CAUSAL_TYPES, direction: "either" });
+  for (const edge of doc.edges) {
+    if (edge.type !== "fulfils") continue;
+    const candidate = (reaches.get(edge.sourceId) ?? 0) * stepMagnitude(edge, UNSCORED_RELATION);
+    if (candidate > (reaches.get(edge.targetId) ?? 0)) reaches.set(edge.targetId, candidate);
+  }
+  return reaches;
 }

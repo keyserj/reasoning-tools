@@ -112,11 +112,9 @@ export function magnitude(score: number): number {
 /**
  * How strongly the perspectives weigh something, ignoring which way each of them leans.
  *
- * This is deliberately not `Math.abs(average(...))`. A relation everyone calls strong while
- * disagreeing about its direction - `wall reduces[3,-5,8] illegal-immig` - averages to nearly
- * nothing, and reading that as "barely a relation" would push the topic's most contested branch
- * out of view. For "how much is there here", each perspective's magnitude counts; for "which way
- * does it point", use the signed average instead.
+ * Deliberately not `Math.abs(average(...))` - see `UX-design.md`'s "how to normalize scores?"
+ * for why a contested thing has to keep its weight. For "which way does it point", use
+ * {@link average} instead.
  */
 export function averageMagnitude(scores: Scores | null, fallback: number): number {
   const present = presentScores(scores);

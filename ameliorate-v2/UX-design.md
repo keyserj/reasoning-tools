@@ -168,6 +168,10 @@
 - how to scale scores by distance to topic node?
   - concept scores: can be multiplied across the causal scores until the path reaches the topic node
   - "guides"/"clarifies" scores: multiply along path until reaching target concept node, then that node multiplies following "concept scores" strategy
+    - ambiguous, and the readings rank questions differently: does the chain stop once it reaches the topic, or does it also multiply by the target concept's own change importance (so a question about a more important concept outranks an equally-weighted question about a lesser one)?
+      - `scripts/questions.ts` takes the first reading, so a question's priority is only about how much of the topic runs through it
+      - the second reading would mean a question can't be prioritized without also judging its subject, which conflates "what should we discuss" with "what matters"
+  - a criterion is reached through the "fulfils" edge that ties it to the causal web, but paths never continue *through* a criterion: two options fulfilling the same criterion are being weighed against each other, not causally connected
   - [TODO: rest of score types]
   - how to do this for disagreement scores?
 - how to normalize scores?
@@ -176,6 +180,10 @@
 		- -8..8: add 8, divide by 16
   - for aggregates (multiple perspectives scored + showing):
     - calculate normalized averages _and_ normalized _standard deviations_ - high deviation should normalize close to 1
+    - averaging has to pick between the magnitudes and the signed scores, and the two answer different questions:
+      - distance/relevance uses the average _magnitude_, so a relation everyone calls strong while disagreeing about its direction (`wall reduces[3,-5,8] illegal immigration`) stays strong - averaging the signed scores gives nearly zero, which would read as "no relation" and push the topic's most contested branch out of view
+      - anything directional (pros vs cons, a tradeoffs cell) uses the signed average, because there the group's net direction _is_ the answer
+      - a concept's change importance is a magnitude too: two people who want a thing changed hard in opposite directions both think it's important to change, so `[8,-8]` should read as important-and-contested rather than as nothing to do
 
 #### Questions - answered
 

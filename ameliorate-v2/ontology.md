@@ -98,8 +98,8 @@
 		- references are prefixed with the referent's type character (e.g. `* $illegal-immig`, `? $best-ways`, `= $visa-overstay`)
 		- to reduce duplication, a reference line never carries scores. Where that hurts readability, the example echoes the referent's score in a `/` comment
 		- `= $some-id` on a concept's/edge's id: references the implied claim behind that thing's score, so it can be supported/critiqued/clarified
-			- implied claims have standard phrasing:
-				- concept's change-importance scores: `$node is important to increase`
+			- implied claims have standard phrasing, derived from the referent:
+				- concept's change-importance scores: `[node's text] is important to increase`
 				- edge scores: `$source-node [edge type] $target-node` (edges are verbs that claim a relation between the source and target)
 				- claim's truth score: `[node's text]` (claims are worded as evaluable statements already)
 			- explicit claims can have any text - ideally causal ones get promoted into the causal map and calculated instead (see [Calculated arguments](#calculated-arguments))
@@ -129,7 +129,7 @@
 		- Statistic: `texas-stat`
 		- Anecdote: `baby-murder`
 		- Option: `enter-on-foot` / `visa-overstay` answer `how-enter`
-		- Implicit vs explicit: claim-tree roots are implicit (implied claims with standardized wording, e.g. `= $illegal-immig is important to increase`); free-text claims (e.g. `still-immigrate`) are explicit
+		- Implicit vs explicit: claim-tree roots are implicit (implied claims with standardized wording, e.g. `= $illegal-immig`); free-text claims (e.g. `still-immigrate`) are explicit
 	- Source
 		- All: `house-doc` mentions `texas-stat`
 	- Scores
@@ -148,6 +148,8 @@
 #### Questions - Unanswered
 
 - questions and sources are left unscored here because [Structure](#Structure) doesn't define scores for them - should they have importance / credibility scores respectively?
+- should implied claims e.g. `= $illegal-immig` be clearer about meaning in the syntax?
+  - previously we had `= $illegal-immig is important to increase` which seems clearer, but is awkward to parse as standard claim text
 
 #### Questions - Answered
 

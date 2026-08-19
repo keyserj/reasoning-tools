@@ -49,7 +49,7 @@ App chrome is Tailwind v4 + daisyUI v5 (theme via `data-theme` on `<html>`). `in
 ## Layout
 
 - `ontology-playground/` — the only app. React + Vite + TypeScript: write a markdown-ish syntax, get a rendered mermaid diagram. Published to GitHub Pages.
-- `ameliorate-v2/` — design docs (no build, no code) for a "contested causal map" ontology and an app built on it, plus HTML wireframes of that UX.
+- `ameliorate-v2/` — design docs for a "contested causal map" ontology and an app built on it, plus HTML wireframes of that UX.
 - `site/` — the published site's root `index.html`; it just redirects into the playground.
 - `.github/workflows/deploy.yml` — on pushes to `main` touching `ontology-playground/`, `site/`, or the workflow itself: tests, builds, and assembles `_site/` (playground into a subdirectory, `site/index.html` at root).
 
@@ -79,6 +79,6 @@ Two invariants span files, so no one file owns them:
 
 ## ameliorate-v2
 
-Docs only. `ontology.md` (structure, score semantics, open questions) and `UX-design.md` (what to show in which state) are outline-style markdown with tab indentation and heavy internal anchor links. `ontology.md`'s "Build a wall" example is written in its own notation — read the syntax legend under **Example → Context** before touching the example.
+`ontology.md` (structure, score semantics, open questions) and `UX-design.md` (what to show in which state) are outline-style markdown with tab indentation and heavy internal anchor links. The "Build a wall" example lives in `examples/build-a-wall.txt` and is written in its own notation — read the syntax legend under `ontology.md`'s **Example → Context** before touching it.
 
 The docs are the source of truth; the wireframes under `wireframe/` are played around with to evaluate a design. Each `topic-landing-v<N>.html` is self-contained (no dependency beyond `versions.js`) and carries its own `CURRENT_VERSION` and inline "What's new" list, which is written once when that version is cut and not edited afterwards. To add a version: copy the newest wireframe to the next number, update its version and "What's new", and append one entry to `versions.js`.

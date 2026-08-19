@@ -1,5 +1,23 @@
 ## Overview
 
+### What is this?
+
+- This is a document that defines an ontology for representing contested information about a problem or solution
+- At a high level, the ontology is a "contested causal map" (naming TBD, see questions section)
+	- "contested" because anyone can disagree about any of the details, via scoring and supporting, critiquing, questioning
+	- "causal map" because the core of the structure is: concepts (as nodes) with causal relations (as edges) between them
+- This overview's [Structure](#Structure) and [Example](#Example) sections are probably the best for quickly grasping the ontology
+	- [Structure Details](#structure-details) has more information (e.g. meaning, purpose, open questions) about each piece of the structure
+	- [Core features](#core-features) goes deeper into what the structure + scores enable (e.g. calculated arguments)
+	- [Big open questions](#big-open-questions) has details on the biggest open questions for this ontology; for less-critical questions, each Structure Details section has its own "open questions" subsection
+- UX design for an app implementing this ontology lives in the sibling doc [UX-design](./UX-design.md)
+
+#### Questions - Unanswered
+
+- is "causal map" appropriate naming if there can be arguments not tied to cause / effect?
+	- seems like "contested topic map" could be better I guess, since "topic" implies we're discussing a specific _thing_, but the "map" might be any map of details to help discuss that thing (rather than specifically causal or argument)
+		- except ["topic map" is a formal thing](https://en.wikipedia.org/wiki/Topic_map) already... the idea seems similar but more formalized/generic than this...?
+
 ### Purpose
 
 - This ontology is an attempt to make it easier for every individual to contribute their wisdom towards improving a situation, so that a group's problem-solving potential can be fully realized in the form of better, more-satisfying-for-everyone solutions.
@@ -10,33 +28,6 @@
 	4.  The way that information is organized and presented has profound impact on improving the processes in 3.
 	5.  Known ways of organizing and presenting information are nowhere near as effective as they could be.
 - TODO: [The value of scored causal structures for refining contested knowledge](The-value-of-scored-causal-structures-for-refining-contested-knowledge.md)
-
-#### Archive
-
-- It's hard to improve situations, especially when many people are involved, and more so when the situation is complex. Even with best effort, it's hard to effectively take into account everyone's points and counterpoints without some becoming drowned out, lost, outdated, forgotten.
-	- It's a good first step to use a document instead of a verbal discussion, but that gets messy very quickly.
-	- A good second step might be to use an argument map, but (TODO: [The value of scored causal structures for refining contested knowledge](The-value-of-scored-causal-structures-for-refining-contested-knowledge.md))
-
-### What is this?
-
-- This is a document that defines an ontology for representing contested information about a problem or solution
-- At a high level, the ontology is a "contested causal map" (naming TBD, see questions section)
-	- "contested" because anyone can disagree about any of the details, via scoring and supporting, critiquing, questioning
-	- "causal map" because the core of the structure is: concepts (as nodes) with causal relations (as edges) between them
-- This overview's [Structure](#Structure) and [Example](#Example) sections are probably the best for quickly grasping the ontology
-	- [Structure Details](#structure-details) has more information (e.g. meaning, purpose, open questions) about each piece of the structure
-	- [Core features](#core-features) goes deeper into what the structure + scores enable (e.g. calculated arguments)
-	- [Big open questions](#big-open-questions) has details about open questions that have more significant impact on the ontology than the "open questions" in the structure details section
-- UX design for an app implementing this ontology lives in the sibling doc [UX-design](./UX-design.md)
-
-#### Questions - Unanswered
-
-- is "causal map" appropriate naming if there can be arguments not tied to cause / effect?
-	- seems like "contested topic map" could be better I guess, since "topic" implies we're discussing a specific _thing_, but the "map" might be any map of details to help discuss that thing (rather than specifically causal or argument)
-		- except ["topic map" is a formal thing](https://en.wikipedia.org/wiki/Topic_map) already... the idea seems similar but more formalized/generic than mine...?
-	- _can_ there be arguments that aren't tied at least to a _concept_ in the causal map?
-		- at least most arguments can probably be tied to a concept, but does it make sense to do this if the concept isn't yet tied to other concepts?
-			- we could make concepts for all arguments behind the scenes, but the name should definitely be based on the main visuals - if concepts aren't core on all topics, then it probably shouldn't be called a "concept" map
 
 ### Structure
 
@@ -601,7 +592,10 @@
 ##### Notes
 
 - See [More advanced claim modeling](#more-advanced-claim-modeling)
-- Non-causal arguments - e.g. evidence about truth (statistics, anecdotes, source mentions), definitional disputes, pure value assertions - make sense to exist via explicit claims. But causal arguments are ideally converted into causal form (concepts + causal edges) so that they're _calculated_ into the argument map instead of manually maintained (see [Calculated arguments](#calculated-arguments)).
+- Arguments can exist as ungrounded/explicit claims
+  - purpose: support informal claims so they're easy to initially add, and to support non-causal arguments
+		- non-causal arguments e.g. evidence, arguments about definitions
+  - ideally causal arguments are converted into causal form (concepts + causal edges) so that they're _calculated_ as implicit claims into the argument map instead of manually maintained (see [Calculated arguments](#calculated-arguments))
 
 ##### Questions - Kind of answered
 
@@ -616,9 +610,7 @@
 		- bad: _double_ the total number of nodes / edges (because each needs an implied claim)
   		- but: could try to automatically maintain implied claims... deleting them if no score or child claim exists
     		- probably not worth doing this. the implied claim could be a very trivial record that's literally just an id
-
-##### Questions - Kind of answered
-
+- see [Should other things besides cause & effect be primary? If so, how?](#Should-other-things-besides-cause--effect-be-primary-If-so-how)
 #### Source
 
 ##### Questions - Unanswered
@@ -1069,17 +1061,6 @@ There are a few different kinds of scores, as specified below. The reasons for t
   	- critically, it seems like causal relations might need to mirror whatever change is made here to claim relations - e.g. "A AND B causes C" as a modeling possibility rather than just "A causes C" and "B causese C"
 	- deductive: "concludes that"/"therefore" instead of "supports"? then "therefore" edge score should probably be 0 or 1, and chaining with "supports" should carry the fully "strength" of "supports"
 
-### Should other things besides cause & effect be primary? If so, how?
-
-- e.g. ungrounded arguments
-	- - arguments can motivate discussion, but they also inherently "take a side", which seems inaccurate vs modeling reality (cause-effect)
-		- maybe we could generate pro/con based on cause/effect + perspective scores to deal with this (fleshed out in [Calculated arguments](#calculated-arguments))
-	- - arguments are often how people think naturally, e.g. "we should do X because ..."
-		- maybe we could generate wording / pro/con based on cause/effect + perspective scores to complement this
-	- - it definitely seems like we should be able to support moving from ungrounded arguments _towards_ grounded arguments (i.e. cause-effect)
-		- see the claim lifecycle notes in [Calculated arguments](#calculated-arguments)
-- e.g. driving/guiding questions
-
 ### Do all topics have a topic node? Can there be multiple topic nodes?
 
 - current leaning: ?
@@ -1134,7 +1115,34 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- `achieves` edges shortcut causal chains, double-counting in calculations
 	- `achieves` invites ungrounded assertion ("the wall achieves the goal") where a causal edge would demand a mechanism
 
+## Kind-of-answered Big Open Questions
+
+This section exists for questions that seem answered but need to be folded into some other section (Structure Details most likely) in this document before archiving the question
+
+### Should other things besides cause & effect be primary? If so, how?
+
+- e.g. ungrounded arguments
+	- arguments can motivate discussion, but they also inherently "take a side", which seems inaccurate vs modeling reality (cause-effect)
+		- maybe we could generate pro/con based on cause/effect + perspective scores to deal with this (fleshed out in [Calculated arguments](#calculated-arguments))
+	- arguments are often how people think naturally, e.g. "we should do X because ..."
+		- maybe we could generate wording / pro/con based on cause/effect + perspective scores to complement this
+	- it definitely seems like we should be able to support moving from ungrounded arguments _towards_ grounded arguments (i.e. cause-effect)
+		- see the claim lifecycle notes in [Calculated arguments](#calculated-arguments)
+  - answer?: it seems really good to allow ungrounded arguments, but to make them have a relation "answers" `[question node]` so that the claim is bias-reduced by allowing other answers, also then they can have importance calculated via that edge's score
+- e.g. driving/guiding questions
+  - yes. ranked via score on "guides" `[topic node]` relation
+
 # Archive
+
+## Overview
+
+### Purpose
+
+#### Archive
+
+- It's hard to improve situations, especially when many people are involved, and more so when the situation is complex. Even with best effort, it's hard to effectively take into account everyone's points and counterpoints without some becoming drowned out, lost, outdated, forgotten.
+	- It's a good first step to use a document instead of a verbal discussion, but that gets messy very quickly.
+	- A good second step might be to use an argument map, but (TODO: [The value of scored causal structures for refining contested knowledge](The-value-of-scored-causal-structures-for-refining-contested-knowledge.md))
 
 ## Big open questions
 

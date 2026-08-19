@@ -665,6 +665,11 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 #### Notes
 
+- what a calculated argument is traced over, as `scripts/arguments.ts` implements it:
+	- only causal edges (causes / reduces / impedes), and only outgoing ones - which matches the leaning in the unanswered question below about incoming edges
+	- `fulfils` is deliberately excluded: an option's fulfilment of a criterion is what the [Tradeoffs table](#tradeoffs-table) answers, and counting it as an argument too would charge the same cost twice
+	- edge weights multiply along the whole downstream chain, and only the concept at the far end contributes a score, so a chain running through something nobody scored still delivers whatever is scored beyond it
+	- separate paths to the same concept add, because two mechanisms onto one outcome are two contributions - which is the same reason a duplicate edge alongside a chain has to be avoided
 - claim lifecycle: claims can temporarily be manually added to an argument chain, but ideally they're then converted into causal form (concepts + causal edges) and thereby calculated into the argument map instead
 	- some arguments aren't causal and stay as manual claims - candidates: evidence about truth (statistics, anecdotes, source mentions), definitional disputes, pure value assertions
 	- the [Example](#Example)'s claims sort accordingly: `physical-barrier` / `climb-over` / `visa-overstay` / `still-immigrate` / `fleeing-danger` are causal at heart (promotable), while `texas-stat` / `baby-murder` / `unclimbable` are evidence/specifics that stay manual

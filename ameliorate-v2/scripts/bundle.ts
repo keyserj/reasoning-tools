@@ -9,7 +9,7 @@ import { type CalculatedArguments, calculatedArguments } from "./arguments.ts";
 import { type DiagramEdge, diagram } from "./diagram.ts";
 import { highlights } from "./highlights.ts";
 import type { Doc, Node } from "./model.ts";
-import { findTopic, impliedClaimText } from "./model.ts";
+import { findTopic, impliedClaimText, scoresOf } from "./model.ts";
 import { type GuidingQuestion, guidingQuestions } from "./questions.ts";
 import type { Ranked } from "./ranking.ts";
 import type { Scores } from "./scores.ts";
@@ -63,7 +63,10 @@ export function buildBundle(doc: Doc): Bundle {
   const topic = findTopic(doc);
   const drawn = diagram(doc);
   const questions = guidingQuestions(doc);
-  const table = questions.map((q) => tradeoffs(doc, q.id)).find((t) => t !== null) ?? null;
+  // One table, for the most central question that has criteria. A second such question would be
+  // dropped silently; the wireframe assumes one because it has one place to put it.
+  const table =
+    questions.reduce<Tradeoffs | null>((found, q) => found ?? tradeoffs(doc, q.id), null) ?? null;
 
   const nodes: Record<string, BundleNode> = {};
   for (const node of doc.nodes) {
@@ -72,7 +75,7 @@ export function buildBundle(doc: Doc): Bundle {
       kind: kindOf(node, doc),
       tags: node.tags,
       subtypes: subtypesOf(node, doc),
-      scores: node.scores,
+      scores: scoresOf(node, doc),
     };
   }
 
@@ -110,13 +113,19 @@ function kindOf(node: Node, doc: Doc): NodeKind {
   return guides ? "guiding" : "clarifying";
 }
 
-/** Category, component and criterion are read off the edges, since nothing tags them. */
+/** The subtypes `ontology.md` says the edges imply, since nothing tags them. */
 function subtypesOf(node: Node, doc: Doc): string[] {
   const subtypes: string[] = [];
   for (const edge of doc.edges) {
-    if (edge.sourceId === node.id && edge.type === "categorizes") subtypes.push("category");
-    if (edge.sourceId === node.id && edge.type === "criterion for") subtypes.push("criterion");
-    if (edge.targetId === node.id && edge.type === "has") subtypes.push("component");
+    const isSource = edge.sourceId === node.id;
+    const isTarget = edge.targetId === node.id;
+    if (isSource && edge.type === "categorizes") subtypes.push("category");
+    if (isTarget && edge.type === "has") subtypes.push("component");
+    // "Concept fulfils {Concept}" and "{Concept} criterion for Question" both name a criterion
+    if (isSource && edge.type === "criterion for") subtypes.push("criterion");
+    if (isTarget && edge.type === "fulfils") subtypes.push("criterion");
+    // "{Claim} answers Clarifying Question"
+    if (isSource && edge.type === "answers") subtypes.push("option");
   }
   return [...new Set(subtypes)];
 }
@@ -142,10 +151,11 @@ function supportersOf(doc: Doc, targetId: string, seen: Set<string>): ClaimNode[
     claims.push({
       id: source.id,
       text: impliedClaimText(source, doc),
-      scores: source.scores,
+      scores: scoresOf(source, doc),
       supports: edge.scores,
       children: supportersOf(doc, source.id, seen),
     });
+    seen.delete(source.id);
   }
   return claims;
 }

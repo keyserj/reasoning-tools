@@ -187,7 +187,9 @@
       "label": "Most enter by crossing the border on foot between ports of entry",
       "kind": "claim",
       "tags": [],
-      "subtypes": [],
+      "subtypes": [
+        "option"
+      ],
       "scores": [
         3,
         1,
@@ -198,7 +200,9 @@
       "label": "Most enter legally and overstay visas",
       "kind": "claim",
       "tags": [],
-      "subtypes": [],
+      "subtypes": [
+        "option"
+      ],
       "scores": [
         7,
         8,
@@ -381,28 +385,44 @@
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": [
+        3,
+        -5,
+        8
+      ]
     },
     "wait-causes-illegal-immig--implied": {
       "label": "Long legal processing times causes Illegal immigration into the US",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": [
+        6,
+        2,
+        null
+      ]
     },
     "illegal-immig--implied": {
       "label": "Illegal immigration into the US is important to increase",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": [
+        -4,
+        0,
+        -8
+      ]
     },
     "murder-supports-worse-score--implied": {
       "label": "An illegal immigrant murdered a baby in cold blood last year supports Illegal immigration into the US is important to increase",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": [
+        -4,
+        null,
+        -8
+      ]
     }
   },
   "edges": {

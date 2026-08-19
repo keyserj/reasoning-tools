@@ -6,9 +6,14 @@ import { parse } from "./parse.ts";
 
 const examples = join(import.meta.dirname, "../examples");
 const buildAWall = readFileSync(join(examples, "build-a-wall.txt"), "utf8");
-const bundle = buildBundle(parse(buildAWall).doc);
+const parsed = parse(buildAWall);
+const bundle = buildBundle(parsed.doc);
 
 describe("buildBundle", () => {
+  it("starts from an example that parses cleanly", () => {
+    expect(parsed.errors).toEqual([]);
+  });
+
   it("carries the topic and the description written on it", () => {
     expect(bundle.topic?.id).toBe("wall");
     expect(bundle.topic?.description).toContain("Should the US build a wall");
@@ -45,6 +50,28 @@ describe("buildBundle", () => {
     ]);
     // `unclimbable` critiques `climb-over`, which is a negative supports rather than its own edge
     expect(claims[2].children.map((c) => c.id)).toEqual(["easy-climb", "unclimbable"]);
+  });
+
+  it("keeps a claim that argues in two places under both of them", () => {
+    const { doc } = parse(
+      [
+        "*[4] Topic &t #topic",
+        "= $t",
+        "  < supports[5]",
+        "    =[6] One &one",
+        "      < supports[5]",
+        "        =[7] Shared &shared",
+        "  < supports[5]",
+        "    =[6] Two &two",
+        "      < supports[5]",
+        "        = $shared",
+      ].join("\n"),
+    );
+    const claims = buildBundle(doc).arguments["t"].claims;
+    expect(claims.map((c) => c.children.map((child) => child.id))).toEqual([
+      ["shared"],
+      ["shared"],
+    ]);
   });
 
   it("argues only about what the diagram can reach", () => {

@@ -748,7 +748,9 @@ const DATA = {
       "label": "Most enter by crossing the border on foot between ports of entry",
       "kind": "claim",
       "tags": [],
-      "subtypes": [],
+      "subtypes": [
+        "option"
+      ],
       "scores": [
         3,
         1,
@@ -759,7 +761,9 @@ const DATA = {
       "label": "Most enter legally and overstay visas",
       "kind": "claim",
       "tags": [],
-      "subtypes": [],
+      "subtypes": [
+        "option"
+      ],
       "scores": [
         7,
         8,
@@ -942,28 +946,44 @@ const DATA = {
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": [
+        3,
+        -5,
+        8
+      ]
     },
     "wait-causes-illegal-immig--implied": {
       "label": "Long legal processing times causes Illegal immigration into the US",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": [
+        6,
+        2,
+        null
+      ]
     },
     "illegal-immig--implied": {
       "label": "Illegal immigration into the US is important to increase",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": [
+        -4,
+        0,
+        -8
+      ]
     },
     "murder-supports-worse-score--implied": {
       "label": "An illegal immigrant murdered a baby in cold blood last year supports Illegal immigration into the US is important to increase",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": [
+        -4,
+        null,
+        -8
+      ]
     }
   },
   "edges": {
@@ -2707,6 +2727,13 @@ const OVERRIDES = {
   questionViews: { "why-wall": "pros", "why-immigrate": "causes" },
 
   // Question text with a node rendered inline, which the plain text can't express.
+  // one blurb per question, since nothing in the structure says what a view is for
+  questionBlurbs: {
+    "why-wall": "Showing the wall\u2019s pros (left) and cons (right): good things it causes and bad things it reduces vs. the reverse. Its main pro is reducing illegal immigration \u2014 though how much is the topic\u2019s biggest disagreement.",
+    "best-ways": "Comparing actions against criteria. Only \u201cinexpensive\u201d has scored fulfilment in the example; \u201cquick\u201d and \u201chumane\u201d are shown but unscored here.",
+    "why-immigrate": "The causes the group believes drive illegal immigration, shown as a small diagram \u2014 the causal parents feeding into it.",
+  },
+
   questionParts: {
     "why-wall": [{ t: "Why might we want " }, { node: "wall" }, { t: "?" }],
     "best-ways": [{ t: "What are the most effective ways to reduce " }, { node: "illegal-immig" }, { t: "?" }],
@@ -2716,7 +2743,7 @@ const OVERRIDES = {
     { t: "This topic weighs building a " }, { ref: "wall" }, { t: " against illegal immigration. The group broadly agrees " },
     { ref: "danger" }, { t: " and " }, { ref: "long-wait" }, { t: " drive " }, { ref: "illegal-immig" },
     { t: ", and that " }, { ref: "legal-immig" }, { t: " is worth increasing. The sharpest disagreement is whether the " },
-    { edge: ["wall", "illegal-immig"], rel: "reduces", scores: [3,-5,8], t2: "wall reduces illegal immigration" },
+    { edge: ["wall", "illegal-immig"], edgeId: "wall-reduces", t2: "wall reduces illegal immigration" },
     { t: " \u2014 casey scores it strongly positive while bob believes it backfires." },
   ],
 };
@@ -2752,7 +2779,7 @@ Object.entries(DATA.nodes).forEach(([id, n]) => {
 const TOP_PRIORITY = Math.max(...DATA.questions.map(q => q.priority), 1e-9);
 const QUESTIONS = DATA.questions.map(q => ({
   id: q.id,
-  guidesId: q.subjectId,
+  subjectId: q.subjectId,
   guides: q.priority / TOP_PRIORITY,
   view: OVERRIDES.questionViews[q.id]
     ?? (DATA.tradeoffs && DATA.tradeoffs.questionId === q.id ? "tradeoffs" : "causes"),
@@ -2761,7 +2788,7 @@ const QUESTIONS = DATA.questions.map(q => ({
 
 const SIGNAL_TO_CAT = { "change-importance": "important", controversy: "controversial", unknown: "unknown" };
 
-const HOTTEST = DATA.highlights.ranked.map(item => {
+function toHotRow(item){
   const cats = item.categories.map(c => SIGNAL_TO_CAT[c]);
   if (OVERRIDES.active.includes(item.id)) cats.push("active");
   if (item.kind === "edge") {
@@ -2771,6 +2798,14 @@ const HOTTEST = DATA.highlights.ranked.map(item => {
   const kind = NODES[item.id].kind;
   const asQuestion = kind === "guiding" || kind === "clarifying";
   return { kind: asQuestion ? "question" : "node", id: item.id, cats, hot: item.hot };
+}
+
+const HOTTEST = DATA.highlights.ranked.map(toHotRow);
+/* One pill's list is ranked by that pill's signal rather than by the combined score, so
+   filtering isn't the same as hiding rows from the combined list. */
+const HOTTEST_BY_CAT = {};
+Object.entries(SIGNAL_TO_CAT).forEach(([signal, cat]) => {
+  HOTTEST_BY_CAT[cat] = (DATA.highlights.byCategory[signal] || []).map(toHotRow);
 });
 
 const CATS = {
@@ -2874,7 +2909,7 @@ function makeNodePill(id, opts){
    RENDER: AGENDA
    ============================================================ */
 function renderTopic(){
-  document.getElementById("topicPillSlot").appendChild(makeNodePill("wall", { tag: true }));
+  document.getElementById("topicPillSlot").appendChild(makeNodePill(DATA.topic.id, { tag: true }));
   document.getElementById("topicDesc").textContent = TOPIC_DESC;
 }
 
@@ -2949,7 +2984,10 @@ function questionRow(item){
 function renderHottest(){
   const list = document.getElementById("hotList");
   list.innerHTML = "";
-  let items = HOTTEST.filter(it => activeFilters.size === 0 || it.cats.some(c => activeFilters.has(c)));
+  const only = activeFilters.size === 1 ? [...activeFilters][0] : null;
+  let items = only && HOTTEST_BY_CAT[only]
+    ? HOTTEST_BY_CAT[only]
+    : HOTTEST.filter(it => activeFilters.size === 0 || it.cats.some(c => activeFilters.has(c)));
   const limit = hotExpanded ? items.length : 5;
   items.slice(0, limit).forEach(item => {
     const row = document.createElement("div");
@@ -3110,7 +3148,8 @@ function renderSummary(){
         const s = document.createElement("span");
         s.className = "ref"; s.textContent = seg.t2;
         // v4: edge ref coloured by effect on target
-        s.setAttribute("style", pillStyle(effectScores(seg.rel, seg.scores), "rb", 2));
+        const segEdge = DATA.edges[seg.edgeId];
+        s.setAttribute("style", pillStyle(effectScores(segEdge.type, segEdge.scores), "rb", 2));
         s.addEventListener("click", () => onEdgeActivate(seg.edge[0], seg.edge[1]));
         p.appendChild(s);
       }
@@ -3196,12 +3235,7 @@ function renderSummaryForQuestion(q){
   const body = document.getElementById("summaryBody");
   document.getElementById("summaryLabel").textContent = "Current-view summary";
   document.querySelectorAll("#summaryToggle button").forEach(b => b.classList.toggle("active", b.dataset.mode === "text"));
-  const texts = {
-    "why-wall": "Showing the wall's pros (left) and cons (right): good things it causes and bad things it reduces vs. the reverse. Its main pro is reducing illegal immigration — though how much is the topic's biggest disagreement.",
-    "best-ways": "Comparing actions against criteria. Only “inexpensive” has scored fulfilment in the example; “quick” and “humane” are shown but unscored here.",
-    "why-immigrate": "The causes the group believes drive illegal immigration, shown as a small diagram — the causal parents feeding into it.",
-  };
-  body.innerHTML = `<p>${texts[q.id]}</p>`;
+  body.innerHTML = `<p>${OVERRIDES.questionBlurbs[q.id] ?? ""}</p>`;
 }
 
 function renderQuestionView(q){
@@ -3219,7 +3253,7 @@ function renderQuestionView(q){
     const sub = document.createElement("p"); sub.className = "sub";
     sub.textContent = "Pros = good things it causes + bad things it reduces (left). Cons = the reverse (right).";
     qview.appendChild(sub);
-    qview.appendChild(prosConsColumns(q.guidesId));
+    qview.appendChild(prosConsColumns(q.subjectId));
 
   } else if (q.view === "tradeoffs") {
     const sub = document.createElement("p"); sub.className = "sub"; sub.textContent = "Tradeoffs table: options (actions) × criteria. Cells are fulfilment scores, colored by value.";
@@ -3230,7 +3264,7 @@ function renderQuestionView(q){
     // v4: causes shown as a small diagram rather than a list
     const sub = document.createElement("p"); sub.className = "sub"; sub.textContent = "Causes feeding into illegal immigration.";
     qview.appendChild(sub);
-    qview.appendChild(buildCausesMiniDiagram(q.guidesId));
+    qview.appendChild(buildCausesMiniDiagram(q.subjectId));
   }
 }
 
@@ -3594,6 +3628,12 @@ function highlightNode(id){
 
 function onEdgeActivate(from, to){
   if (selectedQuestion) toggleQuestion(selectedQuestion);
+  // Highlights and the causes diagram both reach relations the ranked diagram left out
+  if (!DIAGRAM_EDGES.some(e => e.from === from && e.to === to)) {
+    clearHighlight();
+    toast(`“${NODES[from].label} ${NODES[to].label}” isn't among the relations shown here.`);
+    return;
+  }
   focusState = { kind: "edge", from, to };
   applyFocus();
   showClaimPopupForEdge(from, to);

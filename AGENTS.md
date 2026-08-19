@@ -20,6 +20,7 @@ Instructions for every agent working in this repo. See [README.md](./README.md) 
 
 - **Default to fewer and shorter comments.** Take the lowest rung that works: nothing, 1-2 sentences where explanation is genuinely needed, a paragraph only when the information is critical. At 2+ paragraphs consider a separate doc, not a comment. This applies to prose in docs too, including this one.
 - **Keep it present-tense — a comment is not a change log.** Even a real *why* goes in the commit body if it's a why-it-*changed*: "tried X first and backed it out", "this used to hold the selects". Only the reason the code is what it stands as today survives the next edit. A warning about how something behaves now is not history and is worth keeping (`daisyUI v5 spells this tabs-border; tabs-bordered is v4's name and is inert`).
+- **A doc describes the thing, not the conversation that produced it.** No "as you suggested", "we decided", "the reviewer caught" — a reader who wasn't in the room can't use any of it. Credit belongs in the commit body or the PR.
 - **Do comment an accepted compromise**, at the site of the awkwardness rather than only in a doc: what's awkward, why it was accepted, what the refactor would be.
 - **Every fact lives in one place.** A doc owns the *decision*: what was chosen, what the alternatives were, what's still open. A comment owns what someone editing that line can't infer from it, and points at the doc instead of restating it (e.g. `see ./rendering.md`). This file is not exempt: a file's own header comment owns the reasoning behind that file, so don't re-narrate it here.
 - **Never hard-wrap markdown** — one unbroken line per paragraph and per bullet, however long. Editors wrap; hard wraps only make diffs reflow lines that didn't change.
@@ -44,14 +45,14 @@ App chrome is Tailwind v4 + daisyUI v5 (theme via `data-theme` on `<html>`). `in
 ### Workflow
 
 - Commits: `type(scope): lowercase summary` (e.g. `chore(mermaid): …`, `touchup(plgr): …`). Work on a branch and PR into `main`.
-- Before finishing playground work, run typecheck, test, lint, and `format:check`.
+- Before finishing work in either package, run typecheck, test, lint, and `format:check`.
 
 ## Layout
 
 - `ontology-playground/` — the only app. React + Vite + TypeScript: write a markdown-ish syntax, get a rendered mermaid diagram. Published to GitHub Pages.
-- `ameliorate-v2/` — design docs for a "contested causal map" ontology and an app built on it, plus HTML wireframes of that UX.
+- `ameliorate-v2/` — design docs for a "contested causal map" ontology and an app built on it, HTML wireframes of that UX, and `scripts/`: a tested TypeScript implementation of the ontology's math that derives a wireframe's view data.
 - `site/` — the published site's root `index.html`; it just redirects into the playground.
-- `.github/workflows/deploy.yml` — on pushes to `main` touching `ontology-playground/`, `site/`, or the workflow itself: tests, builds, and assembles `_site/` (playground into a subdirectory, `site/index.html` at root).
+- `.github/workflows/deploy.yml` — on pushes to `main` touching `ontology-playground/`, `ameliorate-v2/wireframe/`, `site/`, or the workflow itself: runs the playground's tests, builds it, and assembles `_site/` (playground and wireframes into subdirectories, `site/index.html` at root).
 - `.github/workflows/ameliorate-v2-scripts.yml` — on pushes to `main` touching `ameliorate-v2/scripts/` or `examples/`: typecheck, test, lint, format:check. Nothing under those directories is deployed, which is why it isn't part of the deploy. Nothing runs on a PR, in either package.
 
 ## Don't start web servers yourself
@@ -59,11 +60,11 @@ App chrome is Tailwind v4 + daisyUI v5 (theme via `data-theme` on `<html>`). `in
 When you need a server for testing, first check whether one is already running via playwright; if it isn't, ask the user to run it and give them the command for the directory in question. If the port is dead, say so rather than starting your own server. (Playwright blocks `file://`, so the wireframes need one either way, and a server you started is one the user has to go hunting for later.)
 
 - playground: `cd ontology-playground && npm run dev` → `http://localhost:5173/`
-- wireframes — serve the wireframe directory itself, not the repo root: `cd ameliorate-v2/wireframe && python3 -m http.server 8777`, then browse `http://localhost:8777/<page>.html`
+- wireframes: `cd ameliorate-v2 && npm run serve` → `http://localhost:8777/` (which redirects to the newest version). It serves the wireframe directory itself, not the repo root.
 
 ## ontology-playground
 
-There is no root `package.json`; run everything from `ontology-playground/`, whose [README](./ontology-playground/README.md) lists the scripts. Node version is pinned in `.nvmrc` (24.18.0).
+There is no root `package.json`; run everything from `ontology-playground/` (`ameliorate-v2/` has its own — see below), whose [README](./ontology-playground/README.md) lists the scripts. Node version is pinned in `.nvmrc` (24.18.0).
 
 A single test file or case: `npx vitest run src/ontology/arg-map-truth-and-relevance/parse.test.ts`, `npx vitest run -t "resolves \`$ref\`"`. Snapshots live in `__snapshots__/`; after deliberately changing parser or mermaid output, re-record with `npx vitest run -u` and read the diff rather than trusting it.
 
@@ -82,4 +83,14 @@ Two invariants span files, so no one file owns them:
 
 `ontology.md` (structure, score semantics, open questions) and `UX-design.md` (what to show in which state) are outline-style markdown with tab indentation and heavy internal anchor links. The "Build a wall" example lives in `examples/build-a-wall.txt` and is written in its own notation — read the syntax legend under `ontology.md`'s **Example → Context** before touching it.
 
-The docs are the source of truth; the wireframes under `wireframe/` are played around with to evaluate a design. Each `topic-landing-v<N>.html` is self-contained (no dependency beyond `versions.js`) and carries its own `CURRENT_VERSION` and inline "What's new" list, which is written once when that version is cut and not edited afterwards. To add a version: copy the newest wireframe to the next number, update its version and "What's new", and append one entry to `versions.js`.
+The docs are the source of truth; the wireframes under `wireframe/` are played around with to evaluate a design. Each `topic-landing-v<N>.html` is self-contained (no dependency beyond `versions.js`) and carries its own `CURRENT_VERSION` and inline "What's new" list, which is written once when that version is cut and not edited afterwards. To add a version: copy the newest wireframe to the next number, update its version and "What's new", and append one entry to `versions.js`. `wireframe/index.html` redirects to the newest and needs no edit.
+
+### scripts/
+
+Its own npm package (Node pinned in `.nvmrc`; `npm run test` / `typecheck` / `lint` / `format:check` / `generate` / `serve`). Node runs the `.ts` files directly rather than building them, which constrains what may be written; `tsconfig.json` documents the flags that keep that honest.
+
+`parse()` is the one entry point — whole-document rules in `validate.ts` run at the end of it, so there is no way to get a model without them. Start at `model.ts` for the shape and `chains.ts` for the machinery nearly every view sits on; each file's header owns the reasoning behind it.
+
+`npm run generate` reads `examples/build-a-wall.txt` and writes `examples/build-a-wall.views.json`, which is committed so a change in how something is derived shows up as a reviewable diff. A test asserts the committed file matches what the code produces, so a derivation change can't land without regenerating.
+
+**A wireframe pastes that bundle in rather than loading it, and a pasted bundle is never edited in place** — regenerating reaches a new version, the same way any other wireframe change does. `bundle.ts` owns why. What the structure can't say lives beside it in each wireframe's `OVERRIDES`.

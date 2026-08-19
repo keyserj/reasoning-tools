@@ -14,8 +14,20 @@ function main(argv: string[]): number {
     return 2;
   }
   const out = argv[1] ?? source.replace(/\.txt$/, ".views.json");
+  if (out === source) {
+    console.error(`${source}: that would overwrite the example - name an output path`);
+    return 2;
+  }
 
-  const { doc, errors, warnings } = parse(readFileSync(source, "utf8"));
+  let text: string;
+  try {
+    text = readFileSync(source, "utf8");
+  } catch {
+    console.error(`${source}: can't be read`);
+    return 2;
+  }
+
+  const { doc, errors, warnings } = parse(text);
   for (const warning of warnings) console.warn(`${source}:${warning.line}: ${warning.message}`);
   if (errors.length > 0) {
     for (const error of errors) console.error(`${source}:${error.line}: ${error.message}`);

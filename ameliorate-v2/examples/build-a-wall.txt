@@ -117,7 +117,7 @@
 
 = $wall-reduces
   / scored above as [3,-5,8]
-  / implicit claim behind the "wall reduces illegal immigration" edge score
+  / implied claim behind the "wall reduces illegal immigration" edge score
   < supports[7,-,8]
     =[8,-,8] A wall physically stops crossings without needing continuous surveillance &physical-barrier
       %opposite: A wall physically _aids_ crossings without needing continuous surveillance
@@ -135,9 +135,9 @@
     / reuse: the same claim answers a question above and critiques this edge
     = $visa-overstay
 
-= $illegal-immig is important to increase
-	/ scored above as [-4,0,-8]
-  / implicit claim behind `illegal-immig`'s concept score, with standardized node-score wording; alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
+= $illegal-immig
+  / scored above as [-4,0,-8]
+  / implied claim behind `illegal-immig`'s concept score - standard phrasing, so it reads "Illegal immigration into the US is important to increase"; alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
   < supports[5,8,-]
     =[7,8,2] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
   < supports[-4,-,-8] &murder-supports-worse-score

@@ -581,6 +581,13 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- but "correlates with" doesn't indicate positive vs negative, so the implied claim would be ambiguous
   	- potentially could use "correlates with" as the visible edge, and have the implied claim actually be "positively correlates with". but that seems confusing
 
+##### Fulfils
+
+###### Questions - Unanswered
+
+- what wording is best for opposite of "fulfils"?
+  - option: "works against"
+
 ##### Guides
 
 ###### Notes

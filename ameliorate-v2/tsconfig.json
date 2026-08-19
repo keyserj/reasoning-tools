@@ -1,0 +1,27 @@
+{
+  "compilerOptions": {
+    "target": "ES2024",
+    "lib": ["ES2024"],
+    "module": "NodeNext",
+    "skipLibCheck": true,
+
+    // Node runs these .ts files directly by stripping types in place rather than compiling them,
+    // so three things that compile fine would throw at runtime: a relative import without a .ts
+    // extension, a type-only import not marked `type` (the binding survives erasure and ESM link
+    // fails), and syntax carrying runtime meaning (enum, parameter properties). These flags make
+    // tsc reject each one instead.
+    "moduleResolution": "nodenext",
+    "verbatimModuleSyntax": true,
+    "erasableSyntaxOnly": true,
+    "allowImportingTsExtensions": true,
+    "noEmit": true,
+
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
+
+    "types": ["node"]
+  },
+  "include": ["scripts", "vitest.config.ts"]
+}

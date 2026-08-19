@@ -1,0 +1,36 @@
+<!doctype html>
+<!--
+  Landing page for the wireframe directory.
+
+  GitHub Pages serves no directory listing, so without this file the deployed
+  /ameliorate-v2-wireframes/ URL 404s and every wireframe has to be linked by its full filename.
+  The newest version is read from versions.js rather than hardcoded, so cutting a version stays
+  the one edit AGENTS.md describes.
+-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ameliorate-v2 wireframes</title>
+    <script src="./versions.js"></script>
+  </head>
+  <body>
+    <p id="msg">Redirecting to the newest <a id="link">topic-landing wireframe</a>…</p>
+    <noscript>
+      <p>Finding the newest wireframe needs JavaScript — open a topic-landing-v&lt;N&gt;.html file directly.</p>
+    </noscript>
+    <script>
+      const versions = window.WIREFRAME_VERSIONS ?? [];
+      const newest = versions[versions.length - 1];
+      if (newest) {
+        const href = `./topic-landing-v${newest.v}.html`;
+        // set before redirecting, so a blocked redirect still leaves a usable link
+        document.getElementById("link").href = href;
+        location.replace(href);
+      } else {
+        document.getElementById("msg").textContent =
+          "versions.js is missing or empty — open a topic-landing-v<N>.html file directly.";
+      }
+    </script>
+  </body>
+</html>

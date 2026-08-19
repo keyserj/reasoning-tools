@@ -1,0 +1,1201 @@
+{
+  "perspectives": [
+    "alice",
+    "bob",
+    "casey"
+  ],
+  "topic": {
+    "id": "wall",
+    "description": "Should the US build a wall along its southern border to reduce illegal immigration? We're weighing what the wall would cost against how much it would reduce illegal immigration."
+  },
+  "nodes": {
+    "illegal-immig": {
+      "label": "Illegal immigration into the US",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        -4,
+        0,
+        -8
+      ]
+    },
+    "long-wait": {
+      "label": "Long legal processing times",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        -6,
+        -3,
+        -7
+      ]
+    },
+    "admin-burden": {
+      "label": "Administrative burden of enforcing immigration requirements",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        -5,
+        null,
+        -6
+      ]
+    },
+    "legal-immig": {
+      "label": "Legal immigration into the US",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        7,
+        8,
+        2
+      ]
+    },
+    "motivations": {
+      "label": "Motivations to immigrate illegally",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [
+        "category"
+      ],
+      "scores": [
+        0,
+        null,
+        null
+      ]
+    },
+    "save-money": {
+      "label": "Saving money by skipping the legal process",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        -2,
+        null,
+        -5
+      ]
+    },
+    "disappear": {
+      "label": "Wanting to \"disappear\" (avoid government records)",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        -3,
+        null,
+        null
+      ]
+    },
+    "danger": {
+      "label": "Danger in home countries",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        -8,
+        -8,
+        -6
+      ]
+    },
+    "wall": {
+      "label": "Border wall along the southern US border",
+      "kind": "concept",
+      "tags": [
+        "topic",
+        "action"
+      ],
+      "subtypes": [],
+      "scores": [
+        2,
+        -7,
+        8
+      ]
+    },
+    "barbed-wire": {
+      "label": "Barbed wire along the top",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [
+        "component"
+      ],
+      "scores": null
+    },
+    "how-tall": {
+      "label": "How tall is the proposed wall design?",
+      "kind": "clarifying",
+      "tags": [],
+      "subtypes": [],
+      "scores": null
+    },
+    "more-admin": {
+      "label": "Increased administrative resources for processing immigration",
+      "kind": "concept",
+      "tags": [
+        "action"
+      ],
+      "subtypes": [],
+      "scores": [
+        5,
+        8,
+        2
+      ]
+    },
+    "fewer-requirements": {
+      "label": "Reduced immigration requirements",
+      "kind": "concept",
+      "tags": [
+        "action"
+      ],
+      "subtypes": [],
+      "scores": [
+        3,
+        7,
+        -4
+      ]
+    },
+    "why-wall": {
+      "label": "Why might we want the wall?",
+      "kind": "guiding",
+      "tags": [],
+      "subtypes": [],
+      "scores": null
+    },
+    "best-ways": {
+      "label": "What are the most effective ways to reduce illegal immigration?",
+      "kind": "guiding",
+      "tags": [],
+      "subtypes": [],
+      "scores": null
+    },
+    "why-immigrate": {
+      "label": "Why do people immigrate illegally?",
+      "kind": "guiding",
+      "tags": [],
+      "subtypes": [],
+      "scores": null
+    },
+    "how-enter": {
+      "label": "How do most people illegally enter the US?",
+      "kind": "clarifying",
+      "tags": [],
+      "subtypes": [],
+      "scores": null
+    },
+    "enter-on-foot": {
+      "label": "Most enter by crossing the border on foot between ports of entry",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        3,
+        1,
+        8
+      ]
+    },
+    "visa-overstay": {
+      "label": "Most enter legally and overstay visas",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        7,
+        8,
+        1
+      ]
+    },
+    "inexpensive": {
+      "label": "Inexpensive",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [
+        "criterion"
+      ],
+      "scores": [
+        7,
+        8,
+        2
+      ]
+    },
+    "wall-cost": {
+      "label": "Billions of dollars of construction and maintenance spending",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        -2,
+        -4,
+        null
+      ]
+    },
+    "quick": {
+      "label": "Quick to implement",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [
+        "criterion"
+      ],
+      "scores": [
+        5,
+        3,
+        8
+      ]
+    },
+    "humane": {
+      "label": "Humane treatment of immigrants",
+      "kind": "concept",
+      "tags": [],
+      "subtypes": [
+        "criterion"
+      ],
+      "scores": [
+        8,
+        8,
+        3
+      ]
+    },
+    "still-immigrate": {
+      "label": "Even with instant processing, people would still immigrate illegally to save money or \"disappear\"",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        6,
+        null,
+        8
+      ]
+    },
+    "physical-barrier": {
+      "label": "A wall physically stops crossings without needing continuous surveillance",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        8,
+        null,
+        8
+      ]
+    },
+    "caging-effect": {
+      "label": "Hardened borders trap circular migrants who used to return home",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        2,
+        7,
+        1
+      ]
+    },
+    "costly-recrossing": {
+      "label": "Re-crossing a hardened border is costly and dangerous, so seasonal migrants stay and bring their families over",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        3,
+        8,
+        2
+      ]
+    },
+    "climb-over": {
+      "label": "People will find a way over the barrier",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        6,
+        8,
+        1
+      ]
+    },
+    "easy-climb": {
+      "label": "It's easy to climb a fence",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        8,
+        8,
+        null
+      ]
+    },
+    "unclimbable": {
+      "label": "The wall design is tall, without handholds, and topped with barbed wire",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        5,
+        null,
+        8
+      ]
+    },
+    "fleeing-danger": {
+      "label": "Most people who immigrate illegally are protecting themselves from danger",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": [
+        7,
+        8,
+        2
+      ]
+    },
+    "baby-murder": {
+      "label": "An illegal immigrant murdered a baby in cold blood last year",
+      "kind": "claim",
+      "tags": [
+        "anecdote"
+      ],
+      "subtypes": [],
+      "scores": [
+        3,
+        null,
+        8
+      ]
+    },
+    "texas-stat": {
+      "label": "In Texas 2012-2018, illegal immigrants were arrested for violent crimes at half the rate of native-born citizens",
+      "kind": "claim",
+      "tags": [
+        "statistic"
+      ],
+      "subtypes": [],
+      "scores": [
+        8,
+        null,
+        4
+      ]
+    },
+    "house-doc": {
+      "label": "House Judiciary hearing document, Jan 2025 (docs.house.gov)",
+      "kind": "source",
+      "tags": [],
+      "subtypes": [],
+      "scores": null
+    },
+    "wall-reduces--implied": {
+      "label": "Border wall along the southern US border reduces Illegal immigration into the US",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": null
+    },
+    "wait-causes-illegal-immig--implied": {
+      "label": "Long legal processing times causes Illegal immigration into the US",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": null
+    },
+    "illegal-immig--implied": {
+      "label": "Illegal immigration into the US is important to increase",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": null
+    },
+    "murder-supports-worse-score--implied": {
+      "label": "An illegal immigrant murdered a baby in cold blood last year supports Illegal immigration into the US is important to increase",
+      "kind": "claim",
+      "tags": [],
+      "subtypes": [],
+      "scores": null
+    }
+  },
+  "questions": [
+    {
+      "id": "why-wall",
+      "text": "Why might we want the wall?",
+      "priority": 0.9166666666666666,
+      "guidesId": "wall"
+    },
+    {
+      "id": "best-ways",
+      "text": "What are the most effective ways to reduce illegal immigration?",
+      "priority": 0.5555555555555556,
+      "guidesId": "illegal-immig"
+    },
+    {
+      "id": "why-immigrate",
+      "text": "Why do people immigrate illegally?",
+      "priority": 0.3472222222222222,
+      "guidesId": "best-ways"
+    }
+  ],
+  "highlights": {
+    "top": [
+      {
+        "kind": "edge",
+        "id": "wall-reduces",
+        "signals": {
+          "change-importance": 0,
+          "controversy": 0.6692657668420421,
+          "unknown": 0
+        },
+        "reach": 1,
+        "hot": 0.6692657668420421,
+        "categories": [
+          "controversy"
+        ]
+      },
+      {
+        "kind": "node",
+        "id": "inexpensive",
+        "signals": {
+          "change-importance": 0.7083333333333334,
+          "controversy": 0.3280836614171588,
+          "unknown": 0
+        },
+        "reach": 0.7083333333333334,
+        "hot": 0.5017361111111112,
+        "categories": [
+          "change-importance",
+          "controversy"
+        ]
+      },
+      {
+        "kind": "node",
+        "id": "how-tall",
+        "signals": {
+          "change-importance": 0,
+          "controversy": 0,
+          "unknown": 0.5
+        },
+        "reach": 1,
+        "hot": 0.5,
+        "categories": [
+          "unknown"
+        ]
+      },
+      {
+        "kind": "node",
+        "id": "danger",
+        "signals": {
+          "change-importance": 0.9166666666666666,
+          "controversy": 0.11785113019775792,
+          "unknown": 0
+        },
+        "reach": 0.5,
+        "hot": 0.4583333333333333,
+        "categories": [
+          "change-importance",
+          "controversy"
+        ]
+      },
+      {
+        "kind": "node",
+        "id": "wall-cost",
+        "signals": {
+          "change-importance": 0.375,
+          "controversy": 0.125,
+          "unknown": 0
+        },
+        "reach": 1,
+        "hot": 0.375,
+        "categories": [
+          "change-importance",
+          "controversy"
+        ]
+      }
+    ],
+    "byCategory": {
+      "change-importance": [
+        {
+          "kind": "node",
+          "id": "inexpensive",
+          "signals": {
+            "change-importance": 0.7083333333333334,
+            "controversy": 0.3280836614171588,
+            "unknown": 0
+          },
+          "reach": 0.7083333333333334,
+          "hot": 0.5017361111111112,
+          "categories": [
+            "change-importance",
+            "controversy"
+          ]
+        },
+        {
+          "kind": "node",
+          "id": "danger",
+          "signals": {
+            "change-importance": 0.9166666666666666,
+            "controversy": 0.11785113019775792,
+            "unknown": 0
+          },
+          "reach": 0.5,
+          "hot": 0.4583333333333333,
+          "categories": [
+            "change-importance",
+            "controversy"
+          ]
+        },
+        {
+          "kind": "node",
+          "id": "wall-cost",
+          "signals": {
+            "change-importance": 0.375,
+            "controversy": 0.125,
+            "unknown": 0
+          },
+          "reach": 1,
+          "hot": 0.375,
+          "categories": [
+            "change-importance",
+            "controversy"
+          ]
+        },
+        {
+          "kind": "node",
+          "id": "illegal-immig",
+          "signals": {
+            "change-importance": 0.5,
+            "controversy": 0.408248290463863,
+            "unknown": 0
+          },
+          "reach": 0.6666666666666666,
+          "hot": 0.3333333333333333,
+          "categories": [
+            "change-importance",
+            "controversy"
+          ]
+        },
+        {
+          "kind": "node",
+          "id": "long-wait",
+          "signals": {
+            "change-importance": 0.6666666666666666,
+            "controversy": 0.21245914639969937,
+            "unknown": 0
+          },
+          "reach": 0.3333333333333333,
+          "hot": 0.2222222222222222,
+          "categories": [
+            "change-importance",
+            "controversy"
+          ]
+        }
+      ],
+      "controversy": [
+        {
+          "kind": "edge",
+          "id": "wall-reduces",
+          "signals": {
+            "change-importance": 0,
+            "controversy": 0.6692657668420421,
+            "unknown": 0
+          },
+          "reach": 1,
+          "hot": 0.6692657668420421,
+          "categories": [
+            "controversy"
+          ]
+        },
+        {
+          "kind": "node",
+          "id": "illegal-immig",
+          "signals": {
+            "change-importance": 0.5,
+            "controversy": 0.408248290463863,
+            "unknown": 0
+          },
+          "reach": 0.6666666666666666,
+          "hot": 0.3333333333333333,
+          "categories": [
+            "change-importance",
+            "controversy"
+          ]
+        },
+        {
+          "kind": "node",
+          "id": "inexpensive",
+          "signals": {
+            "change-importance": 0.7083333333333334,
+            "controversy": 0.3280836614171588,
+            "unknown": 0
+          },
+          "reach": 0.7083333333333334,
+          "hot": 0.5017361111111112,
+          "categories": [
+            "change-importance",
+            "controversy"
+          ]
+        },
+        {
+          "kind": "edge",
+          "id": "legal-immig--causes--illegal-immig",
+          "signals": {
+            "change-importance": 0,
+            "controversy": 0.31180478223116176,
+            "unknown": 0
+          },
+          "reach": 0.6666666666666666,
+          "hot": 0.2078698548207745,
+          "categories": [
+            "controversy"
+          ]
+        },
+        {
+          "kind": "edge",
+          "id": "danger--causes--illegal-immig",
+          "signals": {
+            "change-importance": 0,
+            "controversy": 0.27003086243366087,
+            "unknown": 0
+          },
+          "reach": 0.6666666666666666,
+          "hot": 0.1800205749557739,
+          "categories": [
+            "controversy"
+          ]
+        }
+      ],
+      "unknown": [
+        {
+          "kind": "node",
+          "id": "how-tall",
+          "signals": {
+            "change-importance": 0,
+            "controversy": 0,
+            "unknown": 0.5
+          },
+          "reach": 1,
+          "hot": 0.5,
+          "categories": [
+            "unknown"
+          ]
+        }
+      ]
+    }
+  },
+  "diagram": {
+    "nodeIds": [
+      "wall",
+      "danger",
+      "wall-cost",
+      "illegal-immig",
+      "long-wait",
+      "legal-immig",
+      "admin-burden",
+      "save-money",
+      "more-admin",
+      "fewer-requirements"
+    ],
+    "edges": [
+      {
+        "id": "wait-causes-illegal-immig",
+        "sourceId": "long-wait",
+        "targetId": "illegal-immig",
+        "type": "causes",
+        "scores": [
+          6,
+          2,
+          null
+        ],
+        "weight": 0.5,
+        "via": []
+      },
+      {
+        "id": "admin-burden--causes--long-wait",
+        "sourceId": "admin-burden",
+        "targetId": "long-wait",
+        "type": "causes",
+        "scores": [
+          7,
+          null,
+          8
+        ],
+        "weight": 0.9375,
+        "via": []
+      },
+      {
+        "id": "legal-immig--causes--illegal-immig",
+        "sourceId": "legal-immig",
+        "targetId": "illegal-immig",
+        "type": "reduces",
+        "scores": [
+          3,
+          7,
+          1
+        ],
+        "weight": -0.4583333333333333,
+        "via": []
+      },
+      {
+        "id": "long-wait--causes--legal-immig",
+        "sourceId": "long-wait",
+        "targetId": "legal-immig",
+        "type": "impedes",
+        "scores": [
+          6,
+          8,
+          null
+        ],
+        "weight": -0.875,
+        "via": []
+      },
+      {
+        "id": "save-money--causes--illegal-immig",
+        "sourceId": "save-money",
+        "targetId": "illegal-immig",
+        "type": "causes",
+        "scores": [
+          4,
+          null,
+          7
+        ],
+        "weight": 0.6875,
+        "via": []
+      },
+      {
+        "id": "danger--causes--illegal-immig",
+        "sourceId": "danger",
+        "targetId": "illegal-immig",
+        "type": "causes",
+        "scores": [
+          7,
+          8,
+          3
+        ],
+        "weight": 0.75,
+        "via": []
+      },
+      {
+        "id": "wall-reduces",
+        "sourceId": "wall",
+        "targetId": "illegal-immig",
+        "type": "reduces",
+        "scores": [
+          3,
+          -5,
+          8
+        ],
+        "weight": -0.25,
+        "via": []
+      },
+      {
+        "id": "more-admin--causes--long-wait",
+        "sourceId": "more-admin",
+        "targetId": "long-wait",
+        "type": "reduces",
+        "scores": [
+          7,
+          8,
+          null
+        ],
+        "weight": -0.9375,
+        "via": []
+      },
+      {
+        "id": "fewer-requirements--causes--admin-burden",
+        "sourceId": "fewer-requirements",
+        "targetId": "admin-burden",
+        "type": "reduces",
+        "scores": [
+          6,
+          7,
+          null
+        ],
+        "weight": -0.8125,
+        "via": []
+      },
+      {
+        "id": "wall--causes--wall-cost",
+        "sourceId": "wall",
+        "targetId": "wall-cost",
+        "type": "causes",
+        "scores": [
+          8,
+          8,
+          8
+        ],
+        "weight": 1,
+        "via": []
+      }
+    ]
+  },
+  "tradeoffs": {
+    "questionId": "best-ways",
+    "optionIds": [
+      "wall",
+      "more-admin",
+      "fewer-requirements"
+    ],
+    "criterionIds": [
+      "inexpensive",
+      "quick",
+      "humane"
+    ],
+    "cells": {
+      "inexpensive": {
+        "wall": -5.666666666666667,
+        "more-admin": -3.5,
+        "fewer-requirements": 6.5
+      },
+      "quick": {
+        "wall": null,
+        "more-admin": null,
+        "fewer-requirements": null
+      },
+      "humane": {
+        "wall": null,
+        "more-admin": null,
+        "fewer-requirements": null
+      }
+    }
+  },
+  "arguments": {
+    "wall": {
+      "pros": [
+        {
+          "aboutId": "illegal-immig",
+          "effect": "decreases",
+          "strength": 0.125
+        }
+      ],
+      "cons": [
+        {
+          "aboutId": "wall-cost",
+          "effect": "increases",
+          "strength": 0.375
+        }
+      ],
+      "claims": []
+    },
+    "danger": {
+      "pros": [],
+      "cons": [
+        {
+          "aboutId": "illegal-immig",
+          "effect": "increases",
+          "strength": 0.375
+        }
+      ],
+      "claims": []
+    },
+    "wall-cost": {
+      "pros": [],
+      "cons": [],
+      "claims": []
+    },
+    "illegal-immig": {
+      "pros": [],
+      "cons": [],
+      "claims": [
+        {
+          "id": "fleeing-danger",
+          "text": "Most people who immigrate illegally are protecting themselves from danger",
+          "scores": [
+            7,
+            8,
+            2
+          ],
+          "supports": [
+            5,
+            8,
+            null
+          ],
+          "children": []
+        },
+        {
+          "id": "baby-murder",
+          "text": "An illegal immigrant murdered a baby in cold blood last year",
+          "scores": [
+            3,
+            null,
+            8
+          ],
+          "supports": [
+            -4,
+            null,
+            -8
+          ],
+          "children": []
+        }
+      ]
+    },
+    "long-wait": {
+      "pros": [],
+      "cons": [
+        {
+          "aboutId": "legal-immig",
+          "effect": "decreases",
+          "strength": 0.6197916666666667
+        },
+        {
+          "aboutId": "illegal-immig",
+          "effect": "increases",
+          "strength": 0.4505208333333333
+        }
+      ],
+      "claims": []
+    },
+    "legal-immig": {
+      "pros": [
+        {
+          "aboutId": "illegal-immig",
+          "effect": "decreases",
+          "strength": 0.22916666666666666
+        }
+      ],
+      "cons": [],
+      "claims": []
+    },
+    "admin-burden": {
+      "pros": [],
+      "cons": [
+        {
+          "aboutId": "long-wait",
+          "effect": "increases",
+          "strength": 0.625
+        },
+        {
+          "aboutId": "legal-immig",
+          "effect": "decreases",
+          "strength": 0.5810546875
+        },
+        {
+          "aboutId": "illegal-immig",
+          "effect": "increases",
+          "strength": 0.42236328125
+        }
+      ],
+      "claims": []
+    },
+    "save-money": {
+      "pros": [],
+      "cons": [
+        {
+          "aboutId": "illegal-immig",
+          "effect": "increases",
+          "strength": 0.34375
+        }
+      ],
+      "claims": []
+    },
+    "more-admin": {
+      "pros": [
+        {
+          "aboutId": "long-wait",
+          "effect": "decreases",
+          "strength": 0.625
+        },
+        {
+          "aboutId": "legal-immig",
+          "effect": "increases",
+          "strength": 0.5810546875
+        },
+        {
+          "aboutId": "illegal-immig",
+          "effect": "decreases",
+          "strength": 0.42236328125
+        }
+      ],
+      "cons": [],
+      "claims": []
+    },
+    "fewer-requirements": {
+      "pros": [
+        {
+          "aboutId": "admin-burden",
+          "effect": "decreases",
+          "strength": 0.55859375
+        },
+        {
+          "aboutId": "long-wait",
+          "effect": "decreases",
+          "strength": 0.5078125
+        },
+        {
+          "aboutId": "legal-immig",
+          "effect": "increases",
+          "strength": 0.47210693359375
+        },
+        {
+          "aboutId": "illegal-immig",
+          "effect": "decreases",
+          "strength": 0.343170166015625
+        }
+      ],
+      "cons": [],
+      "claims": []
+    },
+    "wait-causes-illegal-immig": {
+      "pros": [],
+      "cons": [],
+      "claims": [
+        {
+          "id": "still-immigrate",
+          "text": "Even with instant processing, people would still immigrate illegally to save money or \"disappear\"",
+          "scores": [
+            6,
+            null,
+            8
+          ],
+          "supports": [
+            -4,
+            null,
+            -6
+          ],
+          "children": []
+        }
+      ]
+    },
+    "admin-burden--causes--long-wait": {
+      "pros": [],
+      "cons": [],
+      "claims": []
+    },
+    "legal-immig--causes--illegal-immig": {
+      "pros": [],
+      "cons": [],
+      "claims": []
+    },
+    "long-wait--causes--legal-immig": {
+      "pros": [],
+      "cons": [],
+      "claims": []
+    },
+    "save-money--causes--illegal-immig": {
+      "pros": [],
+      "cons": [],
+      "claims": []
+    },
+    "danger--causes--illegal-immig": {
+      "pros": [],
+      "cons": [],
+      "claims": []
+    },
+    "wall-reduces": {
+      "pros": [],
+      "cons": [],
+      "claims": [
+        {
+          "id": "physical-barrier",
+          "text": "A wall physically stops crossings without needing continuous surveillance",
+          "scores": [
+            8,
+            null,
+            8
+          ],
+          "supports": [
+            7,
+            null,
+            8
+          ],
+          "children": []
+        },
+        {
+          "id": "caging-effect",
+          "text": "Hardened borders trap circular migrants who used to return home",
+          "scores": [
+            2,
+            7,
+            1
+          ],
+          "supports": [
+            null,
+            -7,
+            -3
+          ],
+          "children": [
+            {
+              "id": "costly-recrossing",
+              "text": "Re-crossing a hardened border is costly and dangerous, so seasonal migrants stay and bring their families over",
+              "scores": [
+                3,
+                8,
+                2
+              ],
+              "supports": [
+                null,
+                7,
+                4
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "climb-over",
+          "text": "People will find a way over the barrier",
+          "scores": [
+            6,
+            8,
+            1
+          ],
+          "supports": [
+            -6,
+            -8,
+            null
+          ],
+          "children": [
+            {
+              "id": "easy-climb",
+              "text": "It's easy to climb a fence",
+              "scores": [
+                8,
+                8,
+                null
+              ],
+              "supports": [
+                5,
+                7,
+                null
+              ],
+              "children": []
+            },
+            {
+              "id": "unclimbable",
+              "text": "The wall design is tall, without handholds, and topped with barbed wire",
+              "scores": [
+                5,
+                null,
+                8
+              ],
+              "supports": [
+                -4,
+                null,
+                -8
+              ],
+              "children": []
+            }
+          ]
+        },
+        {
+          "id": "visa-overstay",
+          "text": "Most enter legally and overstay visas",
+          "scores": [
+            7,
+            8,
+            1
+          ],
+          "supports": [
+            -5,
+            -8,
+            null
+          ],
+          "children": []
+        }
+      ]
+    },
+    "more-admin--causes--long-wait": {
+      "pros": [],
+      "cons": [],
+      "claims": []
+    },
+    "fewer-requirements--causes--admin-burden": {
+      "pros": [],
+      "cons": [],
+      "claims": []
+    },
+    "wall--causes--wall-cost": {
+      "pros": [],
+      "cons": [],
+      "claims": []
+    }
+  }
+}

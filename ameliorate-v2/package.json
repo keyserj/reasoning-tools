@@ -8,6 +8,7 @@
     "node": ">=24.18.0"
   },
   "scripts": {
+    "generate": "node scripts/generate.ts examples/build-a-wall.txt",
     "serve": "python3 -m http.server 8777 --directory wireframe",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",

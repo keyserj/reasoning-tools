@@ -63,3 +63,24 @@ export function scoresOf(node: Node, doc: Doc): Scores | null {
 export function findTopic(doc: Doc): Node | undefined {
   return doc.nodes.find((node) => node.tags.includes("topic"));
 }
+
+/**
+ * What an implied claim says. Derived rather than stored, per `ontology.md`'s legend: the text
+ * belongs to whatever the claim stands behind, so writing it on the reference line would be a
+ * second copy free to drift.
+ */
+export function impliedClaimText(node: Node, doc: Doc): string {
+  if (node.impliedForId === undefined) return node.text;
+  const referent = doc.nodes.find((other) => other.id === node.impliedForId);
+  if (referent) {
+    // a claim is already worded as something evaluable; a concept's score is about changing it
+    return referent.type === "claim" ? referent.text : `${referent.text} is important to increase`;
+  }
+  const edge = doc.edges.find((other) => other.id === node.impliedForId);
+  if (!edge) return "";
+  const textOf = (id: string): string => {
+    const found = doc.nodes.find((other) => other.id === id);
+    return found ? impliedClaimText(found, doc) : id;
+  };
+  return `${textOf(edge.sourceId)} ${edge.type} ${textOf(edge.targetId)}`;
+}

@@ -2,7 +2,6 @@ import {
   type CSSProperties,
   type KeyboardEvent,
   type MouseEvent,
-  type SyntheticEvent,
   useEffect,
   useMemo,
   useRef,
@@ -109,13 +108,12 @@ export default function EditorPane({
   const { linkable, onClick: onRefJumpClick } = useRefJump(lines, editing);
 
   /**
-   * Where the caret is, read off the element rather than the props: at event time the textarea is
-   * what has just moved it. A selection reports the end it grew *toward*, which is the end the
-   * caret is drawn at.
+   * Where the caret is, read off the element rather than the props: at report time the textarea
+   * is what has just moved it. A selection reports the end it grew *toward*, which is the end
+   * the caret is drawn at.
    */
-  const reportCaretLine = (e: SyntheticEvent<HTMLTextAreaElement>) => {
+  const reportCaretLine = (el: HTMLTextAreaElement) => {
     if (!editing) return;
-    const el = e.currentTarget;
     const caret = el.selectionDirection === "backward" ? el.selectionStart : el.selectionEnd;
     onActiveLineChange(lineAt(el.value, caret));
   };
@@ -125,7 +123,7 @@ export default function EditorPane({
   // after a click somewhere else cleared it.
   const handleClick = (e: MouseEvent<HTMLTextAreaElement>) => {
     onRefJumpClick(e);
-    reportCaretLine(e);
+    reportCaretLine(e.currentTarget);
   };
 
   // Answer each request once, by nonce: the effect re-runs on every edit, and moving the caret
@@ -153,6 +151,12 @@ export default function EditorPane({
       return;
     }
     if (editing) handleIndentKeys(e);
+    // The caret moves *after* this handler (the key's default action), and React's own report
+    // waits for `keyup` — so a held arrow key would drag the band a keystroke behind. A frame
+    // callback runs after the move and before the paint: band and caret land together.
+    requestAnimationFrame(() => {
+      if (input.current !== null) reportCaretLine(input.current);
+    });
   };
 
   return (
@@ -274,7 +278,7 @@ export default function EditorPane({
             onChange={(e) => onSourceChange(e.target.value)}
             onKeyDown={handleKeyDown}
             onClick={handleClick}
-            onSelect={reportCaretLine}
+            onSelect={(e) => reportCaretLine(e.currentTarget)}
             onScroll={(e) => {
               if (overlay.current === null) return;
               overlay.current.scrollTop = e.currentTarget.scrollTop;

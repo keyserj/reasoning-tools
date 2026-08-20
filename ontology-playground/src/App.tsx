@@ -152,6 +152,8 @@ export default function App() {
     if (next.id === ontology.id) return;
     stashDraft();
     setActiveLine(null);
+    // Including a pick still waiting on the Mermaid tab, whose line means nothing here anymore.
+    setCaretRequest(null);
 
     // The same example id in another ontology is the whole point: one click, same reasoning,
     // different lens. When it isn't there, say so — a silently swapped document is the main
@@ -184,6 +186,7 @@ export default function App() {
     if (id === shared.exampleId) return;
     stashDraft();
     setActiveLine(null);
+    setCaretRequest(null);
     setShared((d) => ({ ...d, exampleId: target.id, source: sourceFor(ontology, target) }));
   };
 

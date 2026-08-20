@@ -136,7 +136,12 @@ export default function EditorPane({
   const answered = useRef(0);
   useEffect(() => {
     const el = input.current;
-    if (caretRequest === null || caretRequest.nonce === answered.current) return;
+    if (caretRequest === null) {
+      // A cleared request (a document switch) restarts the nonces, so the count follows it down.
+      answered.current = 0;
+      return;
+    }
+    if (caretRequest.nonce === answered.current) return;
     if (el === null || !editing) return;
     answered.current = caretRequest.nonce;
     const offset = offsetOfLine(source, caretRequest.line);

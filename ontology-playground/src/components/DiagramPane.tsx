@@ -171,6 +171,10 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
         ref={containerRef}
         className="absolute inset-0 overflow-hidden touch-none"
         onPointerDown={(e) => {
+          // The browser would blur the editor here itself, but svg-pan-zoom preventDefaults
+          // `mousedown` — which is where that focus move lives — so it's done by hand: a press
+          // on the diagram is leaving the text, and a caret still blinking there says otherwise.
+          if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
           // Left button or a finger; a right-click opens a menu rather than pointing at anything.
           pressedAt.current = e.button === 0 ? { x: e.clientX, y: e.clientY } : null;
         }}

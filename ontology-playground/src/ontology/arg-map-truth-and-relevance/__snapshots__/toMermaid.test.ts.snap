@@ -114,11 +114,11 @@ exports[`toMermaid > matches the generated-mermaid snapshots for the bundled exa
   material_prices e12@--- l3
   l3 e13@--> wall_cost
   little_harm e14@--- l4
-  l4 e15@==> reduction_supports_wall
+  l4 e15@--> reduction_supports_wall
   crime_stat e16@--- l5
   l5 e17@--> little_harm
   unclimbable e18@--- l6
-  l6 e19@==> climb_easy_supports
+  l6 e19@--> climb_easy_supports
   more_judges e20@--- l7
   l7 e21@--> wall
   wall_cost e22@--- l8

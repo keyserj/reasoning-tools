@@ -21,8 +21,8 @@ Every supports/critiques edge makes a claim — `A supports B` — which can its
 - arguing about an edge is then structurally identical to arguing about a claim, which is what this ontology says they are — every `$ref` resolves to a plain node and no case is special
 - it puts every score in a box, uniformly
 - against: roughly double the box count — build-a-wall renders ~12 edge boxes that carry no argument of their own
-- reifying costs a connector the ontology doesn't have: `source ──▶ box` and `box ──▶ target` are one relationship drawn as two. The **Edge display** param decides whether to admit that — `distinguish edge→edge` (default) drops the arrowhead on the way in (`---`) and thickens the way out when it lands on another edge box (`==>`); `all edges same` draws both as `-->`
-- thick rather than dashed for edge→edge because `note` already owns dashed
+- reifying costs a connector the ontology doesn't have: `source ──▶ box` and `box ──▶ target` are one relationship drawn as two. The **Edge display** param decides whether to admit that — `distinguish halves` (default) drops the arrowhead on the way in (`---`); `all edges same` draws both as `-->`
+- an arrow landing on another edge box (`edge-to-edge` in `renderedEdgeTypes.ts`) draws as a plain arrow even under `distinguish halves`: weight is what the active mark thickens a connector with, dashed is `note`'s, and the stadium it lands on already says the target is an edge
 
 Because edges can become nodes, `renderedNodeTypes.ts` lists `supports` and `critiques` even though the ontology calls them edge types; because they can also become connectors, `renderedEdgeTypes.ts` lists them too. That's the point of the "rendered" prefix: what can appear as a box is not the same set as what the ontology is made of, and it depends on the lens.
 
@@ -32,7 +32,6 @@ Labeled connectors are colored, since without color a supports and a critiques c
 
 - which rendering is best?
 - is a marker plus a rank anchor enough to make a detached node findable, or does the tie have to be drawn? A _visible_ dashed arrowless line to both endpoints is the remaining alternative, and it would have to earn its keep against the layout cost below
-- does `distinguish edge→edge` still read at a glance once several edges point at edges, or does the thick connector become another kind of noise?
 
 ## Scores
 

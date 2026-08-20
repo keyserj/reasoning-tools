@@ -52,10 +52,12 @@ export const features: FeatureDef[] = [
         onlyForOptions: [IMPLIED],
         options: [
           {
+            // The id doesn't match the label: ids travel in shared URLs, so it is frozen
+            // while the label is free to say what the option does today.
             id: EDGE_DISPLAY_DISTINGUISH,
-            label: "distinguish edge→edge",
+            label: "distinguish halves",
             description:
-              "One ontology edge is two mermaid connectors, so draw them as the halves they are: no arrowhead on the way into the edge box, and a thick arrow out of it when it lands on another edge box rather than on a claim.",
+              "One ontology edge is two mermaid connectors, so draw them as the halves they are: no arrowhead on the way into the edge box.",
           },
           {
             id: EDGE_DISPLAY_SAME,

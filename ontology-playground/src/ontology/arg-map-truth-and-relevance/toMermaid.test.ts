@@ -54,12 +54,12 @@ describe("toMermaid", () => {
     expect(out).not.toContain("linkStyle");
   });
 
-  it("thickens the connector that lands on another edge box", () => {
+  it("keeps the connector landing on another edge box plain — weight is the active mark's", () => {
     const out = render(
       "= Thesis &t\n  < supports &sup\n    = Reason &r\n= $sup\n  < critiques &c\n    = No &n",
       implied,
     );
-    expect(out).toContain("c e3@==> sup");
+    expect(out).toContain("c e3@--> sup");
   });
 
   it("puts scores on a second line", () => {

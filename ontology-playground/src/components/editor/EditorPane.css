@@ -29,9 +29,8 @@
     scrollbar-color: color-mix(in oklch, var(--color-base-content) 35%, transparent) transparent;
   }
 
-  /* The line boxes the band is painted on. `max-content` sits on the wrapper rather than on each
-     line, so every band is as wide as the *widest* line: at the pane's own width a band would
-     stop in mid-air as soon as a long line had scrolled the pane sideways. */
+  /* `max-content` on the wrapper, not each line, so a band is as wide as the widest line even
+     after a sideways scroll. */
   .editor-lines {
     display: block;
     width: max-content;
@@ -40,18 +39,14 @@
 
   .editor-line {
     display: block;
-    /* An empty line has no content to give it height, where the textarea still lays out a row for
-       it; without this the two drift apart by a line at the first blank one. */
+    /* Empty lines have no content; without this the overlay drifts from the textarea at the first
+       blank. */
     min-height: 1lh;
   }
 
-  /* Where the caret is. The alpha sits under the selection ladder index.css documents, since this
-     marks where you *are* rather than what you chose, and it must not read as heavily as a hover.
-
-     Dark takes its own rung for the reason index.css gives about the surface ramp: near black, a
-     step spans far fewer sRGB code values. Measured over each theme's page, 8% lands 18 values
-     off in light and 19 in dark, where the band reads as barely there; 12% lands 29 in dark,
-     which is the same read as light's 18 without becoming a highlight of its own. */
+  /* Below the selection ladder in index.css: where you are, not what you chose. Dark 12% because
+     near black a step spans fewer sRGB values — 8% is 19 off (barely there), 12% is 29, matching
+     light's 18. */
   .editor-line-active {
     background-color: color-mix(in oklab, var(--color-base-content) 8%, transparent);
   }

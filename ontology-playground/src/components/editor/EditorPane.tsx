@@ -51,11 +51,7 @@ interface Props {
   /** 1-based line being pointed at, banded here; `null` when nothing is */
   activeLine: number | null;
   onActiveLineChange: (line: number | null) => void;
-  /**
-   * Put the caret on this line and scroll it into view. Carries a nonce because the same line can
-   * be asked for twice running — clicking one box, looking elsewhere, clicking it again — and a
-   * bare line number would look unchanged the second time.
-   */
+  /** Move the caret here. The nonce is what makes a second click on the same line a new ask. */
   caretRequest: { line: number; nonce: number } | null;
 }
 
@@ -107,11 +103,7 @@ export default function EditorPane({
 
   const { linkable, onClick: onRefJumpClick } = useRefJump(lines, editing);
 
-  /**
-   * Where the caret is, read off the element rather than the props: at report time the textarea
-   * is what has just moved it. A selection reports the end it grew *toward*, which is the end
-   * the caret is drawn at.
-   */
+  // The end the selection grew toward is where the caret is drawn.
   const reportCaretLine = (el: HTMLTextAreaElement) => {
     if (!editing) return;
     const caret = el.selectionDirection === "backward" ? el.selectionStart : el.selectionEnd;
@@ -126,23 +118,18 @@ export default function EditorPane({
     reportCaretLine(e.currentTarget);
   };
 
-  // Answer each request once, by nonce: the effect re-runs on every edit, and moving the caret
-  // again there would drag it back out of wherever the typing had taken it. A request that
-  // arrives while the Mermaid tab is up waits for the Code tab rather than being dropped —
-  // the textarea is showing generated output, which the line means nothing in.
-  //
-  // Deliberately without `.focus()`: the click that asked for this landed on the diagram, and
-  // taking the keyboard away from it would also raise the on-screen keyboard on a phone.
+  // Once per nonce: this effect also re-runs on every edit, which must not drag the caret back.
+  // No `.focus()`: the click landed on the diagram, and focusing here would raise a phone
+  // keyboard.
   const answered = useRef(0);
   useEffect(() => {
     const el = input.current;
     if (caretRequest === null) {
-      // A cleared request (a document switch) restarts the nonces, so the count follows it down.
-      answered.current = 0;
+      answered.current = 0; // document switch restarts the nonces
       return;
     }
     if (caretRequest.nonce === answered.current) return;
-    if (el === null || !editing) return;
+    if (el === null || !editing) return; // Mermaid tab: wait until Code is showing
     answered.current = caretRequest.nonce;
     const offset = offsetOfLine(source, caretRequest.line);
     el.setSelectionRange(offset, offset);
@@ -156,9 +143,8 @@ export default function EditorPane({
       return;
     }
     if (editing) handleIndentKeys(e);
-    // The caret moves *after* this handler (the key's default action), and React's own report
-    // waits for `keyup` — so a held arrow key would drag the band a keystroke behind. A frame
-    // callback runs after the move and before the paint: band and caret land together.
+    // The caret moves after this handler; React reports on `keyup`, so a held arrow would lag
+    // the band a keystroke.
     requestAnimationFrame(() => {
       if (input.current !== null) reportCaretLine(input.current);
     });
@@ -247,8 +233,7 @@ export default function EditorPane({
                 markerHighlights ? "marker-highlights" : ""
               } ${linkable ? "ref-links" : ""}`}
             >
-              {/* One block per line, so the caret's line can be painted as a whole rather than
-                  measured and drawn over. Both classes are laid out in ./EditorPane.css. */}
+              {/* One block per line so the caret's line can be painted as a whole. ./EditorPane.css. */}
               <span className="editor-lines">
                 {lines.map((tokens, i) => (
                   <span

@@ -71,9 +71,7 @@ describe.each(ontologyList.map((o) => [o.label, o] as const))("%s", (_label, ont
         });
       }
 
-      // Both directions, since each catches what the other can't: a key nothing answers to points
-      // a line at a box that isn't there, and a box nothing maps is one the caret can never reach.
-      // A node is declared as `  <id><shape opener>`, and ids are sanitized to [A-Za-z0-9_].
+      // Both directions: a key nothing answers to, and a box nothing maps. Nodes are `  <id><shape opener>`.
       const drawn = [...text.matchAll(/^ {2}([A-Za-z0-9_]+)[[({]/gm)].map((m) => m[1]);
       expect({ id: example.id, mapped: Object.keys(sourceMap.nodes).sort() }).toEqual({
         id: example.id,

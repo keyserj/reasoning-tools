@@ -50,11 +50,7 @@ export interface RenderEdge {
  */
 export type SourceLines = Record<string, number[]>;
 
-/**
- * Which source lines each *drawn* element came from, keyed by the id mermaid gives it in the SVG.
- * This is the far end of `SourceLines`: `toMermaid` is what knows which boxes and connectors a
- * line finally became, since that depends on the lens the document is drawn through.
- */
+/** Drawn element → source lines, keyed by the id mermaid gives it in the SVG */
 export interface SourceMap {
   /** mermaid node id — the `<id>` in the SVG's `flowchart-<id>-<n>` */
   nodes: Record<string, number[]>;

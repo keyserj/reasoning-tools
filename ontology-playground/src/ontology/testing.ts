@@ -2,11 +2,7 @@
 
 import type { RenderGraph } from "./types.ts";
 
-/**
- * The graph without its source lines. Shape tests assert boxes and connectors, and every one of
- * them also carrying the line it was written on would bury what each case is about — lines get
- * a describe block of their own per suite instead.
- */
+/** Drop `lines` so shape tests aren't buried in source-map noise. */
 export function withoutLines({ nodes, edges }: RenderGraph): RenderGraph {
   const drop = <T extends { lines?: number[] }>(items: T[]) =>
     items.map(({ lines: _lines, ...rest }) => rest);

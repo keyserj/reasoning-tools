@@ -55,7 +55,7 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
   let edgeCounter = 0;
 
   // Notes and edges share the node id space: every one of them ends up as something the diagram
-  // has to tell apart, and `sourceLines` files them all under the one key space.
+  // has to tell apart.
   const noteIds = new Set<string>();
   const edgeIds = new Set<string>();
   const isIdTaken = (id: string): boolean => byId.has(id) || noteIds.has(id) || edgeIds.has(id);
@@ -68,7 +68,6 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
     return id;
   };
 
-  /** File the line a thing was written on under its id. */
   const fileLine = (id: string, line: number) => {
     (sourceLines[id] ??= []).push(line);
   };

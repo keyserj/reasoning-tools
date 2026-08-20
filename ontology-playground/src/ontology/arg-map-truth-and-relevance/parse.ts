@@ -95,7 +95,6 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
   let description: string | undefined;
   let perspectives: string[] = [];
 
-  /** File the line a thing was written on under its id. The topic collects every line feeding it. */
   const fileLine = (id: string, line: number) => {
     (sourceLines[id] ??= []).push(line);
   };
@@ -360,8 +359,6 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
     if (!usedIds.has(use.refId)) {
       errors.push({ line: use.line, message: `Unknown reference "$${use.refId}"` });
     } else {
-      // A `$ref` line uses the claim or edge it names, so it files under that id — after the
-      // declaring line, which the loop above filed first.
       fileLine(use.refId, use.line);
     }
   }

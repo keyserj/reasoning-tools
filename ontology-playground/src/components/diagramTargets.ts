@@ -28,9 +28,8 @@ export interface LinkedElement {
 }
 
 /**
- * Tag everything the map knows and hand back what was tagged. Nodes get the `data-id` mermaid
- * only gives edges; edge labels are included because a labeled connector's midpoint — the part
- * you actually aim at — is the label, not the 1.5px path.
+ * Tag everything the map knows. Nodes get the `data-id` mermaid only gives edges; edge labels
+ * are included because a labeled connector's midpoint is the label, not the 1.5px path.
  */
 export function linkDrawnElements(svg: SVGElement, sourceMap: SourceMap): LinkedElement[] {
   const linked: LinkedElement[] = [];
@@ -59,19 +58,16 @@ export function linkDrawnElements(svg: SVGElement, sourceMap: SourceMap): Linked
 
 /**
  * The line a click on `target` points at, or `null` for anywhere that draws nothing. Read off
- * what was tagged rather than looked up in the map again: the tagged lines are the ones that
- * drew the SVG on screen, where the map in hand may already describe the next one.
+ * what was tagged rather than the map in hand, which may already describe the next SVG.
  */
 export function lineAtTarget(target: EventTarget | null, linked: LinkedElement[]): number | null {
   if (!(target instanceof Element)) return null;
   const el = target.closest(`.${LINKED_CLASS}`);
   if (el === null) return null;
-  // The first line is the element's own; the ones after it (continuations, a reused claim's
-  // other uses) mark the element too but aren't where a click lands.
   return linked.find((candidate) => candidate.el === el)?.lines[0] ?? null;
 }
 
-/** Give up the diagram as something to click: it is still on screen, but it is out of date. */
+/** Still on screen, but out of date — stop treating it as clickable. */
 export function unlinkDrawnElements(container: Element): void {
   for (const el of container.querySelectorAll(`.${LINKED_CLASS}, .${ACTIVE_CLASS}`)) {
     el.classList.remove(LINKED_CLASS, ACTIVE_CLASS);

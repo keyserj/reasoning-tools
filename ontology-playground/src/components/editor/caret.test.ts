@@ -7,8 +7,6 @@ describe("lineAt", () => {
     expect(lineAt("= One\n  + Two", 5)).toBe(1);
   });
 
-  // The newline belongs to the line it ends: a caret just past it is already on the next one,
-  // which is where the textarea draws it.
   it("puts a caret just past a newline on the next line", () => {
     expect(lineAt("= One\n  + Two", 6)).toBe(2);
   });
@@ -17,8 +15,6 @@ describe("lineAt", () => {
     expect(lineAt("= One\n\n= Two", 7)).toBe(3);
   });
 
-  // A source ending in a newline leaves a real empty line the caret can sit on, and the overlay
-  // draws a row for it.
   it("counts the empty line a trailing newline leaves", () => {
     expect(lineAt("= One\n", 6)).toBe(2);
   });
@@ -42,7 +38,6 @@ describe("offsetOfLine", () => {
     expect(offsetOfLine("= One", 9)).toBe(5);
   });
 
-  // The pair has to agree, since one places the caret and the other reads it back.
   it("round-trips with lineAt", () => {
     const text = "%description: D\n\n? Q &q\n  = T &t\n";
     for (let line = 1; line <= text.split("\n").length; line++) {

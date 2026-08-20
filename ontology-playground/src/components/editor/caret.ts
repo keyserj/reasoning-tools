@@ -3,12 +3,10 @@
 // next to it and are easy to mistake for this one — the tokenized `lines` array the overlay
 // renders, and `refJump.ts`'s `Span.line`, which is an index into that array.
 
-/** The 1-based line holding `offset`. An offset past the end reads as the last line. */
 export function lineAt(text: string, offset: number): number {
   return text.slice(0, offset).split("\n").length;
 }
 
-/** Where a 1-based line starts. A line past the end lands at the end of the text. */
 export function offsetOfLine(text: string, line: number): number {
   let offset = 0;
   for (let i = 1; i < line; i++) {

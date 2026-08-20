@@ -129,10 +129,8 @@ export function flowchart(
     // rides on `showIcons` exactly as a node's does.
     const icon = config.showIcons && def?.icon ? `${def.icon} ` : "";
     const label = edge.label ? `|"${escapeLabel(`${icon}${edge.label}`)}"|` : "";
-    // An edge that came from a line gets named, which is the only way to find it again in the
-    // SVG: mermaid writes the name onto the path as its `data-id`, where the id it invents for
-    // an unnamed edge (`L_<from>_<to>_<n>`) is ambiguous, since ids may contain `_` themselves.
-    // Anchors and other drawn-only connectors stay unnamed — nothing ever looks them up.
+    // Named so the SVG can be asked which edge it is: mermaid's invented `L_<from>_<to>_<n>` is
+    // ambiguous because ids contain `_`. Anchors stay unnamed — nothing looks them up.
     const name = edge.lines?.length ? `e${emitted}` : undefined;
     if (name && edge.lines) sourceMap.edges[name] = edge.lines;
     lines.push(`  ${from} ${name ? `${name}@` : ""}${connector}${label} ${to}`);

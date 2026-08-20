@@ -76,7 +76,6 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
     return id;
   };
 
-  /** File the line a thing was written on under its id. The topic collects every line feeding it. */
   const fileLine = (id: string, line: number) => {
     (sourceLines[id] ??= []).push(line);
   };

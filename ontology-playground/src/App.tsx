@@ -66,12 +66,9 @@ export default function App() {
   const [markerHighlights, setMarkerHighlights] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(readInitialTheme);
-  // Which line of the document is being pointed at. It sits above the editor rather than in it so
-  // that the diagram can read the same line the text does. Not in `shared`: where you are looking
-  // isn't part of the document, so it doesn't travel in a link you send.
+  // Same as `markerHighlights`: where you are looking isn't part of the document.
   const [activeLine, setActiveLine] = useState<number | null>(null);
-  // A pick has to *move* the caret, which the line alone can't say: clicking the same box twice
-  // asks for the same line twice, and only the nonce tells the second ask from no ask at all.
+  // The same box clicked twice asks for the same line; only the nonce is a new ask.
   const [caretRequest, setCaretRequest] = useState<{ line: number; nonce: number } | null>(null);
   // Edits survive an ontology or example switch, but only for this page load: persisting
   // them is a separate decision (which storage, and for how long) than keeping the switch
@@ -90,10 +87,8 @@ export default function App() {
     return () => clearTimeout(handle);
   }, [notice]);
 
-  // Each pane answers for itself — the editor sets the line from its caret, the diagram from what
-  // a tap landed on, or clears it for a tap on bare canvas — so the only clearing left to do here
-  // is the keyboard's. Chrome deliberately doesn't clear: reaching for the style dialog, or for
-  // the Edit tab on a phone to go read the line you just tapped, is not letting go of it.
+  // Chrome doesn't clear: opening Style, or Edit on a phone to read the line you tapped, isn't
+  // letting go of it.
   useEffect(() => {
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") setActiveLine(null);
@@ -124,11 +119,7 @@ export default function App() {
     return () => clearTimeout(handle);
   }, [shared]);
 
-  /**
-   * A click in the diagram, in the terms both panes speak. It moves the caret as well as the
-   * band so the text is ready to edit at the line you pointed at — and it has to reach the Code
-   * tab first, since the Mermaid tab is showing generated output the caret means nothing in.
-   */
+  // The Mermaid tab is generated output the caret means nothing in.
   const pickLine = (line: number | null) => {
     setActiveLine(line);
     if (line === null) return;
@@ -152,8 +143,7 @@ export default function App() {
     if (next.id === ontology.id) return;
     stashDraft();
     setActiveLine(null);
-    // Including a pick still waiting on the Mermaid tab, whose line means nothing here anymore.
-    setCaretRequest(null);
+    setCaretRequest(null); // a pick still waiting on the Mermaid tab
 
     // The same example id in another ontology is the whole point: one click, same reasoning,
     // different lens. When it isn't there, say so — a silently swapped document is the main

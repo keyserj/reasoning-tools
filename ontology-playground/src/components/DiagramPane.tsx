@@ -13,31 +13,21 @@ import {
 interface Props {
   mermaid: MermaidOutput;
   theme: Theme;
-  /** 1-based line being pointed at; every element it drew is marked */
   activeLine: number | null;
-  /** what the click landed on, or `null` for a click on nothing the document drew */
   onPickLine: (line: number | null) => void;
 }
 
 type PanZoom = ReturnType<typeof svgPanZoom>;
 
-/**
- * How far the pointer may travel between press and release and still count as a tap. The diagram
- * pans under the same press, so without this every pan that ended on a box would jump the
- * editor's caret. Generous enough for a finger, which never lands perfectly still.
- */
+/** Pan vs tap: without this, a pan that ended on a box would jump the caret. */
 const TAP_SLOP = 6;
 
 export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const panZoomRef = useRef<PanZoom | null>(null);
-  // The elements of the SVG *currently* on screen. Held rather than re-queried because the
-  // marking has to survive a caret move, which re-renders nothing.
   const linkedRef = useRef<LinkedElement[]>([]);
   const pressedAt = useRef<{ x: number; y: number } | null>(null);
-  // Read by the render effect, which must not re-run when the caret moves.
   const activeLineRef = useRef(activeLine);
-  // What is on screen: the mermaid the SVG was drawn from, and the theme it was drawn in.
   const drawn = useRef<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -57,9 +47,8 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
       }
     };
 
-    // An edit that leaves the picture alone — inside a comment, say — should leave the pan and
-    // zoom you were reading it at alone too. The map can still have moved under it, so the
-    // tagging is redone either way.
+    // Same picture (an edit inside a comment, say) keeps pan/zoom; the map can still have moved,
+    // so retag.
     const key = `${theme}\u0000${mermaid.text}`;
     if (key === drawn.current) {
       const svg = containerRef.current?.querySelector("svg");
@@ -79,8 +68,7 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
       linkedRef.current = [];
 
       if (!result.ok) {
-        // The last good picture stays up, but it is no longer this document's: everything it
-        // draws answers to lines that have moved, so it stops offering itself to be clicked.
+        // Last good picture stays up, but its lines have moved, so it stops being clickable.
         unlinkDrawnElements(container);
         drawn.current = null;
         setError(result.error);
@@ -92,8 +80,8 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
       drawn.current = key;
       const svg = container.querySelector("svg");
       if (svg) {
-        // Against `mermaid.sourceMap` rather than a prop read later: the render is awaited, so a
-        // newer map can already have arrived, and it describes an SVG that isn't on screen yet.
+        // Closed-over map, not a later prop: the render is awaited, so a newer map can already
+        // describe a different SVG.
         linkedRef.current = linkDrawnElements(svg, mermaid.sourceMap);
         markActive(activeLineRef.current);
         svg.setAttribute("width", "100%");
@@ -116,8 +104,7 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
     };
   }, [mermaid, theme, markActive]);
 
-  // Marking is not a re-render: the caret moves far more often than the document changes, and
-  // re-emitting the SVG for it would throw away the pan and zoom you were reading it at.
+  // Don't rebuild the SVG on a caret move: that would throw away pan/zoom.
   useEffect(() => {
     activeLineRef.current = activeLine;
     markActive(activeLine);
@@ -148,12 +135,7 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
     [],
   );
 
-  // Which line a tap landed on. Judged here rather than in the shell's own listener because this
-  // pane owns the gesture: the same press pans, so a tap has to be told from a drag.
-  //
-  // Pointer events rather than clicks, because on a touch device there is no click to hear:
-  // svg-pan-zoom takes `touchstart` and calls `preventDefault()` on it, which is what would
-  // otherwise have produced the compatibility mouse events.
+  // Pointer events: svg-pan-zoom preventDefaults `touchstart`, so a phone never fires a click.
   const handlePointerUp = (e: PointerEvent<HTMLDivElement>) => {
     const pressed = pressedAt.current;
     pressedAt.current = null;
@@ -171,11 +153,9 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
         ref={containerRef}
         className="absolute inset-0 overflow-hidden touch-none"
         onPointerDown={(e) => {
-          // The browser would blur the editor here itself, but svg-pan-zoom preventDefaults
-          // `mousedown` — which is where that focus move lives — so it's done by hand: a press
-          // on the diagram is leaving the text, and a caret still blinking there says otherwise.
+          // svg-pan-zoom preventDefaults `mousedown`, which is where the browser would have
+          // blurred the editor.
           if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-          // Left button or a finger; a right-click opens a menu rather than pointing at anything.
           pressedAt.current = e.button === 0 ? { x: e.clientX, y: e.clientY } : null;
         }}
         onPointerUp={handlePointerUp}

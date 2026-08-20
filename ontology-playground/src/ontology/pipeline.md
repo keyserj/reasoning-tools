@@ -1,6 +1,6 @@
 # The four layers of an ontology
 
-Each `src/ontology/<id>/` is the same four steps, and most questions about "where does this belong?" are answered by which of them may know what. `types.ts` is the contract they meet at; this file is the division of labour between them.
+Each `src/ontology/<id>/` is the same four steps, and most questions about "where does this belong?" are answered by which of them may know what. `types.ts` is the contract they meet at; this file is the division of labor between them.
 
 | File                                      | Owns                                                                                                    | May not know                                                 |
 | ----------------------------------------- | ------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------ |

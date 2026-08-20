@@ -70,7 +70,7 @@ Vitest only collects `src/**/*.test.ts` in a `node` environment — there's no D
 
 ### Architecture
 
-Per keystroke: editor text → `ontology.parse` → the ontology's own model → `ontology.toMermaid` → mermaid source plus a source map → SVG injected into `DiagramPane`. Start at `src/ontology/types.ts`, which carries the whole shell↔ontology contract, and [`src/ontology/pipeline.md`](./ontology-playground/src/ontology/pipeline.md), which owns the division of labour between an ontology's four files; each other file's header comment owns the reasoning behind that file, so read it there.
+Per keystroke: editor text → `ontology.parse` → the ontology's own model → `ontology.toMermaid` → mermaid source plus a source map → SVG injected into `DiagramPane`. Start at `src/ontology/types.ts`, which carries the whole shell↔ontology contract, and [`src/ontology/pipeline.md`](./ontology-playground/src/ontology/pipeline.md), which owns the division of labor between an ontology's four files; each other file's header comment owns the reasoning behind that file, so read it there.
 
 Three invariants span files, so no one file owns them:
 

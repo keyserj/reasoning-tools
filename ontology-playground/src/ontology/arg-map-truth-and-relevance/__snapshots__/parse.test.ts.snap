@@ -284,6 +284,7 @@ exports[`parse > matches the parsed-model snapshot for the build-a-wall example 
     ],
     "climb-easy-supports": [
       14,
+      35,
     ],
     "climb-over": [
       13,
@@ -335,6 +336,7 @@ exports[`parse > matches the parsed-model snapshot for the build-a-wall example 
     ],
     "reduction-supports-wall": [
       8,
+      26,
     ],
     "t1": [
       33,
@@ -347,9 +349,11 @@ exports[`parse > matches the parsed-model snapshot for the build-a-wall example 
     ],
     "wall": [
       7,
+      46,
     ],
     "wall-cost": [
       19,
+      49,
     ],
     "wall-reduces": [
       9,

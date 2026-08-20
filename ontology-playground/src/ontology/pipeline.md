@@ -17,7 +17,7 @@ A line number is a fact about how a document was _written_, not about what it me
 
 The consequence worth knowing: **an ontology that doesn't fill `sourceLines` loses editor↔diagram linking, and nothing else breaks.** No type error, no failing render — the boxes simply stop lighting up. `registry.test.ts` fails an ontology whose examples map nothing, which is the backstop.
 
-Which lines map is a rendering question, so it is answered here rather than in the parser: a box takes the line that wrote _it_ (a Kialo copy points at the `$ref` that reuses the claim, not at the line declaring it), a connector takes the line that says the two are related (usually the child's), and anything the document didn't write — an anchor, mermaid's empty-graph placeholder — takes none.
+Which lines map is a rendering question, so it is answered here rather than in the parser: a box leads with the line that wrote _it_ (a Kialo copy leads with the `$ref` line that reuses the claim, not the line declaring it) and carries the lines of the claim's other uses after, so the caret on any use lights up every copy; a connector takes the line that says the two are related (usually the child's); and anything the document didn't write — an anchor, mermaid's empty-graph placeholder — takes none.
 
 ## Why flattening sits on the render side
 

@@ -66,7 +66,8 @@ export function lineAtTarget(target: EventTarget | null, linked: LinkedElement[]
   if (!(target instanceof Element)) return null;
   const el = target.closest(`.${LINKED_CLASS}`);
   if (el === null) return null;
-  // The first line is the declaring one — the rest, where there are any, are continuations.
+  // The first line is the element's own; the ones after it (continuations, a reused claim's
+  // other uses) mark the element too but aren't where a click lands.
   return linked.find((candidate) => candidate.el === el)?.lines[0] ?? null;
 }
 

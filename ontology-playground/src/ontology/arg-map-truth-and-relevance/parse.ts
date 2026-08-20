@@ -359,6 +359,10 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
   for (const use of refUses) {
     if (!usedIds.has(use.refId)) {
       errors.push({ line: use.line, message: `Unknown reference "$${use.refId}"` });
+    } else {
+      // A `$ref` line uses the claim or edge it names, so it files under that id — after the
+      // declaring line, which the loop above filed first.
+      fileLine(use.refId, use.line);
     }
   }
 

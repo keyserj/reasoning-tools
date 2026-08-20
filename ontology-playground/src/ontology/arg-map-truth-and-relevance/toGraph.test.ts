@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { FeatureState } from "../types.ts";
+import { withoutLines } from "../testing.ts";
 import { parse } from "./parse.ts";
 import { toGraph } from "./toGraph.ts";
 import { EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_SAME, IMPLIED } from "./features.ts";
@@ -15,14 +16,9 @@ const impliedSame: FeatureState = {
   [EDGE_CLAIMS]: { option: IMPLIED, params: { [EDGE_DISPLAY]: EDGE_DISPLAY_SAME } },
 };
 
-// Shape only: every box and connector also carries the line it was written on, which is dense
-// enough to bury what these cases are about and has its own block at the bottom.
-const graphOf = (text: string, features: FeatureState) => {
-  const { nodes, edges } = toGraph(parse(text).doc, features);
-  const drop = <T extends { lines?: number[] }>(items: T[]) =>
-    items.map(({ lines: _lines, ...rest }) => rest);
-  return { nodes: drop(nodes), edges: drop(edges) };
-};
+// Shape only — the lines every box and connector also carries have their own block at the bottom.
+const graphOf = (text: string, features: FeatureState) =>
+  withoutLines(toGraph(parse(text).doc, features));
 
 /** The same graph with the lines left on, which the block at the bottom is about. */
 const withLines = (text: string, features: FeatureState) => toGraph(parse(text).doc, features);
@@ -257,6 +253,22 @@ describe("toGraph — source lines", () => {
       [3],
       [3],
     ]);
+  });
+
+  it("adds a `$ref` line to the claim's box, after the box's own", () => {
+    // A click lands on `lines[0]`, so the declaring line leads; the ref lines are what let
+    // the caret on any use light the one shared box up.
+    const src = "= A &a\n= B &b\n  < supports &l\n    = $a";
+    const { nodes } = withLines(src, spelledOut());
+    expect(nodes.find((n) => n.id === "a")?.lines).toEqual([1, 4]);
+  });
+
+  it("adds a `= $edge` block's line to the edge it argues about", () => {
+    const src = "= T &t\n  < supports &sup\n    = R &r\n= $sup\n  < critiques &c\n    = N &n";
+    const { nodes, edges } = withLines(src, spelledOut());
+    expect(edges.find((e) => e.type === "supports")?.lines).toEqual([2, 4]);
+    // The argued edge's detached node is the same edge drawn again, so it lights up too.
+    expect(nodes.find((n) => n.id === "sup")?.lines).toEqual([2, 4]);
   });
 
   it("leaves the anchor without one: nothing wrote it", () => {

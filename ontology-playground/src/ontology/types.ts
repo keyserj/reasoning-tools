@@ -22,7 +22,11 @@ export interface RenderNode {
    * marks (kialo's copy of a reused claim) crosses several types at once.
    */
   dashed?: boolean;
-  /** {@link SourceLines} for this box; absent when the document didn't write it. */
+  /**
+   * {@link SourceLines} for this box, its own first — where a click lands. A box whose
+   * declaration is reused (`$ref`) also carries the reusing lines, so the caret on any of
+   * them lights up every copy at once. Absent when the document didn't write it.
+   */
   lines?: number[];
 }
 

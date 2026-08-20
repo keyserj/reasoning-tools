@@ -1,15 +1,10 @@
 import { describe, expect, it } from "vitest";
+import { withoutLines } from "../testing.ts";
 import { parse } from "./parse.ts";
 import { toGraph } from "./toGraph.ts";
 
-// Shape only: every box and connector also carries the line it was written on, which the block
-// at the bottom is about.
-const graph = (source: string) => {
-  const { nodes, edges } = toGraph(parse(source).doc);
-  const drop = <T extends { lines?: number[] }>(items: T[]) =>
-    items.map(({ lines: _lines, ...rest }) => rest);
-  return { nodes: drop(nodes), edges: drop(edges) };
-};
+// Shape only — the lines every box and connector also carries have their own block at the bottom.
+const graph = (source: string) => withoutLines(toGraph(parse(source).doc));
 
 // The link names are the only thing this file decides, and mermaid can't show them: IBIS gives
 // every link the same `-->` and no color, so ../ibis/toMermaid.test.ts would pass either way.
@@ -46,5 +41,12 @@ describe("toGraph — source lines", () => {
   it("points a `$ref` connector at the ref line rather than at the node it reuses", () => {
     const { edges } = toGraph(parse("= Idea &i1\n= Other &i2\n  + $i1").doc);
     expect(edges.find((e) => e.from === "i1" && e.to === "i2")?.lines).toEqual([3]);
+  });
+
+  it("adds each `$ref` line to the box it reuses, after the box's own", () => {
+    // A click lands on `lines[0]`, so the declaring line leads; the ref lines are what let
+    // the caret on any of them light the one shared box up.
+    const { nodes } = toGraph(parse("= Idea &i1\n= Other &i2\n  + $i1").doc);
+    expect(nodes.find((n) => n.id === "i1")?.lines).toEqual([1, 3]);
   });
 });

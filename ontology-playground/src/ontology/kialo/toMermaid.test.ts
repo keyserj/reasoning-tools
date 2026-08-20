@@ -61,10 +61,10 @@ describe("sourceMap", () => {
     expect(map.edges).toEqual({ e0: [2], e1: [3] });
   });
 
-  it("points a copy at the line that reuses the claim, not at the one declaring it", () => {
+  it("leads a copy with the line that reuses the claim, then the claim's other uses", () => {
     const map = sourceMap("= A &a\n  - Shared &s\n= B &b\n  + $s");
-    expect(map.nodes.s).toEqual([2]);
-    expect(map.nodes.a2).toEqual([4]);
+    expect(map.nodes.s).toEqual([2, 4]);
+    expect(map.nodes.a2).toEqual([4, 2]);
   });
 
   it("keys a box by the id mermaid was given, not by the one the document wrote", () => {

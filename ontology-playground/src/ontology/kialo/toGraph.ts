@@ -83,8 +83,15 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
 
   for (const claim of doc.claims) {
     const usages = byClaim.get(claim.id) ?? [];
+    // Every usage's box carries every usage's lines, its own first (where a click lands), so
+    // the caret on any use of a claim lights up the original and each copy at once.
+    const usageLines = usages.flatMap((usage) => doc.sourceLines[usage.id] ?? []);
     for (const usage of usages) {
-      nodes.push(usageNode(claim, usage, usages.length > 1, showIcons, doc.sourceLines[usage.id]));
+      const own = doc.sourceLines[usage.id] ?? [];
+      const lines = [...own, ...usageLines.filter((line) => !own.includes(line))];
+      nodes.push(
+        usageNode(claim, usage, usages.length > 1, showIcons, lines.length > 0 ? lines : undefined),
+      );
     }
     // Per claim rather than in one pass, so a note's box is declared next to the claim it is
     // about; mermaid draws boxes in the order they're emitted. A claim whose declaring line was

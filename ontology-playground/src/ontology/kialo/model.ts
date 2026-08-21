@@ -1,3 +1,4 @@
+import type { SourceLines } from "../types.ts";
 import type { Note } from "../notes.ts";
 import type { Stance } from "./markers.ts";
 import type { Scores } from "./scores.ts";
@@ -10,8 +11,8 @@ import type { Scores } from "./scores.ts";
 // parent is a question or nothing, an argument's parent is a claim, and neither can take the
 // other's. A `Claim` is then pure content.
 //
-// Nothing here records where in the source a thing was written: line numbers are a fact about
-// the syntax, and the only place they belong is `ParseError`.
+// Where a thing was written stays off the entities and rides on the doc instead — see
+// ../pipeline.md.
 
 /** Evidence for a claim. Follows the claim to every usage of it, as it does in Kialo. */
 export interface Source {
@@ -32,10 +33,20 @@ export interface Question {
   text: string;
 }
 
-/** A claim used as an answer to a question, or as the root of a question-less document. */
-export interface Thesis {
+/**
+ * Not sure a better name to distinguish from `ClaimUsage` - this interface identifies the properties
+ * across usages of a claim, and that `ClaimUsage` identifies the full object types that implement this
+ * interface.
+ */
+interface Usage {
   id: string;
   claimId: string;
+  /** written as `$id` rather than on the line that declares the claim */
+  viaRef: boolean;
+}
+
+/** A claim used as an answer to a question, or as the root of a question-less document. */
+export interface Thesis extends Usage {
   /** `null` in a document with no `?` line, which is Kialo's single-thesis discussion */
   questionId: string | null;
   /**
@@ -48,9 +59,7 @@ export interface Thesis {
 }
 
 /** A claim used to support or critique another claim. */
-export interface Argument {
-  id: string;
-  claimId: string;
+export interface Argument extends Usage {
   parentClaimId: string;
   stance: Stance;
   /** veracity and relevance to the parent, folded into one number; `null` = nobody voted */
@@ -68,6 +77,8 @@ export interface KialoDoc {
   arguments: Argument[];
   /** `~` lines with no claim above them: notes about the document rather than about a claim. */
   notes: Note[];
+  /** Where each of the above was written, by id; the `%` lines file under the topic's. */
+  sourceLines: SourceLines;
 }
 
 /** One use of a claim, which is the unit both the score and the stance belong to. */
@@ -75,10 +86,6 @@ export type ClaimUsage = Thesis | Argument;
 
 export function isArgument(usage: ClaimUsage): usage is Argument {
   return "stance" in usage;
-}
-
-export function isThesis(usage: ClaimUsage): usage is Thesis {
-  return !isArgument(usage);
 }
 
 /** Every usage of each claim, keyed by claim id — what ./toGraph.ts decides a box from. */

@@ -66,6 +66,10 @@ export default function App() {
   const [markerHighlights, setMarkerHighlights] = useState(true);
   const [notice, setNotice] = useState<string | null>(null);
   const [theme, setTheme] = useState<Theme>(readInitialTheme);
+  // Same as `markerHighlights`: where you are looking isn't part of the document.
+  const [activeLine, setActiveLine] = useState<number | null>(null);
+  // The same box clicked twice asks for the same line; only the nonce is a new ask.
+  const [caretRequest, setCaretRequest] = useState<{ line: number; nonce: number } | null>(null);
   // Edits survive an ontology or example switch, but only for this page load: persisting
   // them is a separate decision (which storage, and for how long) than keeping the switch
   // from feeling destructive.
@@ -83,11 +87,21 @@ export default function App() {
     return () => clearTimeout(handle);
   }, [notice]);
 
+  // Chrome doesn't clear: opening Style, or Edit on a phone to read the line you tapped, isn't
+  // letting go of it.
+  useEffect(() => {
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setActiveLine(null);
+    };
+    document.addEventListener("keydown", onKeyDown);
+    return () => document.removeEventListener("keydown", onKeyDown);
+  }, []);
+
   const ontology = getOntology(shared.ontologyId);
   const parseResult = useMemo(() => ontology.parse(shared.source), [ontology, shared.source]);
   // Depends on the theme because each type's one configured color resolves into a fill, a
   // border and a text color differently in each (ontology/typeColors.ts).
-  const mermaidText = useMemo(
+  const mermaidOutput = useMemo(
     () => ontology.toMermaid(parseResult.doc, shared.config, shared.features, theme),
     [ontology, parseResult, shared.config, shared.features, theme],
   );
@@ -105,6 +119,14 @@ export default function App() {
     return () => clearTimeout(handle);
   }, [shared]);
 
+  // The Mermaid tab is generated output the caret means nothing in.
+  const pickLine = (line: number | null) => {
+    setActiveLine(line);
+    if (line === null) return;
+    setActiveTab("source");
+    setCaretRequest((previous) => ({ line, nonce: (previous?.nonce ?? 0) + 1 }));
+  };
+
   /** Stash the current source so switching away from an edited example isn't destructive. */
   const stashDraft = () => {
     if (dirty && shared.exampleId !== null) {
@@ -120,6 +142,8 @@ export default function App() {
     const next = getOntology(id);
     if (next.id === ontology.id) return;
     stashDraft();
+    setActiveLine(null);
+    setCaretRequest(null); // a pick still waiting on the Mermaid tab
 
     // The same example id in another ontology is the whole point: one click, same reasoning,
     // different lens. When it isn't there, say so — a silently swapped document is the main
@@ -142,7 +166,7 @@ export default function App() {
   /** Within one ontology, only the document changes — style and features are left alone. */
   const switchExample = (id: string) => {
     const target = findExample(ontology, id);
-    // The picker shows examples this ontology hasn't written, greyed rather than hidden, so
+    // The picker shows examples this ontology hasn't written, grayed rather than hidden, so
     // clicking one is expected and has to answer rather than do nothing. It's also the only
     // route a touch device has to the reason, having no hover to raise the tooltip with.
     if (!target) {
@@ -151,6 +175,8 @@ export default function App() {
     }
     if (id === shared.exampleId) return;
     stashDraft();
+    setActiveLine(null);
+    setCaretRequest(null);
     setShared((d) => ({ ...d, exampleId: target.id, source: sourceFor(ontology, target) }));
   };
 
@@ -194,7 +220,7 @@ export default function App() {
           <EditorPane
             source={shared.source}
             onSourceChange={(source) => setShared((d) => ({ ...d, source }))}
-            mermaidText={mermaidText}
+            mermaidText={mermaidOutput.text}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             ontologyLabel={ontology.label}
@@ -205,6 +231,9 @@ export default function App() {
             highlightLine={ontology.highlightLine}
             config={shared.config}
             markerHighlights={markerHighlights}
+            activeLine={activeLine}
+            onActiveLineChange={setActiveLine}
+            caretRequest={caretRequest}
           />
         </div>
         <div className="flex flex-col flex-1 min-w-0">
@@ -214,7 +243,12 @@ export default function App() {
             onChange={(features) => setShared((d) => ({ ...d, features }))}
             onOpenStyle={() => setConfigOpen(true)}
           />
-          <DiagramPane mermaidText={mermaidText} theme={theme} />
+          <DiagramPane
+            mermaid={mermaidOutput}
+            theme={theme}
+            activeLine={activeLine}
+            onPickLine={pickLine}
+          />
         </div>
 
         {/* Above both panes rather than inside the diagram column: on a phone the editor

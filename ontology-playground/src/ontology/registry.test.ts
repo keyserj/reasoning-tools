@@ -41,9 +41,48 @@ describe.each(ontologyList.map((o) => [o.label, o] as const))("%s", (_label, ont
     for (const example of ontology.examples) {
       const { doc, errors } = ontology.parse(example.source);
       expect({ id: example.id, errors }).toEqual({ id: example.id, errors: [] });
-      expect(ontology.toMermaid(doc, ontology.defaultConfig, features, "light")).toContain(
+      expect(ontology.toMermaid(doc, ontology.defaultConfig, features, "light").text).toContain(
         "flowchart",
       );
+    }
+  });
+
+  // The linking contract, which no one ontology can keep on its own: an ontology that forgets to
+  // put `lines` on what it draws loses editor↔diagram linking silently, with nothing else failing.
+  it("maps every example's drawn elements back to lines that exist", () => {
+    const features = defaultFeatureState(ontology);
+    for (const example of ontology.examples) {
+      const { doc } = ontology.parse(example.source);
+      const { text, sourceMap } = ontology.toMermaid(
+        doc,
+        ontology.defaultConfig,
+        features,
+        "light",
+      );
+      const lineCount = example.source.split("\n").length;
+      const entries = [...Object.entries(sourceMap.nodes), ...Object.entries(sourceMap.edges)];
+
+      for (const [key, lines] of entries) {
+        const outOfRange = lines.filter((line) => line < 1 || line > lineCount);
+        expect({ id: example.id, key, outOfRange }).toEqual({
+          id: example.id,
+          key,
+          outOfRange: [],
+        });
+      }
+
+      // Both directions: a key nothing answers to, and a box nothing maps. Nodes are `  <id><shape opener>`.
+      const drawn = [...text.matchAll(/^ {2}([A-Za-z0-9_]+)[[({]/gm)].map((m) => m[1]);
+      expect({ id: example.id, mapped: Object.keys(sourceMap.nodes).sort() }).toEqual({
+        id: example.id,
+        mapped: drawn.sort(),
+      });
+      for (const id of Object.keys(sourceMap.edges)) {
+        expect({ id: example.id, drawn: text.includes(`${id}@`) }).toEqual({
+          id: example.id,
+          drawn: true,
+        });
+      }
     }
   });
 

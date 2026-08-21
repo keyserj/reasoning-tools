@@ -20,19 +20,34 @@ export function toGraph(doc: IbisDoc): RenderGraph {
   const nodes: RenderNode[] = [];
   const edges: RenderEdge[] = [];
   for (const { id, type, text, notes } of doc.nodes) {
-    nodes.push({ id, type, text });
+    // A `$ref` reuses this same box, so the box carries the ref lines too — its own first,
+    // where a click lands — and the caret on a ref line lights up the box it points at.
+    const own = doc.sourceLines[id] ?? [];
+    const refLines = doc.edges
+      .filter((edge) => edge.from === id)
+      .flatMap((edge) => doc.sourceLines[edge.id] ?? [])
+      .filter((line) => !own.includes(line));
+    const lines = [...own, ...refLines];
+    nodes.push({ id, type, text, ...(lines.length > 0 ? { lines } : {}) });
     // Per node rather than in one pass at the end, so a note's box is declared next to the
     // node it is about; mermaid draws boxes in the order they're emitted.
-    addNotes(nodes, edges, [{ id, notes }]);
+    addNotes(nodes, edges, [{ id, notes }], doc.sourceLines);
   }
 
-  for (const { from, to } of doc.edges) {
+  for (const { id, from, to } of doc.edges) {
     // Always found: `parse` drops an edge whose `$ref` never resolved to a node.
     const nodeType = typeById.get(from);
-    if (nodeType !== undefined) edges.push({ from, to, type: EDGE_TYPE_BY_NODE_TYPE[nodeType] });
+    if (nodeType !== undefined) {
+      edges.push({
+        from,
+        to,
+        type: EDGE_TYPE_BY_NODE_TYPE[nodeType],
+        lines: doc.sourceLines[id],
+      });
+    }
   }
 
-  addDocumentNotes(nodes, edges, doc.notes, rootNodeIds(doc));
+  addDocumentNotes(nodes, edges, doc.notes, rootNodeIds(doc), doc.sourceLines);
 
   return { nodes, edges };
 }

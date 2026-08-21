@@ -5,42 +5,52 @@ exports[`parse > matches the parsed-model snapshot for the session-storage examp
   "edges": [
     {
       "from": "i1",
+      "id": "l1",
       "to": "q1",
     },
     {
       "from": "n1",
+      "id": "l2",
       "to": "i1",
     },
     {
       "from": "c1",
+      "id": "l3",
       "to": "i1",
     },
     {
       "from": "n2",
+      "id": "l4",
       "to": "c1",
     },
     {
       "from": "i2",
+      "id": "l5",
       "to": "q1",
     },
     {
       "from": "n3",
+      "id": "l6",
       "to": "i2",
     },
     {
       "from": "n4",
+      "id": "l7",
       "to": "i2",
     },
     {
       "from": "n5",
+      "id": "l8",
       "to": "q2",
     },
     {
       "from": "q3",
+      "id": "l9",
       "to": "n5",
     },
     {
       "from": "c1",
+      "id": "l10",
       "to": "n5",
     },
   ],
@@ -118,5 +128,73 @@ exports[`parse > matches the parsed-model snapshot for the session-storage examp
     },
   ],
   "notes": [],
+  "sourceLines": {
+    "c1": [
+      4,
+    ],
+    "i1": [
+      2,
+    ],
+    "i2": [
+      6,
+    ],
+    "l1": [
+      2,
+    ],
+    "l10": [
+      13,
+    ],
+    "l2": [
+      3,
+    ],
+    "l3": [
+      4,
+    ],
+    "l4": [
+      5,
+    ],
+    "l5": [
+      6,
+    ],
+    "l6": [
+      7,
+    ],
+    "l7": [
+      8,
+    ],
+    "l8": [
+      10,
+    ],
+    "l9": [
+      14,
+    ],
+    "n1": [
+      3,
+    ],
+    "n2": [
+      5,
+    ],
+    "n3": [
+      7,
+    ],
+    "n4": [
+      8,
+    ],
+    "n5": [
+      10,
+    ],
+    "n6": [
+      12,
+    ],
+    "q1": [
+      1,
+    ],
+    "q2": [
+      9,
+    ],
+    "q3": [
+      14,
+    ],
+  },
 }
 `;

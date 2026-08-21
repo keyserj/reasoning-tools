@@ -1,7 +1,16 @@
-import { type CSSProperties, Fragment, type KeyboardEvent, useMemo, useRef } from "react";
+import {
+  type CSSProperties,
+  type KeyboardEvent,
+  type MouseEvent,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { HighlightToken, ParseError, StyleConfig } from "../../ontology/types.ts";
+import { lineAt, offsetOfLine } from "./caret.ts";
 import { handleIndentKeys } from "./indent.ts";
-import { useRefJump } from "./refJump.ts";
+import { revealLine, useRefJump } from "./refJump.ts";
 
 export type EditorTab = "source" | "mermaid";
 
@@ -40,6 +49,11 @@ interface Props {
   config: StyleConfig;
   /** draw a lone type marker on a tint of its own color, rather than as bare colored text */
   markerHighlights: boolean;
+  /** 1-based line being pointed at, banded here; `null` when nothing is */
+  activeLine: number | null;
+  onActiveLineChange: (line: number | null) => void;
+  /** Move the caret here. The nonce is what makes a second click on the same line a new ask. */
+  caretRequest: { line: number; nonce: number } | null;
 }
 
 /** One token. Plain text is bare, so the overlay's DOM stays close to the textarea's own. */
@@ -73,9 +87,13 @@ export default function EditorPane({
   highlightLine,
   config,
   markerHighlights,
+  activeLine,
+  onActiveLineChange,
+  caretRequest,
 }: Props) {
   const editing = activeTab === "source";
   const overlay = useRef<HTMLPreElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
 
   // Split on "\n" rather than the parser's /\r?\n/: a token's text has to be the source's own
   // characters, and a swallowed "\r" is a character the textarea still lays out.
@@ -84,7 +102,52 @@ export default function EditorPane({
     [editing, source, highlightLine],
   );
 
-  const { linkable, onClick } = useRefJump(lines, editing);
+  const { linkable, onClick: onRefJumpClick } = useRefJump(lines, editing);
+
+  // The end the selection grew toward is where the caret is drawn.
+  const reportCaretLine = (el: HTMLTextAreaElement) => {
+    if (!editing) return;
+    const caret = el.selectionDirection === "backward" ? el.selectionStart : el.selectionEnd;
+    onActiveLineChange(lineAt(el.value, caret));
+  };
+
+  // `select` misses a caret the *code* moved — `setSelectionRange` fires nothing — so a click
+  // reports too: it's how the ref jump lands, and how you point at a line you're already on
+  // after a click somewhere else cleared it.
+  const handleClick = (e: MouseEvent<HTMLTextAreaElement>) => {
+    onRefJumpClick(e);
+    reportCaretLine(e.currentTarget);
+  };
+
+  // The pane stays mounted while hidden — on a phone the diagram covers it — and an element with
+  // no layout box can't scroll: `revealLine` would write `scrollTop` and nothing would move. An
+  // observer rather than the chosen pane, since the editor is on screen at `md` either way.
+  const [showing, setShowing] = useState(true);
+  useEffect(() => {
+    const el = input.current;
+    if (el === null) return;
+    const observer = new ResizeObserver(() => setShowing(el.clientHeight > 0));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
+  // Once per nonce: this effect also re-runs on every edit, which must not drag the caret back.
+  // No `.focus()`: the click landed on the diagram, and focusing here would raise a phone
+  // keyboard. A request that arrives while the pane is hidden waits rather than being spent on it.
+  const answered = useRef(0);
+  useEffect(() => {
+    const el = input.current;
+    if (caretRequest === null) {
+      answered.current = 0; // document switch restarts the nonces
+      return;
+    }
+    if (caretRequest.nonce === answered.current) return;
+    if (el === null || !editing || !showing) return; // wait until the textarea is on screen
+    answered.current = caretRequest.nonce;
+    const offset = offsetOfLine(source, caretRequest.line);
+    el.setSelectionRange(offset, offset);
+    revealLine(el, caretRequest.line - 1);
+  }, [caretRequest, editing, showing, source]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     // Tab is trapped for indenting, so Escape is the keyboard way back out of the textarea.
@@ -93,6 +156,11 @@ export default function EditorPane({
       return;
     }
     if (editing) handleIndentKeys(e);
+    // The caret moves after this handler; React reports on `keyup`, so a held arrow would lag
+    // the band a keystroke.
+    requestAnimationFrame(() => {
+      if (input.current !== null) reportCaretLine(input.current);
+    });
   };
 
   return (
@@ -160,7 +228,7 @@ export default function EditorPane({
           than a code-editor component: every marker in these syntaxes already has a color (the
           stroke its type is drawn with), so the overlay is what makes a line of source and its
           box in the diagram findable from each other — and keeping the textarea keeps the tab,
-          undo and mobile-input behaviour a replacement would have to re-earn.
+          undo and mobile-input behavior a replacement would have to re-earn.
 
           Only the Code tab gets it. The Mermaid tab is generated output in someone else's
           language, and this ontology's tokenizer would be reading a document it didn't write. */}
@@ -178,17 +246,19 @@ export default function EditorPane({
                 markerHighlights ? "marker-highlights" : ""
               } ${linkable ? "ref-links" : ""}`}
             >
-              {lines.map((tokens, i) => (
-                <Fragment key={i}>
-                  {i > 0 && "\n"}
-                  {tokens.map((token, j) => (
-                    <Token key={j} token={token} config={config} />
-                  ))}
-                </Fragment>
-              ))}
-              {/* A source ending in a newline leaves the textarea an empty last line; give the
-                  pre one too, or the two disagree about their height by a line. A trailing space
-                  hangs at the end of its line, so it can never move a wrap. */}{" "}
+              {/* One block per line so the caret's line can be painted as a whole. ./EditorPane.css. */}
+              <span className="editor-lines">
+                {lines.map((tokens, i) => (
+                  <span
+                    key={i}
+                    className={`editor-line${i + 1 === activeLine ? " editor-line-active" : ""}`}
+                  >
+                    {tokens.map((token, j) => (
+                      <Token key={j} token={token} config={config} />
+                    ))}
+                  </span>
+                ))}
+              </span>
             </pre>
           )}
           {/* `relative` only so the textarea paints over the absolutely positioned overlay:
@@ -202,6 +272,7 @@ export default function EditorPane({
               off in both states because a hairline flipping from inset to outer says nothing
               about focus. What's left is the border doing that job by itself. */}
           <textarea
+            ref={input}
             className={`${EDITOR_BOX} syntax-input relative resize-none overflow-auto shadow-none focus:outline-none placeholder:text-base-content/40 ${
               editing ? "bg-transparent text-transparent caret-base-content" : ""
             }`}
@@ -209,7 +280,8 @@ export default function EditorPane({
             value={editing ? source : mermaidText}
             onChange={(e) => onSourceChange(e.target.value)}
             onKeyDown={handleKeyDown}
-            onClick={onClick}
+            onClick={handleClick}
+            onSelect={(e) => reportCaretLine(e.currentTarget)}
             onScroll={(e) => {
               if (overlay.current === null) return;
               overlay.current.scrollTop = e.currentTarget.scrollTop;

@@ -18,10 +18,10 @@ import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 // apart.
 export const renderedEdgeTypes: EdgeTypeDef[] = [
   { id: "link", connector: "-->" },
-  // The two halves one ontology edge becomes when it's reified — see ./rendering.md on the
-  // `Edge display` param for why each is drawn the way it is.
+  // Reified halves — see ./rendering.md. `edge-to-edge` stays plain: weight is the active mark's
+  // channel, and a permanently thick connector would read as picked.
   { id: "edge-half", connector: "---" },
-  { id: "edge-to-edge", connector: "==>" },
+  { id: "edge-to-edge", connector: "-->" },
   noteEdgeType,
   {
     id: "supports",

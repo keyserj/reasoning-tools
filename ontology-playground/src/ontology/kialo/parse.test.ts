@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { TOPIC_ID } from "../topic.ts";
 import { parse } from "./parse.ts";
 import example from "./examples/session-storage.txt?raw";
 
@@ -9,7 +10,9 @@ describe("parse", () => {
     const { doc, errors } = parse("? Q &q\n  =[3] Thesis &t");
     expect(errors).toEqual([]);
     expect(doc.questions).toEqual([{ id: "q", text: "Q" }]);
-    expect(doc.theses).toEqual([{ id: "t1", claimId: "t", questionId: "q", veracity: [3] }]);
+    expect(doc.theses).toEqual([
+      { id: "t1", claimId: "t", viaRef: false, questionId: "q", veracity: [3] },
+    ]);
     expect(doc.arguments).toEqual([]);
   });
 
@@ -32,9 +35,11 @@ describe("parse", () => {
     const { doc, errors } = parse("= A &a\n  -[1] Cost &cost\n= B &b\n  +[4] $cost");
     expect(errors).toEqual([]);
     expect(doc.claims.filter((c) => c.id === "cost")).toHaveLength(1);
+    // `viaRef` is which usage was written as `$cost` rather than at the line declaring it, which
+    // is the one thing telling the two apart — ./toGraph.ts draws that one as a copy.
     expect(doc.arguments.filter((a) => a.claimId === "cost")).toMatchObject([
-      { parentClaimId: "a", stance: "con", impact: [1] },
-      { parentClaimId: "b", stance: "pro", impact: [4] },
+      { parentClaimId: "a", stance: "con", impact: [1], viaRef: false },
+      { parentClaimId: "b", stance: "pro", impact: [4], viaRef: true },
     ]);
   });
 
@@ -113,6 +118,25 @@ describe("parse", () => {
     expect(messages("%perspectives: [a, b]\n=[1] T")).toEqual([
       "Expected 2 scores to match %perspectives, got 1",
     ]);
+  });
+
+  it("files lines under ids that name members of `Object.prototype`", () => {
+    // On a plain `{}`, `sourceLines["constructor"]` reads back the inherited function and filing a
+    // line onto it throws, taking a document someone shared a link to down with it.
+    const { doc, errors } = parse("= Thesis &constructor\n  + Pro &toString");
+    expect(errors).toEqual([]);
+    expect(doc.sourceLines["constructor"]).toEqual([1]);
+    expect(doc.sourceLines["toString"]).toEqual([2]);
+  });
+
+  it("refuses an id in the renderer's `_` namespace, keeping the line", () => {
+    const { doc, errors } = parse("%description: Topic\n= Thesis &_topic");
+    expect(errors.map((e) => e.message)).toEqual([
+      'An id can\'t start with "_" — the diagram reserves that prefix',
+    ]);
+    // The header box keeps `_topic` to itself, so the thesis is somewhere else entirely.
+    expect(doc.claims).toMatchObject([{ id: "c1", text: "Thesis" }]);
+    expect(doc.sourceLines[TOPIC_ID]).toEqual([1]);
   });
 
   it("reports duplicate ids, unknown references and unrecognized markers", () => {

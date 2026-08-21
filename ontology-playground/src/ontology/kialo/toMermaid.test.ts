@@ -7,7 +7,10 @@ import buildAWall from "./examples/build-a-wall.txt?raw";
 
 /** The features argument is Kialo's unused one; `theme` is what the two after it are here for. */
 const render = (source: string, config = defaultConfig) =>
-  toMermaid(parse(source).doc, config, {}, "light");
+  toMermaid(parse(source).doc, config, {}, "light").text;
+
+const sourceMap = (source: string) =>
+  toMermaid(parse(source).doc, defaultConfig, {}, "light").sourceMap;
 
 describe("toMermaid", () => {
   it("emits a flowchart with shapes, classes and child -> parent edges", () => {
@@ -16,23 +19,26 @@ describe("toMermaid", () => {
     expect(out).toContain('q{{"❓ Q"}}:::question');
     expect(out).toContain('t["💬 Thesis<br/>[3]"]:::thesis');
     expect(out).toContain('r["✅ Reason<br/>[4]"]:::pro');
-    expect(out).toContain("t --> q");
+    expect(out).toContain("t e0@--> q");
   });
 
-  it("colors an unfolded connector from the same config entry its box type uses", () => {
-    // Restyling "Pro" has to move its connectors as well as its boxes, which is what
-    // `EdgeTypeDef.colorTypeId` buys — see ../types.ts.
-    const source = "= A &a\n  -[1] Shared &s\n= B &b\n  +[4] $s";
-    expect(render(source)).toContain('s -->|"⛔ [1]"| a');
-    expect(render(source)).toContain(`stroke:${defaultConfig.typeColors.pro}`);
+  it("renames an id that names a member of `Object.prototype`, which mermaid can't key on", () => {
+    // Mermaid's own node tables are plain objects, so it throws mid-layout on `constructor` and
+    // draws nothing — the document is fine, the identifier isn't. Its line still has to map.
+    const source = "= Thesis &constructor\n  + Reason &r";
+    const drawn = [...render(source).matchAll(/^ {2}([A-Za-z0-9_]+)[[({]/gm)].map((m) => m[1]);
+    expect(drawn.some((id) => id in Object.prototype)).toBe(false);
+    expect(sourceMap(source).nodes["_constructor"]).toEqual([1]);
+  });
 
-    const restyled = {
-      ...defaultConfig,
-      typeColors: { ...defaultConfig.typeColors, pro: "#00aa77" },
-    };
-    // Light mode draws a border in exactly the color picked, so the connector says it plainly.
-    expect(render(source, restyled)).toContain("stroke:#00aa77");
-    expect(render(source, restyled)).not.toContain(`stroke:${defaultConfig.typeColors.pro}`);
+  it("dashes a copy with a second class, so it keeps its stance type's fill and stroke", () => {
+    // Mermaid appends both classes and concatenates their styles — see ../mermaidFlowchart.ts.
+    const out = render("= A &a\n  -[1] Shared &s\n= B &b\n  +[4] $s");
+    expect(out).toContain('a2["✅ Shared 🔀<br/>[4]"]:::pro');
+    expect(out).toContain("classDef dashed stroke-dasharray:4 3");
+    expect(out).toContain("class a2 dashed");
+    // No connector here carries a stance, so nothing asks for a linkStyle.
+    expect(out).not.toContain("linkStyle");
   });
 
   it("omits icons when showIcons is false, including a claim's source marker", () => {
@@ -53,5 +59,31 @@ describe("toMermaid", () => {
 
   it("matches the generated-mermaid snapshot for the build-a-wall example", () => {
     expect(render(buildAWall)).toMatchSnapshot();
+  });
+});
+
+describe("sourceMap", () => {
+  it("maps each box and connector back to the line that wrote it", () => {
+    const map = sourceMap("? Q &q\n  =[3] Thesis &t\n    +[4] Reason &r");
+    expect(map.nodes).toEqual({ q: [1], t: [2], r: [3] });
+    // A `+` line writes a claim and attaches it, so it draws a box and a connector.
+    expect(map.edges).toEqual({ e0: [2], e1: [3] });
+  });
+
+  it("leads a copy with the line that reuses the claim, then the claim's other uses", () => {
+    const map = sourceMap("= A &a\n  - Shared &s\n= B &b\n  + $s");
+    expect(map.nodes.s).toEqual([2, 4]);
+    expect(map.nodes.a2).toEqual([4, 2]);
+  });
+
+  it("keys a box by the id mermaid was given, not by the one the document wrote", () => {
+    // `buildIdMap` sanitizes `ops-cost`; a map keyed by the ontology's id would miss the box.
+    expect(sourceMap("= A &ops-cost").nodes).toEqual({ ops_cost: [1] });
+  });
+
+  it("leaves the `@` source line and the anchor out: neither draws anything of its own", () => {
+    const map = sourceMap("%description: D\n= T &t\n  @ https://e.example A study");
+    expect(map.nodes).toEqual({ _topic: [1], t: [2] });
+    expect(map.edges).toEqual({});
   });
 });

@@ -27,16 +27,17 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     shape: ['["', '"]'],
     defaultColor: "#d97706",
   },
-  // Drawn exactly as a `thesis` on purpose because both are neutral. Can consider unique coloring
-  // later.
-  {
-    id: "claim",
-    label: "Claim",
-    icon: "💬",
-    description: "A claim reused in more than one spot, so its box can't take one stance.",
-    shape: ['["', '"]'],
-    defaultColor: "#d97706",
-  },
+  // The neutral box, kept for the planned lens that moves stance onto the connectors: with no
+  // stance on a box, a claim is drawn once however many times it is used, and needs this back.
+  // Drawn exactly as a `thesis` because both are neutral.
+  // {
+  //   id: "claim",
+  //   label: "Claim",
+  //   icon: "💬",
+  //   description: "A claim reused in more than one spot, so its box can't take one stance.",
+  //   shape: ['["', '"]'],
+  //   defaultColor: "#d97706",
+  // },
   {
     id: "pro",
     label: "Pro",

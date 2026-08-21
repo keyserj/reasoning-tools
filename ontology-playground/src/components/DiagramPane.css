@@ -1,0 +1,31 @@
+/* Mermaid's injected SVG, so these selectors name mermaid's classes; type look stays in `classDef`. */
+@layer components {
+  /* Unmapped chrome (empty placeholder, anchors) must not look clickable. */
+  .diagram-pane .is-linked {
+    cursor: pointer;
+  }
+
+  /* Halo: mermaid sets fill/stroke as inline `!important`, measured unreachable from a stylesheet.
+     `filter` is the property it never sets. Tight rather than wide, or it reads as the box's own
+     shadow. */
+  .diagram-pane g.node.is-active {
+    filter: drop-shadow(0 0 2px color-mix(in oklab, var(--color-base-content) 90%, transparent))
+      drop-shadow(0 0 5px color-mix(in oklab, var(--color-base-content) 60%, transparent));
+  }
+
+  /* `filter` replaces rather than accumulates, so hover would otherwise outrank the active mark. */
+  .diagram-pane g.node.is-linked:not(.is-active):hover {
+    filter: drop-shadow(0 0 2px color-mix(in oklab, var(--color-base-content) 35%, transparent));
+  }
+
+  /* Connector color is inline; width is not, so unlike a node this can be marked by weight. */
+  .diagram-pane path.flowchart-link.is-active {
+    stroke-width: 3.5px !important;
+  }
+
+  /* Label is a separate element from the path; both have to mark for a labeled connector to read
+     as one. */
+  .diagram-pane g.label.is-active {
+    filter: drop-shadow(0 0 3px color-mix(in oklab, var(--color-base-content) 55%, transparent));
+  }
+}

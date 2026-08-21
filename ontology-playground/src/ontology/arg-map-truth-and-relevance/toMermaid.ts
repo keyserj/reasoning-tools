@@ -1,4 +1,4 @@
-import type { FeatureState, StyleConfig, Theme } from "../types.ts";
+import type { FeatureState, MermaidOutput, StyleConfig, Theme } from "../types.ts";
 import { flowchart } from "../mermaidFlowchart.ts";
 import type { ArgDoc } from "./model.ts";
 import { toGraph } from "./toGraph.ts";
@@ -14,7 +14,7 @@ export function toMermaid(
   config: StyleConfig,
   features: FeatureState,
   theme: Theme,
-): string {
+): MermaidOutput {
   return flowchart(
     toGraph(doc, features),
     config,

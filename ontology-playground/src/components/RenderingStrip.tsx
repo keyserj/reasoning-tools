@@ -55,7 +55,7 @@ export default function RenderingStrip({ features, state, onChange, onOpenStyle 
           toolbar. */}
       <div className="flex flex-wrap items-center gap-2 px-3 py-1 min-h-10">
         {/* Names the controls in the row rather than the diagram below, which needs no label to
-            be recognised as a diagram. */}
+            be recognized as a diagram. */}
         <span className="section-header">Rendering options</span>
 
         {features.map((feature) => {
@@ -108,7 +108,7 @@ export default function RenderingStrip({ features, state, onChange, onOpenStyle 
           <div className="mt-2 flex flex-col gap-1">
             {open.options.map((o) => (
               // The same `option-selected` the pills take: selection means one thing app-wide, and
-              // a `bg-base-200` fill would double-book the band token as a selection colour inside
+              // a `bg-base-200` fill would double-book the band token as a selection color inside
               // a content panel.
               <label
                 key={o.id}

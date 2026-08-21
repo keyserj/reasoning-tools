@@ -937,7 +937,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
       - no
     - hmm it does seem like it could be nice to color differently based on the specific score's meaning e.g. causal vs supports vs guides vs importance... but not sure if that'd be too cluttery/confusing to figure out
       - the currently-planned coloring was to have good/bad coloring, which works for "important to increase/decrease", "increases an important-to-increase concept"
-      - maybe for claim nodes, purple = true, grey = untrue, yellow = opposite of true? seems like it should be different from good/bad color because true is not necessarily "good". Hmm what about claim edges though? they probably don't make sense to be the same color because a negative score is a critique which just means "not true", rather than "opposite"... hmm...
+      - maybe for claim nodes, purple = true, gray = untrue, yellow = opposite of true? seems like it should be different from good/bad color because true is not necessarily "good". Hmm what about claim edges though? they probably don't make sense to be the same color because a negative score is a critique which just means "not true", rather than "opposite"... hmm...
 		- which scores should be which colors should be a separate open question
 		- notably, regardless of the modeling choice, we should be able to color scores differently based on what they're about, not based on their scale
 			- and we can achieve this coloring no matter the answer to this question - if we go all truth scores, then we potentially could have a "claim semantic type" property to specify that this is a "causes" claim vs "change importance claim" etc.

@@ -22,7 +22,7 @@ Compare [the arg-map ontology](../arg-map-truth-and-relevance/ontology.md), whic
 
 The cost is expressive, not cosmetic. "I grant the fact but deny it bears on this" cannot be said. [examples/build-a-wall.txt](./examples/build-a-wall.txt) carries both directions of it: casey holds `easy-climb` true but irrelevant, and `visa-overstay` false but decisive if true, and both land near 0 here for opposite reasons Kialo cannot tell apart. An argument _about_ the relation has nowhere to go either, so `little-harm` — which in arg-map attacks the edge — hangs on the thesis instead.
 
-This is not the same question as arg-map's own open "one belief score, or separate truth and relevance?". Both answers there keep a number per claim _and_ a number per edge, and differ only in how the two are labelled.
+This is not the same question as arg-map's own open "one belief score, or separate truth and relevance?". Both answers there keep a number per claim _and_ a number per edge, and differ only in how the two are labeled.
 
 ## Questions, and what they say about a tool
 

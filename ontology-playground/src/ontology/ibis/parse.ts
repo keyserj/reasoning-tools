@@ -1,5 +1,6 @@
-import type { ParseError } from "../types.ts";
+import type { ParseError, SourceLines } from "../types.ts";
 import type { Note } from "../notes.ts";
+import { RESERVED_ID_MESSAGE, RESERVED_ID_PREFIX, idTable } from "../ids.ts";
 import type { IbisDoc, IbisEdge, IbisNode } from "./model.ts";
 import {
   ID_SUFFIX,
@@ -48,13 +49,17 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
   // Filed at the end: a note under a `$ref` line owns an id that may be declared further down.
   const pendingNotes: { note: Note; ownerId: string }[] = [];
   const docNotes: Note[] = [];
+  const sourceLines: SourceLines = idTable();
   const stack: StackFrame[] = [];
   let lastNoteIndent: number | null = null;
   let autoCounter = 0;
+  let edgeCounter = 0;
 
-  // Notes share the node id space, since both end up as boxes the diagram has to tell apart.
+  // Notes and edges share the node id space: every one of them ends up as something the diagram
+  // has to tell apart.
   const noteIds = new Set<string>();
-  const isIdTaken = (id: string): boolean => byId.has(id) || noteIds.has(id);
+  const edgeIds = new Set<string>();
+  const isIdTaken = (id: string): boolean => byId.has(id) || noteIds.has(id) || edgeIds.has(id);
 
   const nextAutoId = (): string => {
     let id: string;
@@ -64,9 +69,27 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
     return id;
   };
 
-  /** An explicit `&id` if it's free, else a fresh one and a reported duplicate. */
+  const fileLine = (id: string, line: number) => {
+    (sourceLines[id] ??= []).push(line);
+  };
+
+  /** `l` for link, as arg-map's edges take, and not the `e<n>` mermaid names its own edges. */
+  const nextEdgeId = (): string => {
+    let id: string;
+    do {
+      id = `l${++edgeCounter}`;
+    } while (isIdTaken(id));
+    edgeIds.add(id);
+    return id;
+  };
+
+  /** An explicit `&id` if it's free, else a fresh one and a reported duplicate or reserved id. */
   const takeId = (explicitId: string | undefined, lineNo: number): string => {
     if (explicitId === undefined) return nextAutoId();
+    if (explicitId.startsWith(RESERVED_ID_PREFIX)) {
+      errors.push({ line: lineNo, message: RESERVED_ID_MESSAGE });
+      return nextAutoId();
+    }
     if (isIdTaken(explicitId)) {
       errors.push({ line: lineNo, message: `Duplicate id "&${explicitId}"` });
       return nextAutoId();
@@ -125,6 +148,7 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
       }
       const id = takeId(explicitId, lineNo);
       noteIds.add(id);
+      fileLine(id, lineNo);
       // Nothing above it: a note about the document rather than about any one node.
       if (parentId === null) docNotes.push({ id, text: body });
       else pendingNotes.push({ note: { id, text: body }, ownerId: parentId });
@@ -146,10 +170,16 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
 
     // Normal node.
     const id = takeId(explicitId, lineNo);
+    fileLine(id, lineNo);
     const node: IbisNode = { id, type, text: body, notes: [] };
     nodes.push(node);
     byId.set(id, node);
-    if (parentId !== null) edges.push({ from: id, to: parentId });
+    // The line writes the node *and* nests it, so it draws the connector as well as the box.
+    if (parentId !== null) {
+      const edgeId = nextEdgeId();
+      fileLine(edgeId, lineNo);
+      edges.push({ id: edgeId, from: id, to: parentId });
+    }
 
     stack.push({ indent, nodeId: id });
   }
@@ -157,7 +187,9 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
   // Resolve references now that every node id is known (forward refs allowed).
   for (const ref of pendingRefs) {
     if (byId.has(ref.refId)) {
-      edges.push({ from: ref.refId, to: ref.parentId });
+      const edgeId = nextEdgeId();
+      fileLine(edgeId, ref.line);
+      edges.push({ id: edgeId, from: ref.refId, to: ref.parentId });
     } else {
       errors.push({ line: ref.line, message: `Unknown reference "$${ref.refId}"` });
     }
@@ -168,6 +200,6 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
   // in the diagram attached to nothing.
   for (const { note, ownerId } of pendingNotes) byId.get(ownerId)?.notes.push(note);
 
-  const doc: IbisDoc = { nodes, edges, notes: docNotes };
+  const doc: IbisDoc = { nodes, edges, notes: docNotes, sourceLines };
   return { doc, errors };
 }

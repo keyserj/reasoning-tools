@@ -274,5 +274,90 @@ exports[`parse > matches the parsed-model snapshot for the build-a-wall example 
     "bob",
     "casey",
   ],
+  "sourceLines": {
+    "_topic": [
+      1,
+      2,
+    ],
+    "barrier-supports-reduction": [
+      10,
+    ],
+    "climb-easy-supports": [
+      14,
+      35,
+    ],
+    "climb-over": [
+      13,
+    ],
+    "cost-critiques-wall": [
+      18,
+    ],
+    "crime-stat": [
+      32,
+    ],
+    "easy-climb": [
+      15,
+    ],
+    "l1": [
+      12,
+    ],
+    "l2": [
+      16,
+    ],
+    "l3": [
+      20,
+    ],
+    "l4": [
+      29,
+    ],
+    "l5": [
+      31,
+    ],
+    "l6": [
+      38,
+    ],
+    "l7": [
+      45,
+    ],
+    "l8": [
+      47,
+    ],
+    "little-harm": [
+      30,
+    ],
+    "material-prices": [
+      21,
+    ],
+    "more-judges": [
+      44,
+    ],
+    "physical-barrier": [
+      11,
+    ],
+    "reduction-supports-wall": [
+      8,
+      26,
+    ],
+    "t1": [
+      33,
+    ],
+    "unclimbable": [
+      39,
+    ],
+    "visa-overstay": [
+      17,
+    ],
+    "wall": [
+      7,
+      46,
+    ],
+    "wall-cost": [
+      19,
+      49,
+    ],
+    "wall-reduces": [
+      9,
+    ],
+  },
 }
 `;

@@ -3,18 +3,49 @@ import { parse } from "./parse.ts";
 import example from "./examples/session-storage.txt?raw";
 
 describe("parse", () => {
+  it("keeps a written id clear of the ones it mints for edges and notes", () => {
+    // Every id in a document is unique whoever minted it, so `sourceLines` can key them all.
+    const { doc } = parse("= Idea &n1\n  + Nested &n2\n    ~ aside &n3");
+    const ids = [
+      ...doc.nodes.map((node) => node.id),
+      ...doc.nodes.flatMap((node) => node.notes.map((note) => note.id)),
+      ...doc.edges.map((edge) => edge.id),
+    ];
+    expect(new Set(ids).size).toBe(ids.length);
+    expect(Object.keys(doc.sourceLines).sort()).toEqual([...ids].sort());
+  });
+
   it("builds child -> parent edges from indentation", () => {
     const { doc, errors } = parse("? Q &q1\n  = Idea &i1\n    + Pro &p1\n    - Con &c1");
     expect(errors).toEqual([]);
     expect(doc.nodes).toHaveLength(4);
-    expect(doc.edges).toContainEqual({ from: "i1", to: "q1" });
-    expect(doc.edges).toContainEqual({ from: "p1", to: "i1" });
-    expect(doc.edges).toContainEqual({ from: "c1", to: "i1" });
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "i1", to: "q1" }));
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "p1", to: "i1" }));
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "c1", to: "i1" }));
   });
 
   it("auto-assigns stable ids to unlabeled nodes", () => {
     const { doc } = parse("? Q\n  = Idea");
     expect(doc.nodes.map((n) => n.id)).toEqual(["n1", "n2"]);
+  });
+
+  it("files lines under ids that name members of `Object.prototype`", () => {
+    // On a plain `{}`, `sourceLines["constructor"]` reads back the inherited function and filing a
+    // line onto it throws, taking a document someone shared a link to down with it.
+    const { doc, errors } = parse("= Idea &constructor\n  + Pro &toString");
+    expect(errors).toEqual([]);
+    expect(doc.sourceLines["constructor"]).toEqual([1]);
+    expect(doc.sourceLines["toString"]).toEqual([2]);
+  });
+
+  it("refuses an id in the renderer's `_` namespace, keeping the line", () => {
+    // IBIS draws no box of the renderer's own today, but the namespace is the shared renderer's
+    // (../ids.ts), so a syntax that let a document in would be the one that collides later.
+    const { doc, errors } = parse("= Idea &_topic");
+    expect(errors.map((e) => e.message)).toEqual([
+      'An id can\'t start with "_" — the diagram reserves that prefix',
+    ]);
+    expect(doc.nodes).toMatchObject([{ id: "n1", text: "Idea" }]);
   });
 
   it("drops `/` meta-comments without error and hangs `~` notes off the line above", () => {
@@ -30,7 +61,7 @@ describe("parse", () => {
   it("keeps a note a leaf, so a line nested under one attaches to the note's parent", () => {
     const { doc, errors } = parse("= Idea &i1\n  ~ aside\n    + Pro &p1");
     expect(errors).toEqual([]);
-    expect(doc.edges).toContainEqual({ from: "p1", to: "i1" });
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "p1", to: "i1" }));
   });
 
   it("takes `$id` in a note's body as prose rather than a reference", () => {
@@ -66,12 +97,12 @@ describe("parse", () => {
     const b = doc.nodes.find((n) => n.text === "B");
     // The `-` places `a1` under B but can't restate what it is: `a1` is still an idea.
     expect(doc.nodes.find((n) => n.id === "a1")?.type).toBe("idea");
-    expect(doc.edges).toContainEqual({ from: "a1", to: b?.id });
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "a1", to: b?.id }));
   });
 
   it("nests deeper indentation even with mixed tabs and spaces", () => {
     const { doc } = parse("- Con &c1\n\t  - Rebuttal &r1");
-    expect(doc.edges).toContainEqual({ from: "r1", to: "c1" });
+    expect(doc.edges).toContainEqual(expect.objectContaining({ from: "r1", to: "c1" }));
   });
 
   it("reports duplicate ids and unknown references as non-fatal errors", () => {

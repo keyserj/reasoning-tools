@@ -5,6 +5,7 @@
    cascade position stays fixed. AGENTS.md has the rules for when a rule earns its own file. */
 @import "./ontology/highlight.css";
 @import "./components/editor/EditorPane.css";
+@import "./components/DiagramPane.css";
 
 @plugin "daisyui" {
   themes:
@@ -51,7 +52,7 @@
    whole app. Chroma scales with lightness rather than staying at dark's 0.035, because that is
    what the slate scale itself does (0.003 at `slate-50` climbing to 0.037 at `slate-800`): a tint
    that reads as slate against near-black reads as pastel blue against white — 0.035 up here gives
-   RGB(228,243,255), a colour rather than a neutral. base-100 is left as daisyUI's pure white,
+   RGB(228,243,255), a color rather than a neutral. base-100 is left as daisyUI's pure white,
    which has no hue to agree or disagree with.
 
    Lightness is unchanged from daisyUI's stock 96/92.5%, itself already widened from its 98/95%:
@@ -104,7 +105,11 @@
    Derived from base-content because it's the only neutral that flips with the theme: daisyUI's
    `neutral` is rgb(9,9,11) in both, which against the dark page measures one code value. Same
    reason `index.css` overrides the ghost hover and AGENTS.md asks for content-derived borders on
-   small controls. */
+   small controls.
+
+   One rung hangs below the whole ladder and is mixed the same way: the editor's caret band, which
+   marks where you are rather than what you chose and so must not compete with a hover. Its numbers
+   live with its rule, in components/editor/EditorPane.css. */
 @utility option-selected {
   background-color: color-mix(in oklab, var(--color-base-content) 22%, transparent);
   border-color: color-mix(in oklab, var(--color-base-content) 40%, transparent);

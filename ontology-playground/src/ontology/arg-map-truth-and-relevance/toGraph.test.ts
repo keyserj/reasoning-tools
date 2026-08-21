@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { FeatureState } from "../types.ts";
+import { withoutLines } from "../testing.ts";
 import { parse } from "./parse.ts";
 import { toGraph } from "./toGraph.ts";
 import { EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_SAME, IMPLIED } from "./features.ts";
@@ -15,7 +16,12 @@ const impliedSame: FeatureState = {
   [EDGE_CLAIMS]: { option: IMPLIED, params: { [EDGE_DISPLAY]: EDGE_DISPLAY_SAME } },
 };
 
-const graphOf = (text: string, features: FeatureState) => toGraph(parse(text).doc, features);
+// Shape only — the lines every box and connector also carries have their own block at the bottom.
+const graphOf = (text: string, features: FeatureState) =>
+  withoutLines(toGraph(parse(text).doc, features));
+
+/** The same graph with the lines left on, which the block at the bottom is about. */
+const withLines = (text: string, features: FeatureState) => toGraph(parse(text).doc, features);
 
 describe("toGraph — spelled out (default)", () => {
   it("draws a plain edge as a labeled connector, with no node of its own", () => {
@@ -222,5 +228,55 @@ describe("toGraph — implied", () => {
     const graph = graphOf("= A &a", implied);
     expect(graph.nodes.map((n) => n.type)).not.toContain("topic");
     expect(graph.edges).toEqual([]);
+  });
+});
+
+describe("toGraph — source lines", () => {
+  const source = ["%description: D", "= Thesis &t", "  < supports[8] &sup", "    = Reason &r"].join(
+    "\n",
+  );
+
+  it("points a claim's box at the line that wrote it", () => {
+    const { nodes } = withLines(source, spelledOut());
+    expect(nodes.find((n) => n.id === "r")?.lines).toEqual([4]);
+  });
+
+  it("points a labeled connector at the edge line, not at either endpoint's", () => {
+    const { edges } = withLines(source, spelledOut());
+    expect(edges.find((e) => e.type === "supports")?.lines).toEqual([3]);
+  });
+
+  it("gives a reified edge and both its halves the same line under `implied`", () => {
+    const { nodes, edges } = withLines(source, implied);
+    expect(nodes.find((n) => n.id === "sup")?.lines).toEqual([3]);
+    expect(edges.filter((e) => e.from === "sup" || e.to === "sup").map((e) => e.lines)).toEqual([
+      [3],
+      [3],
+    ]);
+  });
+
+  it("adds a `$ref` line to the claim's box, after the box's own", () => {
+    // A click lands on `lines[0]`, so the declaring line leads; the ref lines are what let
+    // the caret on any use light the one shared box up.
+    const src = "= A &a\n= B &b\n  < supports &l\n    = $a";
+    const { nodes } = withLines(src, spelledOut());
+    expect(nodes.find((n) => n.id === "a")?.lines).toEqual([1, 4]);
+  });
+
+  it("adds a `= $edge` block's line to the edge it argues about", () => {
+    const src = "= T &t\n  < supports &sup\n    = R &r\n= $sup\n  < critiques &c\n    = N &n";
+    const { nodes, edges } = withLines(src, spelledOut());
+    expect(edges.find((e) => e.type === "supports")?.lines).toEqual([2, 4]);
+    // The argued edge's detached node is the same edge drawn again, so it lights up too.
+    expect(nodes.find((n) => n.id === "sup")?.lines).toEqual([2, 4]);
+  });
+
+  it("leaves the anchor without one: nothing wrote it", () => {
+    const { edges } = withLines(source, spelledOut());
+    expect(edges.find((e) => e.type === "anchor")).toEqual({
+      from: "t",
+      to: "_topic",
+      type: "anchor",
+    });
   });
 });

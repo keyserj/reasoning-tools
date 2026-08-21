@@ -28,4 +28,30 @@
   .syntax-input {
     scrollbar-color: color-mix(in oklch, var(--color-base-content) 35%, transparent) transparent;
   }
+
+  /* `max-content` on the wrapper, not each line, so a band is as wide as the widest line even
+     after a sideways scroll. */
+  .editor-lines {
+    display: block;
+    width: max-content;
+    min-width: 100%;
+  }
+
+  .editor-line {
+    display: block;
+    /* Empty lines have no content; without this the overlay drifts from the textarea at the first
+       blank. */
+    min-height: 1lh;
+  }
+
+  /* Below the selection ladder in index.css: where you are, not what you chose. Dark 12% because
+     near black a step spans fewer sRGB values — 8% is 19 off (barely there), 12% is 29, matching
+     light's 18. */
+  .editor-line-active {
+    background-color: color-mix(in oklab, var(--color-base-content) 8%, transparent);
+  }
+
+  [data-theme="dark"] .editor-line-active {
+    background-color: color-mix(in oklab, var(--color-base-content) 12%, transparent);
+  }
 }

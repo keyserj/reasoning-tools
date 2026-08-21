@@ -3,7 +3,7 @@
 // has a note in its own vocabulary — so what a note *is* and how it's drawn live together at this
 // level, and an ontology's model only says which of the things it does own a note hangs off.
 
-import type { EdgeTypeDef, NodeTypeDef, RenderEdge, RenderNode } from "./types.ts";
+import type { EdgeTypeDef, NodeTypeDef, RenderEdge, RenderNode, SourceLines } from "./types.ts";
 import { ANCHOR_TYPE_ID } from "./anchoring.ts";
 
 export interface Note {
@@ -46,11 +46,19 @@ export const noteEdgeType: EdgeTypeDef = { id: NOTE_TYPE_ID, connector: "-.->" }
  * since an un-argued edge under `spelled out` earns no box — which is what keeps this free of any
  * one ontology's rules.
  */
-export function addNotes(nodes: RenderNode[], edges: RenderEdge[], owners: NoteOwner[]): void {
+export function addNotes(
+  nodes: RenderNode[],
+  edges: RenderEdge[],
+  owners: NoteOwner[],
+  sourceLines: SourceLines,
+): void {
   for (const owner of owners) {
     for (const note of owner.notes) {
-      nodes.push({ id: note.id, type: NOTE_TYPE_ID, text: note.text });
-      edges.push({ from: note.id, to: owner.id, type: NOTE_TYPE_ID });
+      const lines = sourceLines[note.id];
+      nodes.push({ id: note.id, type: NOTE_TYPE_ID, text: note.text, lines });
+      // The `~` line writes the note *and* attaches it, so it draws both the box and the dotted
+      // connector back to what it annotates.
+      edges.push({ from: note.id, to: owner.id, type: NOTE_TYPE_ID, lines });
     }
   }
 }
@@ -66,9 +74,10 @@ export function addDocumentNotes(
   edges: RenderEdge[],
   notes: Note[],
   rootIds: string[],
+  sourceLines: SourceLines,
 ): void {
   for (const note of notes) {
-    nodes.push({ id: note.id, type: NOTE_TYPE_ID, text: note.text });
+    nodes.push({ id: note.id, type: NOTE_TYPE_ID, text: note.text, lines: sourceLines[note.id] });
     for (const rootId of rootIds) {
       edges.push({ from: rootId, to: note.id, type: ANCHOR_TYPE_ID });
     }

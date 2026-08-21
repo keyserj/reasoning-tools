@@ -13,9 +13,9 @@ Read `types.ts`, whatever sits directly in `src/ontology/` as shared plumbing, a
 
 **Syntax and parsing.** Which markers exist, how a line is read, and what is an error — said explicitly, since an input that "kind of" works and quietly does something else is worse than a rejection. Then: does reaching the model from the text need more than line-and-indent? References, folding, nodes implied rather than written — each is real logic, and belongs in the plan rather than being discovered in `parse.ts`.
 
-**`model.ts`.** The closest modelling of the actual ontology, not a shape chosen because it will be convenient to draw: `RenderGraph` is what serves mermaid, and `toGraph.ts` is where the model gets projected onto it. A model that already looks like a render graph has usually thrown away something the ontology cares about.
+**`model.ts`.** The closest modeling of the actual ontology, not a shape chosen because it will be convenient to draw: `RenderGraph` is what serves mermaid, and `toGraph.ts` is where the model gets projected onto it. A model that already looks like a render graph has usually thrown away something the ontology cares about. Where a thing was written stays off the entities and rides on the doc's `sourceLines` — [`src/ontology/pipeline.md`](../../../ontology-playground/src/ontology/pipeline.md) says which lines to file and why `toGraph.ts` has to pass them on.
 
-**Rendering.** Which types are boxes and which are connectors, and what the legend says. Then the same question in the other direction: does deriving that from the model need real logic? It often does, and it's the interesting part — Kialo folds a claim used in several spots into one neutral box whose connectors carry the scores.
+**Rendering.** Which types are boxes and which are connectors, and what the legend says. Then the same question in the other direction: does deriving that from the model need real logic? It often does, and it's the interesting part — Kialo draws a box per _usage_ of a claim, so one claim used in three spots is three boxes, each with its own stance and score.
 
 **Examples.** Which ids from `examples.ts` this ontology will ship, and what each will look like.
 

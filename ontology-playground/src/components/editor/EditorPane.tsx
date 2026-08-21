@@ -5,6 +5,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import type { HighlightToken, ParseError, StyleConfig } from "../../ontology/types.ts";
 import { lineAt, offsetOfLine } from "./caret.ts";
@@ -118,9 +119,21 @@ export default function EditorPane({
     reportCaretLine(e.currentTarget);
   };
 
+  // The pane stays mounted while hidden — on a phone the diagram covers it — and an element with
+  // no layout box can't scroll: `revealLine` would write `scrollTop` and nothing would move. An
+  // observer rather than the chosen pane, since the editor is on screen at `md` either way.
+  const [showing, setShowing] = useState(true);
+  useEffect(() => {
+    const el = input.current;
+    if (el === null) return;
+    const observer = new ResizeObserver(() => setShowing(el.clientHeight > 0));
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   // Once per nonce: this effect also re-runs on every edit, which must not drag the caret back.
   // No `.focus()`: the click landed on the diagram, and focusing here would raise a phone
-  // keyboard.
+  // keyboard. A request that arrives while the pane is hidden waits rather than being spent on it.
   const answered = useRef(0);
   useEffect(() => {
     const el = input.current;
@@ -129,12 +142,12 @@ export default function EditorPane({
       return;
     }
     if (caretRequest.nonce === answered.current) return;
-    if (el === null || !editing) return; // Mermaid tab: wait until Code is showing
+    if (el === null || !editing || !showing) return; // wait until the textarea is on screen
     answered.current = caretRequest.nonce;
     const offset = offsetOfLine(source, caretRequest.line);
     el.setSelectionRange(offset, offset);
     revealLine(el, caretRequest.line - 1);
-  }, [caretRequest, editing, source]);
+  }, [caretRequest, editing, showing, source]);
 
   const handleKeyDown = (e: KeyboardEvent<HTMLTextAreaElement>) => {
     // Tab is trapped for indenting, so Escape is the keyboard way back out of the textarea.

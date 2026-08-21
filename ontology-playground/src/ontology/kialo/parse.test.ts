@@ -120,6 +120,15 @@ describe("parse", () => {
     ]);
   });
 
+  it("files lines under ids that name members of `Object.prototype`", () => {
+    // On a plain `{}`, `sourceLines["constructor"]` reads back the inherited function and filing a
+    // line onto it throws, taking a document someone shared a link to down with it.
+    const { doc, errors } = parse("= Thesis &constructor\n  + Pro &toString");
+    expect(errors).toEqual([]);
+    expect(doc.sourceLines["constructor"]).toEqual([1]);
+    expect(doc.sourceLines["toString"]).toEqual([2]);
+  });
+
   it("refuses an id in the renderer's `_` namespace, keeping the line", () => {
     const { doc, errors } = parse("%description: Topic\n= Thesis &_topic");
     expect(errors.map((e) => e.message)).toEqual([

@@ -29,6 +29,15 @@ describe("parse", () => {
     expect(doc.nodes.map((n) => n.id)).toEqual(["n1", "n2"]);
   });
 
+  it("files lines under ids that name members of `Object.prototype`", () => {
+    // On a plain `{}`, `sourceLines["constructor"]` reads back the inherited function and filing a
+    // line onto it throws, taking a document someone shared a link to down with it.
+    const { doc, errors } = parse("= Idea &constructor\n  + Pro &toString");
+    expect(errors).toEqual([]);
+    expect(doc.sourceLines["constructor"]).toEqual([1]);
+    expect(doc.sourceLines["toString"]).toEqual([2]);
+  });
+
   it("refuses an id in the renderer's `_` namespace, keeping the line", () => {
     // IBIS draws no box of the renderer's own today, but the namespace is the shared renderer's
     // (../ids.ts), so a syntax that let a document in would be the one that collides later.

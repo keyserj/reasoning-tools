@@ -1,5 +1,5 @@
 import type { ParseError, SourceLines } from "../types.ts";
-import { RESERVED_ID_MESSAGE, RESERVED_ID_PREFIX } from "../ids.ts";
+import { RESERVED_ID_MESSAGE, RESERVED_ID_PREFIX, idTable } from "../ids.ts";
 import { TOPIC_ID } from "../topic.ts";
 import type { Note } from "../notes.ts";
 import type { ArgDoc, Claim, Edge } from "./model.ts";
@@ -80,7 +80,7 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
   const edges: Edge[] = [];
   const errors: ParseError[] = [];
   const usedIds = new Set<string>();
-  const sourceLines: SourceLines = {};
+  const sourceLines: SourceLines = idTable();
   const refUses: { refId: string; line: number }[] = [];
   // A note names its owner by id, and the owner may not exist yet: an edge only materializes
   // once the claim nested under it is read, and a `= $ref` block can point further down the

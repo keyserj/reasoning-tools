@@ -1,6 +1,6 @@
 import type { ParseError, SourceLines } from "../types.ts";
 import type { Note } from "../notes.ts";
-import { RESERVED_ID_MESSAGE, RESERVED_ID_PREFIX } from "../ids.ts";
+import { RESERVED_ID_MESSAGE, RESERVED_ID_PREFIX, idTable } from "../ids.ts";
 import type { IbisDoc, IbisEdge, IbisNode } from "./model.ts";
 import {
   ID_SUFFIX,
@@ -49,7 +49,7 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
   // Filed at the end: a note under a `$ref` line owns an id that may be declared further down.
   const pendingNotes: { note: Note; ownerId: string }[] = [];
   const docNotes: Note[] = [];
-  const sourceLines: SourceLines = {};
+  const sourceLines: SourceLines = idTable();
   const stack: StackFrame[] = [];
   let lastNoteIndent: number | null = null;
   let autoCounter = 0;

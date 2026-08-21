@@ -22,6 +22,15 @@ describe("toMermaid", () => {
     expect(out).toContain("t e0@--> q");
   });
 
+  it("renames an id that names a member of `Object.prototype`, which mermaid can't key on", () => {
+    // Mermaid's own node tables are plain objects, so it throws mid-layout on `constructor` and
+    // draws nothing — the document is fine, the identifier isn't. Its line still has to map.
+    const source = "= Thesis &constructor\n  + Reason &r";
+    const drawn = [...render(source).matchAll(/^ {2}([A-Za-z0-9_]+)[[({]/gm)].map((m) => m[1]);
+    expect(drawn.some((id) => id in Object.prototype)).toBe(false);
+    expect(sourceMap(source).nodes["_constructor"]).toEqual([1]);
+  });
+
   it("dashes a copy with a second class, so it keeps its stance type's fill and stroke", () => {
     // Mermaid appends both classes and concatenates their styles — see ../mermaidFlowchart.ts.
     const out = render("= A &a\n  -[1] Shared &s\n= B &b\n  +[4] $s");

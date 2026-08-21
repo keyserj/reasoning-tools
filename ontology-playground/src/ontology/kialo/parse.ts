@@ -1,6 +1,6 @@
 import type { ParseError, SourceLines } from "../types.ts";
 import type { Note } from "../notes.ts";
-import { RESERVED_ID_MESSAGE, RESERVED_ID_PREFIX } from "../ids.ts";
+import { RESERVED_ID_MESSAGE, RESERVED_ID_PREFIX, idTable } from "../ids.ts";
 import { TOPIC_ID } from "../topic.ts";
 import type { Argument, Claim, KialoDoc, Question, Source, Thesis } from "./model.ts";
 import {
@@ -51,7 +51,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
 
   const usedIds = new Set<string>();
   const claimIds = new Set<string>();
-  const sourceLines: SourceLines = {};
+  const sourceLines: SourceLines = idTable();
   const refUsages: { refId: string; line: number }[] = [];
   // Sources and notes name their claim by id, and a `$ref` may point further down the file, so
   // they are filed once every id is known.

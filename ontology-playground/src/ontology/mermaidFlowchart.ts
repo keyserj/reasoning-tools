@@ -7,6 +7,7 @@ import type {
   StyleConfig,
   Theme,
 } from "./types.ts";
+import { RESERVED_ID_PREFIX, idTable } from "./ids.ts";
 import { deriveTypeStyle } from "./typeColors.ts";
 
 // Shared mermaid-flowchart renderer. Every ontology's `toMermaid` is the same walk over
@@ -70,6 +71,11 @@ function buildIdMap(graph: RenderGraph): Map<string, string> {
   for (const node of graph.nodes) {
     let base = node.id.replace(/[^A-Za-z0-9_]/g, "_");
     if (!/^[A-Za-z_]/.test(base)) base = `n_${base}`;
+    // Mermaid keys its own node tables on plain objects, so an id naming a member of
+    // `Object.prototype` — `constructor`, `toString` — reads back an inherited function and the
+    // layout throws before drawing anything. The `_` prefix is safe to rename into: no document
+    // can write one (./ids.ts), and the id a reader sees is the `&id` in their own text.
+    if (base in Object.prototype) base = `${RESERVED_ID_PREFIX}${base}`;
     let candidate = base;
     let k = 1;
     while (used.has(candidate)) candidate = `${base}_${k++}`;
@@ -86,7 +92,7 @@ export function flowchart(
   tables: FlowchartTables,
   theme: Theme,
 ): MermaidOutput {
-  const sourceMap: SourceMap = { nodes: {}, edges: {} };
+  const sourceMap: SourceMap = { nodes: idTable(), edges: idTable() };
 
   if (graph.nodes.length === 0) {
     return {

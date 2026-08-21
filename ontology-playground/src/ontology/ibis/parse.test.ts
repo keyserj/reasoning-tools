@@ -29,6 +29,16 @@ describe("parse", () => {
     expect(doc.nodes.map((n) => n.id)).toEqual(["n1", "n2"]);
   });
 
+  it("refuses an id in the renderer's `_` namespace, keeping the line", () => {
+    // IBIS draws no box of the renderer's own today, but the namespace is the shared renderer's
+    // (../ids.ts), so a syntax that let a document in would be the one that collides later.
+    const { doc, errors } = parse("= Idea &_topic");
+    expect(errors.map((e) => e.message)).toEqual([
+      'An id can\'t start with "_" — the diagram reserves that prefix',
+    ]);
+    expect(doc.nodes).toMatchObject([{ id: "n1", text: "Idea" }]);
+  });
+
   it("drops `/` meta-comments without error and hangs `~` notes off the line above", () => {
     const { doc, errors } = parse("= Idea &i1\n  / hidden\n  ~ shown note");
     expect(errors).toEqual([]);

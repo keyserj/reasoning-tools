@@ -1,4 +1,5 @@
 import type { ParseError, SourceLines } from "../types.ts";
+import { RESERVED_ID_MESSAGE, RESERVED_ID_PREFIX } from "../ids.ts";
 import { TOPIC_ID } from "../topic.ts";
 import type { Note } from "../notes.ts";
 import type { ArgDoc, Claim, Edge } from "./model.ts";
@@ -108,9 +109,13 @@ export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
     return id;
   };
 
-  /** Claim the line's `&id`, falling back to an auto id when it's missing or taken. */
+  /** Claim the line's `&id`, falling back to an auto id when it's missing, reserved or taken. */
   const takeId = (explicit: string | undefined, prefix: string, line: number): string => {
     if (explicit === undefined) return nextAutoId(prefix);
+    if (explicit.startsWith(RESERVED_ID_PREFIX)) {
+      errors.push({ line, message: RESERVED_ID_MESSAGE });
+      return nextAutoId(prefix);
+    }
     if (usedIds.has(explicit)) {
       errors.push({ line, message: `Duplicate id "&${explicit}"` });
       return nextAutoId(prefix);

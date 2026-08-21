@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { TOPIC_ID } from "../topic.ts";
 import { parse } from "./parse.ts";
 import sessionStorage from "./examples/session-storage.txt?raw";
 import buildAWall from "./examples/build-a-wall.txt?raw";
@@ -107,6 +108,16 @@ describe("parse", () => {
     const { doc } = parse("%description: Why we care\n%perspectives: [alice, bob]\n= A &a");
     expect(doc.description).toBe("Why we care");
     expect(doc.perspectives).toEqual(["alice", "bob"]);
+  });
+
+  it("refuses an id in the renderer's `_` namespace, keeping the line", () => {
+    const { doc, errors } = parse("%description: Topic\n= A &_topic");
+    expect(errors.map((e) => e.message)).toEqual([
+      'An id can\'t start with "_" — the diagram reserves that prefix',
+    ]);
+    // The header box keeps `_topic` to itself, so the claim is somewhere else entirely.
+    expect(doc.claims).toMatchObject([{ id: "c1", text: "A" }]);
+    expect(doc.sourceLines[TOPIC_ID]).toEqual([1]);
   });
 
   it("auto-ids claims and edges that have no `&id`", () => {

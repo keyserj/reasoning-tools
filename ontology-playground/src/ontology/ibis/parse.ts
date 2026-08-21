@@ -1,5 +1,6 @@
 import type { ParseError, SourceLines } from "../types.ts";
 import type { Note } from "../notes.ts";
+import { RESERVED_ID_MESSAGE, RESERVED_ID_PREFIX } from "../ids.ts";
 import type { IbisDoc, IbisEdge, IbisNode } from "./model.ts";
 import {
   ID_SUFFIX,
@@ -82,9 +83,13 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
     return id;
   };
 
-  /** An explicit `&id` if it's free, else a fresh one and a reported duplicate. */
+  /** An explicit `&id` if it's free, else a fresh one and a reported duplicate or reserved id. */
   const takeId = (explicitId: string | undefined, lineNo: number): string => {
     if (explicitId === undefined) return nextAutoId();
+    if (explicitId.startsWith(RESERVED_ID_PREFIX)) {
+      errors.push({ line: lineNo, message: RESERVED_ID_MESSAGE });
+      return nextAutoId();
+    }
     if (isIdTaken(explicitId)) {
       errors.push({ line: lineNo, message: `Duplicate id "&${explicitId}"` });
       return nextAutoId();

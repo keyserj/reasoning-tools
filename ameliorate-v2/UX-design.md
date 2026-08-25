@@ -113,6 +113,124 @@
 
 #### Idea 2: Minimap of diagram with all concept nodes rendered
 
+## Common calculations
+
+### "Reach" ?
+
+#### What
+
+"Distance" between two nodes? Calculated through some relation types. Seems better than "distance" because it implies impact - "distance" might just be "how many edges away". How does this relate to "chains"?
+
+E.g. "importance of Support node to Topic node" might chain the "supports" scores to the root claim, then "causes" scores to the Topic node.
+
+#### Purpose
+
+Calculate relations between nodes, e.g. A's importance to B, or A's indirect causation on B.
+
+#### Notes
+
+- when attenuating something by multiplying with reach (e.g importance of Support node to Topic node), if it's convenient, it seems reasonable to short-circuit the calculation when the attenuated value reaches some floor threshold, e.g. 0.1 for importance on a normalized 0-1 scale
+
+## UI Sections
+
+For adding details about specific sections that could use explanation / discussion.
+
+### Guiding Questions
+
+#### What
+
+#### Purpose
+
+### Hottest Details
+
+#### What
+
+Show the top 5 nodes/edges to look at, excluding topic node and guiding question nodes, with pills to filter by hotness reason.
+
+"top to look at" is calculated based on normalizing the following "hotness reasons" into a 0..1 range:
+- "Important to change": top 5 (absolute value) concepts
+- "Controversial": top 5 std-deviation causal concepts/edges
+- "Unknowns": top 5 unanswered clarifying questions
+- "Active": frequency x recency of comments and edits
+
+#### Purpose
+
+Highlight the most important things to see in the topic. Guiding Questions has its own separate section because at least one of those should always be forefront.
+
+#### Calculations
+
+Example:
+
+When:
+- A[-2,4] causes[7,8] B[-,2] causes[-3,5] C[5,8]
+- Q clarifies[5,7] B
+
+Calculate:
+- "Reach, to C":
+  - A causes[7.5] B causes[1] C, Q clarifies[6] B
+  - normalized: A causes[7.5 / 8 ~= 0.94] B causes[1 / 8 ~= 0.13] C, Q clarifies[6 / 8 = 0.75] B
+  - attenuated: A causes[0.94 * 0.13 ~= 0.12] C, Q clarifies[0.75 * 0.13 ~= 0.09] C
+- "Important to change": A[1], B[1], C[6.5]
+- "Important to change, relevant for C": A[1 * 0.12 ~= 0.12], B[1]
+- "Controversial": A[?] causes[?] B[?] causes[?] C[?]
+- "Controversial, relevant for C": A[?] causes[?] B[?] causes[?] C[?]
+- "Uncertainty": B[?]
+- "Uncertainty, relevant for C": B[?]
+- "Active": some frecency calculation, seems somewhat common and like it shouldn't be too hard to figure out
+
+#### Questions - unanswered
+
+#### Questions - kind of answered
+
+- how would an important argument surface in this "hottest details"?
+  - e.g. A supports B ("important to increase") impliedFor S addresses T
+    - hmm how does a Guiding Q fit into this chain?
+      - A supports B respondsTo Q guides T?
+      - seems like there are arguments about a question separately from arguments about scores?
+        - maybe: "A is important to increase" / "A causes B" should be independently viewable via causal diagram (clicking a score?), but should also show up in IBIS where relevant?
+          - IBIS should be more highlighted because it's centered around a guiding question
+          - in considering this though, it seems like "claim importance to topic causal node" and "claim importance to guiding question" could be two separate calculations, both relevant
+            - ugh, but does a guiding question always map back to the topic node?
+              - I guess for clarity, concept map should never point at IBIS - only IBIS should point at concepts
+    - interestingly, "`[Solution]` is important to increase" is very analogous to "We should `[Solution]`"
+      - unfortunately this seems to mean that an explicit argument can go in either spot
+  - arguments don't have a direct "importance"
+    - maybe it makes sense to use truth x relevance = impact (or "importance"?)
+      - how does "importance" get carried through `impliedFor`?
+        - node/"important to increase": 100% carry through? because semantics are actually that claim supports importance
+        - edge/"A causes B": potentially could relate to confidence somehow I guess, which maybe could be shown in calcs, but doesn't seem to make sense to affect importance?
+          - technically edge claims _can_ support a solution's "importance to increase"
+            - e.g. S reduces P, if a claim supports that `reduces`, it is calculated as supporting that `We should [S]`
+  - so... I guess arguments have importance to a root claim, and a root claim has importance to a question and/or topic
+    - I'm having a hard time thinking through how the "importance to question" and "importance to topic" will overlap, when there's importance to both
+      - seems like it can differ via `Q guides T` score vs `S [causal path] T` score
+        - maybe just calculate both and use the highest for calculating hotness
+- should "important to change" and "unknowns" be based on average scores or max scores?
+  - should there be a checkbox (similar to "attenuated" idea) for "averages" (maybe info bubble for contrasting with "maximums"...?)
+  - average seems a good default, maybe "averages" checkbox could be nice to toggle
+- should all these "hotness" calculations be attenuated based on reach to the topic node?
+  - maybe there should be a checkbox for "attenuated" ? (would need a more colloquial name, or info bubble)
+    - this seems good. then you could easily see what's most _absolutely_ hot yet know if it's relevant to discuss
+      - maybe want to discuss the things that aren't "as relevant" because it might actually be relevant and just the calcs aren't right
+- does it make sense for questions to have importance of "unknown-ness" propagate via causal relations of parent concept?
+  - if Q clarifies B causes C:
+    - it makes sense that B is uncertain based on Q
+    - but I don't _think_ it makes sense for B's uncertainty to propagate to C via causation, does it?
+      - if B is very uncertain, and is rated to cause C very low (1 or 2), that doesn't mean that C is only slightly uncertain
+      - in fact, does B's uncertainty have any relevance to C?
+        - I guess it's uncertainty specifically about B's change-importance
+          - in which case, it should be uncertainty about B's change-importance relevant for C
+            - I guess in theory it could be seen via a +/- range for "B's change-importance relevant for C"
+              - (or a confidence %)
+            - hmm in theory then, we could do something that combines the max importance and range of importance to determine if the unknown-ness is important
+              - I like this, not sure how the math would do it though
+- naming?: "hottest details" vs something like "items to discuss"
+  - something like "items to discuss" could be more clear about the section's motivation
+  - I was thinking about "items to discuss" mainly because I was wondering if this section should include nodes/edges that are explicitly marked as "I want to discuss this" by someone
+    - or if we add "suggested focuses" that people can propose, would those go here too?
+      - live discussion management should probably be separate from "hottest details"
+      - but potentially something marked as "I want to discuss this" could get some points in the "hotness" calculation...? not sure
+
 ## States
 
 ### What to show when topic selected (i.e. on entry, when no node / edge selected)
@@ -120,14 +238,14 @@
 - Agenda pane
   - note: each section here sorts items by score, and "show more/less" if there are any to show/hide
   - note: all scores here should be scaled by distance to the topic node (see question in subsection for how)
-	- heading: `Topic [topic node]`, `Guide me through the topic`
-	- section: `Basics` (`[topic description]`)
-	- section: `Guiding Questions`: top 5 guiding questions (top one is selected, and default is "what's important to consider in this topic?")
-		- if structure editing + < 5 items: "add guiding question"
-	- section: `Hottest Details`: top 5 of all nodes/edges excluding topic node (normalized scores, see question in subsection for how), with pills to filter
-		- "Important to change": top 5 (absolute value) concepts
-		- "Controversial": top 5 std-deviation causal concepts/edges
-		- "Unknowns": top 5 unanswered clarifying questions
+  - heading: `Topic [topic node]`, `Guide me through the topic`
+  - section: `Basics` (`[topic description]`)
+  - section: `Guiding Questions`: top 5 guiding questions (top one is selected, and default is "what's important to consider in this topic?")
+    - if structure editing + < 5 items: "add guiding question"
+  - section: `Hottest Details`: top 5 of all nodes/edges excluding topic node (normalized scores, see question in subsection for how), with pills to filter
+    - "Important to change": top 5 (absolute value) concepts
+    - "Controversial": top 5 std-deviation causal concepts/edges
+    - "Unknowns": top 5 unanswered clarifying questions
 - Structure pane
   - (top 1/4, switch between, collapsible) generated current-view summary, sunburst
   - show view based on selected guiding question (default: top 10 important nodes to the Topic)
@@ -263,7 +381,7 @@
 - hard because focusing filters many nodes in/out
 - animating node movement can help a little bit but doesn't help with building a mental model
 
-#### Questions - Unanswered
+#### Questions - unanswered
 
 - is there some non-diagram format that we could keep around as a visual aid that is easier to keep stable than a diagram?
   - like Kialo's sunburst view, but with our node types (something like this https://www.figma.com/design/XqLnSqZrFxifevzznGgsKH/Focused-nodes-design?node-id=161-2&p=f&t=FRsDMDZLspne9eh0-0)

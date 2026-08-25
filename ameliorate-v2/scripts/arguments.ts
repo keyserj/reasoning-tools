@@ -5,9 +5,9 @@
 // claim, because `wall causes wall-cost` plus `wall-cost`'s negative score says it. The decisions
 // behind which relations count, and why paths add, are recorded there.
 
-import { CAUSAL_TYPES, signedProduct, walk } from "./chains.ts";
+import { CAUSAL_TYPES, pathWeight, walk } from "./chains.ts";
 import type { Doc } from "./model.ts";
-import { UNSCORED_CONCEPT, UNSCORED_RELATION, averageOr, normalize } from "./scores.ts";
+import { UNSCORED_CONCEPT, averageOr, normalize } from "./scores.ts";
 
 export interface CalculatedArgument {
   /** the scored concept that makes this an argument */
@@ -30,9 +30,8 @@ const downstream = { types: CAUSAL_TYPES, direction: "forward" } as const;
  * Everything `subjectId` causally reaches, sorted into arguments for and against it. Only edge
  * weights compound along the way; the score that decides pro from con is the one at the far end.
  *
- * Bounded by `walk`'s depth cap, so an argument more than six relations away is not reported -
- * accepted because a chain that long has attenuated to near nothing, and lifting it means
- * enumerating paths that grow exponentially.
+ * Bounded by `walk`'s strength floor rather than by a chain length, so distance costs an argument
+ * nothing beyond the attenuation the scores already impose.
  */
 export function calculatedArguments(doc: Doc, subjectId: string): CalculatedArguments {
   const byId = new Map(doc.nodes.map((node) => [node.id, node]));
@@ -41,7 +40,7 @@ export function calculatedArguments(doc: Doc, subjectId: string): CalculatedArgu
   for (const path of walk(doc, subjectId, downstream)) {
     const target = byId.get(path.toId);
     if (target?.type !== "concept") continue;
-    effects.set(path.toId, (effects.get(path.toId) ?? 0) + signedProduct(path, UNSCORED_RELATION));
+    effects.set(path.toId, (effects.get(path.toId) ?? 0) + pathWeight(path));
   }
 
   const pros: CalculatedArgument[] = [];

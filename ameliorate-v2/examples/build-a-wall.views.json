@@ -836,21 +836,6 @@
       },
       {
         "kind": "node",
-        "id": "inexpensive",
-        "signals": {
-          "change-importance": 0.7083333333333334,
-          "controversy": 0.3280836614171588,
-          "unknown": 0
-        },
-        "reach": 0.7083333333333334,
-        "hot": 0.5017361111111112,
-        "categories": [
-          "change-importance",
-          "controversy"
-        ]
-      },
-      {
-        "kind": "node",
         "id": "how-tall",
         "signals": {
           "change-importance": 0,
@@ -865,36 +850,6 @@
       },
       {
         "kind": "node",
-        "id": "danger",
-        "signals": {
-          "change-importance": 0.9166666666666666,
-          "controversy": 0.11785113019775792,
-          "unknown": 0
-        },
-        "reach": 0.5,
-        "hot": 0.4583333333333333,
-        "categories": [
-          "change-importance",
-          "controversy"
-        ]
-      },
-      {
-        "kind": "node",
-        "id": "wall-cost",
-        "signals": {
-          "change-importance": 0.375,
-          "controversy": 0.125,
-          "unknown": 0
-        },
-        "reach": 1,
-        "hot": 0.375,
-        "categories": [
-          "change-importance",
-          "controversy"
-        ]
-      },
-      {
-        "kind": "node",
         "id": "illegal-immig",
         "signals": {
           "change-importance": 0.5,
@@ -902,7 +857,7 @@
           "unknown": 0
         },
         "reach": 0.6666666666666666,
-        "hot": 0.3333333333333333,
+        "hot": 0.4694160968212877,
         "categories": [
           "change-importance",
           "controversy"
@@ -910,17 +865,30 @@
       },
       {
         "kind": "node",
-        "id": "long-wait",
+        "id": "danger",
         "signals": {
-          "change-importance": 0.6666666666666666,
-          "controversy": 0.21245914639969937,
+          "change-importance": 0.9166666666666666,
+          "controversy": 0,
           "unknown": 0
         },
-        "reach": 0.3333333333333333,
-        "hot": 0.2222222222222222,
+        "reach": 0.5,
+        "hot": 0.4583333333333333,
         "categories": [
-          "change-importance",
-          "controversy"
+          "change-importance"
+        ]
+      },
+      {
+        "kind": "node",
+        "id": "wall-cost",
+        "signals": {
+          "change-importance": 0.375,
+          "controversy": 0,
+          "unknown": 0
+        },
+        "reach": 1,
+        "hot": 0.375,
+        "categories": [
+          "change-importance"
         ]
       },
       {
@@ -932,51 +900,7 @@
           "unknown": 0
         },
         "reach": 0.3055555555555555,
-        "hot": 0.21643518518518517,
-        "categories": [
-          "change-importance",
-          "controversy"
-        ]
-      },
-      {
-        "kind": "node",
-        "id": "admin-burden",
-        "signals": {
-          "change-importance": 0.6875,
-          "controversy": 0.0625,
-          "unknown": 0
-        },
-        "reach": 0.3125,
-        "hot": 0.21484375,
-        "categories": [
-          "change-importance",
-          "controversy"
-        ]
-      },
-      {
-        "kind": "edge",
-        "id": "legal-immig--causes--illegal-immig",
-        "signals": {
-          "change-importance": 0,
-          "controversy": 0.31180478223116176,
-          "unknown": 0
-        },
-        "reach": 0.6666666666666666,
-        "hot": 0.2078698548207745,
-        "categories": [
-          "controversy"
-        ]
-      },
-      {
-        "kind": "node",
-        "id": "save-money",
-        "signals": {
-          "change-importance": 0.4375,
-          "controversy": 0.1875,
-          "unknown": 0
-        },
-        "reach": 0.4583333333333333,
-        "hot": 0.20052083333333331,
+        "hot": 0.24567412260314953,
         "categories": [
           "change-importance",
           "controversy"
@@ -991,10 +915,81 @@
           "unknown": 0
         },
         "reach": 0.3125,
-        "hot": 0.1953125,
+        "hot": 0.23119369740405044,
         "categories": [
           "change-importance",
           "controversy"
+        ]
+      },
+      {
+        "kind": "node",
+        "id": "long-wait",
+        "signals": {
+          "change-importance": 0.6666666666666666,
+          "controversy": 0,
+          "unknown": 0
+        },
+        "reach": 0.3333333333333333,
+        "hot": 0.2222222222222222,
+        "categories": [
+          "change-importance"
+        ]
+      },
+      {
+        "kind": "node",
+        "id": "admin-burden",
+        "signals": {
+          "change-importance": 0.6875,
+          "controversy": 0,
+          "unknown": 0
+        },
+        "reach": 0.3125,
+        "hot": 0.21484375,
+        "categories": [
+          "change-importance"
+        ]
+      },
+      {
+        "kind": "node",
+        "id": "fewer-requirements",
+        "signals": {
+          "change-importance": 0.5833333333333334,
+          "controversy": 0.568257570707744,
+          "unknown": 0
+        },
+        "reach": 0.25390625,
+        "hot": 0.2082303745052138,
+        "categories": [
+          "change-importance",
+          "controversy"
+        ]
+      },
+      {
+        "kind": "edge",
+        "id": "legal-immig--causes--illegal-immig",
+        "signals": {
+          "change-importance": 0,
+          "controversy": 0.31180478223116176,
+          "unknown": 0
+        },
+        "reach": 0.6666666666666666,
+        "hot": 0.20786985482077452,
+        "categories": [
+          "controversy"
+        ]
+      },
+      {
+        "kind": "node",
+        "id": "save-money",
+        "signals": {
+          "change-importance": 0.4375,
+          "controversy": 0,
+          "unknown": 0
+        },
+        "reach": 0.4583333333333333,
+        "hot": 0.20052083333333331,
+        "categories": [
+          "change-importance"
         ]
       },
       {
@@ -1006,7 +1001,7 @@
           "unknown": 0
         },
         "reach": 0.6666666666666666,
-        "hot": 0.1800205749557739,
+        "hot": 0.18002057495577395,
         "categories": [
           "controversy"
         ]
@@ -1041,21 +1036,6 @@
       },
       {
         "kind": "node",
-        "id": "fewer-requirements",
-        "signals": {
-          "change-importance": 0.5833333333333334,
-          "controversy": 0.568257570707744,
-          "unknown": 0
-        },
-        "reach": 0.25390625,
-        "hot": 0.14811197916666669,
-        "categories": [
-          "change-importance",
-          "controversy"
-        ]
-      },
-      {
-        "kind": "node",
         "id": "disappear",
         "signals": {
           "change-importance": 0.375,
@@ -1067,108 +1047,22 @@
         "categories": [
           "change-importance"
         ]
-      },
-      {
-        "kind": "edge",
-        "id": "save-money--causes--illegal-immig",
-        "signals": {
-          "change-importance": 0,
-          "controversy": 0.1875,
-          "unknown": 0
-        },
-        "reach": 0.6666666666666666,
-        "hot": 0.125,
-        "categories": [
-          "controversy"
-        ]
-      },
-      {
-        "kind": "edge",
-        "id": "long-wait--causes--legal-immig",
-        "signals": {
-          "change-importance": 0,
-          "controversy": 0.125,
-          "unknown": 0
-        },
-        "reach": 0.3333333333333333,
-        "hot": 0.041666666666666664,
-        "categories": [
-          "controversy"
-        ]
-      },
-      {
-        "kind": "edge",
-        "id": "admin-burden--causes--long-wait",
-        "signals": {
-          "change-importance": 0,
-          "controversy": 0.0625,
-          "unknown": 0
-        },
-        "reach": 0.3333333333333333,
-        "hot": 0.020833333333333332,
-        "categories": [
-          "controversy"
-        ]
-      },
-      {
-        "kind": "edge",
-        "id": "more-admin--causes--long-wait",
-        "signals": {
-          "change-importance": 0,
-          "controversy": 0.0625,
-          "unknown": 0
-        },
-        "reach": 0.3333333333333333,
-        "hot": 0.020833333333333332,
-        "categories": [
-          "controversy"
-        ]
-      },
-      {
-        "kind": "edge",
-        "id": "fewer-requirements--causes--admin-burden",
-        "signals": {
-          "change-importance": 0,
-          "controversy": 0.0625,
-          "unknown": 0
-        },
-        "reach": 0.3125,
-        "hot": 0.01953125,
-        "categories": [
-          "controversy"
-        ]
       }
     ],
     "byCategory": {
       "change-importance": [
         {
           "kind": "node",
-          "id": "inexpensive",
-          "signals": {
-            "change-importance": 0.7083333333333334,
-            "controversy": 0.3280836614171588,
-            "unknown": 0
-          },
-          "reach": 0.7083333333333334,
-          "hot": 0.5017361111111112,
-          "categories": [
-            "change-importance",
-            "controversy"
-          ]
-        },
-        {
-          "kind": "node",
           "id": "danger",
           "signals": {
             "change-importance": 0.9166666666666666,
-            "controversy": 0.11785113019775792,
+            "controversy": 0,
             "unknown": 0
           },
           "reach": 0.5,
           "hot": 0.4583333333333333,
           "categories": [
-            "change-importance",
-            "controversy"
+            "change-importance"
           ]
         },
         {
@@ -1176,14 +1070,13 @@
           "id": "wall-cost",
           "signals": {
             "change-importance": 0.375,
-            "controversy": 0.125,
+            "controversy": 0,
             "unknown": 0
           },
           "reach": 1,
           "hot": 0.375,
           "categories": [
-            "change-importance",
-            "controversy"
+            "change-importance"
           ]
         },
         {
@@ -1195,7 +1088,7 @@
             "unknown": 0
           },
           "reach": 0.6666666666666666,
-          "hot": 0.3333333333333333,
+          "hot": 0.4694160968212877,
           "categories": [
             "change-importance",
             "controversy"
@@ -1206,14 +1099,13 @@
           "id": "long-wait",
           "signals": {
             "change-importance": 0.6666666666666666,
-            "controversy": 0.21245914639969937,
+            "controversy": 0,
             "unknown": 0
           },
           "reach": 0.3333333333333333,
           "hot": 0.2222222222222222,
           "categories": [
-            "change-importance",
-            "controversy"
+            "change-importance"
           ]
         },
         {
@@ -1225,7 +1117,7 @@
             "unknown": 0
           },
           "reach": 0.3055555555555555,
-          "hot": 0.21643518518518517,
+          "hot": 0.24567412260314953,
           "categories": [
             "change-importance",
             "controversy"
@@ -1236,14 +1128,13 @@
           "id": "admin-burden",
           "signals": {
             "change-importance": 0.6875,
-            "controversy": 0.0625,
+            "controversy": 0,
             "unknown": 0
           },
           "reach": 0.3125,
           "hot": 0.21484375,
           "categories": [
-            "change-importance",
-            "controversy"
+            "change-importance"
           ]
         },
         {
@@ -1251,14 +1142,13 @@
           "id": "save-money",
           "signals": {
             "change-importance": 0.4375,
-            "controversy": 0.1875,
+            "controversy": 0,
             "unknown": 0
           },
           "reach": 0.4583333333333333,
           "hot": 0.20052083333333331,
           "categories": [
-            "change-importance",
-            "controversy"
+            "change-importance"
           ]
         },
         {
@@ -1270,7 +1160,7 @@
             "unknown": 0
           },
           "reach": 0.3125,
-          "hot": 0.1953125,
+          "hot": 0.23119369740405044,
           "categories": [
             "change-importance",
             "controversy"
@@ -1285,7 +1175,7 @@
             "unknown": 0
           },
           "reach": 0.25390625,
-          "hot": 0.14811197916666669,
+          "hot": 0.2082303745052138,
           "categories": [
             "change-importance",
             "controversy"
@@ -1330,22 +1220,7 @@
             "unknown": 0
           },
           "reach": 0.6666666666666666,
-          "hot": 0.3333333333333333,
-          "categories": [
-            "change-importance",
-            "controversy"
-          ]
-        },
-        {
-          "kind": "node",
-          "id": "inexpensive",
-          "signals": {
-            "change-importance": 0.7083333333333334,
-            "controversy": 0.3280836614171588,
-            "unknown": 0
-          },
-          "reach": 0.7083333333333334,
-          "hot": 0.5017361111111112,
+          "hot": 0.4694160968212877,
           "categories": [
             "change-importance",
             "controversy"
@@ -1360,7 +1235,7 @@
             "unknown": 0
           },
           "reach": 0.6666666666666666,
-          "hot": 0.2078698548207745,
+          "hot": 0.20786985482077452,
           "categories": [
             "controversy"
           ]
@@ -1374,7 +1249,7 @@
             "unknown": 0
           },
           "reach": 0.6666666666666666,
-          "hot": 0.1800205749557739,
+          "hot": 0.18002057495577395,
           "categories": [
             "controversy"
           ]
@@ -1416,38 +1291,9 @@
             "unknown": 0
           },
           "reach": 0.25390625,
-          "hot": 0.14811197916666669,
+          "hot": 0.2082303745052138,
           "categories": [
             "change-importance",
-            "controversy"
-          ]
-        },
-        {
-          "kind": "node",
-          "id": "wall-cost",
-          "signals": {
-            "change-importance": 0.375,
-            "controversy": 0.125,
-            "unknown": 0
-          },
-          "reach": 1,
-          "hot": 0.375,
-          "categories": [
-            "change-importance",
-            "controversy"
-          ]
-        },
-        {
-          "kind": "edge",
-          "id": "save-money--causes--illegal-immig",
-          "signals": {
-            "change-importance": 0,
-            "controversy": 0.1875,
-            "unknown": 0
-          },
-          "reach": 0.6666666666666666,
-          "hot": 0.125,
-          "categories": [
             "controversy"
           ]
         },
@@ -1460,7 +1306,7 @@
             "unknown": 0
           },
           "reach": 0.3055555555555555,
-          "hot": 0.21643518518518517,
+          "hot": 0.24567412260314953,
           "categories": [
             "change-importance",
             "controversy"
@@ -1475,125 +1321,9 @@
             "unknown": 0
           },
           "reach": 0.3125,
-          "hot": 0.1953125,
+          "hot": 0.23119369740405044,
           "categories": [
             "change-importance",
-            "controversy"
-          ]
-        },
-        {
-          "kind": "node",
-          "id": "save-money",
-          "signals": {
-            "change-importance": 0.4375,
-            "controversy": 0.1875,
-            "unknown": 0
-          },
-          "reach": 0.4583333333333333,
-          "hot": 0.20052083333333331,
-          "categories": [
-            "change-importance",
-            "controversy"
-          ]
-        },
-        {
-          "kind": "node",
-          "id": "long-wait",
-          "signals": {
-            "change-importance": 0.6666666666666666,
-            "controversy": 0.21245914639969937,
-            "unknown": 0
-          },
-          "reach": 0.3333333333333333,
-          "hot": 0.2222222222222222,
-          "categories": [
-            "change-importance",
-            "controversy"
-          ]
-        },
-        {
-          "kind": "node",
-          "id": "danger",
-          "signals": {
-            "change-importance": 0.9166666666666666,
-            "controversy": 0.11785113019775792,
-            "unknown": 0
-          },
-          "reach": 0.5,
-          "hot": 0.4583333333333333,
-          "categories": [
-            "change-importance",
-            "controversy"
-          ]
-        },
-        {
-          "kind": "edge",
-          "id": "long-wait--causes--legal-immig",
-          "signals": {
-            "change-importance": 0,
-            "controversy": 0.125,
-            "unknown": 0
-          },
-          "reach": 0.3333333333333333,
-          "hot": 0.041666666666666664,
-          "categories": [
-            "controversy"
-          ]
-        },
-        {
-          "kind": "edge",
-          "id": "admin-burden--causes--long-wait",
-          "signals": {
-            "change-importance": 0,
-            "controversy": 0.0625,
-            "unknown": 0
-          },
-          "reach": 0.3333333333333333,
-          "hot": 0.020833333333333332,
-          "categories": [
-            "controversy"
-          ]
-        },
-        {
-          "kind": "edge",
-          "id": "more-admin--causes--long-wait",
-          "signals": {
-            "change-importance": 0,
-            "controversy": 0.0625,
-            "unknown": 0
-          },
-          "reach": 0.3333333333333333,
-          "hot": 0.020833333333333332,
-          "categories": [
-            "controversy"
-          ]
-        },
-        {
-          "kind": "node",
-          "id": "admin-burden",
-          "signals": {
-            "change-importance": 0.6875,
-            "controversy": 0.0625,
-            "unknown": 0
-          },
-          "reach": 0.3125,
-          "hot": 0.21484375,
-          "categories": [
-            "change-importance",
-            "controversy"
-          ]
-        },
-        {
-          "kind": "edge",
-          "id": "fewer-requirements--causes--admin-burden",
-          "signals": {
-            "change-importance": 0,
-            "controversy": 0.0625,
-            "unknown": 0
-          },
-          "reach": 0.3125,
-          "hot": 0.01953125,
-          "categories": [
             "controversy"
           ]
         }
@@ -1619,15 +1349,15 @@
   "diagram": {
     "nodeIds": [
       "wall",
+      "illegal-immig",
       "danger",
       "wall-cost",
-      "illegal-immig",
-      "long-wait",
       "legal-immig",
-      "admin-burden",
-      "save-money",
       "more-admin",
-      "fewer-requirements"
+      "long-wait",
+      "admin-burden",
+      "fewer-requirements",
+      "save-money"
     ],
     "edges": [
       {
@@ -1810,22 +1540,6 @@
       ],
       "claims": []
     },
-    "danger": {
-      "pros": [],
-      "cons": [
-        {
-          "aboutId": "illegal-immig",
-          "effect": "increases",
-          "strength": 0.375
-        }
-      ],
-      "claims": []
-    },
-    "wall-cost": {
-      "pros": [],
-      "cons": [],
-      "claims": []
-    },
     "illegal-immig": {
       "pros": [],
       "cons": [],
@@ -1862,20 +1576,20 @@
         }
       ]
     },
-    "long-wait": {
+    "danger": {
       "pros": [],
       "cons": [
         {
-          "aboutId": "legal-immig",
-          "effect": "decreases",
-          "strength": 0.6197916666666667
-        },
-        {
           "aboutId": "illegal-immig",
           "effect": "increases",
-          "strength": 0.4505208333333333
+          "strength": 0.375
         }
       ],
+      "claims": []
+    },
+    "wall-cost": {
+      "pros": [],
+      "cons": [],
       "claims": []
     },
     "legal-immig": {
@@ -1887,38 +1601,6 @@
         }
       ],
       "cons": [],
-      "claims": []
-    },
-    "admin-burden": {
-      "pros": [],
-      "cons": [
-        {
-          "aboutId": "long-wait",
-          "effect": "increases",
-          "strength": 0.625
-        },
-        {
-          "aboutId": "legal-immig",
-          "effect": "decreases",
-          "strength": 0.5810546875
-        },
-        {
-          "aboutId": "illegal-immig",
-          "effect": "increases",
-          "strength": 0.42236328125
-        }
-      ],
-      "claims": []
-    },
-    "save-money": {
-      "pros": [],
-      "cons": [
-        {
-          "aboutId": "illegal-immig",
-          "effect": "increases",
-          "strength": 0.34375
-        }
-      ],
       "claims": []
     },
     "more-admin": {
@@ -1940,6 +1622,43 @@
         }
       ],
       "cons": [],
+      "claims": []
+    },
+    "long-wait": {
+      "pros": [],
+      "cons": [
+        {
+          "aboutId": "legal-immig",
+          "effect": "decreases",
+          "strength": 0.6197916666666667
+        },
+        {
+          "aboutId": "illegal-immig",
+          "effect": "increases",
+          "strength": 0.4505208333333333
+        }
+      ],
+      "claims": []
+    },
+    "admin-burden": {
+      "pros": [],
+      "cons": [
+        {
+          "aboutId": "long-wait",
+          "effect": "increases",
+          "strength": 0.625
+        },
+        {
+          "aboutId": "legal-immig",
+          "effect": "decreases",
+          "strength": 0.5810546875
+        },
+        {
+          "aboutId": "illegal-immig",
+          "effect": "increases",
+          "strength": 0.42236328125
+        }
+      ],
       "claims": []
     },
     "fewer-requirements": {
@@ -1966,6 +1685,17 @@
         }
       ],
       "cons": [],
+      "claims": []
+    },
+    "save-money": {
+      "pros": [],
+      "cons": [
+        {
+          "aboutId": "illegal-immig",
+          "effect": "increases",
+          "strength": 0.34375
+        }
+      ],
       "claims": []
     },
     "wait-causes-illegal-immig": {

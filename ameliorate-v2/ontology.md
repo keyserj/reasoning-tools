@@ -919,7 +919,11 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 ### Do all topics have a topic node? Can there be multiple topic nodes?
 
-- current leaning: ?
+- current leaning: at most one topic node, and it has to be a concept
+	- not because more couldn't be useful, but because every distance and every score is read relative to _the_ topic, so a second one would leave both silently depending on which was written first
+	- a concept because distance is measured across the causal web, which is where concepts live
+	- `scripts/validate.ts` rejects a second one and a non-concept one; a document with none still parses (a fragment is a document), and `scripts/generate.ts` refuses to build views from it
+	- the "core" nodes idea below is what would relax this, and would need a rule for which core a distance is measured from
 - context: some structure relies on topic node(s) existing
 	- guiding questions guide the topic node (or other guiding questions)
 	- node scores are assumed to be relative to the topic

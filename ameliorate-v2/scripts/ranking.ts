@@ -7,11 +7,12 @@
 // thing being "hot" or "controversial". What it does supply is every input - change importance,
 // the spread between perspectives, and the causal distance a score is discounted by.
 
-import { CAUSAL_TYPES, topicReach } from "./chains.ts";
-import type { Doc, Edge, Node } from "./model.ts";
+import { CAUSAL_TYPES, partReach, topicReach } from "./chains.ts";
+import type { Doc, Edge } from "./model.ts";
 import { findTopic } from "./model.ts";
 import {
   MAX_SCORE,
+  type Scores,
   UNSCORED_CONCEPT,
   UNSCORED_RELATION,
   averageMagnitude,
@@ -29,11 +30,11 @@ export interface Ranked {
   id: string;
   /** each 0..1, before distance is applied */
   signals: Record<Signal, number>;
-  /** 0..1: how much of the signal survives the causal distance to the topic */
+  /** 0..1: how much of a signal survives the distance to the topic */
   reach: number;
-  /** 0..1: the strongest reason to look at this, discounted by how far away it is */
+  /** 0..1: the reason to look at this, discounted by how far away it is */
   hot: number;
-  /** every signal this scores above zero on, strongest first */
+  /** every signal this scores on, strongest first */
   categories: Signal[];
 }
 
@@ -42,6 +43,31 @@ const NO_SIGNALS: Record<Signal, number> = {
   controversy: 0,
   unknown: 0,
 };
+
+/**
+ * Below this the perspectives agree, and calling that "controversial" spends the word on nothing:
+ * `[-8,-8,-6]` is a consensus. Written on the score's own 0..8 scale, so it reads as "at least a
+ * couple of points apart". The other two signals need no floor - a small change importance is a
+ * small amount of something, where a small deviation is the *absence* of controversy.
+ */
+const CONTROVERSY_FLOOR = 2 / MAX_SCORE;
+
+function controversyOf(scores: Scores | null): number {
+  const spread = deviation(scores) / MAX_SCORE;
+  return spread < CONTROVERSY_FLOOR ? 0 : spread;
+}
+
+/**
+ * One number out of several reasons to look at something, each of which would do on its own.
+ *
+ * A thing with a single signal keeps that signal's score, which matters because an edge only ever
+ * has controversy and must still be able to top the list. Two middling reasons together beat one
+ * strong-ish reason, which is the part `Math.max` couldn't say - and the case `UX-design.md`
+ * cares about, since a contested *and* important concept is exactly what a reader should see.
+ */
+function combine(signals: Record<Signal, number>): number {
+  return 1 - Object.values(signals).reduce((rest, signal) => rest * (1 - signal), 1);
+}
 
 /**
  * Rank everything a reader might be pointed at. The topic itself is left out: it's the thing
@@ -64,29 +90,21 @@ export function rank(doc: Doc): Ranked[] {
     if (existing) existing.push(edge);
     else clarifiesBy.set(edge.sourceId, [edge]);
   }
-  const byId = new Map(doc.nodes.map((node) => [node.id, node]));
   const ranked: Ranked[] = [];
 
   const add = (
     kind: "node" | "edge",
     id: string,
     signals: Partial<Record<Signal, number>>,
-    nodeReach: number,
+    reach: number,
   ): void => {
     const full = { ...NO_SIGNALS, ...signals };
-    const strongest = Math.max(...Object.values(full));
-    if (strongest === 0 || nodeReach === 0) return;
+    const hot = combine(full) * reach;
+    if (hot === 0) return;
     const categories = (Object.keys(full) as Signal[])
       .filter((signal) => full[signal] > 0)
       .sort((a, b) => full[b] - full[a]);
-    ranked.push({
-      kind,
-      id,
-      signals: full,
-      reach: nodeReach,
-      hot: strongest * nodeReach,
-      categories,
-    });
+    ranked.push({ kind, id, signals: full, reach, hot, categories });
   };
 
   for (const node of doc.nodes) {
@@ -97,7 +115,7 @@ export function rank(doc: Doc): Ranked[] {
         node.id,
         {
           "change-importance": averageMagnitude(node.scores, UNSCORED_CONCEPT) / MAX_SCORE,
-          controversy: deviation(node.scores) / MAX_SCORE,
+          controversy: controversyOf(node.scores),
         },
         reachOf(node.id),
       );
@@ -106,14 +124,20 @@ export function rank(doc: Doc): Ranked[] {
       // a guiding question sets the agenda rather than marking a gap, and a clarifying question
       // that has been answered is no longer an unknown
       if (!clarifies || answered.has(node.id)) continue;
-      // a question hanging over several things is as pressing as the most pressing of them
-      const unknown = Math.max(
-        ...clarifies.map((edge) => averageMagnitude(edge.scores, UNSCORED_RELATION) / MAX_SCORE),
-      );
-      const questionReach = Math.max(
-        ...clarifies.map((edge) => reachOfClarified(doc, edge.targetId, byId, reachOf)),
-      );
-      add("node", node.id, { unknown }, questionReach);
+      // A question hanging over several things takes the most pressing of them - weight and
+      // distance as one pair, since a strong doubt about something remote and a faint doubt about
+      // the topic are different findings and the best of each would describe neither.
+      let unknown = 0;
+      let reach = 0;
+      for (const edge of clarifies) {
+        const weight = averageMagnitude(edge.scores, UNSCORED_RELATION) / MAX_SCORE;
+        const at = reachOf(edge.targetId);
+        if (weight * at > unknown * reach) {
+          unknown = weight;
+          reach = at;
+        }
+      }
+      add("node", node.id, { unknown }, reach);
     }
   }
 
@@ -122,28 +146,10 @@ export function rank(doc: Doc): Ranked[] {
     add(
       "edge",
       edge.id,
-      { controversy: deviation(edge.scores) / MAX_SCORE },
-      Math.max(reachOf(edge.sourceId), reachOf(edge.targetId)),
+      { controversy: controversyOf(edge.scores) },
+      partReach(doc, edge.id, reaches),
     );
   }
 
   return ranked.sort((a, b) => b.hot - a.hot || a.id.localeCompare(b.id));
-}
-
-/**
- * A question is as close to the topic as whatever it clarifies. That may be an implied claim,
- * which sits beside the causal web rather than in it, so the question inherits the reach of the
- * thing whose score is being argued about.
- */
-function reachOfClarified(
-  doc: Doc,
-  targetId: string,
-  byId: Map<string, Node>,
-  reachOf: (id: string) => number,
-): number {
-  const target = byId.get(targetId);
-  const referentId = target?.impliedForId ?? targetId;
-  const edge = doc.edges.find((e) => e.id === referentId);
-  if (edge) return Math.max(reachOf(edge.sourceId), reachOf(edge.targetId));
-  return reachOf(referentId);
 }

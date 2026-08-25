@@ -45,6 +45,19 @@ describe("rank", () => {
     expect(find("illegal-immig")?.categories).toEqual(["change-importance", "controversy"]);
   });
 
+  it("counts two reasons for more than either alone, without letting one reason lose out", () => {
+    // illegal-immig is 0.5 important and 0.408 contested, so it outranks danger's 0.917 x 0.5
+    expect(find("illegal-immig")!.hot).toBeGreaterThan(find("danger")!.hot);
+    // wall-reduces has only controversy, and still keeps every bit of it
+    expect(ranked[0].hot).toBeCloseTo(ranked[0].signals.controversy, 10);
+  });
+
+  it("calls a thing everyone agrees about uncontroversial rather than faintly controversial", () => {
+    // danger is [-8,-8,-6]: a consensus that reads as a deviation of 0.94
+    expect(find("danger")?.categories).toEqual(["change-importance"]);
+    expect(find("danger")?.signals.controversy).toBe(0);
+  });
+
   it("discounts a concept by every relation between it and the topic", () => {
     // danger causes[7,8,3] illegal-immig, which the topic reduces[3,-5,8]
     expect(find("danger")?.hot).toBeCloseTo(0.458, 3);
@@ -52,11 +65,28 @@ describe("rank", () => {
     expect(find("wait-causes-illegal-immig")?.hot).toBeCloseTo(0.167, 3);
   });
 
-  it("reaches a criterion through what fulfils it, without routing through the criterion", () => {
-    // wall causes[8,8,8] wall-cost fulfils[-7,-8,-2] inexpensive
-    expect(find("inexpensive")?.hot).toBeCloseTo(0.502, 3);
-    // more-admin also fulfils inexpensive, but that must not make it adjacent to the topic
-    expect(find("more-admin")!.hot).toBeLessThan(find("wall-cost")!.hot);
+  it("leaves out a criterion, which the tradeoffs table weighs instead", () => {
+    // `humane` is the best-scored criterion in the topic and still isn't a causal finding
+    expect(find("inexpensive")).toBeUndefined();
+    expect(find("humane")).toBeUndefined();
+  });
+
+  it("keeps a question's doubt and its distance as one pair", () => {
+    // a faint doubt about the topic and a strong doubt about something remote are each 0.125;
+    // taking the best weight and the best distance separately would report 1
+    const { doc } = parse(
+      [
+        "* Topic &t #topic",
+        "  > causes[1]",
+        "    * Remote &r",
+        "  < clarifies[1]",
+        "    ? Q &q",
+        "* $r",
+        "  < clarifies[8]",
+        "    ? $q",
+      ].join("\n"),
+    );
+    expect(rank(doc).find((item) => item.id === "q")?.hot).toBeCloseTo(0.125, 10);
   });
 
   it("ranks hottest first", () => {

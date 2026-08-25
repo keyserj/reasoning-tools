@@ -6,6 +6,7 @@
 
 import type { ParseError } from "./diagnostics.ts";
 import type { Doc, Node, NodeType } from "./model.ts";
+import { TOPIC_TAG } from "./model.ts";
 import { OPPOSITE_KEY, edgeTypeDef, isBipolar } from "./markers.ts";
 import type { Scores } from "./scores.ts";
 
@@ -55,6 +56,25 @@ export function validate(doc: Doc, declaredAt: DeclaredAt): ValidateResult {
         });
       }
     }
+  }
+
+  // Every distance is measured from the topic and every score is read relative to it, so a second
+  // one would leave both silently depending on which was written first. `ontology.md`'s open
+  // question about multiple topic nodes is what would relax this. Having none is legal here - a
+  // fragment is still a document - and is ./generate.ts's problem, since no view can be built.
+  const topics = doc.nodes.filter((node) => node.tags.includes(TOPIC_TAG));
+  for (const extra of topics.slice(1)) {
+    errors.push({
+      line: at(extra.id),
+      message: `Line ${at(topics[0].id)} already tags a #${TOPIC_TAG} - a document has at most one`,
+    });
+  }
+  for (const topic of topics) {
+    if (topic.type === "concept") continue;
+    errors.push({
+      line: at(topic.id),
+      message: `"#${TOPIC_TAG}" tags a concept, not a ${topic.type} - the causal web is what distance is measured across`,
+    });
   }
 
   /** what a relation ran between, so two spellings of one relation read as one assertion */

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { average, deviation, magnitude, normalize, presentScores } from "./scores.ts";
+import { average, averageMagnitude, deviation, normalize, presentScores } from "./scores.ts";
 
 describe("reading a score row", () => {
   it("ignores the slots nobody filled", () => {
@@ -21,8 +21,12 @@ describe("reading a score row", () => {
     expect(deviation([7, null, null])).toBe(0);
   });
 
-  it("keeps the sign for a chain weight and drops it for a magnitude", () => {
+  it("keeps the sign for a chain weight", () => {
     expect(normalize(-8)).toBe(-1);
-    expect(magnitude(-8)).toBe(1);
+  });
+
+  it("keeps a split row's weight instead of letting the two sides cancel", () => {
+    expect(average([8, -8])).toBe(0);
+    expect(averageMagnitude([8, -8], 0)).toBe(8);
   });
 });

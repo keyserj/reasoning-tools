@@ -17,12 +17,13 @@ describe("highlights", () => {
     expect(top).toHaveLength(5);
   });
 
-  it("shows the criteria the wireframe's hand-built list had no way to reach", () => {
-    // `inexpensive` enters at #2 through `wall causes wall-cost fulfils inexpensive`
+  it("picks the same five the wireframe was hand-built with", () => {
+    // and orders them differently: illegal-immig is both contested and important to change, which
+    // the wireframe's hand-placed numbers had no way to add together
     expect(top.map((item) => item.id)).toEqual([
       "wall-reduces",
-      "inexpensive",
       "how-tall",
+      "illegal-immig",
       "danger",
       "wall-cost",
     ]);

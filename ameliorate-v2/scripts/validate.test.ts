@@ -111,6 +111,25 @@ describe("validate: unscoreable edges", () => {
   });
 });
 
+describe("validate: the topic", () => {
+  it("accepts one, and doesn't insist on one", () => {
+    expect(messages("* A &a #topic")).toEqual([]);
+    expect(messages("* A &a")).toEqual([]);
+  });
+
+  it("rejects a second, which would leave every distance depending on write order", () => {
+    expect(messages("* A &a #topic\n* B &b #topic")).toEqual([
+      "Line 1 already tags a #topic - a document has at most one",
+    ]);
+  });
+
+  it("rejects one that isn't a concept, since distance is measured across the causal web", () => {
+    expect(messages("? A question &q #topic")).toEqual([
+      '"#topic" tags a concept, not a question - the causal web is what distance is measured across',
+    ]);
+  });
+});
+
 describe("scoresOf", () => {
   it("reads an implied claim's score off the thing it stands behind", () => {
     const { doc } = parse("*[-4,0,-8] Immigration &i\n= $i\n  < supports[5]\n    = They flee &f");

@@ -5,10 +5,9 @@
 // multiplies through it, and because a question may guide a concept rather than the topic node,
 // the chain carries on through the causal web to reach the topic.
 
-import { type WalkOptions, magnitudeProduct, topicReach, walk } from "./chains.ts";
+import { type WalkOptions, pathStrength, topicReach, walk } from "./chains.ts";
 import type { Doc } from "./model.ts";
 import { findTopic } from "./model.ts";
-import { UNSCORED_RELATION } from "./scores.ts";
 
 export interface GuidingQuestion {
   id: string;
@@ -53,7 +52,7 @@ export function guidingQuestions(doc: Doc): GuidingQuestion[] {
     // the edge the winning chain set off along, so the number and the view it opens agree
     let guidesId = guides[0].targetId;
     for (const path of walk(doc, node.id, guiding)) {
-      const chain = magnitudeProduct(path, UNSCORED_RELATION) * (reaches.get(path.toId) ?? 0);
+      const chain = pathStrength(path) * (reaches.get(path.toId) ?? 0);
       if (chain > priority) {
         priority = chain;
         guidesId = path.steps[0].edge.targetId;

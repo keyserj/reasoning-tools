@@ -59,9 +59,15 @@ export function scoresOf(node: Node, doc: Doc): Scores | null {
   return referent?.scores ?? null;
 }
 
-/** The `#topic` concept: what every score is relative to, and what distance is measured from. */
+/** `ontology.md` tags the topic explicitly, the same way it tags an action. */
+export const TOPIC_TAG = "topic";
+
+/**
+ * The `#topic` concept: what every score is relative to, and what distance is measured from.
+ * ./validate.ts holds a document to at most one, so the first match is the only match.
+ */
 export function findTopic(doc: Doc): Node | undefined {
-  return doc.nodes.find((node) => node.tags.includes("topic"));
+  return doc.nodes.find((node) => node.type === "concept" && node.tags.includes(TOPIC_TAG));
 }
 
 /**

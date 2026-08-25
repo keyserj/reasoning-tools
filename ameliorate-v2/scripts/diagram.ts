@@ -10,7 +10,7 @@ import type { EdgeTypeName } from "./markers.ts";
 import type { Doc, Edge } from "./model.ts";
 import { findTopic } from "./model.ts";
 import { rank } from "./ranking.ts";
-import { UNSCORED_RELATION, type Scores } from "./scores.ts";
+import type { Scores } from "./scores.ts";
 
 export interface DiagramEdge {
   id: string;
@@ -48,16 +48,13 @@ export function diagram(doc: Doc, limit = DEFAULT_LIMIT): Diagram {
 
   const byId = new Map(doc.nodes.map((node) => [node.id, node]));
   const causal = doc.edges.filter((edge) => CAUSAL_TYPES.includes(edge.type));
-  // `ontology.md`'s Causal map is concepts and their causal relations, so a concept with no
-  // causal edge has nothing to draw here however highly it ranks - a criterion reaches the topic
-  // through `fulfils`, which belongs to the tradeoffs table rather than to this view.
-  const inWeb = new Set(causal.flatMap((edge) => [edge.sourceId, edge.targetId]));
 
+  // `ontology.md`'s Causal map is concepts and their causal relations, so a ranked question or
+  // claim has nothing to draw here however highly it ranks.
   const shown = [topic.id];
   for (const item of rank(doc)) {
     if (shown.length >= limit) break;
-    if (item.kind !== "node" || !inWeb.has(item.id)) continue;
-    if (byId.get(item.id)?.type !== "concept") continue;
+    if (item.kind !== "node" || byId.get(item.id)?.type !== "concept") continue;
     shown.push(item.id);
   }
 
@@ -72,7 +69,7 @@ export function diagram(doc: Doc, limit = DEFAULT_LIMIT): Diagram {
       targetId: edge.targetId,
       type: edge.type,
       scores: edge.scores,
-      weight: stepWeight(edge, UNSCORED_RELATION),
+      weight: stepWeight(edge),
       via: [],
     });
   }
@@ -115,7 +112,7 @@ function indirectEdges(causal: Edge[], visible: Set<string>, direct: DiagramEdge
       if (edge.sourceId !== currentId) continue;
       const nextId = edge.targetId;
       if (seen.has(nextId)) continue;
-      const nextWeight = weight * stepWeight(edge, UNSCORED_RELATION);
+      const nextWeight = weight * stepWeight(edge);
 
       if (visible.has(nextId)) {
         // a relation drawn as itself, or one the drawn graph already states

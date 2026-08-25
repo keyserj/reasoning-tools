@@ -289,7 +289,12 @@ Calculate:
     - ambiguous, and the readings rank questions differently: does the chain stop once it reaches the topic, or does it also multiply by the target concept's own change importance (so a question about a more important concept outranks an equally-weighted question about a lesser one)?
       - `scripts/questions.ts` takes the first reading, so a question's priority is only about how much of the topic runs through it
       - the second reading would mean a question can't be prioritized without also judging its subject, which conflates "what should we discuss" with "what matters"
-  - a criterion is reached through the "fulfils" edge that ties it to the causal web, but paths never continue *through* a criterion: two options fulfilling the same criterion are being weighed against each other, not causally connected
+  - a criterion is *not* reached at all: it hangs off the causal web by "fulfils", and what an option fulfils is what the [Tradeoffs table](./ontology.md#tradeoffs-table) answers, so counting it as distance too would charge it twice
+    - it also ranks badly: `inexpensive` came out as the second-hottest thing in the "Build a wall" example, ahead of illegal immigration itself, because it hangs off the one branch nobody disputes
+    - and routing *through* one would make every option adjacent to every other option that shares a criterion
+  - claims are reached through the score they argue about rather than through causation: an implied claim _is_ its referent's score, so it sits exactly where the referent does, and "supports"/"critiques" attenuate outward from there
+  - an edge sits at whichever of its two ends is nearer - a relation is equally visible from either side of itself
+  - open: "answers" carries no distance, so a claim that only answers a clarifying question stays unreached even when the question is close to the topic - a question's own distance is defined by what it clarifies, so it can't be spread outward the way the rest are
   - [TODO: rest of score types]
   - how to do this for disagreement scores?
 - how to normalize scores?
@@ -302,6 +307,14 @@ Calculate:
       - distance/relevance uses the average _magnitude_, so a relation everyone calls strong while disagreeing about its direction (`wall reduces[3,-5,8] illegal immigration`) stays strong - averaging the signed scores gives nearly zero, which would read as "no relation" and push the topic's most contested branch out of view
       - anything directional (pros vs cons, a tradeoffs cell) uses the signed average, because there the group's net direction _is_ the answer
       - a concept's change importance is a magnitude too: two people who want a thing changed hard in opposite directions both think it's important to change, so `[8,-8]` should read as important-and-contested rather than as nothing to do
+        - except where the score has to pick a _side_ - a calculated argument is a pro or a con, and a group split down the middle has no direction to give it, so `scripts/arguments.ts` uses the signed average there and leans on the disagreement filter to surface the split separately
+- how to combine "Important to change" / "Controversial" / "Unknowns" into one "hottest" ordering?
+  - each is a reason to look at something and any one of them would do on its own, so they combine as `1 - Π(1 - signal)` rather than as a max or a sum
+    - a max can't say that something both contested _and_ important to change beats something only important - which is the case most worth surfacing
+    - a sum would penalise anything carrying one signal, and a causal edge only ever carries controversy
+  - "Controversial" needs a floor or it labels everything: a standard deviation above zero is not disagreement, and `[-8,-8,-6]` is a consensus. `scripts/ranking.ts` uses 2 points of the 0..8 scale, which in the "Build a wall" example keeps the genuinely split rows and drops nine near-unanimous ones
+    - the other two need no floor - a small change importance is a small amount of something, where a small deviation is the _absence_ of controversy rather than a little of it
+  - the combined number is then scaled by distance to the topic, per the question above
 
 #### Questions - answered
 
@@ -371,6 +384,10 @@ Calculate:
 - not sure if there will be performance issues here
 - math is usually pretty performant but it seems like a lot of calculations need to be made
   - there must be a way to effectively cache/reuse calculations, since many calculations are similar / across same paths
+- leaning: cut a route on what it is still worth rather than on how long it is
+  - `scripts/chains.ts` abandons a route below 0.001, which is under what any view's rounding can show. Weights never exceed 1, so a route only ever weakens and nothing above the threshold is missed - where a length cap would drop a long strong chain and keep a short worthless one
+  - distance needs no path enumeration at all: one sweep settling nodes strongest-first gives the best route to everything, since a weaker route can't be improved by extending it
+  - enumeration is still exponential where scores don't attenuate, so `walk` refuses past 20k routes rather than returning a quietly incomplete answer
 
 ### How to keep diagram from re-layouting too much?
 

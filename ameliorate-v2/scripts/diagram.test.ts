@@ -17,15 +17,15 @@ describe("diagram", () => {
   it("draws concepts only, closest to the topic first", () => {
     expect(drawn.nodeIds).toEqual([
       "wall",
+      "illegal-immig",
       "danger",
       "wall-cost",
-      "illegal-immig",
-      "long-wait",
       "legal-immig",
-      "admin-burden",
-      "save-money",
       "more-admin",
+      "long-wait",
+      "admin-burden",
       "fewer-requirements",
+      "save-money",
     ]);
   });
 
@@ -33,9 +33,9 @@ describe("diagram", () => {
     expect(drawn).toMatchSnapshot();
   });
 
-  it("leaves out a concept with no causal relation, however highly it ranks", () => {
-    // `inexpensive` ranks second overall, but reaches the topic only through `fulfils`
-    expect(drawn.nodeIds).not.toContain("inexpensive");
+  it("leaves out the questions the same ranking puts near the top", () => {
+    // `how-tall` is the topic's second-hottest detail and still isn't part of a causal map
+    expect(drawn.nodeIds).not.toContain("how-tall");
   });
 
   it("draws no node it can't connect to something else, however tight the limit", () => {

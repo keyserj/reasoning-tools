@@ -5,9 +5,9 @@
 // reach touches what the question is about. A cell is how much the option fulfils the criterion,
 // which may be direct or may run through what the option causes.
 
-import { CAUSAL_TYPES, reach, signedProduct, walk } from "./chains.ts";
+import { CAUSAL_TYPES, pathWeight, reachFrom, walk } from "./chains.ts";
 import type { Doc } from "./model.ts";
-import { UNSCORED_RELATION, average } from "./scores.ts";
+import { average } from "./scores.ts";
 import { guidingQuestions } from "./questions.ts";
 
 /** `ontology.md` tags an action explicitly, since edges can't imply that something is doable. */
@@ -52,9 +52,10 @@ export function tradeoffs(doc: Doc, questionId: string): Tradeoffs | null {
   // Any causal path counts, whichever way it points: an action that only makes the situation
   // worse is still one of the things being weighed, and leaving it out would decide the question
   // before the table is read. See `ontology.md`'s Action notes.
+  const reachesSubject = reachFrom(doc, subjectId, { ...downstream, direction: "backward" });
   const optionIds = doc.nodes
     .filter((node) => node.type === "concept" && node.tags.includes(ACTION_TAG))
-    .filter((node) => reach(doc, node.id, subjectId, downstream) > 0)
+    .filter((node) => (reachesSubject.get(node.id) ?? 0) > 0)
     .map((node) => node.id);
 
   const reached = new Map<string, ReturnType<typeof walk>>();
@@ -105,7 +106,7 @@ function fulfilment(
     }
     for (const path of downstreamPaths) {
       if (path.toId !== edge.sourceId) continue;
-      total = (total ?? 0) + signedProduct(path, UNSCORED_RELATION) * weight;
+      total = (total ?? 0) + pathWeight(path) * weight;
     }
   }
   return total;

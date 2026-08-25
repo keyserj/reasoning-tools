@@ -5,6 +5,7 @@
 
 import { readFileSync, writeFileSync } from "node:fs";
 import { buildBundle } from "./bundle.ts";
+import { findTopic } from "./model.ts";
 import { parse } from "./parse.ts";
 
 function main(argv: string[]): number {
@@ -31,6 +32,13 @@ function main(argv: string[]): number {
   for (const warning of warnings) console.warn(`${source}:${warning.line}: ${warning.message}`);
   if (errors.length > 0) {
     for (const error of errors) console.error(`${source}:${error.line}: ${error.message}`);
+    return 1;
+  }
+
+  // Legal to parse, but every view is ranked by distance from the topic, so without one the
+  // bundle would come out empty rather than wrong - which reads as a bug in the views.
+  if (!findTopic(doc)) {
+    console.error(`${source}: no #topic concept - nothing to measure the views against`);
     return 1;
   }
 

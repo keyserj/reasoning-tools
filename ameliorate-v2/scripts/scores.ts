@@ -60,15 +60,12 @@ export function takeScores(text: string): TakeScoresResult {
 
 // --- reading a row ---------------------------------------------------------
 //
-// Three normalizations do different jobs and are easy to confuse. A chain weight keeps its sign,
-// because that's what says whether a path increases or decreases what it ends at. A magnitude
-// drops it, because "how much does this matter" has no direction. The third - the 0..1 position
-// a colour is picked from, `(s + 8) / 16` for a bipolar scale - is a rendering decision and lives
-// with the rendering, in `UX-design.md`.
+// Whether an aggregate keeps its sign is the choice everything downstream turns on, and
+// `UX-design.md`'s "how to normalize scores?" owns it.
 
-/** What `ontology.md` says an unscored thing should count as: no need to change. */
+/** What `ontology.md` says an unscored concept counts as: no need to change. */
 export const UNSCORED_CONCEPT = 0;
-/** ...and "somewhat", for a relation or a question nobody weighed. */
+/** ...and "somewhat", for a relation nobody weighed - a question's `guides`/`clarifies` included. */
 export const UNSCORED_RELATION = 4;
 
 export function presentScores(scores: Scores | null): number[] {
@@ -99,14 +96,8 @@ export function deviation(scores: Scores | null): number {
   return Math.sqrt(variance);
 }
 
-/** A score as a -1..1 weight, sign kept: what a directional chain multiplies. */
 export function normalize(score: number): number {
   return score / MAX_SCORE;
-}
-
-/** A score as a 0..1 weight, sign dropped: how much of something there is, either way. */
-export function magnitude(score: number): number {
-  return Math.abs(score) / MAX_SCORE;
 }
 
 /**

@@ -17,4 +17,5 @@ window.WIREFRAME_VERSIONS = [
   { v: "2", desc: "layered diagram, smooth score gradients" },
   { v: "3", desc: "focus &amp; inspect: claim inspector, color key" },
   { v: "4", desc: "hard color bands, per-question views, resizable split" },
+  { v: "5", desc: "questions &amp; highlights generated from the example" },
 ];

@@ -40,13 +40,13 @@
 	- Concept
 		- Topic?
 		- All - Concept causes/reduces/impedes Concept, Concept positively correlates with Concept
-		- Category - {Concept} categorizes Concept
+		- Category - {Concept} categorizes Any
 		- Component - Concept has {Concept}
 		- Action - {Concept} tagged `#action`
 		- Criterion - Concept fulfills {Concept}; {Concept} criterion for Question ?
 	- Question
 		- Guiding Question - {Question} tagged `#guiding`; Guiding Question guides Topic/Guiding-Question
-		- Clarifying Question - {Question} not tagged `#guiding`; Clarifying Question clarifies Node/Edge/Question
+		- Clarifying Question - {Question} not tagged `#guiding`; Clarifying Question clarifies Node
 	- Claim
 		- note: all scores have an implied claim, where supporting claims support a higher score, critiquing claims support a lower score
 		- note: many arguments about a score can be _calculated_ from causation instead of manually claimed (see [Calculated arguments](#calculated-arguments))
@@ -65,7 +65,7 @@
   - fulfills (Concept -> Criterion) (opposite: "fulfills opposite"? if the criterion has an opposite)
   - criterion for (Criterion -> Question)
   - guides (Guiding Question -> Topic, Guiding Question)
-  - clarifies (Question -> Any)
+  - clarifies (Question -> Node)
   - answers (Claim -> Clarifying Question)
   - mentions (Source -> Claim)
   - supports (Claim -> Claim) (opposite: critiques)
@@ -96,6 +96,7 @@
 		- document-level `%perspectives: [person1, person2, person3]`: declares whose scores appear in the example
   	- `Topic` property `description`: a high-level description of the topic - why are we discussing it?
   	- `Claim` property `opposite`: indicates phrasing for the opposite meaning of the claim. Enables -8..8 scale for explicit claim's truth score, rather than 0..8.
+  	- `Criterion` property `opposite`: indicates phrasing for the opposite of the criterion (e.g. `Expensive` for `Inexpensive`). Enables -8..8 scale for `fulfills` edges that target the criterion, rather than 0..8.
 	- `[X,Y,Z]`: scores, one slot per person in the `%perspectives` order - node scores appear after the node type character (e.g. `*[-4,0,-8]`), edge scores appear after the edge type (e.g. `causes[6,2,-]`)
 		- `-` in a slot: that person didn't score it
 		- a scoreable node/edge with no brackets at all: nobody scored it
@@ -124,7 +125,7 @@
 		- Category: `motivations` categorizes `save-money` / `disappear` / `danger`
 		- Component: `wall` has `barbed-wire`
 		- Action: `wall` / `more-admin` / `fewer-requirements` (tagged `#action`; each reduces `illegal-immig` or one of its causes)
-		- Criterion: `inexpensive` / `quick` / `humane` (criterion for the `best-ways` question); `more-admin` / `fewer-requirements` fulfil `inexpensive` directly, while `wall` fulfills it via a causal-fulfills chain (`wall` causes `wall-cost`, which fulfills[-7,-8,-2] `inexpensive`)
+		- Criterion: `inexpensive` / `quick` / `humane` (each `criterion for` the `best-ways` question - a criterion's importance to the decision is that edge's score, e.g. `criterion for[7,8,2]`, so the criterion concepts themselves are unscored); `more-admin` / `fewer-requirements` fulfill `inexpensive` directly, while `wall` fulfills it via a causal-fulfills chain (`wall` causes `wall-cost`, which fulfills[-7,-8,-2] `inexpensive`)
 	- Question
 		- Guiding Question: `why-wall` guides the topic (`wall`); `best-ways` guides `illegal-immig` (a concept the wall reduces); `why-immigrate` guides `best-ways`
 		- Clarifying Question: `how-tall` clarifies the `wall` node; `how-enter` clarifies the `wall-reduces` edge, via the edge's implied claim
@@ -140,13 +141,14 @@
 		- Perspectives: score brackets hold one slot per person, in the `%perspectives: [alice, bob, casey]` order
 			- scored by everyone: the main nodes, e.g. `*[2,-7,8]` on the topic (`wall`), `*[-4,0,-8]` on `illegal-immig`
 			- scored by some (`-` = that person didn't score): e.g. `*[-2,-,-5]` on `save-money`, `mentions[8,-,-]`
-			- scored by nobody (brackets omitted): `barbed-wire`, the `clarifies` edge from `how-tall`
+			- scored by nobody (brackets omitted): `barbed-wire`, the `clarifies` edge from `how-tall`, the `categorizes` edges, the criterion concepts (their importance is scored on `criterion for` instead)
 		- Concept score: e.g. `*[-8,-8,-6]` on `danger`
 		- Claim truth score: e.g. `=[8,-,4]` on `texas-stat`
-		- Edge score: one on each scoreable edge type - causes, reduces, impedes, fulfills, guides, clarifies, answers, mentions, supports
+		- Edge score: one on each scoreable edge type except `categorizes` (scoreable, but nobody scored it here) - causes, reduces, impedes, fulfills, criterion for, guides, clarifies, answers, mentions, supports
 		- Unscored edges (never take scores): has
 		- Implied claims behind scores: `= $wait-causes-illegal-immig` (a causes edge's score), `= $illegal-immig` (a concept's score), `= $murder-supports-worse-score` (a supports edge's score)
 		- Oppositional scores: `wall reduces[3,-5,8] illegal-immig` - casey (`8`) believes it reduces, bob (`-5`) believes it increases
+		- Opposites unlocking the negative half: `physical-barrier` defines `%opposite` so its truth score can go negative; `inexpensive` defines `%opposite: Expensive`, which is what its negative `fulfills` scores read as
 	- note: argument-map "reuse" (same claim in multiple arguments) falls out naturally from the graph: `visa-overstay` both answers `how-enter` and critiques `wall-reduces`
 
 #### Questions - unanswered
@@ -241,7 +243,7 @@
 
 ##### Category
 
-- Category - {Concept} categorizes Concept
+- Category - {Concept} categorizes Any
 
 ###### What
 
@@ -354,7 +356,6 @@
   - option 3: no edge = guiding, "informs" ("clarifies"?) = clarifying
     - - conflicts with guiding questions being able to guide other guiding questions (they'd need an edge)
   - option 4: ?
-  - trying: option 1 - distinguish via edge type: "guides" = guiding (agenda-setting), "clarifies" = clarifying (fact-requesting)
 
 ##### Guiding Question
 
@@ -1022,7 +1023,7 @@ This section exists for questions that seem answered but need to be folded into 
 - context: some structure relies on topic node(s) existing
 	- guiding questions guide the topic node (or other guiding questions)
 	- node scores are assumed to be relative to the topic
-	- question prioritization can chain through causal edges because topic nodes are concepts in the causal web (see Guides/Clarifies notes under [Shared: Edges](#shared-edges))
+	- question prioritization can chain through causal edges because topic nodes are concepts in the causal web (see notes about guides/clarifies chaining under [Shared: Edges](#shared-edges))
 - do all topics have a topic node?
 	- seems like some topics might not have a single node that represents them, in which case relations that rely on a topic node wouldn't work
 		- maybe making a topic node could be a requirement...?

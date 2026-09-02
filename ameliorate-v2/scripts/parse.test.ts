@@ -333,10 +333,14 @@ describe("parse: more of the syntax", () => {
     ]);
   });
 
-  it("keeps %opposite to claims and %description to concepts", () => {
-    expect(messages("* A concept &a\n  %opposite: the other way")).toEqual([
-      '"%opposite" belongs to a claim, not a concept',
+  it("keeps %opposite to claims and concepts, and %description to concepts", () => {
+    expect(messages("? A question &q\n  %opposite: the other way")).toEqual([
+      '"%opposite" belongs to a claim or a concept, not a question',
     ]);
+    expect(messages("= A claim &c\n  %description: about it")).toEqual([
+      '"%description" belongs to a concept, not a claim',
+    ]);
+    expect(messages("* A criterion &a\n  %opposite: the other way")).toEqual([]);
   });
 
   it("sees through a `/` comment when deciding a note can't hang off a note", () => {
@@ -382,12 +386,18 @@ describe("parse: the example's marquee structure", () => {
     ]);
   });
 
-  it("leaves the three unscoreable relations unscored", () => {
-    const unscoreable = doc.edges.filter((e) =>
-      ["categorizes", "has", "criterion for"].includes(e.type),
-    );
-    expect(unscoreable).toHaveLength(7);
-    expect(unscoreable.every((e) => e.scores === null)).toBe(true);
+  it("scores a criterion's importance on `criterion for`, not on the criterion itself", () => {
+    const criterionFor = doc.edges.filter((e) => e.type === "criterion for");
+    expect(criterionFor).toHaveLength(3);
+    expect(criterionFor.every((e) => e.scores !== null)).toBe(true);
+    const criteria = criterionFor.map((e) => doc.nodes.find((n) => n.id === e.sourceId));
+    expect(criteria.every((n) => n?.scores === null)).toBe(true);
+  });
+
+  it("leaves `has`, the one unscoreable relation, unscored", () => {
+    const has = doc.edges.filter((e) => e.type === "has");
+    expect(has).toHaveLength(1);
+    expect(has[0].scores).toBeNull();
   });
 
   it("reads the topic's tags, description and scores off one line and its child", () => {

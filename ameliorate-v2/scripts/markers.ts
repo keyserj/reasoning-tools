@@ -54,7 +54,7 @@ export interface EdgeTypeDef {
   sign: 1 | -1;
   /** absent on a unipolar type, which has no meaningful opposite */
   opposite?: string;
-  /** `ontology.md`: categorizes / has / criterion for don't take a score */
+  /** `ontology.md`: `has` doesn't take a score */
   scoreable: boolean;
   /** node types this may run `from` and `to`, per `ontology.md`'s Structure */
   from: readonly NodeType[];

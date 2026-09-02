@@ -173,12 +173,12 @@ For e.g. Hottest Details we also want to normalize so that different scores can 
 #### Questions - answered
 
 - how to normalize scores?
-  - normalize to 0..1
-		- 0..8: divide by 8
-		- -8..8: absolute value, then divide by 8
-  		- generally if we're normalizing to 0..1, we probably care about magnitude
-    		- we do at least for normalizing change importance for "hottest details"
-  		- if direction is significant, we can consider normalizing to -1..1 or adding 8 and dividing by 16
+  - depends on the purpose:
+    - for sorting / comparing (e.g. Hottest Details): normalize to 0..1, so different score types share one range
+      - 0..8: divide by 8
+      - -8..8: absolute value, then divide by 8 - here we care about magnitude, not direction
+    - for attenuation / reach (multiplying along edges): divide by 8, keeping the sign - bipolar edges land in -1..1, unipolar edges in 0..1
+      - the sign has to survive so that e.g. `A causes B reduces C` chains to A reducing C
   - for aggregates (multiple perspectives scored + showing):
     - calculate normalized averages _and_ normalized _standard deviations_ - high deviation should normalize close to 1
 
@@ -200,13 +200,13 @@ Provide reasons why we're discussing the topic, ultimate questions to answer. An
 
 #### Notes
 
-- if structure editing + < 5 items: "add guiding question" (... or always show when editing?)
+- if structure editing + < 3 items: "add guiding question" (... or always show when editing?)
 
 #### Calculations
 
 Which questions to show? Guiding Questions (manually specified) which have a final `guides` relation to the topic node. Take the top 3 based on attenuated `guides`/`clarifies` edge scores.
 
-We'll call this the Guiding Score (name TBD). If a question does not have a path to the topic node that exclusively has `guides`/`clarifies` edges, the question has a Guiding Score of 0.
+We'll call this the Guiding Score (name TBD). If a question does not have a path to the topic node that exclusively has `guides`/`clarifies` edges, ending with a final `guides` relation to the topic node, the question has a Guiding Score of 0.
 
 Example:
 
@@ -240,7 +240,7 @@ So the top 3 questions would be GQ1[0.88], GQ2[0.60], GQ4[0.50].
 - should the top guiding question be selected by default, with "what's important to consider in this topic?" as a default guiding question?
   - seems good, especially if the "what's important" is a default fallback
   - but we should first determine what UX would look like with a guiding question selected
-    - I'm thinking it'd be good to give the topic overview without focusing on a specific question first, so people know there are multiple questions, and can easily see top disagreement/importance/etc. at a glance
+  - actually: I'm thinking it'd be good to give the topic overview without focusing on a specific question first, so people know there are multiple questions, and can easily see top disagreement/importance/etc. at a glance
 - how should "Open questions" rank unscored questions (like `how-tall`) against scored ones?
   - unscored questions can probably just use a default score of 4 (scale 0..8)
 
@@ -294,6 +294,7 @@ Calculate:
     - but: this can probably be done in a less-side-effect-y way, like having that person's UI point it out
   - no: all scores get thrown off when a new person joins and hasn't scored yet
   - let's go with no. we can show in a different way when something should be scored.
+  - note: this is for perspective-combining (averages, std devs). attenuation instead uses the edge type's default score for a `-` slot (see the ontology's default scores note)
 
 ##### Attenuation ?
 
@@ -312,8 +313,8 @@ Calculate:
   - A causes[7.5] B causes[1] C, Q clarifies[6] B
   - normalized: A causes[7.5 / 8 ~= 0.94] B causes[1 / 8 ~= 0.13] C, Q clarifies[6 / 8 = 0.75] B
   - attenuated: A causes[0.94 * 0.13 ~= 0.12] C, Q clarifies[0.75 * 0.13 ~= 0.09] C
-- "Important to change": A[1], B[1], C[6.5]
-- "Important to change, relevant for C": A[1 * 0.12 ~= 0.12], B[1] (TODO: 1. not normalized, 2. B not attenuated, 3. C missing)
+- "Important to change": A[1], B[2], C[6.5]
+- "Important to change, relevant for C": A[1 * 0.12 ~= 0.12], B[2] (TODO: 1. not normalized, 2. B not attenuated, 3. C missing)
 - "Controversial": A[?] causes[?] B[?] causes[?] C[?]
 - "Controversial, relevant for C": A[?] causes[?] B[?] causes[?] C[?]
 - "Uncertainty": B[?]

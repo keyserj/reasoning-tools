@@ -29,9 +29,9 @@ const TAB_SIZE = 2;
 const BRACKETED_LIST = /^\[(.*)\]$/;
 
 /** Per `ontology.md`'s Structure Details. */
-const PROPERTY_OWNER: Record<string, NodeType | undefined> = {
-  [DESCRIPTION_KEY]: "concept",
-  [OPPOSITE_KEY]: "claim",
+const PROPERTY_OWNERS: Record<string, readonly NodeType[] | undefined> = {
+  [DESCRIPTION_KEY]: ["concept"],
+  [OPPOSITE_KEY]: ["claim", "concept"],
 };
 
 /**
@@ -232,16 +232,17 @@ export function parse(text: string): ParseResult {
           });
         }
       } else if (parent.kind === "node" && parent.node) {
-        const ownerType = PROPERTY_OWNER[key];
-        if (ownerType === undefined) {
+        const owners = PROPERTY_OWNERS[key];
+        if (owners === undefined) {
           errors.push({
             line: lineNo,
             message: `Unknown property "%${key}" (expected %${DESCRIPTION_KEY} or %${OPPOSITE_KEY})`,
           });
-        } else if (parent.node.type !== ownerType) {
+        } else if (!owners.includes(parent.node.type)) {
+          const belongsTo = owners.map((type) => `a ${type}`).join(" or ");
           errors.push({
             line: lineNo,
-            message: `"%${key}" belongs to a ${ownerType}, not a ${parent.node.type}`,
+            message: `"%${key}" belongs to ${belongsTo}, not a ${parent.node.type}`,
           });
         } else if (parent.node.properties[key] !== undefined) {
           errors.push({

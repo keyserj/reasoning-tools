@@ -60,9 +60,11 @@
     * $wall
 
 ? What are the most effective ways to reduce illegal immigration? &best-ways #guiding
-  / guiding question (agenda-setting); guides `illegal-immig` (not the topic) - guides chains through the wall-reduces edge to relate it to the wall topic
+  / guiding question (agenda-setting); guides `illegal-immig` (not the topic) - guides chains through the why-wall's guides edge to the topic
   > guides[7,5,8]
     * $illegal-immig
+  > guides[7,5,8]
+    ? $why-wall
   < guides[6,8,1]
     ? Why do people immigrate illegally? &why-immigrate #guiding
       / guiding question guiding another guiding question
@@ -80,9 +82,10 @@
 
 / --- Criteria: for evaluating the options (3 criteria x 3 options = a minimal tradeoffs table) ---
 
-*[7,8,2] Inexpensive &inexpensive
+* Inexpensive &inexpensive
+  %opposite: Expensive
   / criterion: worded so that more of it is good
-  > criterion for
+  > criterion for[7,8,2]
     ? $best-ways
   < fulfills[-3,-4,-]
     * $more-admin
@@ -91,17 +94,17 @@
   < fulfills[-7,-8,-2]
     *[-2,-4,-] Billions of dollars of construction and maintenance spending &wall-cost
       < causes[8,8,8]
-        / the wall's fulfilment of "inexpensive" comes via this causal-fulfills chain (causes[8,8,8] x fulfills[-7,-8,-2]); everyone agrees the wall costs money
+        / the wall's fulfillment of "inexpensive" comes via this causal-fulfills chain (causes[8,8,8] x fulfills[-7,-8,-2]); everyone agrees the wall costs money
         * $wall
 
-*[5,3,8] Quick to implement &quick
+* Quick to implement &quick
   / fulfills edges omitted for brevity - only "inexpensive" shows them
-  > criterion for
+  > criterion for[5,3,8]
     ? $best-ways
 
-*[8,8,3] Humane treatment of immigrants &humane
+* Humane treatment of immigrants &humane
   / fulfills edges omitted for brevity - only "inexpensive" shows them
-  > criterion for
+  > criterion for[8,8,3]
     ? $best-ways
 
 / --- Claims: arguing about scores ---

@@ -188,6 +188,18 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
       "type": "guides",
     },
     {
+      "id": "best-ways--guides--why-wall",
+      "notes": [],
+      "scores": [
+        7,
+        5,
+        8,
+      ],
+      "sourceId": "best-ways",
+      "targetId": "why-wall",
+      "type": "guides",
+    },
+    {
       "id": "why-immigrate--guides--best-ways",
       "notes": [],
       "scores": [
@@ -238,7 +250,11 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
     {
       "id": "inexpensive--criterion-for--best-ways",
       "notes": [],
-      "scores": null,
+      "scores": [
+        7,
+        8,
+        2,
+      ],
       "sourceId": "inexpensive",
       "targetId": "best-ways",
       "type": "criterion for",
@@ -294,7 +310,11 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
     {
       "id": "quick--criterion-for--best-ways",
       "notes": [],
-      "scores": null,
+      "scores": [
+        5,
+        3,
+        8,
+      ],
       "sourceId": "quick",
       "targetId": "best-ways",
       "type": "criterion for",
@@ -302,7 +322,11 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
     {
       "id": "humane--criterion-for--best-ways",
       "notes": [],
-      "scores": null,
+      "scores": [
+        8,
+        8,
+        3,
+      ],
       "sourceId": "humane",
       "targetId": "best-ways",
       "type": "criterion for",
@@ -633,7 +657,9 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
       "notes": [],
       "properties": {},
       "scores": null,
-      "tags": [],
+      "tags": [
+        "guiding",
+      ],
       "text": "Why might we want the wall?",
       "type": "question",
     },
@@ -642,7 +668,9 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
       "notes": [],
       "properties": {},
       "scores": null,
-      "tags": [],
+      "tags": [
+        "guiding",
+      ],
       "text": "What are the most effective ways to reduce illegal immigration?",
       "type": "question",
     },
@@ -651,7 +679,9 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
       "notes": [],
       "properties": {},
       "scores": null,
-      "tags": [],
+      "tags": [
+        "guiding",
+      ],
       "text": "Why do people immigrate illegally?",
       "type": "question",
     },
@@ -693,12 +723,10 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
     {
       "id": "inexpensive",
       "notes": [],
-      "properties": {},
-      "scores": [
-        7,
-        8,
-        2,
-      ],
+      "properties": {
+        "opposite": "Expensive",
+      },
+      "scores": null,
       "tags": [],
       "text": "Inexpensive",
       "type": "concept",
@@ -720,11 +748,7 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
       "id": "quick",
       "notes": [],
       "properties": {},
-      "scores": [
-        5,
-        3,
-        8,
-      ],
+      "scores": null,
       "tags": [],
       "text": "Quick to implement",
       "type": "concept",
@@ -733,11 +757,7 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
       "id": "humane",
       "notes": [],
       "properties": {},
-      "scores": [
-        8,
-        8,
-        3,
-      ],
+      "scores": null,
       "tags": [],
       "text": "Humane treatment of immigrants",
       "type": "concept",

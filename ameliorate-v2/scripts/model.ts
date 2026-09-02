@@ -64,6 +64,21 @@ export function isGuiding(node: Node): boolean {
   return node.type === "question" && node.tags.includes(GUIDING_TAG);
 }
 
+/**
+ * The subtypes a relation implies. Category, component and criterion are never tagged - the edge
+ * is what says them, which is why `ontology.md`'s Structure lists them as relations rather than
+ * as `#tag`s.
+ */
+export function subtypesOf(node: Node, doc: Doc): string[] {
+  const subtypes = new Set<string>();
+  for (const edge of doc.edges) {
+    if (edge.sourceId === node.id && edge.type === "categorizes") subtypes.add("category");
+    if (edge.sourceId === node.id && edge.type === "criterion for") subtypes.add("criterion");
+    if (edge.targetId === node.id && edge.type === "has") subtypes.add("component");
+  }
+  return [...subtypes];
+}
+
 /** An implied claim's score is the score of what it stands behind, held in exactly one place. */
 export function scoresOf(node: Node, doc: Doc): Scores | null {
   if (node.impliedForId === undefined) return node.scores;

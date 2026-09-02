@@ -250,7 +250,8 @@ So the top 3 questions would be GQ1[0.88], GQ2[0.60], GQ4[0.50].
 
 Show the top 20 nodes/edges to look at ("show more" to see beyond the top 5), excluding topic node, with pills to filter by hotness reason.
 
-These should all show in the same list, but clicking a pill should filter to the top 5 nodes/edges for that hotness reason. Fewer than 20 can show if the same node/edge appears for multiple hotness reasons.
+These should all show in the same list, but clicking a pill should filter to the top 5 nodes/edges for that hotness reason. Fewer than 20 can show if the same node/edge appears for multiple hotness reasons. If a node/edge has multiple hotness reasons, it's sorted in the combined list using its _highest_ hotness score.
+
 
 "top to look at" is calculated based on normalizing the following "hotness reasons" into a 0..1 range:
 - "Important to change": top 5 (absolute value) concepts
@@ -264,6 +265,7 @@ Highlight the most important things to see in the topic. Guiding Questions has i
 
 #### Notes
 
+- If an unknown clarifies multiple things, its normalized score should calculate via the max `clarifies` score of these.
 - For calculating controversy, we normalize the population std dev to 0..1 by dividing by 4 (half of 0..8 range) and clamping to 1 (because -8..8 normalizes to 0..2 when dividing by 4).
   - 4 is used for both -8..8 and 0..8 scales because a point of disagreement means the same on both scales. then we clamp to 1 because the -8..8 will be in the 0..2 range. we're ok with a range of 9-16 being treated as the same as a range of 8.
   - this normalizes a change-importance of 8 to equal a disagreement range of 8 or more, and a change-importance of 4 to a disagreement range of 4
@@ -294,7 +296,7 @@ Calculate:
     - but: this can probably be done in a less-side-effect-y way, like having that person's UI point it out
   - no: all scores get thrown off when a new person joins and hasn't scored yet
   - let's go with no. we can show in a different way when something should be scored.
-  - note: this is for perspective-combining (averages, std devs). attenuation instead uses the edge type's default score for a `-` slot (see the ontology's default scores note)
+  - note: this is for perspective-combining (averages, std devs). when attenuating, perspective-combine first, then use the edge type's default score if there are no scores on the edge to attenuate (see the ontology's default scores note)
 
 ##### Attenuation ?
 

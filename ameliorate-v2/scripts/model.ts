@@ -50,6 +50,20 @@ export interface Doc {
   notes: Note[];
 }
 
+/** The one concept a document is about, per `ontology.md`'s Structure. */
+export const TOPIC_TAG = "topic";
+
+/** Agenda-setting question rather than fact-requesting, per `ontology.md`'s Structure. */
+export const GUIDING_TAG = "guiding";
+
+export function topicNode(doc: Doc): Node | undefined {
+  return doc.nodes.find((node) => node.tags.includes(TOPIC_TAG));
+}
+
+export function isGuiding(node: Node): boolean {
+  return node.type === "question" && node.tags.includes(GUIDING_TAG);
+}
+
 /** An implied claim's score is the score of what it stands behind, held in exactly one place. */
 export function scoresOf(node: Node, doc: Doc): Scores | null {
   if (node.impliedForId === undefined) return node.scores;

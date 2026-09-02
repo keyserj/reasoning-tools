@@ -15,6 +15,6 @@
 window.WIREFRAME_VERSIONS = [
   { v: "1", desc: "first pass at the topic-landing state" },
   { v: "2", desc: "layered diagram, smooth score gradients" },
-  { v: "3", desc: "focus &amp; inspect: claim inspector, colour key" },
-  { v: "4", desc: "hard colour bands, per-question views, resizable split" },
+  { v: "3", desc: "focus &amp; inspect: claim inspector, color key" },
+  { v: "4", desc: "hard color bands, per-question views, resizable split" },
 ];

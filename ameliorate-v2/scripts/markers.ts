@@ -67,12 +67,33 @@ export interface EdgeTypeDef {
 const CONCEPTS = { from: ["concept"], to: ["concept"] } as const;
 const CLAIMS = { from: ["claim"], to: ["claim"] } as const;
 const AGENDA = { from: ["question"], to: ["concept", "question"] } as const;
-const ANYTHING = { from: ["question"], to: ["concept", "question", "claim", "source"] } as const;
+const ANYTHING = {
+  from: ["question"],
+  to: ["concept", "question", "claim", "source"],
+} as const;
 
 export const EDGE_TYPES = {
-  causes: { canonical: "causes", sign: 1, opposite: "reduces", scoreable: true, ...CONCEPTS },
-  reduces: { canonical: "causes", sign: -1, opposite: "causes", scoreable: true, ...CONCEPTS },
-  impedes: { canonical: "causes", sign: -1, opposite: "causes", scoreable: true, ...CONCEPTS },
+  causes: {
+    canonical: "causes",
+    sign: 1,
+    opposite: "reduces",
+    scoreable: true,
+    ...CONCEPTS,
+  },
+  reduces: {
+    canonical: "causes",
+    sign: -1,
+    opposite: "causes",
+    scoreable: true,
+    ...CONCEPTS,
+  },
+  impedes: {
+    canonical: "causes",
+    sign: -1,
+    opposite: "causes",
+    scoreable: true,
+    ...CONCEPTS,
+  },
   "positively correlates with": {
     canonical: "positively correlates with",
     sign: 1,
@@ -87,25 +108,54 @@ export const EDGE_TYPES = {
     scoreable: true,
     ...CONCEPTS,
   },
-  fulfils: {
-    canonical: "fulfils",
+  fulfills: {
+    canonical: "fulfills",
     sign: 1,
     opposite: "works against",
     scoreable: true,
     ...CONCEPTS,
   },
-  supports: { canonical: "supports", sign: 1, opposite: "critiques", scoreable: true, ...CLAIMS },
-  critiques: { canonical: "supports", sign: -1, opposite: "supports", scoreable: true, ...CLAIMS },
+  supports: {
+    canonical: "supports",
+    sign: 1,
+    opposite: "critiques",
+    scoreable: true,
+    ...CLAIMS,
+  },
+  critiques: {
+    canonical: "supports",
+    sign: -1,
+    opposite: "supports",
+    scoreable: true,
+    ...CLAIMS,
+  },
   guides: { canonical: "guides", sign: 1, scoreable: true, ...AGENDA },
   clarifies: { canonical: "clarifies", sign: 1, scoreable: true, ...ANYTHING },
-  answers: { canonical: "answers", sign: 1, scoreable: true, from: ["claim"], to: ["question"] },
-  mentions: { canonical: "mentions", sign: 1, scoreable: true, from: ["source"], to: ["claim"] },
-  categorizes: { canonical: "categorizes", sign: 1, scoreable: false, ...CONCEPTS },
+  answers: {
+    canonical: "answers",
+    sign: 1,
+    scoreable: true,
+    from: ["claim"],
+    to: ["question"],
+  },
+  mentions: {
+    canonical: "mentions",
+    sign: 1,
+    scoreable: true,
+    from: ["source"],
+    to: ["claim"],
+  },
+  categorizes: {
+    canonical: "categorizes",
+    sign: 1,
+    scoreable: true,
+    ...CONCEPTS,
+  },
   has: { canonical: "has", sign: 1, scoreable: false, ...CONCEPTS },
   "criterion for": {
     canonical: "criterion for",
     sign: 1,
-    scoreable: false,
+    scoreable: true,
     from: ["concept"],
     to: ["question"],
   },
@@ -130,7 +180,10 @@ export function isBipolar(name: EdgeTypeName): boolean {
  * Read the edge type an edge line opens with. Types are multi-word here (`criterion for`), so
  * this can't be one word off the front the way a single-word syntax reads it.
  */
-export function takeEdgeType(body: string): { type: EdgeTypeName | null; rest: string } {
+export function takeEdgeType(body: string): {
+  type: EdgeTypeName | null;
+  rest: string;
+} {
   for (const name of EDGE_TYPE_NAMES) {
     if (!body.startsWith(name)) continue;
     const after = body[name.length];

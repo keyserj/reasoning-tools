@@ -244,7 +244,7 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
       "type": "criterion for",
     },
     {
-      "id": "more-admin--fulfils--inexpensive",
+      "id": "more-admin--fulfills--inexpensive",
       "notes": [],
       "scores": [
         -3,
@@ -253,10 +253,10 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
       ],
       "sourceId": "more-admin",
       "targetId": "inexpensive",
-      "type": "fulfils",
+      "type": "fulfills",
     },
     {
-      "id": "fewer-requirements--fulfils--inexpensive",
+      "id": "fewer-requirements--fulfills--inexpensive",
       "notes": [],
       "scores": [
         7,
@@ -265,10 +265,10 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
       ],
       "sourceId": "fewer-requirements",
       "targetId": "inexpensive",
-      "type": "fulfils",
+      "type": "fulfills",
     },
     {
-      "id": "wall-cost--fulfils--inexpensive",
+      "id": "wall-cost--fulfills--inexpensive",
       "notes": [],
       "scores": [
         -7,
@@ -277,7 +277,7 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
       ],
       "sourceId": "wall-cost",
       "targetId": "inexpensive",
-      "type": "fulfils",
+      "type": "fulfills",
     },
     {
       "id": "wall--causes--wall-cost",

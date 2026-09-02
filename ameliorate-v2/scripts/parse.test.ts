@@ -55,8 +55,8 @@ describe("parse: nodes", () => {
   });
 
   it("rejects a property the ontology doesn't define", () => {
-    expect(messages("* A &a\n  %colour: red")).toEqual([
-      'Unknown property "%colour" (expected %description or %opposite)',
+    expect(messages("* A &a\n  %color: red")).toEqual([
+      'Unknown property "%color" (expected %description or %opposite)',
     ]);
   });
 

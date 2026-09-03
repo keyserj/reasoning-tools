@@ -37,7 +37,9 @@ const PROPERTY_OWNERS: Record<string, readonly NodeType[] | undefined> = {
 /**
  * An implied claim stands behind a score, so it only means something where there is one to argue
  * about. `ontology.md`'s legend derives its wording from a concept, an edge or a claim, and
- * questions and sources carry no score for it to be about.
+ * doesn't word one for a question or a source. Whether those two should carry scores at all is
+ * still open (`ontology.md`'s Questions - unanswered), so a `?[8]` is left to parse rather than
+ * rejected; only the implied claim is withheld.
  */
 const CAN_IMPLY_CLAIM: Record<NodeType, boolean> = {
   concept: true,

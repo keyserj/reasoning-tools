@@ -1,5 +1,23 @@
 ## Overview
 
+### What is this?
+
+- This is a document that defines an ontology for representing contested information about a problem or solution
+- At a high level, the ontology is a "contested causal map" (naming TBD, see questions section)
+	- "contested" because anyone can disagree about any of the details, via scoring and supporting, critiquing, questioning
+	- "causal map" because the core of the structure is: concepts (as nodes) with causal relations (as edges) between them
+- This overview's [Structure](#Structure) and [Example](#Example) sections are probably the best for quickly grasping the ontology
+	- [Structure Details](#structure-details) has more information (e.g. meaning, purpose, open questions) about each piece of the structure
+	- [Core features](#core-features) goes deeper into what the structure + scores enable (e.g. calculated arguments)
+	- [Big open questions](#big-open-questions) has details on the biggest open questions for this ontology; for less-critical questions, each Structure Details section has its own "open questions" subsection
+- UX design for an app implementing this ontology lives in the sibling doc [UX-design](./UX-design.md)
+
+#### Questions - Unanswered
+
+- is "causal map" appropriate naming if there can be arguments not tied to cause / effect?
+	- seems like "contested topic map" could be better I guess, since "topic" implies we're discussing a specific _thing_, but the "map" might be any map of details to help discuss that thing (rather than specifically causal or argument)
+		- except ["topic map" is a formal thing](https://en.wikipedia.org/wiki/Topic_map) already... the idea seems similar but more formalized/generic than this...?
+
 ### Purpose
 
 - This ontology is an attempt to make it easier for every individual to contribute their wisdom towards improving a situation, so that a group's problem-solving potential can be fully realized in the form of better, more-satisfying-for-everyone solutions.
@@ -11,36 +29,9 @@
 	5.  Known ways of organizing and presenting information are nowhere near as effective as they could be.
 - TODO: [The value of scored causal structures for refining contested knowledge](The-value-of-scored-causal-structures-for-refining-contested-knowledge.md)
 
-#### Archive
-
-- It's hard to improve situations, especially when many people are involved, and more so when the situation is complex. Even with best effort, it's hard to effectively take into account everyone's points and counterpoints without some becoming drowned out, lost, outdated, forgotten.
-	- It's a good first step to use a document instead of a verbal discussion, but that gets messy very quickly.
-	- A good second step might be to use an argument map, but (TODO: [The value of scored causal structures for refining contested knowledge](The-value-of-scored-causal-structures-for-refining-contested-knowledge.md))
-
-### What is this?
-
-- This is a document that defines an ontology for representing contested information about a problem or solution
-- At a high level, the ontology is a "contested causal map" (naming TBD, see questions section)
-	- "contested" because anyone can disagree about any of the details, via scoring and supporting, critiquing, questioning
-	- "causal map" because the core of the structure is: concepts (as nodes) with causal relations (as edges) between them
-- This overview's [Structure](#Structure) and [Example](#Example) sections are probably the best for quickly grasping the ontology
-	- [Structure Details](#structure-details) has more information (e.g. meaning, purpose, open questions) about each piece of the structure
-	- [Core features](#core-features) goes deeper into what the structure + scores enable (e.g. calculated arguments)
-	- [Big open questions](#big-open-questions) has details about open questions that have more significant impact on the ontology than the "open questions" in the structure details section
-- UX design for an app implementing this ontology lives in the sibling doc [UX-design](./UX-design.md)
-
-#### Questions - Unanswered
-
-- is "causal map" appropriate naming if there can be arguments not tied to cause / effect?
-	- seems like "contested topic map" could be better I guess, since "topic" implies we're discussing a specific _thing_, but the "map" might be any map of details to help discuss that thing (rather than specifically causal or argument)
-		- except ["topic map" is a formal thing](https://en.wikipedia.org/wiki/Topic_map) already... the idea seems similar but more formalized/generic than mine...?
-	- _can_ there be arguments that aren't tied at least to a _concept_ in the causal map?
-		- at least most arguments can probably be tied to a concept, but does it make sense to do this if the concept isn't yet tied to other concepts?
-			- we could make concepts for all arguments behind the scenes, but the name should definitely be based on the main visuals - if concepts aren't core on all topics, then it probably shouldn't be called a "concept" map
-
 ### Structure
 
-- Shared: Nodes & Edges
+- Shared: Nodes
 	- notes:
 		- a node can be only one of the types (Concept, Question, Claim, Source)
 			- but can be one or more of the subtypes e.g. a concept can be a topic and an action
@@ -49,234 +40,81 @@
 	- Concept
 		- Topic?
 		- All - Concept causes/reduces/impedes Concept, Concept positively correlates with Concept
-		- Category - {Concept} categorizes Concept
+		- Category - {Concept} categorizes Any
 		- Component - Concept has {Concept}
 		- Action - {Concept} tagged `#action`
-		- Criterion - Concept fulfils {Concept}; {Concept} criterion for Question ?
+		- Criterion - Concept fulfills {Concept}; {Concept} criterion for Question ?
 	- Question
-		- Guiding Question - Guiding Question guides Topic/Guiding-Question
-		- Clarifying Question - Clarifying Question clarifies Node
+		- Guiding Question - {Question} tagged `#guiding`; Guiding Question guides Topic/Guiding-Question
+		- Clarifying Question - {Question} not tagged `#guiding`; Clarifying Question clarifies Node
 	- Claim
 		- note: all scores have an implied claim, where supporting claims support a higher score, critiquing claims support a lower score
 		- note: many arguments about a score can be _calculated_ from causation instead of manually claimed (see [Calculated arguments](#calculated-arguments))
 		- All - Claim supports/critiques Claim
-		- Statistic
-		- Anecdote
+		- Statistic - {Claim} tagged `#statistic`
+		- Anecdote - {Claim} tagged `#anecdote`
 		- Option - {Claim} answers Clarifying Question
 	- Source
 		- All - Source mentions Claim
+- Shared: Edges
+  - notes: (A -> B) notation indicates (`source node types` -> `target node types`)
+  - causes (Concept -> Concept) (opposite: reduces/impedes)
+  - positively correlates with (Concept -> Concept) (opposite: negatively correlates with)
+  - has (Concept -> Concept) (no implied claim)
+  - categorizes (Category -> Any)
+  - fulfills (Concept -> Criterion) (opposite: "fulfills opposite"? if the criterion has an opposite)
+  - criterion for (Criterion -> Question)
+  - guides (Guiding Question -> Topic, Guiding Question)
+  - clarifies (Question -> Node)
+  - answers (Claim -> Clarifying Question)
+  - mentions (Source -> Claim)
+  - supports (Claim -> Claim) (opposite: critiques)
 - Individual: Scores
 	- note: all scores use one of two ranges - bipolar -8..8 (the scored thing has a meaningful opposite) or unipolar 0..8 (it doesn't); see [Score ranges](#Score-ranges) for more details
-	- [Concept scoring semantics: desirability? importance? more-less vs good-bad?](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad)
-	- Claim truth score: -8 = completely opposite of true, 0 = completely absent of truth, 8 = completely true
+	- See [Concept scoring semantics: desirability? importance? more-less vs good-bad?](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad)
+	- Claim truth score: -8 = strongly believe opposite, 0 = don't believe, 8 = strongly believe
 		- claims use only 0..8 scoring if "opposite" isn't defined
-	- Edge weight score
-		- note: scores don't make sense for these?: categorizes, has, criterion for
-		- causes (opposite: reduces/impedes): how much the source moves the target: -8 = strongly reduces it, 0 = doesn't move it at all, 8 = strongly increases it
-		- positively correlates with (opposite: negatively correlates with): how much source and target move together: -8 = strong negative correlation, 0 = uncorrelated, 8 = strong positive correlation
-		- fulfils: -8 = actively works against it, 0 = doesn't fulfil it at all, 8 = fully fulfils it
-		- guides: how much exploring the question would advance the target topic/question: 0 = no bearing on it, 8 = central to it (most progress on the target runs through this question)
-		- clarifies: how contingent the target node is on the answer: 0 = answer wouldn't change anything about it, 8 = answer could completely reshape how we see/score it
-		- answers: 0 = doesn't answer, 4 = kind of answers, 8 = fully answers
-		- mentions: 0 = doesn't mention, 4 = kind of implies, 8 = definitely mentions
-		- supports (opposite: critiques): -8 = strongly critiques, 0 = neither supports nor critiques, 8 = strongly supports
+  - Implied claim wordings:
+    - Concept: "`[concept text]` is important to increase" (opposite: "... to decrease")
+    - Edge: "`[source node text]` `[edge verb]` `[target node text]` e.g. `A causes B`
 
 ### Example
 
 #### Context
 
-- Based on arguments about "The US should 'build a wall' to reduce illegal immigration"; tries to show off one of each piece from [Structure](#Structure)
+- Based on arguments about "The US should build a wall to reduce illegal immigration"; tries to show off one of each piece from [Structure](#Structure)
 - Scores convey three users' perspectives via the `%perspectives` line - the main nodes are scored by everyone, some things by only some people, and some by nobody
 - Syntax legend:
 	- `*`: Concept node type
 	- `?`: Question node type
-		- guiding vs clarifying is implied by edge type: `guides` (agenda-setting) vs `clarifies` (fact-requesting)
+		- guiding (agenda-setting) vs clarifying (fact-requesting) is determined by presence of `#guiding` tag
 	- `=`: Claim node type
 	- `@`: Source node type
-	- `<`: edge whose source is the child (nested) line and target is the parent line
-	- `>`: edge whose source is the parent line and target is the child (nested) line
+	- `<`: edge whose source is the child (nested/indented) line and target is the parent line
+	- `>`: edge whose source is the parent line and target is the child (nested/indented) line
 	- `%[key]: [value]`: key-value property definition - for the parent line when indented, otherwise for the document as a whole
 		- document-level `%perspectives: [person1, person2, person3]`: declares whose scores appear in the example
   	- `Topic` property `description`: a high-level description of the topic - why are we discussing it?
   	- `Claim` property `opposite`: indicates phrasing for the opposite meaning of the claim. Enables -8..8 scale for explicit claim's truth score, rather than 0..8.
+  	- `Criterion` property `opposite`: indicates phrasing for the opposite of the criterion (e.g. `Expensive` for `Inexpensive`). Enables -8..8 scale for `fulfills` edges that target the criterion, rather than 0..8.
 	- `[X,Y,Z]`: scores, one slot per person in the `%perspectives` order - node scores appear after the node type character (e.g. `*[-4,0,-8]`), edge scores appear after the edge type (e.g. `causes[6,2,-]`)
 		- `-` in a slot: that person didn't score it
 		- a scoreable node/edge with no brackets at all: nobody scored it
 	- `&some-id`: sets an id on the node/edge whose line the id appears on
 	- `$some-id`: references an id
-		- references are prefixed with the referent's type character (e.g. `* $illegal-immig`, `? $best-ways`, `= $visa-overstay`)
-		- to reduce duplication, a reference line never carries scores. Where that hurts readability, the example echoes the referent's score in a `/` comment
-		- `= $some-id` on a concept's/edge's id: references the implied claim behind that thing's score, so it can be supported/critiqued/clarified
-			- implied claims have standard phrasing:
-				- concept's change-importance scores: `$node is important to increase`
-				- edge scores: `$source-node [edge type] $target-node` (edges are verbs that claim a relation between the source and target)
-				- claim's truth score: `[node's text]` (claims are worded as evaluable statements already)
+		- when a reference is by itself on a line, it's prefixed with the referent's type character (e.g. `* $illegal-immig`, `? $best-ways`, `= $visa-overstay`)
+		- to reduce duplication, a reference line never carries scores
+  		- if that hurts readability, can echo the referent's score in a `/` comment
+		- `= $some-id` on its own line: references the implied claim behind that thing's score, so it can be supported/critiqued/clarified
+  		- see [Structure](#structure) for implied claim phrasings based on the parent node/edge type
 			- explicit claims can have any text - ideally causal ones get promoted into the causal map and calculated instead (see [Calculated arguments](#calculated-arguments))
-	- `#tag`: explicitly specifies a subtype (e.g. `#action`) - subtypes like category/component/criterion are implied by their edges so aren't tagged
+	- `#tag`: explicitly specifies a subtype (e.g. `#action`)
 	- `~`: a note relevant to its parent line - it would show visually if this were rendered
 	- `/`: a meta comment about the example, noting something about its parent line - it wouldn't show if rendered
 
 #### "Build a wall"
 
-```
-%perspectives: [alice, bob, casey]
-  / rough personas so the scores tell a story: alice is moderate, bob doubts illegal immigration is a big problem and opposes the wall, casey wants illegal immigration reduced hard and favors the wall
-
-/ --- Concepts: the causal core ---
-
-*[-4,0,-8] Illegal immigration into the US &illegal-immig
-  < causes[6,2,-] &wait-causes-illegal-immig
-    *[-6,-3,-7] Long legal processing times &long-wait
-      < causes[7,-,8]
-        *[-5,-,-6] Administrative burden of enforcing immigration requirements &admin-burden
-
-*[7,8,2] Legal immigration into the US &legal-immig
-  > reduces[3,7,1]
-    * $illegal-immig
-  < impedes[6,8,-]
-    * $long-wait
-
-*[0,-,-] Motivations to immigrate illegally &motivations
-  > categorizes
-    / categorizes doesn't take a score
-    *[-2,-,-5] Saving money by skipping the legal process &save-money
-      > causes[4,-,7]
-        * $illegal-immig
-  > categorizes
-    *[-3,-,-] Wanting to "disappear" (avoid government records) &disappear
-      > causes[2,-,6]
-        * $illegal-immig
-  > categorizes
-    *[-8,-8,-6] Danger in home countries &danger
-      > causes[7,8,3]
-        * $illegal-immig
-
-/ --- Actions ---
-
-*[2,-7,8] Border wall along the southern US border &wall #topic #action
-  %description: Should the US build a wall along its southern border to reduce illegal immigration? We're weighing what the wall would cost against how much it would reduce illegal immigration.
-  > reduces[3,-5,8] &wall-reduces
-    * $illegal-immig
-  > has
-    / has doesn't take a score
-    * Barbed wire along the top &barbed-wire
-      / component; nobody scored it, so no score brackets at all
-  < clarifies
-    ? How tall is the proposed wall design? &how-tall
-      / clarifying question about a plain node (vs how-enter, which clarifies an edge)
-
-*[5,8,2] Increased administrative resources for processing immigration &more-admin #action
-  > reduces[7,8,-]
-    * $long-wait
-
-*[3,7,-4] Reduced immigration requirements &fewer-requirements #action
-  ~ ambiguous: it wasn't stated which requirements would be reduced
-  > reduces[6,7,-]
-    * $admin-burden
-
-/ --- Questions ---
-
-? Why might we want the wall? &why-wall
-  / guiding question (agenda-setting); the canned "why might we want [concept]?" pointed at the topic - its view shows the wall's pros
-  > guides[8,6,8]
-    * $wall
-
-? What are the most effective ways to reduce illegal immigration? &best-ways
-  / guiding question (agenda-setting); guides `illegal-immig` (not the topic) - guides chains through the wall-reduces edge to relate it to the wall topic
-  > guides[7,5,8]
-    * $illegal-immig
-  < guides[6,8,1]
-    ? Why do people immigrate illegally? &why-immigrate
-      / guiding question guiding another guiding question
-
-? How do most people illegally enter the US? &how-enter
-  / clarifying question (fact-requesting); it clarifies an edge by targeting the edge's implied claim - note the `=` on the reference
-  > clarifies[6,-,3]
-    = $wall-reduces
-  < answers[7,-,6]
-    =[3,1,8] Most enter by crossing the border on foot between ports of entry &enter-on-foot
-      / claim option
-  < answers[7,8,-]
-    =[7,8,1] Most enter legally and overstay visas &visa-overstay
-      / claim option
-
-/ --- Criteria: for evaluating the options (3 criteria x 3 options = a minimal tradeoffs table) ---
-
-*[7,8,2] Inexpensive &inexpensive
-  / criterion: worded so that more of it is good
-  > criterion for
-    / criterion for doesn't take a score
-    ? $best-ways
-  < fulfils[-3,-4,-]
-    * $more-admin
-  < fulfils[7,-,6]
-    * $fewer-requirements
-  < fulfils[-7,-8,-2]
-    *[-2,-4,-] Billions of dollars of construction and maintenance spending &wall-cost
-      < causes[8,8,8]
-        / the wall's fulfilment of "inexpensive" comes via this causal-fulfils chain (causes[8,8,8] x fulfils[-7,-8,-2]); everyone agrees the wall costs money
-        * $wall
-
-*[5,3,8] Quick to implement &quick
-  / fulfils edges omitted for brevity - only "inexpensive" shows them
-  > criterion for
-    ? $best-ways
-
-*[8,8,3] Humane treatment of immigrants &humane
-  / fulfils edges omitted for brevity - only "inexpensive" shows them
-  > criterion for
-    ? $best-ways
-
-/ --- Claims: arguing about scores ---
-
-= $wait-causes-illegal-immig
-  / scored above as [6,2,-]
-  / implied claim behind the "long waits cause illegal immigration" edge score
-  < supports[-4,-,-6]
-    =[6,-,8] Even with instant processing, people would still immigrate illegally to save money or "disappear" &still-immigrate
-      / explicit claim, but causal: it's essentially pointing at the save-money/disappear causes edges, so it could be promoted and become a calculated argument
-
-= $wall-reduces
-  / scored above as [3,-5,8]
-  / implicit claim behind the "wall reduces illegal immigration" edge score
-  < supports[7,-,8]
-    =[8,-,8] A wall physically stops crossings without needing continuous surveillance &physical-barrier
-      %opposite: A wall physically _aids_ crossings without needing continuous surveillance
-  < supports[-,-7,-3]
-    =[2,7,1] Hardened borders trap circular migrants who used to return home &caging-effect
-      < supports[-,7,4]
-        =[3,8,2] Re-crossing a hardened border is costly and dangerous, so seasonal migrants stay and bring their families over &costly-recrossing
-  < supports[-6,-8,-]
-    =[6,8,1] People will find a way over the barrier &climb-over
-      < supports[5,7,-]
-        =[8,8,-] It's easy to climb a fence &easy-climb
-      < supports[-4,-,-8]
-        =[5,-,8] The wall design is tall, without handholds, and topped with barbed wire &unclimbable
-  < supports[-5,-8,-]
-    / reuse: the same claim answers a question above and critiques this edge
-    = $visa-overstay
-
-= $illegal-immig is important to increase
-	/ scored above as [-4,0,-8]
-  / implicit claim behind `illegal-immig`'s concept score, with standardized node-score wording; alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
-  < supports[5,8,-]
-    =[7,8,2] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
-  < supports[-4,-,-8] &murder-supports-worse-score
-    =[3,-,8] An illegal immigrant murdered a baby in cold blood last year &baby-murder #anecdote
-
-= $murder-supports-worse-score
-  / scored above as [-4,-,-8]
-  / implied claim behind the anecdote's support edge score
-  < supports[-7,-,-3]
-    =[8,-,4] In Texas 2012-2018, illegal immigrants were arrested for violent crimes at half the rate of native-born citizens &texas-stat #statistic
-      ~ rates vary by year and state; Texas is used because it tracks immigration status in arrest data
-
-/ --- Sources ---
-
-@ House Judiciary hearing document, Jan 2025 (docs.house.gov) &house-doc
-  > mentions[8,-,-]
-    = $texas-stat
-```
+- The example lives in [examples/build-a-wall.txt](./examples/build-a-wall.txt)
 
 #### Structure coverage
 
@@ -287,7 +125,7 @@
 		- Category: `motivations` categorizes `save-money` / `disappear` / `danger`
 		- Component: `wall` has `barbed-wire`
 		- Action: `wall` / `more-admin` / `fewer-requirements` (tagged `#action`; each reduces `illegal-immig` or one of its causes)
-		- Criterion: `inexpensive` / `quick` / `humane` (criterion for the `best-ways` question); `more-admin` / `fewer-requirements` fulfil `inexpensive` directly, while `wall` fulfils it via a causal-fulfils chain (`wall` causes `wall-cost`, which fulfils[-7,-8,-2] `inexpensive`)
+		- Criterion: `inexpensive` / `quick` / `humane` (each `criterion for` the `best-ways` question - a criterion's importance to the decision is that edge's score, e.g. `criterion for[7,8,2]`, so the criterion concepts themselves are unscored); `more-admin` / `fewer-requirements` fulfill `inexpensive` directly, while `wall` fulfills it via a causal-fulfills chain (`wall` causes `wall-cost`, which fulfills[-7,-8,-2] `inexpensive`)
 	- Question
 		- Guiding Question: `why-wall` guides the topic (`wall`); `best-ways` guides `illegal-immig` (a concept the wall reduces); `why-immigrate` guides `best-ways`
 		- Clarifying Question: `how-tall` clarifies the `wall` node; `how-enter` clarifies the `wall-reduces` edge, via the edge's implied claim
@@ -296,27 +134,30 @@
 		- Statistic: `texas-stat`
 		- Anecdote: `baby-murder`
 		- Option: `enter-on-foot` / `visa-overstay` answer `how-enter`
-		- Implicit vs explicit: claim-tree roots are implicit (implied claims with standardized wording, e.g. `= $illegal-immig is important to increase`); free-text claims (e.g. `still-immigrate`) are explicit
+		- Implicit vs explicit: claim-tree roots are implicit (implied claims with standardized wording, e.g. `= $illegal-immig`); free-text claims (e.g. `still-immigrate`) are explicit
 	- Source
 		- All: `house-doc` mentions `texas-stat`
 	- Scores
 		- Perspectives: score brackets hold one slot per person, in the `%perspectives: [alice, bob, casey]` order
 			- scored by everyone: the main nodes, e.g. `*[2,-7,8]` on the topic (`wall`), `*[-4,0,-8]` on `illegal-immig`
 			- scored by some (`-` = that person didn't score): e.g. `*[-2,-,-5]` on `save-money`, `mentions[8,-,-]`
-			- scored by nobody (brackets omitted): `barbed-wire`, the `clarifies` edge from `how-tall`
+			- scored by nobody (brackets omitted): `barbed-wire`, the `clarifies` edge from `how-tall`, the `categorizes` edges, the criterion concepts (their importance is scored on `criterion for` instead)
 		- Concept score: e.g. `*[-8,-8,-6]` on `danger`
 		- Claim truth score: e.g. `=[8,-,4]` on `texas-stat`
-		- Edge weight score: one on each scoreable edge type - causes, reduces, impedes, fulfils, guides, clarifies, answers, mentions, supports
-		- Unscored edges (never take scores): categorizes, has, criterion for
+		- Edge score: one on each scoreable edge type except `categorizes` (scoreable, but nobody scored it here) - causes, reduces, impedes, fulfills, criterion for, guides, clarifies, answers, mentions, supports
+		- Unscored edges (never take scores): has
 		- Implied claims behind scores: `= $wait-causes-illegal-immig` (a causes edge's score), `= $illegal-immig` (a concept's score), `= $murder-supports-worse-score` (a supports edge's score)
 		- Oppositional scores: `wall reduces[3,-5,8] illegal-immig` - casey (`8`) believes it reduces, bob (`-5`) believes it increases
+		- Opposites unlocking the negative half: `physical-barrier` defines `%opposite` so its truth score can go negative; `inexpensive` defines `%opposite: Expensive`, which is what its negative `fulfills` scores read as
 	- note: argument-map "reuse" (same claim in multiple arguments) falls out naturally from the graph: `visa-overstay` both answers `how-enter` and critiques `wall-reduces`
 
-#### Questions - Unanswered
+#### Questions - unanswered
 
 - questions and sources are left unscored here because [Structure](#Structure) doesn't define scores for them - should they have importance / credibility scores respectively?
+- should implied claims e.g. `= $illegal-immig` be clearer about meaning in the syntax?
+  - previously we had `= $illegal-immig is important to increase` which seems clearer, but is awkward to parse as standard claim text
 
-#### Questions - Answered
+#### Questions - answered
 
 - should an implied claim's score just _be_ the score of the node/edge it wraps, or is it a separate truth score?
 	- it should just _be_ the same score, and it's written in exactly one place: the declaration. Reference lines carry no scores, so `causes[6,2,-]` has it and `= $wait-causes-illegal-immig` doesn't
@@ -326,7 +167,7 @@
 
 ### Benefits / goals
 
-- significantly improved maintenance of the contested information
+- significantly improved maintenance of contested information
   - many arguments don't need to be manually written or maintained - they can be calculated from causation + individual scores - see [Calculated arguments](#calculated-arguments)
 
 ### Downsides / known missing things
@@ -340,7 +181,7 @@
 
 ## Structure Details
 
-### Shared: Nodes & Edges
+### Shared: Nodes
 
 #### Concept
 
@@ -351,7 +192,7 @@
 
 ##### Topic
 
-###### Meaning
+###### What
 
 ###### Purpose
 
@@ -367,7 +208,7 @@
 	- this also would allow calculating e.g. "how important is node X to the topic?"
 - bad
 
-###### Questions - Unanswered
+###### Questions - unanswered
 
 - [Do all topics have a topic node? Can there be multiple topic nodes?](#do-all-topics-have-a-topic-node-can-there-be-multiple-topic-nodes)
 - how to relate all relevant nodes to the Topic?
@@ -379,7 +220,7 @@
 
 - All - Concept causes/reduces/impedes Concept
 
-###### Meaning
+###### What
 
 - An idea, a thing, a phenomenon - something to discuss
 - ==Example: "" _causes_ "" (TODO: find immigration example to use for all of these?)==
@@ -392,19 +233,19 @@
 
 ###### Ideas
 
-###### Questions - Unanswered
+###### Questions - unanswered
 
-###### Questions - Kind of answered
+###### Questions - kind of answered
 
-###### Questions - Answered
+###### Questions - answered
 
-###### Questions - Archive
+###### Questions - archive
 
 ##### Category
 
-- Category - {Concept} categorizes Concept
+- Category - {Concept} categorizes Any
 
-###### Meaning
+###### What
 
 ###### Purpose
 
@@ -412,7 +253,7 @@
 
 - Concept has {Concept}
 
-###### Meaning
+###### What
 
 ###### Purpose
 
@@ -420,7 +261,7 @@
 
 - Action - {Concept} tagged `#action`
 
-###### Meaning
+###### What
 
 - Something that could be done about the situation - a potential intervention (e.g. building a wall)
 
@@ -430,14 +271,14 @@
 
 ###### Notes
 
-- a "what's the best solution?" Question's options are calculated: trace causal edges from the Question's target to find actions that reduce it
+- a "what's the best solution?" Question's options can be calculated by tracing causal edges from the Question's target to actions that reduce it
   - e.g. `best-ways` guides `illegal-immig`, so its options are the actions whose causal paths reduce `illegal-immig`: `wall` / `more-admin` / `fewer-requirements`
 
-###### Questions - Unanswered
+###### Questions - kind of answered
 
 - naming: "Action" vs "Option"?
 	- "Option" implies a decision/question that it's an option _for_, actions aren't always an option when they're first created
-	- using "Action" also frees "Option" to mean the question-relative role: an action can be an option for a question, mirroring how claims can be options for a clarifying question
+	- using "Action" also frees "Option" to mean the question-relative role: an action can be an option for a guiding question, mirroring how claims can be options for a clarifying question
 - when calculating a Question's options, which actions count?
 	- for a question like "what's the best solution?": actions whose causal paths reduce the question's target
   	- but should actions scored as _causing_ the target be included too, since people can disagree about whether something causes or reduces it?
@@ -446,35 +287,38 @@
 
 ##### Criterion
 
-- Criterion - Concept fulfils {Concept}; {Concept} criterion for Question ?
+- Criterion - Concept fulfills {Concept}; {Concept} criterion for Question ?
 
-###### Meaning
+###### What
 
 - A quality by which options can be evaluated, e.g. "inexpensive", "durable", "avoids excess"
 - ideally is worded such that more of it is a good thing, for consistency (also makes "how good is a solution" slightly easier to calculate)
 
 ###### Purpose
 
-- Enable a tradeoffs table: options along one axis, criteria along the other; each option's value = sum over criteria of (how much the option fulfils the criterion) x (how important the criterion is, -8 to 8)
+- Enable a tradeoffs table: options along one axis, criteria along the other; each option's value can be calculated by summing for each criterion: `fulfills score` x `criterion for score`
 	- In theory, this table could be created just by looking all the things caused/reduced by a solution, but generally it's much easier to think about through a smaller set of common criteria
-- Provide a way for "causing too much of a thing" to create negative value (e.g. a solution that creates excess would poorly fulfil "avoids excess")
+- Provide a way for "causing too much of a thing" to create negative value (e.g. a solution that creates excess would poorly fulfill "avoids excess")
 
 ###### Notes
 
-- the causal-fulfils edge chain from an Action to a Criterion determines how much the Action fulfils the Criterion
+- the causal-fulfills edge chain from an Action to a Criterion determines how much the Action fulfills the Criterion
 - criteria are typically pretty contextual to the thing they're criterion for, so they generally don't make sense to reuse across different decisions
-- the tradeoffs table uses the same "multiply edge weights by concept scores" calculation as "how good is a solution", viewed as a table restricted to Criterion nodes
+- the tradeoffs table "how good is an option" calculation is similar to the "multiply edge scores by concept scores" calculation
 
-###### Questions - Unanswered
+###### Questions - unanswered
 
+- see [should Criterion be a separate node type from Concept?](#should-criterion-be-a-separate-node-type-from-concept)
 - sometimes criteria seem to make sense being directly caused by other concepts, and sometimes they seem like they can only be "fulfilled" - might be based on how the criterion is worded? awkward
 	- hypothesis: criteria that are _properties of the option itself_ (e.g. "inexpensive", "durable") can only be fulfilled, while criteria that are _outcomes in the world_ (e.g. "reduced admin burden") can be caused?
-- what should the criterion edge be to the thing that the criterion is helping weigh?
+  	- as noted in "should criterion be a separate node type", we _could_ make a separate criterion as a property that ties to an outcome / effect
+    	- e.g. "reduces traffic throughput" -> "high traffic throughput"
+- what should the name be for the criterion edge that points to the question?
   - "criterion for [Question]"
     - is... accurate?
-	- perhaps "weighs"? "helps weigh"?
+	- perhaps "weighs"? "helps weigh"? "evaluates"? "important for answering"?
 
-###### Questions - Kind of answered
+###### Questions - kind of answered
 
 - "{Concept} criterion for [solving] Concept" seems too narrow
 	- should be able to have Criterion for achieving a positive thing, like a Goal
@@ -485,35 +329,22 @@
 
 ##### Notes
 
-- answers look differently based on question subtype: clarifying questions are generally answered by claims (via `answers` edges), while guiding questions generally don't have a concrete answer - they make sense to be "answered" by a view, probably generated based on relevant causal nodes (e.g. a tradeoffs-table view for "what are the most effective ways to reduce illegal immigration?")
-  - this can double as a sanity check: a "guiding" question that accumulates `answers` claims was probably clarifying all along
+- clarifying questions are generally answered by claims (via `answers` edges)
+- guiding questions generally don't have a concrete answer - they make sense to be "answered" by a view, probably generated based on relevant causal nodes (e.g. a tradeoffs-table view for "what are the most effective ways to reduce illegal immigration?")
 
-##### Questions - Unanswered
+##### Questions - kind of answered
 
 - how should guiding vs clarifying questions be scored?
   - clarifying seems better scored via edge because a question can relate to different nodes in different amounts of relevance
   - if there's no edge for guiding, then scoring to prioritize a guiding question will be different than scoring a clarifying question
   - a guiding edge does seem like its importance is to a topic, and we therefore have a similar problem to [TODO: link to section where we talk about node scores being all relative to topic and it not being worth moving these into an edge relation to the topic because there'd be too many edges]
-- "guiding" vs "driving" verbiage?
-  - "driving"
-    - + strong, like "motivating"
-    - - on its own can make people think of cars rather than reasoning
-  - "guiding"
-    - - doesn't imply "motivating" so much
+  - for now: seems best to score the edge for both kinds of questions
 
-##### Questions - Kind of answered
+##### Questions - answered
 
-- can a guiding question have a parent that _isn't_ the topic itself?
-  - hmm potentially guiding questions can be broken into further guiding questions? hard to say
-    - in this case though, the child "guiding question" probably wouldn't make sense to be displayed in the root set of "guiding questions" for a topic
-      - hmm maybe it wouldn't necessarily be more important than the parent but it could be more important than other root questions. e.g. "Why do people immigrate illegally?" guides "What are the most effective ways to reduce illegal immigration?", yet is also pretty important to the topic of illegal immigration
-  - clarifying questions _do_ seem like they could have a topic parent
-    - e.g. "concept: cars going too fast" < informs "question: how fast do cars go on average here?"
-    - I guess this means we can't just distinguish guiding vs clarifying via looking at what the parent is
-  - for now it seems like we could say that guiding questions will "guide" either the topic node or another guiding question
-  - note: this is somewhat similar to the idea that all node scores are relative to the topic (see [Topic](#Topic)'s "how to relate all relevant nodes to the Topic?"). but guiding questions having an edge to topic/question nodes doesn't seem like it'd be too many edges, compared to all nodes having edges to the topic
 - how to distinguish Guiding vs Clarifying questions?
   - definitely want to distinguish these - guiding questions are agenda-setting (they help drive our understanding of the topic), clarifying questions are fact-requesting (simpler, usually narrower / about something specific)
+  - going with: option 2 because sometimes it seems like a guiding question reads better as "clarifying" something
   - option 1: edge type "guides" = guiding, "clarifies" = clarifying
     - + "clarifies" is clear
     - - "informs" doesn't really exclude "clarifies"
@@ -525,7 +356,6 @@
   - option 3: no edge = guiding, "informs" ("clarifies"?) = clarifying
     - - conflicts with guiding questions being able to guide other guiding questions (they'd need an edge)
   - option 4: ?
-  - trying: option 1 - distinguish via edge type: "guides" = guiding (agenda-setting), "clarifies" = clarifying (fact-requesting)
 
 ##### Guiding Question
 
@@ -541,7 +371,7 @@
 - because the shape of a useful answer is known ahead of time, each one can auto-generate a view from the structure + the viewer's scores
 - notes regarding specific questions mentioned below:
 	- "good"/"bad" are perspective-specific per [Concept scoring semantics](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad) (change importance): a positive-scored concept is "good" (important to increase), a negative-scored one is "bad" (important to decrease)
-	- "upstream"/"downstream" mean the whole transitive causal reach, not just immediate neighbors - followed via the same multiply-and-attenuate causal chaining as [Calculated arguments](#calculated-arguments), which is what sorts each reached node into pro vs con and weights it
+	- "upstream"/"downstream" are transitive, not just immediate neighbors - followed via the same multiply-and-attenuate causal chaining as [Calculated arguments](#calculated-arguments), which is what sorts each reached node into pro vs con and weights it
 - specific question ideas:
 	- "what is [concept]?"
 		- what the view shows: its components
@@ -575,18 +405,34 @@
 - Questions - Unanswered
 	- should the canned set include something like "what do we know about this?" for questions / claims / sources?
 
-###### Questions - Unanswered
+###### Questions - unanswered
 
-- better name?
-	- "driving question" - initially invokes idea of driving as in "driving a car", like a driving exam
+- "guiding" vs "driving" verbiage?
+  - "driving"
+    - + strong, like "motivating"
+    - - on its own can make people think of cars rather than reasoning
+  - "guiding"
+    - - doesn't imply "motivating" so much
 
-###### Questions - Kind of answered
+
+###### Questions - kind of answered
 
 - what edge name to use?
 	- "informs" seems to imply that there's uncertainty in the topic if the question isn't answered, but that doesn't seem right
 	- hmm if questions themselves are scored by importance, the edge may not matter?
 		- could also do "important for" ...?
 	- trying: "guides" - self-documenting since it matches the subtype name
+- can a guiding question have a parent that _isn't_ the topic itself?
+  - hmm potentially guiding questions can be broken into further guiding questions? hard to say
+    - in this case though, the child "guiding question" probably wouldn't make sense to be displayed in the root set of "guiding questions" for a topic
+      - hmm maybe it wouldn't necessarily be more important than the parent but it could be more important than other root questions. e.g. "Why do people immigrate illegally?" guides "What are the most effective ways to reduce illegal immigration?", yet is also pretty important to the topic of illegal immigration
+        - maybe even "why do people immigrate illegally?" _clarifies_ "what are the most effective ways to reduce illegal immigration?".
+          - "clarifies" seems better here because it's a _prerequisite_ to answering the parent, not just a question to explore / learn more about the parent
+  - clarifying questions _do_ seem like they could have a topic parent
+    - e.g. "concept: cars going too fast" < informs "question: how fast do cars go on average here?"
+    - I guess this means we can't just distinguish guiding vs clarifying via looking at what the parent is
+  - for now it seems like we could say that guiding questions will "guide" either the topic node or another guiding question
+  - note: this is somewhat similar to the idea that all node scores are relative to the topic (see [Topic](#Topic)'s "how to relate all relevant nodes to the Topic?"). but guiding questions having an edge to topic/question nodes doesn't seem like it'd be too many edges, compared to all nodes having edges to the topic
 
 ##### Clarifying Question
 
@@ -600,10 +446,14 @@
 
 ##### Notes
 
+- See [Structure](#structure) for implicit claim wordings
 - See [More advanced claim modeling](#more-advanced-claim-modeling)
-- Non-causal arguments - e.g. evidence about truth (statistics, anecdotes, source mentions), definitional disputes, pure value assertions - make sense to exist via explicit claims. But causal arguments are ideally converted into causal form (concepts + causal edges) so that they're _calculated_ into the argument map instead of manually maintained (see [Calculated arguments](#calculated-arguments)).
+- Arguments can also exist as ungrounded/explicit claims
+  - purpose: support informal claims so they're easy to initially add, and to support non-causal arguments
+		- non-causal arguments e.g. evidence, arguments about definitions
+  - ideally causal arguments are converted into causal form (concepts + causal edges) so that they're _calculated_ as implicit claims instead of manually maintained (see [Calculated arguments](#calculated-arguments))
 
-##### Questions - Kind of answered
+##### Questions - kind of answered
 
 - how to model implied claims?
 	- (option 2 seems best)
@@ -616,12 +466,11 @@
 		- bad: _double_ the total number of nodes / edges (because each needs an implied claim)
   		- but: could try to automatically maintain implied claims... deleting them if no score or child claim exists
     		- probably not worth doing this. the implied claim could be a very trivial record that's literally just an id
-
-##### Questions - Kind of answered
+- see [Should other things besides cause & effect be primary? If so, how?](#Should-other-things-besides-cause--effect-be-primary-If-so-how)
 
 #### Source
 
-##### Questions - Unanswered
+##### Questions - kind of answered
 
 - Does this make sense as a Concept subtype? Rather than its own Node type
 	- yes: it seems like a Concept
@@ -637,6 +486,95 @@
 			- there are other issues with Concept being "higher" than Claim, e.g. the open question of what to do about Claims that don't tie to a Concept (if that's possible)
 	- potentially Source could have "credible for Topic" relation ?
 		- kind of nice to allow sources to have different credibility based on the topic
+
+### Shared: Edges
+
+#### Notes
+
+- every scorable edge is scored through its implied claim, worded `[source node text] [edge verb] [target node text]` (e.g. `A causes B`); the edge's weight score _is_ that implied claim's truth score (see [Claim truth score](#claim-truth-score))
+- so all edge scores use the claim truth score: `-8 = strongly believe opposite`, `0 = don't believe`, `8 = strongly believe`
+	- only bipolar edges (those with a defined opposite, e.g. causes / reduces) use the negative half; unipolar edges (e.g. guides, mentions) stay 0..8
+	- e.g. `A causes[8] B` reads "A causes B", strongly believed; `A causes[-8] B` reads its opposite, "A reduces B"
+
+#### Questions - kind of answered
+
+- do edge scores need to be able to convey 'how _much_ `A [verbs] B`'?
+  - q: does scoring "belief extent" rather than "`[verb]` extent" still allow us to perform transitive edge calculations?
+    - e.g. `A causes[7] B causes[6] C` calculates to `A causes[5.25] C`
+  - right now the semantics are 'how much _do you believe_ that `A [verbs] B`?'.
+    - what happens if I strongly believe that A causes B, but that A only slightly causes B?
+      - I _think_ implicitly `A causes B` is _relative to other causes of B_
+        - which means that "strong belief" would be in "A causing B relative to other causes"
+          - which is akin to "A _strongly causes_ B"
+            - which seems fine for transitive edge calculations
+
+#### Causes (opposite: reduces/impedes)
+
+##### Notes
+
+- enables calculating "how much does node A cause node C?"
+	- by multiplying causal weight scores
+		- normalized to -1..1 (score / 8), so that chained causation attenuates
+	- and this, combined with [Concept scoring semantics](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad): "how much does node C _matter to_ node A?"
+		- by multiplying causal score by concept score e.g. goodness
+- avoid duplicate edges when a chain already conveys the relation (e.g. A causes B and B causes C, plus a direct A causes C edge)
+  - if there are duplicate edges, it might be hard to ensure calculations don't double-count them
+
+##### Questions - kind of answered
+
+- does it make more sense for opposite of "A causes B" to be "B causes A", rather than "A reduces B"?
+  - seems like edge direction ("B causes A") is more significantly distinct, that claims wouldn't necessarily be equal and opposite, that this claim would make more sense to actually have independent / unlinked
+    - for example, "B guides A" doesn't seem to make any sense at all
+
+#### Positively correlates with
+
+##### Purpose
+
+- represents an observed association where we don't (yet) know the direction or the mechanism
+- example: `eating ice cream _positively correlates with_ drowning`
+- can add a question to signify uncertainty, e.g. `why does ice cream correlate with drowning?`
+- can add a statistic to support/critique the edge
+- intention is that this association eventually gets replaced by `A causes B`, `B causes A`, and/or a shared upstream cause of both A and B
+  - shared upstream cause example: `eating ice cream _correlates with_ drowning` -> `hot day _causes_ eating ice cream`, `hot day _causes_ swimming _causes_ likelihood of drowning`
+
+##### Questions - Unanswered
+
+- is there a better, shorter name for this edge?
+	- "positively correlates with" is verbose next to `causes` / `guides`
+	- but "correlates with" doesn't indicate positive vs negative, so the implied claim would be ambiguous
+  	- potentially could use "correlates with" as the visible edge, and have the implied claim actually be "positively correlates with". but that seems confusing
+
+#### Fulfills
+
+##### Questions - Unanswered
+
+- what wording is best for opposite of "fulfills"?
+  - option: "works against"
+
+#### Guides
+
+#### Clarifies
+
+##### Notes
+
+- `clarifies` scores indicate uncertainty about the clarified node (until the question is answered)
+
+##### Questions - unanswered
+
+- can clarifies scores be used to prioritize a question in relation to any node in the map?
+	- using the same multiply-along-edges machinery as causal chains? (see Causes notes above)
+		- e.g. for a question clarifying C, where A causes B causes C: multiplying C's scored importance x the causal chain weights (A causes B, B causes C) x the clarifies weight conveys how much impact the question has on A (how uncertain we are about it)
+		- I don't think this works. the question implies uncertainty in C's change-importance score, but causation to other nodes doesn't necessarily seem to create uncertainty in those nodes' change-importance
+
+#### Mentions
+
+##### Questions - Unanswered
+
+- Does this make more sense as a 0 or 1 score? Mentions or doesn't?
+	- in between could be nice for arguing whether something is ambiguously implied
+		- but this seems somewhat of a niche thing to take advantage of - I'd guess that most times there's just a direct quote provided, and the Claim is a summary or direct text from that quote
+
+
 
 ### Individual: Scores
 
@@ -658,11 +596,13 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 - all scores use one of two ranges: -8..8 ("bipolar" - the scored thing has a meaningful opposite) or 0..8 ("unipolar" - it doesn't)
 - why -8..8 / 0..8 (previously -9..9 / 1..9):
-	- absence lives at 0 everywhere ("doesn't cause at all", "doesn't mention", "completely absent of truth", "no need to change")
-	- 0..8 has an odd number of options (9), so 4 is a midpoint that can be used for defaults if appropriate; a 0..9 range would put the midpoint at 4.5
+	- scoring 0 can signify "absence" of something (e.g. doesn't cause at all, doesn't mention, no need to change)
+  	- also makes it easier to perform calculations, e.g. multiplying by 0 when something _does_ mean "complete absence"
+	- 0..8 has a nice integer midpoint of 4
 
 ##### Questions - Unanswered
 
+- see [should-claim-scores-have-opposites?](#should-claim-scores-have-opposites)
 - is there better terminology than "unipolar vs bipolar" for the score ranges?
   - these terms are good because they're established in surveying literature
   - but bipolar seems more-colloquially related to the medical condition. would be ideal to avoid this connection
@@ -680,14 +620,14 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- does this have value asynchronously? seems like conveying "I think this is important" is sufficient asynchronously
 	- synchronously, it seems like this could be handled by something like [Suggesting and voting on a new focus](https://github.com/amelioro/ameliorate/issues/314)
 		- does this make sense as _part_ of the ontology...?
-		- this _could_ be useful asynchronously? though maybe a "driving question"
+		- this _could_ be useful asynchronously? though maybe as a "driving question"
 
 #### Claim truth score
 
 ##### Notes
 
 - need to define "opposite" claim in order to expand scoring range from 0..8 to -8..8
-  - implicit claims will intentionally either have this defined or not defined, based on what makes sense (e.g. "A causes B" has opposite "A reduces B", but "A guides B" doesn't have opposite because it doesn't seem like something like "creates chaos for" makes sense)
+  - implicit claims will intentionally either have this defined or not defined, based on what makes sense (e.g. "A causes B" has opposite "A reduces B", but "A guides B" doesn't have opposite because it doesn't seem like something like "creates chaos for" makes sense to convey)
 
 ##### Questions - Unanswered
 
@@ -696,83 +636,20 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- probably default unscored score to like a 4 or something "somewhat supports"
 - do the semantics allow/benefit-from distinguishing the _kind_ of claim, e.g. relevance support vs importance support vs truth support?
   - relevance to parent / impact on parent seems all tied in via the "supports" edge - could argue about this by pointing claims at the edge
+    - note: in Kialo, a child claim's score is "impact", i.e. the combination of relevance to parent x truth of child
 - are there alternative semantics for a claim's score?
 - are there better names than "truth"?
 	- "credence" - maybe slightly academic, but more-explicitly implies "our _belief_ that something is true" as opposed to "absolutely true"
 	- "veracity"
 
-#### Edge weight score
-
-##### Notes
-
-- every scorable edge is scored through its implied claim, worded `[source node text] [edge verb] [target node text]` (e.g. `A causes B`); the edge's weight score _is_ that implied claim's truth score (see [Claim truth score](#claim-truth-score))
-- so all edge scores share one scale: `8 = strongly believe`, `0 = don't believe`, `-8 = strongly believe the opposite`
-	- only bipolar edges (those with a defined opposite, e.g. causes / reduces) use the negative half; unipolar edges (e.g. guides, mentions) stay 0..8
-- e.g. `A causes[8] B` reads "A causes B", strongly believed; `A causes[-8] B` reads its opposite, "A reduces B"
-
-##### Causes (opposite: reduces/impedes)
-
-###### Notes
-
-- enables calculating "how much does node A cause node B?"
-	- by multiplying causal weight scores
-		- probably normalized to -1..1 (score / 8), so that chained causation attenuates rather than compounds
-	- and this, combined with [Concept scoring semantics](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad): "how much does node B _matter to_ node A?"
-		- by multiplying causal score by concept score e.g. goodness
-- avoid duplicate edges when a chain already conveys the relation (e.g. A causes B and B causes C, plus a direct A causes C edge) - the duplicate would double-count in calculations
-
-###### Questions - kind of answered
-
-- does it make more sense for opposite of "A causes B" to be "B causes A", rather than "A reduces B"?
-  - seems like edge direction ("B causes A") is more significantly distinct, that claims wouldn't necessarily be equal and opposite, that this claim would make more sense to actually have independent / unlinked
-    - for example, "B guides A" doesn't seem to make any sense at all
-
-##### Positively correlates with
-
-###### Purpose
-
-- represents an observed association where we don't (yet) know the direction or the mechanism
-- example: `eating ice cream _positively correlates with_ drowning`
-- can add a question to signify uncertainty, e.g. `why does ice cream correlate with drowning?`
-- can add a statistic to support/critique the edge
-- intention is that this association eventually gets replaced by `A causes B`, `B causes A`, and/or a shared upstream cause of both A and B
-  - shared upstream cause example: `eating ice cream _correlates with_ drowning` -> `hot day _causes_ eating ice cream`, `hot day _causes_ swimming _causes_ likelihood of drowning`
-
-###### Questions - Unanswered
-
-- is there a better, shorter name for this edge?
-	- "positively correlates with" is verbose next to `causes` / `guides`
-	- but "correlates with" doesn't indicate positive vs negative, so the implied claim would be ambiguous
-  	- potentially could use "correlates with" as the visible edge, and have the implied claim actually be "positively correlates with". but that seems confusing
-
-##### Guides
-
-###### Notes
-
-- `guides` weights can chain the same way causal weights do, to prioritize questions within the question hierarchy: e.g. if Q2 guides[7] Q1 and Q1 guides[8] the topic, Q2's priority relative to the topic multiplies (and attenuates) through the chain
-- the chaining can also extend through causal edges to prioritize a guiding question in relation to any node (see Clarifies notes below), since topic nodes are concepts in the causal web
-	- especially relevant if multiple topic nodes are allowed in the future (e.g. a topic "build a wall" that reduces a topic "illegal immigration" - separate topics would allow people to focus on "build a wall" specifically, as opposed to generally looking at "illegal immigration")
-
-##### Clarifies
-
-###### Notes
-
-- `clarifies` scores indicate uncertainty about the clarified node (until the question is answered)
-- enables prioritizing a question in relation to _any_ node in the map, not just the node it directly clarifies, using the same multiply-along-edges machinery as causal chains (see Causes notes above)
-	- e.g. for a question clarifying C, where A causes B causes C: multiplying C's scored importance x the causal chain weights (A causes B, B causes C) x the clarifies weight conveys how much impact the question has on A (how uncertain we are about it)
-
-##### Mentions
-
-###### Questions - Unanswered
-
-- Does this make more sense as a 0 or 1 score? Mentions or doesn't?
-	- in between could be nice for arguing whether something is ambiguously implied
-		- but this seems somewhat of a niche thing to take advantage of - I'd guess that most times there's just a direct quote provided, and the Claim is a summary or direct text from that quote
-
 ## Core features
 
 - features enabled by the structure
-- other candidates that could migrate here from notes elsewhere: question prioritization via guides/clarifies chaining (see [Edge weight score](#edge-weight-score)), "how good is a solution" calculation
+- other candidates that could migrate here from notes elsewhere:
+  - question prioritization via guides/clarifies chaining (see [Shared: Edges](#shared-edges))
+  - "how good is a solution" calculation
+- there's also description of some features in [UX-design.md](./UX-design.md)
+  - maybe a good distinction between these two places is that UX design is more detailed, with some less-critical features, and Core Features is more high-level and "core"
 
 ### Causal map
 
@@ -785,13 +662,13 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 ### Tradeoffs table
 
-- options (actions) along one axis, criteria along the other; each cell is a "fulfills" score of how much the option fulfils the criterion, weighted by the criterion's importance (see [Criterion](#criterion))
+- options (actions) along one axis, criteria along the other; each cell is a "fulfills" score of how much the option fulfills the criterion, weighted by the criterion's importance (see [Criterion](#criterion))
 
 #### Purpose
 
 - provide a concise way of organizing all the factors involved with a decision, so that everything can be fairly considered
 
-#### Questions - unanswered
+#### Questions - kind of answered
 
 - how does the table determine what criteria are to be shown for a question?
   - all criteria with a "is criterion for" ([name TBD](#criterion)) edge that points to this question
@@ -804,28 +681,32 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 ### Calculated arguments
 
-#### Meaning
+#### What
 
 - many of the arguments in an argument map about a node's score can be _calculated_ based on causation to/from the node, rather than manually maintained as claims:
-	- arguments supporting a higher score: nodes with positive score that this node causes, nodes with negative score that this node reduces
-	- arguments supporting a lower score: nodes with negative score that this node causes, nodes with positive score that this node reduces, nodes that impede this node ? (see questions - not sure if impediments should be included - should "change importance" include attainability?)
-- e.g. in the [Example](#Example), "the wall costs billions" doesn't need to be a manual claim critiquing the wall's score - `wall causes[8,8,8] wall-cost`, combined with `wall-cost`'s negative scores, _is_ that con, calculably
-- this reuses the "multiply edge weights by concept scores" machinery from "how good is a solution" (see Causes notes under [Edge weight score](#edge-weight-score)) - the argument map is that calculation decomposed per-neighbor, displayed as pros/cons
+	- supports: caused positively-scored nodes, reduced negatively-scored nodes
+	- critiques: caused negatively-scored nodes, reduced positively-scored nodes, nodes that impede this node ?
+  	- see questions - not sure if impediments should be included
+	- e.g. in the [Example](#Example), "the wall costs billions" doesn't need to be a manual claim critiquing the wall's score - `wall causes[8,8,8] wall-cost` can be combined with `wall-cost`'s negative score to conclude that "wall costs billions" is a con that critiques the wall as a solution
+  - causal scores can also be used to calculate some of the argument scores, similar to the "multiply edge scores by concept scores" calculations
 
 #### Purpose
 
-1. make the contested information easier to maintain: causes are often reused across many arguments, so updating a few cause-effect relations (or concept scores) automatically updates every calculated argument they participate in - in a manual argument map, each affected argument would have to be found and edited by hand
+1. make the contested information easier to maintain: causes are often reused across many arguments, so updating a few cause-effect relations (or concept scores) automatically updates every calculated argument they participate in
+  - in a manual argument map, each affected argument would have to be found and edited by hand
 	- e.g. `long-wait` feeds calculated arguments in multiple places (its `causes` edge argues about `illegal-immig`'s score; `more-admin reduces long-wait` argues for `more-admin`) - one update to `long-wait`'s score or edges flows to all of them
-2. keep the shared structure more side-free in wording
+2. keep the shared structure's wording from taking sides
   - "X causes Y" just models reality, and calculated arguments can use standardized wording - manual claim wording usually reads as taking a side (e.g. "people will find a way over the barrier")
-	- the side of the calculated argument is also based on the viewer's own scores rather than baked into the shared structure; though non-causal supports edges using a -8 to 8 score also allows claim pro/con status to be calculated
+	- the side (pro vs con) of the calculated argument is based on the viewer's own scores rather than baked into the shared structure
+  	- non-causal supports edges using a -8 to 8 score also allows claim pro/con status to be calculated
 
 #### Notes
 
-- claim lifecycle: claims can temporarily be manually added to an argument chain, but ideally they're then converted into causal form (concepts + causal edges) and thereby calculated into the argument map instead
-	- some arguments aren't causal and stay as manual claims - candidates: evidence about truth (statistics, anecdotes, source mentions), definitional disputes, pure value assertions
-	- the [Example](#Example)'s claims sort accordingly: `physical-barrier` / `climb-over` / `visa-overstay` / `still-immigrate` / `fleeing-danger` are causal at heart (promotable), while `texas-stat` / `baby-murder` / `unclimbable` are evidence/specifics that stay manual
-- arguments about a causal _edge's_ weight seem partly calculable too:
+- claim lifecycle: claims can be manually added, but ideally they're eventually converted into causal form (concepts + causal edges) to be calculated into the argument map instead
+	- though some arguments aren't causal and stay as manual claims
+  	- e.g. evidence (statistics, anecdotes, source mentions), definitional disputes
+	- the [Example](#Example)'s claims sort accordingly: `physical-barrier` / `climb-over` / `visa-overstay` / `still-immigrate` / `fleeing-danger` are causal, while `texas-stat` / `baby-murder` / `unclimbable` are evidence/specifics that stay manual
+- arguments about a causal edge seem partly calculable too:
 	- competing causes: `still-immigrate` (critiquing `wait-causes-illegal-immig`) is essentially pointing at the sibling causes of `illegal-immig` (`save-money`, `disappear`) as competing explanations
 	- mechanism decomposition: `climb-over` and `visa-overstay` critique `wall-reduces`; decomposing that edge into its mechanism (wall reduces "crossings on foot between ports of entry", which causes `illegal-immig`) turns them into ordinary causal arguments about the intermediate node ("people climb over" reduces the wall's effect on it; "most enter via visa overstay" caps its weight on `illegal-immig`)
 
@@ -835,15 +716,39 @@ There are a few different kinds of scores, as specified below. The reasons for t
 	- "Y impedes X": an impediment seems to speak to how attainable X is, not how important it is to change X - e.g. `long-wait impedes legal-immig` doesn't seem to argue that `legal-immig` should be scored lower (alice and bob score it high while fully agreeing it's impeded)
   	- but attainability _does_ seem to relate to "is this is a good option?" because if it's easier to attain then that's a plus. perhaps the impedance should show up in the tradeoffs table but not in the arguments about "is X important to increase?"
 	- "Y causes X": `danger causes illegal-immig` feels like it carries the `fleeing-danger` argument ("they're fleeing danger" supports a less-negative score for `illegal-immig`), but strictly the argument's causal content is an _outgoing_ edge that doesn't exist yet (illegal immigration reduces the harm those people face) - should promotion prefer creating that outgoing edge, or should sympathetic/incriminating incoming causes count as arguments somehow?
-- which arguments are irreducibly non-causal, beyond the candidates in the notes above?
+- which kinds of arguments are non-causal?
 - how should scores migrate when a claim is promoted to causal form?
-  - do old truth score + supports weight map 1:1 onto the new concept score + causal edge weight?
+  - do old truth score + supports weight map 1:1 onto the new concept score + causal edge score?
     - seems like they may be different-but-related judgments
     - when something has been promoted, could prompt prior scorers to re-score
 
 ## Big open questions
 
+- these questions are likely to majorly affect the ontology or the implementations of it
 - these should be root-level so we can do something like e.g. "option 1" "option 2"
+
+### Should claim scores have opposites?
+
+- leaning: ?
+- thoughts
+	- issue with -8 to 8 w/opposites: scores imply pro/con generation based on perspective, but critiques could mean "supports absence", "supports opposite", or "both", which means we _can't_ flip based on perspective
+	- issue with 0 to 8: people cannot score the same edge in opposite directions
+  - there are a few relevant open questions here:
+    - [is-it-possible-for-child-claims-to-distinctly-advocate-for-absence-of-truth-separately-from-opposite-of-truth](#is-it-possible-for-child-claims-to-distinctly-advocate-for-absence-of-truth-separately-from-opposite-of-truth)
+    - [should-claim-truth-scores-be-the-only-possible-scores](#should-claim-truth-scores-be-the-only-possible-scores)
+    - [concept-scoring-semantics-desirability-importance-more-less-vs-good-bad](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad)
+- options
+  - option 1: -8 to 8 w/opposites
+    - bad: scores imply pro/con generation based on perspective, but critiques could have three different meanings ("supports absence", "supports opposite", or "both"), which means we _can't_ flip based on perspective
+  - option 2: 0 to 8
+    - bad: people cannot score the same edge in opposite directions
+			- (could allow -8 to 0 for critiques edges and 0 to 8 for supports)
+			- previous idea: just make both directional edges (e.g. causes _and_ reduces)
+  			- but this means that all children arguments belong on both directional edge claim trees, and still there's the problem of not being able to tell where children should be reflected on the opposite edge claim tree
+					- e.g. a critique of "causes" that supports "absence of truth" would be also a critique of "reduces", whereas a critique of "causes" that supports "reduces" would be a support of "reduces"
+					- I guess we could just forfeit the tree-flipping for duplicated edges, but then there's a bunch of duplication
+  					- will opposite scoring be rare and therefore the duplication be rare?
+    					- seems like "importance to change" direction could be uncommonly disagreed upon but "rare" might be a stretch
 
 ### Is it possible for child claims to distinctly advocate for "absence of truth" separately from "opposite of truth"?
 - leaning: ?
@@ -886,62 +791,6 @@ There are a few different kinds of scores, as specified below. The reasons for t
     - same issue as above - even "supports increase" vs "supports decrease" vs "supports no change" seem to have some overlapping justification... e.g. a claim at the same time may "supports decrease" _and_ "supports no change" if the claim conveys that "critiques increase"
   - supports edge score might be able to indicate _which score_ the child claim supports in the parent - see the [Concept scoring semantics](#concept-scoring-semantics-desirability-importance-more-less-vs-good-bad) unanswered question about a pro suggesting a precise score for its parent
 
-### How to model contexts? E.g. location, time, broader vs more specific
-
-- some notes in https://github.com/amelioro/ameliorate/issues/13 that should probably be moved here eventually
-
-#### Purpose
-
-- When problems exist in multiple contexts, it seems useful to model these problems separately, yet keep them linked to each other. For example, with World Hunger, one mapping might list general causes ("cannot afford importing food", "poor food production", "region internally uncooperative", …), but each specific region that struggles with hunger will be impacted by these causes in different amounts and ways, and therefore any solutions would have differing value.
-
-#### Thoughts
-
-- seems useful to be able to easily see commonalities and differences between situations that differ in context
-- maybe a node could have an edge "generalizes" or "specializes" another node
-	- then the nodes would be linked such that A's related nodes show up in a list for B, so a user could go through the list and check off if they make sense for B
-  	- should this only go in one direction? the more specific node seeing the general node's relations, but not vice versa? like inheritance
-- could be useful to compare a problem across each ("sibling"?) context using a matrix or table view. This could aid in identifying similarities and differences across contexts - e.g. "in Africa it seems a big cause of hunger is weak governmental infrastructure, but in Asia the bigger cause seems to be overpopulation".
-
-### How to model variable quantities that relate to multiple nodes / edges?
-
-- some notes in https://github.com/amelioro/ameliorate/issues/715
-- e.g. See [multiple variations for one solution](https://ameliorate.app/docs/diagramming-choices#multiple-variations-for-one-solution) - how would a "hire guards" solution look at hiring 20 guards vs 40 guards?
-  - another example: food legislation, e.g. what are costs of providing X meals for students statewide vs 2X meals, and what are differences in benefits
-- Seems like generally you could start by creating various variables e.g. guard quantity, solution cost, then you add some function between them so that when you increase guards from 20 to 40, the cost goes up by $X/guard. Maybe even "expected might vs potential enemies" to be "guard quantity" divided by "potential enemy size" (e.g. 30 enemies)
-  - Nicely it seems like this could be independent from user scoring, basically as things to consider when scoring
-  - I suppose a variable might be able to associate / fulfill some criteria directly, so then when evaluating a criterion, we'd want to show the related variables
-- probably should allow variables to have a discrete or continuous range defined
-
-### Should claim truth scores be the _only_ possible scores?
-
-- (rather than having other score types and having to match claim scores to them)
-- option 1: everything has its own score type (causes, guides, supports, change-importance)
-- option 2: only claim truth scores
-	- idea: all scores could be about a claim, with scores being negative if an opposite is defined
-		- e.g. rather having a concept change-importance score where -8 = important to decrease, 0 = not important to change, 8 = important to increase; with an associated claim truth score -8..8 for "X is important to increase", where negative means opposite i.e. "important to decrease"; we could potentially _only_ have the claim truth score which shows on the concept node directly
-	- good
-  	- consistency! we could show the same UX for all scores, maybe something like:
-    	- show claim e.g. bipolar "A causes B" / "it's important to increase A" / "A fulfills B", unipolar "Q guides Topic" / "Avg walking speed is 4 mph"
-    	- show score slider with each segment labeled
-			- bipolar: show opposite claim ("A reduces B" / "it's important to decrease A" / "A reduces fulfillment of (??) B")
-	- questions
-  	- what should segments be labeled?
-    	- this seems like it could work for all claims?: -8 = strongly believe _opposite_, -4 = somewhat believe _opposite_, 0 = don't believe, 4 = somewhat believe, 8 = strongly believe
-  	- what is opposite of "fulfills"?
-    	- e.g. `[solution] fulfills 'inexpensive'/'reduces vehicle speeds'`
-      	- agh not sure how this would work - it seems like some criteria have a clear opposite ('_increases_ vehicle speeds') and some don't (I suppose 'expensive' is the opposite of 'inexpensive'? but semantically speaking, this seems the same as "absence of inexpensive")
-        	- maybe the "fulfills" score should be 0 to 8 unless the criterion itself has an "opposite" defined?
-- questions
-  - hmm would we still want to show different colors based on the type of score?
-    - would it be enough to show colors based on unipolar vs bipolar scores?
-      - no
-    - hmm it does seem like it could be nice to color differently based on the specific score's meaning e.g. causal vs supports vs guides vs importance... but not sure if that'd be too cluttery/confusing to figure out
-      - the currently-planned coloring was to have good/bad coloring, which works for "important to increase/decrease", "increases an important-to-increase concept"
-      - maybe for claim nodes, purple = true, gray = untrue, yellow = opposite of true? seems like it should be different from good/bad color because true is not necessarily "good". Hmm what about claim edges though? they probably don't make sense to be the same color because a negative score is a critique which just means "not true", rather than "opposite"... hmm...
-		- which scores should be which colors should be a separate open question
-		- notably, regardless of the modeling choice, we should be able to color scores differently based on what they're about, not based on their scale
-			- and we can achieve this coloring no matter the answer to this question - if we go all truth scores, then we potentially could have a "claim semantic type" property to specify that this is a "causes" claim vs "change importance claim" etc.
-
 ### Concept scoring semantics: desirability? importance? more-less vs good-bad?
 
 - current leaning: Option 4 (change importance), multiplied with causal weights to calculate "how good is a solution" (see Option 4's questions); desirability / current presence / ideal presence as optional clarifier scores when change scores conflict?
@@ -968,6 +817,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 - idea 1
 	- change importance score: -8 really important to decrease, 0 no need to change, 8 really important to increase
 	- desirability, current presence, ideal presence, scores could be clarifiers if the change score differs...?
+
 #### Questions - Unanswered
 
 - "how important is it to increase/decrease this?" is _within the context of the topic_ - e.g. "death" might be less avoidable in a topic like "old people surviving surgeries" vs "children getting hit by cars"
@@ -1030,6 +880,104 @@ There are a few different kinds of scores, as specified below. The reasons for t
 			- hmm this issue would be solved if the concepts were worded with quantities in them... but that seems pretty terrible
 		- I think it's fine to just treat the "change importance of 3" as "goodness points" for a solution, so just multiple the change importance by how much the solution causes the concept to change
 
+## Kind-of-answered Big Open Questions
+
+This section exists for questions that seem answered but need to be folded into some other section (Structure Details most likely) in this document before archiving the question
+
+### Should claim truth scores be the _only_ possible scores?
+
+- (rather than having other score types and having to match claim scores to them)
+- option 1: everything has its own score type (causes, guides, supports, change-importance)
+- option 2: only claim truth scores
+	- idea: all scores could be about a claim, with scores being negative if an opposite is defined
+		- e.g. rather having a concept change-importance score where -8 = important to decrease, 0 = not important to change, 8 = important to increase; with an associated claim truth score -8..8 for "X is important to increase", where negative means opposite i.e. "important to decrease"; we could potentially _only_ have the claim truth score which shows on the concept node directly
+	- good
+  	- consistency! we could show the same UX for all scores, maybe something like:
+    	- show claim e.g. bipolar "A causes B" / "it's important to increase A" / "A fulfills B", unipolar "Q guides Topic" / "Avg walking speed is 4 mph"
+    	- show score slider with each segment labeled
+			- bipolar: show opposite claim ("A reduces B" / "it's important to decrease A" / "A reduces fulfillment of (??) B")
+	- questions
+  	- what should segments be labeled?
+    	- this seems like it could work for all claims?: -8 = strongly believe _opposite_, -4 = somewhat believe _opposite_, 0 = don't believe, 4 = somewhat believe, 8 = strongly believe
+  	- what is opposite of "fulfills"?
+    	- e.g. `[solution] fulfills 'inexpensive'/'reduces vehicle speeds'`
+      	- agh not sure how this would work - it seems like some criteria have a clear opposite ('_increases_ vehicle speeds') and some don't (I suppose 'expensive' is the opposite of 'inexpensive'? but semantically speaking, this seems the same as "absence of inexpensive")
+        	- maybe the "fulfills" score should be 0 to 8 unless the criterion itself has an "opposite" defined?
+- questions
+  - hmm would we still want to show different colors based on the type of score?
+    - would it be enough to show colors based on unipolar vs bipolar scores?
+      - no
+    - hmm it does seem like it could be nice to color differently based on the specific score's meaning e.g. causal vs supports vs guides vs importance... but not sure if that'd be too cluttery/confusing to figure out
+      - the currently-planned coloring was to have good/bad coloring, which works for "important to increase/decrease", "increases an important-to-increase concept"
+      - maybe for claim nodes, purple = true, gray = untrue, yellow = opposite of true? seems like it should be different from good/bad color because true is not necessarily "good". Hmm what about claim edges though? they probably don't make sense to be the same color because a negative score is a critique which just means "not true", rather than "opposite"... hmm...
+		- which scores should be which colors should be a separate open question
+		- notably, regardless of the modeling choice, we should be able to color scores differently based on what they're about, not based on their scale
+			- and we can achieve this coloring no matter the answer to this question - if we go all truth scores, then we potentially could have a "claim semantic type" property to specify that this is a "causes" claim vs "change importance claim" etc.
+
+### Should other things besides cause & effect be primary? If so, how?
+
+- e.g. ungrounded arguments
+	- arguments can motivate discussion, but they also inherently "take a side", which seems inaccurate vs modeling reality (cause-effect)
+		- maybe we could generate pro/con based on cause/effect + perspective scores to deal with this (fleshed out in [Calculated arguments](#calculated-arguments))
+	- arguments are often how people think naturally, e.g. "we should do X because ..."
+		- maybe we could generate wording / pro/con based on cause/effect + perspective scores to complement this
+	- it definitely seems like we should be able to support moving from ungrounded arguments _towards_ grounded arguments (i.e. cause-effect)
+		- see the claim lifecycle notes in [Calculated arguments](#calculated-arguments)
+  - answer?: it seems really good to allow ungrounded arguments, but to make them have a relation "answers" `[question node]` so that the claim is bias-reduced by allowing other answers, also then they can have importance calculated via that edge's score
+- e.g. driving/guiding questions
+  - yes. ranked via score on "guides" `[topic node]` relation
+
+## Medium open questions
+
+- these questions are likely to have a sizable affect on the ontology or implementations of it, so they're separate from section-specific questions, but they don't seem as significant as big open questions (or aren't as high-priority right now)
+- these should be root-level so we can do something like e.g. "option 1" "option 2"
+
+### Should criterion be a separate node type from Concept?
+
+- leaning: yes
+- yes: criteria are worded slightly more narrowly than a Concept, I think
+	- especially if they need to be worded such that it's a good thing
+	- "inexpensive" doesn't really feel like an _effect_, more like a _characteristic_
+- yes: seems like sometimes "causes" pointing at a criterion-ish concept doesn't make much sense
+	- "$100k causes expensive" - expensive is more of a characteristic than an effect
+		- perhaps criteria are more like properties than effects? with sometimes close overlap
+- yes: criterion in a tradeoffs table _shouldn't_ have change importance scores
+	- the score should be "how important this is for an answer", maybe "evaluates" a question? "important for answering"?
+	- "characteristics" don't really make sense as "important to change"
+- yes: otherwise some slightly-more-complex logic is needed to prevent it from showing up in "hot" section for "importance to change" reasons
+	- fine to show up for heavy disagreement via its edges
+
+- no: effects like "reduces traffic throughput" can be directly reused as a criterion
+	- but: a criterion does seem like it's better as a noun than a clause-with-verb, "high traffic throughput"
+		- q: is there a clean way to have clause-with-verb directly tied to the noun version?
+			- hmm maybe they should be separate nodes with "fulfills"
+
+### How to model contexts? E.g. location, time, broader vs more specific
+
+- some notes in https://github.com/amelioro/ameliorate/issues/13 that should probably be moved here eventually
+
+#### Purpose
+
+- When problems exist in multiple contexts, it seems useful to model these problems separately, yet keep them linked to each other. For example, with World Hunger, one mapping might list general causes ("cannot afford importing food", "poor food production", "region internally uncooperative", …), but each specific region that struggles with hunger will be impacted by these causes in different amounts and ways, and therefore any solutions would have differing value.
+
+#### Thoughts
+
+- seems useful to be able to easily see commonalities and differences between situations that differ in context
+- maybe a node could have an edge "generalizes" or "specializes" another node
+	- then the nodes would be linked such that A's related nodes show up in a list for B, so a user could go through the list and check off if they make sense for B
+  	- should this only go in one direction? the more specific node seeing the general node's relations, but not vice versa? like inheritance
+- could be useful to compare a problem across each ("sibling"?) context using a matrix or table view. This could aid in identifying similarities and differences across contexts - e.g. "in Africa it seems a big cause of hunger is weak governmental infrastructure, but in Asia the bigger cause seems to be overpopulation".
+
+### How to model variable quantities that relate to multiple nodes / edges?
+
+- some notes in https://github.com/amelioro/ameliorate/issues/715
+- e.g. See [multiple variations for one solution](https://ameliorate.app/docs/diagramming-choices#multiple-variations-for-one-solution) - how would a "hire guards" solution look at hiring 20 guards vs 40 guards?
+  - another example: food legislation, e.g. what are costs of providing X meals for students statewide vs 2X meals, and what are differences in benefits
+- Seems like generally you could start by creating various variables e.g. guard quantity, solution cost, then you add some function between them so that when you increase guards from 20 to 40, the cost goes up by $X/guard. Maybe even "expected might vs potential enemies" to be "guard quantity" divided by "potential enemy size" (e.g. 30 enemies)
+  - Nicely it seems like this could be independent from user scoring, basically as things to consider when scoring
+  - I suppose a variable might be able to associate / fulfill some criteria directly, so then when evaluating a criterion, we'd want to show the related variables
+- probably should allow variables to have a discrete or continuous range defined
+
 ### Concept scoring: relatively vs absolutely
 
 - current leaning: relative because seems useful and lower cognitive effort ?
@@ -1069,24 +1017,13 @@ There are a few different kinds of scores, as specified below. The reasons for t
   	- critically, it seems like causal relations might need to mirror whatever change is made here to claim relations - e.g. "A AND B causes C" as a modeling possibility rather than just "A causes C" and "B causese C"
 	- deductive: "concludes that"/"therefore" instead of "supports"? then "therefore" edge score should probably be 0 or 1, and chaining with "supports" should carry the fully "strength" of "supports"
 
-### Should other things besides cause & effect be primary? If so, how?
-
-- e.g. ungrounded arguments
-	- - arguments can motivate discussion, but they also inherently "take a side", which seems inaccurate vs modeling reality (cause-effect)
-		- maybe we could generate pro/con based on cause/effect + perspective scores to deal with this (fleshed out in [Calculated arguments](#calculated-arguments))
-	- - arguments are often how people think naturally, e.g. "we should do X because ..."
-		- maybe we could generate wording / pro/con based on cause/effect + perspective scores to complement this
-	- - it definitely seems like we should be able to support moving from ungrounded arguments _towards_ grounded arguments (i.e. cause-effect)
-		- see the claim lifecycle notes in [Calculated arguments](#calculated-arguments)
-- e.g. driving/guiding questions
-
 ### Do all topics have a topic node? Can there be multiple topic nodes?
 
 - current leaning: ?
 - context: some structure relies on topic node(s) existing
 	- guiding questions guide the topic node (or other guiding questions)
 	- node scores are assumed to be relative to the topic
-	- question prioritization can chain through causal edges because topic nodes are concepts in the causal web (see Guides/Clarifies notes under [Edge weight score](#edge-weight-score))
+	- question prioritization can chain through causal edges because topic nodes are concepts in the causal web (see notes about guides/clarifies chaining under [Shared: Edges](#shared-edges))
 - do all topics have a topic node?
 	- seems like some topics might not have a single node that represents them, in which case relations that rely on a topic node wouldn't work
 		- maybe making a topic node could be a requirement...?
@@ -1136,6 +1073,16 @@ There are a few different kinds of scores, as specified below. The reasons for t
 
 # Archive
 
+## Overview
+
+### Purpose
+
+#### Archive
+
+- It's hard to improve situations, especially when many people are involved, and more so when the situation is complex. Even with best effort, it's hard to effectively take into account everyone's points and counterpoints without some becoming drowned out, lost, outdated, forgotten.
+	- It's a good first step to use a document instead of a verbal discussion, but that gets messy very quickly.
+	- A good second step might be to use an argument map, but (TODO: [The value of scored causal structures for refining contested knowledge](The-value-of-scored-causal-structures-for-refining-contested-knowledge.md))
+
 ## Big open questions
 
 ### How should implied claim's score relate to the score on the parent that implies it?
@@ -1153,7 +1100,7 @@ There are a few different kinds of scores, as specified below. The reasons for t
 		2. all scales shifted from -9..9 / 1..9 to -8..8 / 0..8, so their tops align and absence sits at 0 everywhere (see [Score ranges](#Score-ranges))
 		- with those, the parent-score-to-claim-score mapping is the identity for every parent scale:
 			- concept change-importance: `$X is important to increase` scored -8 = the opposite is true ("important to decrease"), 0 = absent of truth ("not important to change"), 8 = completely true
-			- bipolar edges (causes/fulfils/supports): `$A causes $B` scored -8 = the opposite relation holds (reduces), 0 = no relation, 8 = fully holds
+			- bipolar edges (causes/fulfills/supports): `$A causes $B` scored -8 = the opposite relation holds (reduces), 0 = no relation, 8 = fully holds
 			- unipolar edges (guides/clarifies/answers/mentions): the implied claim just never uses the negative half
 		- explicit claims default to 0..8 unless "opposite"/"absent" phrasings are defined for them, so the negative half only exists where it's meaningful (see [Claim truth score](#claim-truth-score))
 - thoughts

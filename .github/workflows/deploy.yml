@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "ontology-playground/**"
+      - "ameliorate-v2/wireframe/**"
       - "site/**"
       - ".github/workflows/deploy.yml"
   workflow_dispatch:
@@ -43,6 +44,8 @@ jobs:
           mkdir -p _site
           cp site/index.html _site/
           cp -r ontology-playground/dist _site/ontology-playground
+          # the wireframes are static, so they ship as-is rather than being built
+          cp -r ameliorate-v2/wireframe _site/ameliorate-v2-wireframes
       - uses: actions/configure-pages@983d7736d9b0ae728b81ab479565c72886d7745b # v5
       - uses: actions/upload-pages-artifact@56afc609e74202658d3ffba0e8f6dda462b719fa # v3
         with:

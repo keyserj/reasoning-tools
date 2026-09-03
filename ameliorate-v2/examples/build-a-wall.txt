@@ -1,0 +1,158 @@
+%perspectives: [alice, bob, casey]
+  / rough personas so the scores tell a story: alice is moderate, bob doubts illegal immigration is a big problem and opposes the wall, casey wants illegal immigration reduced hard and favors the wall
+
+/ --- Concepts: the causal core ---
+
+*[-4,0,-8] Illegal immigration into the US &illegal-immig
+  < causes[6,2,-] &wait-causes-illegal-immig
+    *[-6,-3,-7] Long legal processing times &long-wait
+      < causes[7,-,8]
+        *[-5,-,-6] Administrative burden of enforcing immigration requirements &admin-burden
+
+*[7,8,2] Legal immigration into the US &legal-immig
+  > reduces[3,7,1]
+    * $illegal-immig
+  < impedes[6,8,-]
+    * $long-wait
+
+*[0,-,-] Motivations to immigrate illegally &motivations
+  > categorizes
+    *[-2,-,-5] Saving money by skipping the legal process &save-money
+      > causes[4,-,7]
+        * $illegal-immig
+  > categorizes
+    *[-3,-,-] Wanting to "disappear" (avoid government records) &disappear
+      > causes[2,-,6]
+        * $illegal-immig
+  > categorizes
+    *[-8,-8,-6] Danger in home countries &danger
+      > causes[7,8,3]
+        * $illegal-immig
+
+/ --- Actions ---
+
+*[2,-7,8] Border wall along the southern US border &wall #topic #action
+  %description: Should the US build a wall along its southern border to reduce illegal immigration? We're weighing what the wall would cost against how much it would reduce illegal immigration.
+  > reduces[3,-5,8] &wall-reduces
+    * $illegal-immig
+  > has
+    / has doesn't take a score
+    * Barbed wire along the top &barbed-wire
+      / component; nobody scored it, so no score brackets at all
+  < clarifies
+    ? How tall is the proposed wall design? &how-tall
+      / clarifying question about a plain node (vs how-enter, which clarifies an edge)
+
+*[5,8,2] Increased administrative resources for processing immigration &more-admin #action
+  > reduces[7,8,-]
+    * $long-wait
+
+*[3,7,-4] Reduced immigration requirements &fewer-requirements #action
+  ~ ambiguous: it wasn't stated which requirements would be reduced
+  > reduces[6,7,-]
+    * $admin-burden
+
+/ --- Questions ---
+
+? Why might we want the wall? &why-wall #guiding
+  / guiding question (agenda-setting); the canned "why might we want [concept]?" pointed at the topic - its view shows the wall's pros
+  > guides[8,6,8]
+    * $wall
+
+? What are the most effective ways to reduce illegal immigration? &best-ways #guiding
+  / guiding question (agenda-setting); guides `illegal-immig` (not the topic) - guides chains through the why-wall's guides edge to the topic
+  > guides[7,5,8]
+    * $illegal-immig
+  > guides[7,5,8]
+    ? $why-wall
+  < guides[6,8,1]
+    ? Why do people immigrate illegally? &why-immigrate #guiding
+      / guiding question guiding another guiding question
+
+? How do most people illegally enter the US? &how-enter
+  / clarifying question (fact-requesting); it clarifies an edge by targeting the edge's implied claim - note the `=` on the reference
+  > clarifies[6,-,3]
+    = $wall-reduces
+  < answers[7,-,6]
+    =[3,1,8] Most enter by crossing the border on foot between ports of entry &enter-on-foot
+      / claim option
+  < answers[7,8,-]
+    =[7,8,1] Most enter legally and overstay visas &visa-overstay
+      / claim option
+
+/ --- Criteria: for evaluating the options (3 criteria x 3 options = a minimal tradeoffs table) ---
+
+* Inexpensive &inexpensive
+  %opposite: Expensive
+  / criterion: worded so that more of it is good
+  > criterion for[7,8,2]
+    ? $best-ways
+  < fulfills[-3,-4,-]
+    * $more-admin
+  < fulfills[7,-,6]
+    * $fewer-requirements
+  < fulfills[-7,-8,-2]
+    *[-2,-4,-] Billions of dollars of construction and maintenance spending &wall-cost
+      < causes[8,8,8]
+        / the wall's fulfillment of "inexpensive" comes via this causal-fulfills chain (causes[8,8,8] x fulfills[-7,-8,-2]); everyone agrees the wall costs money
+        * $wall
+
+* Quick to implement &quick
+  / fulfills edges omitted for brevity - only "inexpensive" shows them
+  > criterion for[5,3,8]
+    ? $best-ways
+
+* Humane treatment of immigrants &humane
+  / fulfills edges omitted for brevity - only "inexpensive" shows them
+  > criterion for[8,8,3]
+    ? $best-ways
+
+/ --- Claims: arguing about scores ---
+
+= $wait-causes-illegal-immig
+  / scored above as [6,2,-]
+  / implied claim behind the "long waits cause illegal immigration" edge score
+  < supports[-4,-,-6]
+    =[6,-,8] Even with instant processing, people would still immigrate illegally to save money or "disappear" &still-immigrate
+      / explicit claim, but causal: it's essentially pointing at the save-money/disappear causes edges, so it could be promoted and become a calculated argument
+
+= $wall-reduces
+  / scored above as [3,-5,8]
+  / implied claim behind the "wall reduces illegal immigration" edge score
+  < supports[7,-,8]
+    =[8,-,8] A wall physically stops crossings without needing continuous surveillance &physical-barrier
+      %opposite: A wall physically _aids_ crossings without needing continuous surveillance
+  < supports[-,-7,-3]
+    =[2,7,1] Hardened borders trap circular migrants who used to return home &caging-effect
+      < supports[-,7,4]
+        =[3,8,2] Re-crossing a hardened border is costly and dangerous, so seasonal migrants stay and bring their families over &costly-recrossing
+  < supports[-6,-8,-]
+    =[6,8,1] People will find a way over the barrier &climb-over
+      < supports[5,7,-]
+        =[8,8,-] It's easy to climb a fence &easy-climb
+      < supports[-4,-,-8]
+        =[5,-,8] The wall design is tall, without handholds, and topped with barbed wire &unclimbable
+  < supports[-5,-8,-]
+    / reuse: the same claim answers a question above and critiques this edge
+    = $visa-overstay
+
+= $illegal-immig
+  / scored above as [-4,0,-8]
+  / implied claim behind `illegal-immig`'s concept score - standard phrasing, so it reads "Illegal immigration into the US is important to increase"; alice/casey are saying "no - decrease"; supports argue for a higher score, critiques lower
+  < supports[5,8,-]
+    =[7,8,2] Most people who immigrate illegally are protecting themselves from danger &fleeing-danger
+  < supports[-4,-,-8] &murder-supports-worse-score
+    =[3,-,8] An illegal immigrant murdered a baby in cold blood last year &baby-murder #anecdote
+
+= $murder-supports-worse-score
+  / scored above as [-4,-,-8]
+  / implied claim behind the anecdote's support edge score
+  < supports[-7,-,-3]
+    =[8,-,4] In Texas 2012-2018, illegal immigrants were arrested for violent crimes at half the rate of native-born citizens &texas-stat #statistic
+      ~ rates vary by year and state; Texas is used because it tracks immigration status in arrest data
+
+/ --- Sources ---
+
+@ House Judiciary hearing document, Jan 2025 (docs.house.gov) &house-doc
+  > mentions[8,-,-]
+    = $texas-stat

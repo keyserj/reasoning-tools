@@ -1,0 +1,41 @@
+# Nothing under scripts/ or examples/ is deployed - a wireframe pastes the generated bundle in
+# rather than loading it - so these checks are their own workflow instead of a step in the deploy,
+# where a failing test would block a site that had nothing to change.
+name: Check ameliorate-v2 scripts
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "ameliorate-v2/scripts/**"
+      - "ameliorate-v2/examples/**"
+      - "ameliorate-v2/package.json"
+      - "ameliorate-v2/package-lock.json"
+      - "ameliorate-v2/tsconfig.json"
+      - "ameliorate-v2/vitest.config.ts"
+      - "ameliorate-v2/.oxlintrc.json"
+      - ".github/workflows/ameliorate-v2-scripts.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+defaults:
+  run:
+    working-directory: ameliorate-v2
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: ameliorate-v2/package-lock.json
+      - run: npm ci
+      - run: npm run typecheck
+      - run: npm run test
+      - run: npm run lint
+      - run: npm run format:check

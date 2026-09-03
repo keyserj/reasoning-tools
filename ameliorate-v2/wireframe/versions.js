@@ -20,4 +20,5 @@ window.WIREFRAME_VERSIONS = [
   { v: "5", desc: "questions &amp; highlights generated from the example" },
   { v: "6", desc: "trimmed topic header, summary/minimap tabs, single-select highlights filter" },
   { v: "7", desc: "average border color by default, switchable in the color key; tighter agenda rows" },
+  { v: "8", desc: "dagre layout with routed edges; drag to pan, wheel and buttons to zoom" },
 ];

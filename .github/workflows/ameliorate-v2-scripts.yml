@@ -13,6 +13,7 @@ on:
       - "ameliorate-v2/package-lock.json"
       - "ameliorate-v2/tsconfig.json"
       - "ameliorate-v2/vitest.config.ts"
+      - "ameliorate-v2/.oxlintrc.json"
       - ".github/workflows/ameliorate-v2-scripts.yml"
   workflow_dispatch:
 

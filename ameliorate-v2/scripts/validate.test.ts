@@ -45,6 +45,12 @@ describe("validate: what may hold a negative", () => {
   it("allows it once %opposite says what the other half means", () => {
     expect(messages("=[-4] A claim &c\n  %opposite: The other way round")).toEqual([]);
   });
+
+  // `fulfills` is bipolar per-type for now, so this passes even though `quick` words no opposite
+  // for the negative to read as - see the TODO on `fulfills` in ./markers.ts.
+  it("lets `fulfills` go negative against a criterion that worded no opposite", () => {
+    expect(messages("* Quick &q\n  < fulfills[-5]\n    * More admin &m")).toEqual([]);
+  });
 });
 
 describe("validate: what a relation may run between", () => {
@@ -52,6 +58,14 @@ describe("validate: what a relation may run between", () => {
     expect(messages("@ S &s\n  > causes[6]\n    ? Q &q")).toEqual([
       '"causes" runs from a concept, not a source',
       '"causes" runs to a concept, not a question',
+    ]);
+  });
+
+  it("lets `categorizes` reach any node type, from a concept only", () => {
+    expect(messages("* C &c\n  > categorizes\n    = A &a")).toEqual([]);
+    expect(messages("* C &c\n  > categorizes\n    @ S &s")).toEqual([]);
+    expect(messages("= A &a\n  > categorizes\n    * C &c")).toEqual([
+      '"categorizes" runs from a concept, not a claim',
     ]);
   });
 

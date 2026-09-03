@@ -64,13 +64,13 @@ export interface EdgeTypeDef {
 // The endpoint pairs, spread in below so each relation still reads as one line. A guiding
 // question sets an agenda, so it points at a concept or at another guiding question; a
 // clarifying question can hang off anything, including the implied claim behind an edge's score.
+const ANY_NODE = ["concept", "question", "claim", "source"] as const;
 const CONCEPTS = { from: ["concept"], to: ["concept"] } as const;
 const CLAIMS = { from: ["claim"], to: ["claim"] } as const;
 const AGENDA = { from: ["question"], to: ["concept", "question"] } as const;
-const ANYTHING = {
-  from: ["question"],
-  to: ["concept", "question", "claim", "source"],
-} as const;
+const ANYTHING = { from: ["question"], to: ANY_NODE } as const;
+/** `ontology.md`: a category is a concept, but it may categorize anything. */
+const CATEGORIZING = { from: ["concept"], to: ANY_NODE } as const;
 
 export const EDGE_TYPES = {
   causes: {
@@ -111,7 +111,10 @@ export const EDGE_TYPES = {
   fulfills: {
     canonical: "fulfills",
     sign: 1,
-    opposite: "works against",
+    // TODO: `ontology.md` gives fulfills an opposite only where the target criterion defines
+    // `%opposite`, so it's really bipolar per-edge. Declared per-type while that wording is
+    // unsettled, which lets `fulfills[-7] quick` validate even though `quick` words no opposite.
+    opposite: "fulfills opposite",
     scoreable: true,
     ...CONCEPTS,
   },
@@ -149,7 +152,7 @@ export const EDGE_TYPES = {
     canonical: "categorizes",
     sign: 1,
     scoreable: true,
-    ...CONCEPTS,
+    ...CATEGORIZING,
   },
   has: { canonical: "has", sign: 1, scoreable: false, ...CONCEPTS },
   "criterion for": {

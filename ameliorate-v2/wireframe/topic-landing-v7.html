@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Topic landing v5 — build-a-wall</title>
+<title>Topic landing v7 — build-a-wall</title>
 <!--
-  Clickable wireframe for the "topic selected" state (nothing else selected). v5.
+  Clickable wireframe for the "topic selected" state (nothing else selected). v7.
   Generated from ameliorate-v2/UX-design.md + ontology.md ("Build a wall" example),
   viewed as danny (no own scores; sees alice/bob/casey aggregated).
   Depends on versions.js and prototype-bar.js for the prototype bar; everything
@@ -14,13 +14,12 @@
   Context + the version switcher live in the prototype bar at the very top
   (the "i" button, and "version N" next to it) - that bar is scaffolding, not design.
 
-  v5 changes are listed in the "i" popover ("What's new" tab). Headlines:
-    - the questions and highlights numbers are generated from the example by
-      ameliorate-v2/scripts, pasted in below as DATA; OVERRIDES holds the rest
-    - guiding scores dropped, because a question now only chains to the topic
-      along guides/clarifies edges
-    - highlights recomputed: disagreement is scaled by 4 rather than 8, and an
-      unscored slot no longer counts as a 0, so claims now reach the list
+  v7 changes are listed in the "i" popover ("What's new" tab). Headlines:
+    - borders are colored by the group average by default; the split-color
+      banding that shows disagreement is now a mode, switched in the Color key
+    - Structure's whole tab row collapses the summary, and so does re-clicking
+      the tab that's already showing
+    - tighter Explore questions / Highlights rows, and no purple legend
 -->
 <script src="versions.js"></script>
 <style>
@@ -109,12 +108,6 @@
   .section h2 {
     font-size: 15px; margin: 6px 0 10px; letter-spacing: .2px;
   }
-  .topic-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .btn {
-    border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px;
-    padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--text);
-  }
-  .btn:hover { border-color: var(--accent); }
   .desc { color: #3d4149; margin: 4px 0 2px; }
 
   /* Pills (nodes / edges / references) */
@@ -130,10 +123,10 @@
   .pill .tag { font-size: 9.5px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin-left: 6px; }
 
   /* Explore questions */
-  .q-list { display: flex; flex-direction: column; gap: 8px; margin-top: 2px; }
+  .q-list { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
   .q-item {
-    display: flex; align-items: flex-start; gap: 9px;
-    cursor: pointer; padding: 7px 9px; border-radius: 8px; border: 1px solid transparent;
+    display: flex; align-items: flex-start; gap: 8px;
+    cursor: pointer; padding: 6px 8px; border-radius: 8px; border: 1px solid transparent;
   }
   .q-item:hover { background: var(--bg); }
   .q-item.selected { background: #eef1fc; border-color: #c7d0f5; }
@@ -142,11 +135,9 @@
     box-shadow: 0 0 0 1px rgba(0,0,0,.12) inset;
   }
   .q-text { flex: 1; min-width: 0; }
-  .q-legend { color: var(--muted); font-size: 11.5px; margin: 10px 0 0; display: flex; align-items: center; gap: 6px; }
-  .q-legend .swatch { width: 42px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #e6dcf0, #6a3d9a); flex: 0 0 auto; }
 
   /* Highlights */
-  .filter-row { display: flex; gap: 8px; margin: 4px 0 12px; flex-wrap: wrap; }
+  .filter-row { display: flex; gap: 8px; margin: 4px 0 8px; flex-wrap: wrap; }
   .filter-pill {
     display: inline-flex; align-items: center; gap: 6px;
     border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px 11px;
@@ -157,8 +148,10 @@
   .filter-pill.active { background: #23262b; color: #fff; border-color: #23262b; }
   .filter-pill .ic { font-size: 12px; }
 
-  .hot-list { display: flex; flex-direction: column; gap: 8px; }
-  .hot-row { display: flex; align-items: flex-start; gap: 8px; }
+  .hot-list { display: flex; flex-direction: column; gap: 2px; }
+  /* padding/radius/hover match .q-item, so Highlights reads at the same density as Explore questions */
+  .hot-row { display: flex; align-items: flex-start; gap: 8px; padding: 6px 8px; border-radius: 8px; }
+  .hot-row:hover { background: var(--bg); }
   /* fixed-width icon column so every row's body starts at the same x; icons centred so a
      single icon lines up with the centre of a double-icon stack */
   .hot-row .categories { flex: 0 0 40px; display: inline-flex; justify-content: center; gap: 1px; padding-top: 2px; }
@@ -178,25 +171,34 @@
     border-bottom: 1px solid var(--line);
   }
   .struct-head h2 { font-size: 15px; margin: 0; }
-  .struct-head .spacer { flex: 1; }
-  .view-toggle { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
-  .view-toggle button {
-    border: none; background: var(--panel); padding: 5px 10px; cursor: pointer; color: var(--muted); font-size: 13px;
-  }
-  .view-toggle button.active { background: #23262b; color: #fff; }
-  .icon-btn {
-    border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px;
-    width: 30px; height: 30px; cursor: pointer; color: var(--muted); font-size: 14px;
-  }
-  .icon-btn:hover { border-color: var(--accent); }
 
-  /* Summary strip — collapsing hides the whole section */
-  .summary {
-    border-bottom: 1px solid var(--line); background: var(--panel);
-    padding: 10px 16px 14px;
+  /* Summary strip — the tab row stays visible when collapsed, so there's always
+     something to click to bring the body back */
+  .summary { border-bottom: 1px solid var(--line); background: var(--panel); }
+  /* the whole row collapses the summary, so it hovers and takes a pointer like the Color key's title */
+  .summary-tabs { display: flex; align-items: center; gap: 2px; padding: 0 12px; cursor: pointer; }
+  /* --line rather than the --bg the agenda rows hover to: this strip is full-width with no
+     unhovered sibling beside it to compare against, and --bg's 4% step goes unnoticed there */
+  .summary-tabs:hover { background: var(--line); }
+  /* the row is the control, so the chevron is only its state indicator - no button chrome, and it
+     brightens with the row rather than hovering on its own */
+  .summary-collapse {
+    border: none; background: none; padding: 0 4px; margin-left: 6px;
+    color: var(--muted); font-size: 11px; line-height: 1; cursor: pointer;
   }
-  .summary.collapsed { display: none; }
-  .summary-title { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
+  .summary-tabs:hover .summary-collapse { color: var(--text); }
+  .summary-tab {
+    border: none; background: none; cursor: pointer; font: inherit; font-size: 12.5px;
+    color: var(--muted); padding: 9px 8px 8px; border-radius: 7px 7px 0 0;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  /* a step darker than the row's own hover, which is always under it when a tab is hovered */
+  .summary-tab:hover { color: var(--text); background: var(--line-strong); }
+  .summary-tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+  /* collapsed hides the body, so the active tab reads as unselected too - nothing is "showing" */
+  .summary.collapsed .summary-tab.active { color: var(--muted); font-weight: normal; border-bottom-color: transparent; }
+  .summary-body { padding: 8px 16px 14px; }
+  .summary.collapsed .summary-body { display: none; }
   /* inline-block refs (own compact line-height, matching the agenda's inline pills) so
      wrapped pill lines get row spacing from the paragraph without inflating pill height */
   .summary-body p { margin: 0; color: #3d4149; line-height: 1.85; }
@@ -241,7 +243,7 @@
   .diagram.focus-mode .edges path.edge.faded { opacity: .12; }
   .diagram.focus-mode .edges path.edge.incident { stroke: #5b616b; stroke-width: 2.2; }
 
-  /* Colour key / legend */
+  /* Color key / legend */
   .legend {
     position: absolute; left: 14px; bottom: 14px; z-index: 8;
     background: rgba(255,255,255,.97); border: 1px solid var(--line-strong);
@@ -257,6 +259,15 @@
   .legend.collapsed .legend-title { margin-bottom: 0; }
   .legend-group { font-size: 10px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin: 4px 0 3px; }
   .legend-group:first-child { margin-top: 0; }
+  /* border-color mode lives here rather than in an app-bar gear: it's the setting the Color
+     key exists to explain, and it sits next to the diagram it changes */
+  .legend-modes { display: flex; gap: 4px; margin-bottom: 6px; }
+  .legend-mode {
+    border: 1px solid var(--line-strong); background: var(--panel); color: var(--muted);
+    border-radius: 999px; padding: 2px 8px; font: inherit; font-size: 10.5px; cursor: pointer;
+  }
+  .legend-mode:hover { border-color: var(--accent); }
+  .legend-mode.active { background: #23262b; color: #fff; border-color: #23262b; }
   .legend-row { display: flex; align-items: center; gap: 7px; margin: 3px 0; color: #3d4149; }
   .legend .sw { width: 18px; height: 12px; border-radius: 3px; flex: 0 0 auto; border: 1px solid rgba(0,0,0,.10); }
 
@@ -357,14 +368,14 @@
   <div id="protoBarSlot"></div>
   <script>
     // Per-version facts for prototype-bar.js; written once when this version is cut.
-    window.CURRENT_VERSION = "5";
+    window.CURRENT_VERSION = "7";
     window.WHATS_NEW_HTML = `
-      <div class="ver">v5 &mdash; changes since v4</div>
+      <div class="ver">v7 &mdash; changes since v6</div>
       <ol>
-        <li><b>The numbers are generated now.</b> Explore questions and Highlights come from a script that reads the ontology example (<code>npm run generate</code>), pasted in as a data bundle instead of hand-derived. Everything else is unchanged from v4.</li>
-        <li><b>Guiding scores are lower.</b> A question now only counts a path that runs along <i>guides</i> / <i>clarifies</i> edges and ends by guiding the topic, so &ldquo;most effective ways&rdquo; reads 0.76 (was 0.83) and &ldquo;why do people immigrate&rdquo; 0.48 (was 0.52).</li>
-        <li><b>Highlights are recomputed.</b> Disagreement is scaled by 4 rather than 8, and a scorer who left a &ldquo;&mdash;&rdquo; no longer counts as a 0 &mdash; so the list is ordered differently and <b>claims</b> (&ldquo;most enter legally and overstay visas&rdquo;) now reach it alongside concepts and edges.</li>
-        <li>Nothing in the rendering changed: an adapter maps the bundle onto the names v4 already read, and hand-authored bits (which view a question opens, &ldquo;Most active&rdquo;, the criteria scores, the diagram) sit in an <code>OVERRIDES</code> block.</li>
+        <li><b>Borders are colored by the group average by default.</b> The split-color banding is now the &ldquo;Disagreement&rdquo; mode of a <b>Border color</b> switch at the top of the Color key - useful when you're looking for contested claims, distracting on arrival. Average also makes the Summary and Minimap tabs agree, since the sunburst was already coloring by average.</li>
+        <li><b>The whole Structure tab row collapses the summary,</b> not just the chevron - and re-clicking the tab that's already showing collapses it too, so the shown tab and the collapse state are one state. The chevron lost its button border to say so: it's the row's state indicator now, like the Color key's.</li>
+        <li><b>Tighter Explore questions and Highlights rows.</b> 22px between rows down to 14px, on Tailwind's 4px spacing steps.</li>
+        <li><b>Dropped the &ldquo;deeper purple = guides the topic more&rdquo; legend.</b> The three dots are nearly the same purple anyway, and the list order already carries the ranking.</li>
       </ol>
     `;
   </script>
@@ -385,19 +396,13 @@
     <!-- ================= AGENDA PANE ================= -->
     <aside class="agenda">
       <div class="section">
-        <div class="topic-head">
-          <h2 style="margin:0">Topic</h2>
-          <span class="spacer" style="flex:1"></span>
-          <button class="btn" id="tourBtn">Tour this topic</button>
-        </div>
-        <div style="margin:10px 0 8px" id="topicPillSlot"></div>
+        <h2 style="margin-bottom:8px">Topic</h2>
         <p class="desc" id="topicDesc"></p>
       </div>
 
       <div class="section">
         <h2>Explore questions</h2>
         <div class="q-list" id="qList"></div>
-        <div class="q-legend"><span class="swatch"></span> deeper purple = guides the topic more (drives the order)</div>
       </div>
 
       <div class="section">
@@ -415,17 +420,13 @@
     <main class="structure">
       <div class="struct-head">
         <h2>Structure</h2>
-        <div class="spacer"></div>
-        <div class="view-toggle" id="summaryToggle">
-          <button data-mode="text" class="active" title="Text summary">T</button>
-          <button data-mode="sunburst" title="Sunburst">&#9673;</button>
-        </div>
-        <button class="icon-btn" id="summaryCollapseBtn" title="Collapse / expand summary">&#9650;</button>
       </div>
 
       <div class="summary" id="summary">
-        <div class="summary-title">
-          <span id="summaryLabel">Current-view summary</span>
+        <div class="summary-tabs" id="summaryTabs">
+          <button class="summary-tab active" data-mode="text">Summary</button>
+          <button class="summary-tab" data-mode="sunburst">Minimap</button>
+          <button class="summary-collapse" id="summaryCollapseBtn" title="Collapse / expand summary">&#9650;</button>
         </div>
         <div class="summary-body" id="summaryBody"></div>
       </div>
@@ -450,10 +451,15 @@
         <div class="qview" id="qview" style="display:none"></div>
       </div>
 
-      <!-- Colour key (floats over the structure pane) -->
+      <!-- Color key (floats over the structure pane) -->
       <div class="legend" id="legend">
-        <button class="legend-title" id="legendToggle">Colour key &#9662;</button>
+        <button class="legend-title" id="legendToggle">Color key &#9662;</button>
         <div class="legend-body" id="legendBody">
+          <div class="legend-group">Border color</div>
+          <div class="legend-modes" id="legendModes">
+            <button class="legend-mode" data-mode="average">Average</button>
+            <button class="legend-mode" data-mode="disagreement">Disagreement</button>
+          </div>
           <div class="legend-group">Nodes &mdash; importance to change</div>
           <div class="legend-row"><span class="sw" style="background:#b2182b"></span> Decrease / &ldquo;bad&rdquo; (&minus;)</div>
           <div class="legend-row"><span class="sw" style="background:#e9e9e9"></span> No change (0)</div>
@@ -461,7 +467,7 @@
           <div class="legend-group">Edges &mdash; effect on target</div>
           <div class="legend-row"><span class="sw" style="background:#2166ac"></span> causes &rarr; increases (blue)</div>
           <div class="legend-row"><span class="sw" style="background:#b2182b"></span> reduces / impedes &rarr; decreases (red)</div>
-          <div class="legend-row"><span class="sw sweep" id="legendSweep"></span> Split colours = scorers disagree</div>
+          <div class="legend-row"><span class="sw sweep" id="legendSweep"></span> <span id="legendSweepText"></span></div>
         </div>
       </div>
     </main>
@@ -1146,7 +1152,7 @@ for (const [id, node] of Object.entries(DATA.nodes)) {
   };
 }
 
-/* Two things the syntax leaves unscored that this view still colours, each borrowing the
+/* Two things the syntax leaves unscored that this view still colors, each borrowing the
    edge that carries the score: a criterion's importance is its `criterion for` score, and
    a question's is the `guides` edge it sets its agenda through. Borrowing is the view's
    call - the ontology deliberately keeps the score on the edge. */
@@ -1226,11 +1232,16 @@ function colorPurple(s){ return mix(PURPLE.lo, PURPLE.hi, Math.max(0,s)/8); }
 function colorFor(s, palette){ return palette === "purple" ? colorPurple(s) : colorRB(s); }
 function tint(c){ return mix(c, "#ffffff", 0.82); }
 
+/* How a border reads a set of scorers. "average" merges them into one color and is the
+   default, because side-by-side hues on every element read as noise to someone arriving;
+   "disagreement" bands them, which is what you want when hunting contested claims. */
+let borderMode = "average";
+
 /* Build inline style for a pill/node/edge-label from its scores.
-   Border = equal-width HARD-STOP bands (one per scorer, sorted by score); fill = light
-   tint of the average. Consensus reads near-solid; disagreement as distinct side-by-side
-   blocks. The padding-box/border-box background trick keeps the banded border while
-   respecting border-radius. (v4: reverted from v2/v3's smooth gradient to v1's hard bands.) */
+   Fill is always a light tint of the average. In disagreement mode the border is equal-width
+   HARD-STOP bands, one per scorer sorted by score, so consensus reads near-solid and a split
+   reads as distinct side-by-side blocks; the padding-box/border-box background trick keeps
+   that banding while respecting border-radius. */
 function pillStyle(scores, palette, borderPx){
   borderPx = borderPx || 2;
   if (!scores || scores.every(s => s === null)) {
@@ -1238,14 +1249,17 @@ function pillStyle(scores, palette, borderPx){
   }
   const present = scores.filter(s => s !== null).sort((a,b) => a - b);
   const n = present.length;
+  const avg = present.reduce((a,s) => a+s, 0) / n;
+  const fill = tint(colorFor(avg, palette));
+  if (borderMode === "average") {
+    return `background:${fill}; border:${borderPx}px solid ${colorFor(avg, palette)};`;
+  }
   const stops = present.map((s,i) => {
     const c = colorFor(s, palette);
     return `${c} ${(i/n*100).toFixed(2)}% ${((i+1)/n*100).toFixed(2)}%`;
   }).join(", ");
-  // v4: angled hard bands (hard stops at an angle) rather than horizontal
+  // angled hard bands rather than horizontal, so a split stays legible on a one-line pill
   const grad = `linear-gradient(120deg, ${stops})`;
-  const avg = present.reduce((a,s) => a+s, 0) / n;
-  const fill = tint(colorFor(avg, palette));
   return `background:linear-gradient(${fill},${fill}) padding-box, ${grad} border-box;`
        + `border:${borderPx}px solid transparent;`;
 }
@@ -1263,7 +1277,7 @@ function fmtScore(s){ return (s === null || s === undefined) ? "—" : (s > 0 ? 
 
 /* Effect-on-target scores for an edge: causes keeps its sign; reduces/impedes flip
    (a "reduce" is a negative effect). This makes causes read blue, reduces/impedes read
-   red — coloured by what the edge does to its target rather than by belief in the verb. */
+   red — colored by what the edge does to its target rather than by belief in the verb. */
 function effectScores(relation, scores){
   const flip = (relation === "reduces" || relation === "impedes");
   return (scores || []).map(s => s === null ? null : (flip ? -s : s));
@@ -1296,15 +1310,16 @@ function makeNodePill(id, opts){
    RENDER: AGENDA
    ============================================================ */
 function renderTopic(){
-  document.getElementById("topicPillSlot").appendChild(makeNodePill("wall", { tag: true }));
   document.getElementById("topicDesc").textContent = TOPIC_DESC;
 }
 
 function renderQuestions(){
   const list = document.getElementById("qList");
+  list.innerHTML = "";
   QUESTIONS.forEach(q => {
     const item = document.createElement("div");
-    item.className = "q-item";
+    // re-rendering has to restore the selection, since the rows are rebuilt rather than patched
+    item.className = "q-item" + (q.id === selectedQuestion ? " selected" : "");
     item.dataset.q = q.id;
 
     // purple "guides" dot — deeper purple = guides the topic more (explains the ordering)
@@ -1327,17 +1342,17 @@ function renderQuestions(){
 }
 
 let hotExpanded = false;
-const activeFilters = new Set();
+let activeFilter = null; // at most one pill active at a time; null = show all
 
 function renderFilters(){
   const row = document.getElementById("filterRow");
   row.innerHTML = "";
   Object.entries(CATEGORIES).forEach(([key, category]) => {
     const pill = document.createElement("div");
-    pill.className = "filter-pill" + (activeFilters.has(key) ? " active" : "");
+    pill.className = "filter-pill" + (activeFilter === key ? " active" : "");
     pill.innerHTML = `<span class="ic">${category.icon}</span>${category.label}`;
     pill.addEventListener("click", () => {
-      if (activeFilters.has(key)) activeFilters.delete(key); else activeFilters.add(key);
+      activeFilter = (activeFilter === key) ? null : key;
       renderFilters(); renderHottest();
     });
     row.appendChild(pill);
@@ -1371,7 +1386,7 @@ function questionRow(item){
 function renderHottest(){
   const list = document.getElementById("hotList");
   list.innerHTML = "";
-  let items = HOTTEST.filter(item => activeFilters.size === 0 || item.categories.some(category => activeFilters.has(category)));
+  let items = HOTTEST.filter(item => !activeFilter || item.categories.includes(activeFilter));
   const limit = hotExpanded ? items.length : 5;
   items.slice(0, limit).forEach(item => {
     const row = document.createElement("div");
@@ -1462,10 +1477,13 @@ function nodeCenter(id){ return { x: POS[id].x / 100 * CANVAS_W, y: POS[id].y / 
 function layoutEdges(){
   const diagram = document.getElementById("diagram");
   const svg = document.getElementById("edges");
+  const rect = diagram.getBoundingClientRect();
+  // a question view hides the diagram, and measuring it then puts NaN in every path;
+  // whatever showed it again calls back here
+  if (!rect.width || !rect.height) return;
   // rebuild both paths and labels each pass (keeps them from duplicating on resize)
   svg.querySelectorAll("path.edge").forEach(p => p.remove());
   diagram.querySelectorAll(".edge-label").forEach(l => l.remove());
-  const rect = diagram.getBoundingClientRect();
   const scaleX = CANVAS_W / rect.width, scaleY = CANVAS_H / rect.height;
 
   DIAGRAM_EDGES.forEach(edge => {
@@ -1487,7 +1505,7 @@ function layoutEdges(){
 
     const label = document.createElement("div");
     label.className = "edge-label";
-    // v4: colour by effect on target (causes blue, reduces/impedes red)
+    // v4: color by effect on target (causes blue, reduces/impedes red)
     label.setAttribute("style", pillStyle(effectScores(edge.relation, edge.scores), "rb", 2));
     label.dataset.from = edge.from; label.dataset.to = edge.to;
     // place labels ~40% from the source (not the midpoint) to keep them off the target/middle nodes
@@ -1508,6 +1526,16 @@ function layoutEdges(){
    ============================================================ */
 let summaryMode = "text";
 
+function isSummaryCollapsed(){ return document.getElementById("summary").classList.contains("collapsed"); }
+
+function setSummaryCollapsed(collapsed){
+  document.getElementById("summary").classList.toggle("collapsed", collapsed);
+  document.getElementById("summaryCollapseBtn").innerHTML = collapsed ? "▼" : "▲";
+  // the strip's height decides what's left for the diagram; a question view hides it entirely,
+  // and gets its layout back from showDefaultView
+  if (!selectedQuestion) layoutEdges();
+}
+
 const SUMMARY_TEXT = [
   { t: "This topic weighs building a " }, { ref: "wall" }, { t: " against illegal immigration. The group broadly agrees " },
   { ref: "danger" }, { t: " and " }, { ref: "long-wait" }, { t: " drive " }, { ref: "illegal-immig" },
@@ -1517,13 +1545,11 @@ const SUMMARY_TEXT = [
 ];
 
 function renderSummary(){
-  const label = document.getElementById("summaryLabel");
   const body = document.getElementById("summaryBody");
   body.innerHTML = "";
-  document.querySelectorAll("#summaryToggle button").forEach(b => b.classList.toggle("active", b.dataset.mode === summaryMode));
+  document.querySelectorAll("#summaryTabs .summary-tab").forEach(b => b.classList.toggle("active", b.dataset.mode === summaryMode));
 
   if (summaryMode === "text") {
-    label.textContent = "Current-view summary";
     const p = document.createElement("p");
     SUMMARY_TEXT.forEach(seg => {
       if (seg.t) p.appendChild(document.createTextNode(seg.t));
@@ -1537,7 +1563,7 @@ function renderSummary(){
       if (seg.edge) {
         const s = document.createElement("span");
         s.className = "ref"; s.textContent = seg.t2;
-        // v4: edge ref coloured by effect on target
+        // v4: edge ref colored by effect on target
         s.setAttribute("style", pillStyle(effectScores(seg.relation, seg.scores), "rb", 2));
         s.addEventListener("click", () => onEdgeActivate(seg.edge[0], seg.edge[1]));
         p.appendChild(s);
@@ -1545,7 +1571,6 @@ function renderSummary(){
     });
     body.appendChild(p);
   } else {
-    label.textContent = "Sunburst";
     body.appendChild(buildSunburst());
   }
 }
@@ -1586,7 +1611,7 @@ function buildSunburst(){
   center.addEventListener("click", () => highlightNode("wall"));
   svg.appendChild(center);
   const cap = document.createElement("figcaption");
-  cap.innerHTML = "Sunburst (placeholder) — center is the topic; ring segments are related concepts colored by score. Click a segment to highlight it.";
+  cap.innerHTML = "Minimap (placeholder) — center is the topic; ring segments are related concepts colored by score. Click a segment to highlight it.";
   wrap.appendChild(svg); wrap.appendChild(cap);
   return wrap;
 }
@@ -1622,8 +1647,7 @@ function toggleQuestion(id){
 
 function renderSummaryForQuestion(q){
   const body = document.getElementById("summaryBody");
-  document.getElementById("summaryLabel").textContent = "Current-view summary";
-  document.querySelectorAll("#summaryToggle button").forEach(b => b.classList.toggle("active", b.dataset.mode === "text"));
+  document.querySelectorAll("#summaryTabs .summary-tab").forEach(b => b.classList.toggle("active", b.dataset.mode === "text"));
   const texts = {
     "why-wall": "Showing the wall's pros (left) and cons (right): good things it causes and bad things it reduces vs. the reverse. Its main pro is reducing illegal immigration — though how much is the topic's biggest disagreement.",
     "best-ways": "Comparing actions against criteria. Only “inexpensive” has scored fulfilment in the example; “quick” and “humane” are shown but unscored here.",
@@ -1691,7 +1715,7 @@ function argCardColumn(title, kind, dir, fromId, list){
 }
 
 /* small causes diagram: illegal-immig on top, its causal parents below. Edges are drawn
-   like the main diagram — gray line + gray arrowhead + a colour-coded (effect) label. */
+   like the main diagram — gray line + gray arrowhead + a color-coded (effect) label. */
 function buildCausesMiniDiagram(){
   const wrap = document.createElement("div");
   const dia = document.createElement("div"); dia.className = "mini-diagram";
@@ -1721,7 +1745,7 @@ function buildCausesMiniDiagram(){
     path.setAttribute("vector-effect", "non-scaling-stroke");
     svg.appendChild(path);
 
-    // colour-coded label ~1/3 up from the cause, matching the main diagram
+    // color-coded label ~1/3 up from the cause, matching the main diagram
     const f = 0.36;
     const label = document.createElement("div"); label.className = "edge-label";
     label.setAttribute("style", pillStyle(effectScores(edge.relation, edge.scores), "rb", 2));
@@ -1742,7 +1766,7 @@ function buildCausesMiniDiagram(){
   wrap.appendChild(dia);
 
   const cap = document.createElement("p"); cap.className = "hint"; cap.style.textAlign = "center";
-  cap.textContent = "Same as the main diagram: gray “causes” arrows with labels coloured by effect (blue = increases illegal immigration). Click a concept or edge to open it in the full diagram.";
+  cap.textContent = "Same as the main diagram: gray “causes” arrows with labels colored by effect (blue = increases illegal immigration). Click a concept or edge to open it in the full diagram.";
   wrap.appendChild(cap);
   return wrap;
 }
@@ -1934,7 +1958,7 @@ function showClaimPopupForEdge(from, to){
   pop.appendChild(scoreSection(eff, "Per-scorer effect on the target"));
 
   const note = document.createElement("div"); note.className = "cp-note";
-  note.textContent = `Shown as each scorer's effect on “${NODES[to].label}”: “${edge.relation}” is ${flip ? "a decrease (red)" : "an increase (blue)"}. Split colours = scorers disagree.`;
+  note.textContent = `Shown as each scorer's effect on “${NODES[to].label}”: “${edge.relation}” is ${flip ? "a decrease (red)" : "an increase (blue)"}. Split colors = scorers disagree.`;
   pop.appendChild(note);
 
   document.getElementById("diagram").appendChild(pop);
@@ -1995,6 +2019,38 @@ function applyFocus(){
       l.classList.toggle("faded", !(l.dataset.from === from && l.dataset.to === to));
     });
   }
+}
+
+/* ============================================================
+   RENDER: COLOR KEY
+   ============================================================ */
+/* The bottom row demonstrates the active mode on scores of its own: a wide split for
+   disagreement, and a same-sign pair for average, since any pair straddling zero averages
+   to the gray that the row above already claims for "no change". */
+function renderLegend(){
+  const disagreement = borderMode === "disagreement";
+  document.querySelectorAll("#legendModes .legend-mode")
+    .forEach(b => b.classList.toggle("active", b.dataset.mode === borderMode));
+  document.getElementById("legendSweep")
+    .setAttribute("style", pillStyle(disagreement ? [-8, 8] : [4, 8], "rb", 2));
+  document.getElementById("legendSweepText").textContent =
+    disagreement ? "Split colors = scorers disagree" : "One color = scorers averaged";
+}
+
+/* Every colored element takes its border from pillStyle, so switching mode means re-running
+   the renders. The claim popup is dropped rather than re-rendered - it reopens from whatever
+   it was describing. */
+function rerenderForBorderMode(){
+  clearHighlight();
+  renderQuestions();
+  renderHottest();
+  renderLegend();
+  // rebuilt even while a question view hides it, or its nodes would still be in the old mode on
+  // the way back; layoutEdges skips a hidden diagram, so the edges are drawn when it reappears
+  renderDiagram();
+  const q = selectedQuestion ? QUESTIONS.find(x => x.id === selectedQuestion) : null;
+  if (q) { renderQuestionView(q); renderSummaryForQuestion(q); }
+  else { renderSummary(); }
 }
 
 /* ============================================================
@@ -2095,36 +2151,42 @@ function init(){
   renderHottest();
   renderDiagram();
   renderSummary();
+  renderLegend();
   initDivider();
 
-  // legend "split colours" swatch reuses the disagreement banding
-  document.getElementById("legendSweep").setAttribute("style", pillStyle([-8, 8], "rb", 2));
+  document.querySelectorAll("#legendModes .legend-mode").forEach(b => {
+    b.addEventListener("click", () => {
+      if (b.dataset.mode === borderMode) return;
+      borderMode = b.dataset.mode;
+      rerenderForBorderMode();
+    });
+  });
   document.getElementById("legendToggle").addEventListener("click", (e) => {
     e.stopPropagation();
     const lg = document.getElementById("legend");
     lg.classList.toggle("collapsed");
     document.getElementById("legendToggle").innerHTML =
-      "Colour key " + (lg.classList.contains("collapsed") ? "▸" : "▾");
+      "Color key " + (lg.classList.contains("collapsed") ? "▸" : "▾");
   });
 
   document.getElementById("hotMore").addEventListener("click", () => { hotExpanded = !hotExpanded; renderHottest(); });
-  document.getElementById("tourBtn").addEventListener("click", () => toast("“Tour this topic” would step through the hottest nodes one at a time (not built)."));
 
-  document.querySelectorAll("#summaryToggle button").forEach(b => {
+  // the shown tab and the collapse state are one state: re-clicking the tab that's showing hides it
+  document.querySelectorAll("#summaryTabs .summary-tab").forEach(b => {
     b.addEventListener("click", () => {
+      // read the active class rather than summaryMode: a selected question forces the Summary
+      // tab active without changing the mode, and what's marked active is what the user sees
+      if (b.classList.contains("active") && !isSummaryCollapsed()) { setSummaryCollapsed(true); return; }
       summaryMode = b.dataset.mode;
-      const s = document.getElementById("summary");
-      s.classList.remove("collapsed"); // choosing a mode reveals the summary
-      document.getElementById("summaryCollapseBtn").innerHTML = "▲";
       if (selectedQuestion) showDefaultView();
       renderSummary();
+      setSummaryCollapsed(false);
     });
   });
-  document.getElementById("summaryCollapseBtn").addEventListener("click", () => {
-    const s = document.getElementById("summary");
-    s.classList.toggle("collapsed");
-    document.getElementById("summaryCollapseBtn").innerHTML = s.classList.contains("collapsed") ? "▼" : "▲";
-    if (!selectedQuestion) layoutEdges();
+  // anywhere else on the row - the chevron included - toggles, the way the Color key's title does
+  document.getElementById("summaryTabs").addEventListener("click", (e) => {
+    if (e.target.closest(".summary-tab")) return;
+    setSummaryCollapsed(!isSummaryCollapsed());
   });
 
   document.querySelectorAll("[data-stub]").forEach(el => el.addEventListener("click", () => toast(el.dataset.stub)));

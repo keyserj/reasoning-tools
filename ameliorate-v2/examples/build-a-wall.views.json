@@ -10,238 +10,476 @@
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-4, 0, -8]
+      "scores": [-4, 0, -8],
+      "signals": {
+        "change-importance": 0.5,
+        "controversy": 0.816,
+        "unknown": 0,
+        "active": 0.5
+      },
+      "hotness": 0.816
     },
     "long-wait": {
       "label": "Long legal processing times",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-6, -3, -7]
+      "scores": [-6, -3, -7],
+      "signals": {
+        "change-importance": 0.667,
+        "controversy": 0.425,
+        "unknown": 0,
+        "active": 0.6
+      },
+      "hotness": 0.667
     },
     "admin-burden": {
       "label": "Administrative burden of enforcing immigration requirements",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-5, null, -6]
+      "scores": [-5, null, -6],
+      "signals": {
+        "change-importance": 0.688,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.688
     },
     "legal-immig": {
       "label": "Legal immigration into the US",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [7, 8, 2]
+      "scores": [7, 8, 2],
+      "signals": {
+        "change-importance": 0.708,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.708
     },
     "motivations": {
       "label": "Motivations to immigrate illegally",
       "kind": "concept",
       "tags": [],
       "subtypes": ["category"],
-      "scores": [0, null, null]
+      "scores": [0, null, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "save-money": {
       "label": "Saving money by skipping the legal process",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-2, null, -5]
+      "scores": [-2, null, -5],
+      "signals": {
+        "change-importance": 0.438,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.438
     },
     "disappear": {
       "label": "Wanting to \"disappear\" (avoid government records)",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-3, null, null]
+      "scores": [-3, null, null],
+      "signals": {
+        "change-importance": 0.375,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "danger": {
       "label": "Danger in home countries",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-8, -8, -6]
+      "scores": [-8, -8, -6],
+      "signals": {
+        "change-importance": 0.917,
+        "controversy": 0.236,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.917
     },
     "wall": {
       "label": "Border wall along the southern US border",
       "kind": "concept",
       "tags": ["topic", "action"],
       "subtypes": [],
-      "scores": [2, -7, 8]
+      "scores": [2, -7, 8],
+      "signals": {
+        "change-importance": 0.125,
+        "controversy": 1,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 1
     },
     "barbed-wire": {
       "label": "Barbed wire along the top",
       "kind": "concept",
       "tags": [],
       "subtypes": ["component"],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "how-tall": {
       "label": "How tall is the proposed wall design?",
       "kind": "clarifying",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0.5,
+        "active": 0.8
+      },
+      "hotness": 0.8
     },
     "more-admin": {
       "label": "Increased administrative resources for processing immigration",
       "kind": "concept",
       "tags": ["action"],
       "subtypes": [],
-      "scores": [5, 8, 2]
+      "scores": [5, 8, 2],
+      "signals": {
+        "change-importance": 0.625,
+        "controversy": 0.612,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.625
     },
     "fewer-requirements": {
       "label": "Reduced immigration requirements",
       "kind": "concept",
       "tags": ["action"],
       "subtypes": [],
-      "scores": [3, 7, -4]
+      "scores": [3, 7, -4],
+      "signals": {
+        "change-importance": 0.25,
+        "controversy": 1,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 1
     },
     "why-wall": {
       "label": "Why might we want the wall?",
       "kind": "guiding",
       "tags": ["guiding"],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "best-ways": {
       "label": "What are the most effective ways to reduce illegal immigration?",
       "kind": "guiding",
       "tags": ["guiding"],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "why-immigrate": {
       "label": "Why do people immigrate illegally?",
       "kind": "guiding",
       "tags": ["guiding"],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "how-enter": {
       "label": "How do most people illegally enter the US?",
       "kind": "clarifying",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "enter-on-foot": {
       "label": "Most enter by crossing the border on foot between ports of entry",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [3, 1, 8]
+      "scores": [3, 1, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.736,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.736
     },
     "visa-overstay": {
       "label": "Most enter legally and overstay visas",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [7, 8, 1]
+      "scores": [7, 8, 1],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.773,
+        "unknown": 0,
+        "active": 0.4
+      },
+      "hotness": 0.773
     },
     "inexpensive": {
       "label": "Inexpensive",
       "kind": "concept",
       "tags": [],
       "subtypes": ["criterion"],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "wall-cost": {
       "label": "Billions of dollars of construction and maintenance spending",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-2, -4, null]
+      "scores": [-2, -4, null],
+      "signals": {
+        "change-importance": 0.375,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "quick": {
       "label": "Quick to implement",
       "kind": "concept",
       "tags": [],
       "subtypes": ["criterion"],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "humane": {
       "label": "Humane treatment of immigrants",
       "kind": "concept",
       "tags": [],
       "subtypes": ["criterion"],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "still-immigrate": {
       "label": "Even with instant processing, people would still immigrate illegally to save money or \"disappear\"",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [6, null, 8]
+      "scores": [6, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.25
     },
     "physical-barrier": {
       "label": "A wall physically stops crossings without needing continuous surveillance",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [8, null, 8]
+      "scores": [8, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "caging-effect": {
       "label": "Hardened borders trap circular migrants who used to return home",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [2, 7, 1]
+      "scores": [2, 7, 1],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.656
     },
     "costly-recrossing": {
       "label": "Re-crossing a hardened border is costly and dangerous, so seasonal migrants stay and bring their families over",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [3, 8, 2]
+      "scores": [3, 8, 2],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.656
     },
     "climb-over": {
       "label": "People will find a way over the barrier",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [6, 8, 1]
+      "scores": [6, 8, 1],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.736,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.736
     },
     "easy-climb": {
       "label": "It's easy to climb a fence",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [8, 8, null]
+      "scores": [8, 8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "unclimbable": {
       "label": "The wall design is tall, without handholds, and topped with barbed wire",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [5, null, 8]
+      "scores": [5, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "fleeing-danger": {
       "label": "Most people who immigrate illegally are protecting themselves from danger",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [7, 8, 2]
+      "scores": [7, 8, 2],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.656
     },
     "baby-murder": {
       "label": "An illegal immigrant murdered a baby in cold blood last year",
       "kind": "claim",
       "tags": ["anecdote"],
       "subtypes": [],
-      "scores": [3, null, 8]
+      "scores": [3, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.625,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.625
     },
     "texas-stat": {
       "label": "In Texas 2012-2018, illegal immigrants were arrested for violent crimes at half the rate of native-born citizens",
       "kind": "claim",
       "tags": ["statistic"],
       "subtypes": [],
-      "scores": [8, null, 4]
+      "scores": [8, null, 4],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "house-doc": {
       "label": "House Judiciary hearing document, Jan 2025 (docs.house.gov)",
       "kind": "source",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     }
   },
   "edges": {
@@ -249,247 +487,534 @@
       "from": "long-wait",
       "relation": "causes",
       "to": "illegal-immig",
-      "scores": [6, 2, null]
+      "scores": [6, 2, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "admin-burden--causes--long-wait": {
       "from": "admin-burden",
       "relation": "causes",
       "to": "long-wait",
-      "scores": [7, null, 8]
+      "scores": [7, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "legal-immig--causes--illegal-immig": {
       "from": "legal-immig",
       "relation": "reduces",
       "to": "illegal-immig",
-      "scores": [3, 7, 1]
+      "scores": [3, 7, 1],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.624,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.624
     },
     "long-wait--causes--legal-immig": {
       "from": "long-wait",
       "relation": "impedes",
       "to": "legal-immig",
-      "scores": [6, 8, null]
+      "scores": [6, 8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.25
     },
     "motivations--categorizes--save-money": {
       "from": "motivations",
       "relation": "categorizes",
       "to": "save-money",
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "save-money--causes--illegal-immig": {
       "from": "save-money",
       "relation": "causes",
       "to": "illegal-immig",
-      "scores": [4, null, 7]
+      "scores": [4, null, 7],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "motivations--categorizes--disappear": {
       "from": "motivations",
       "relation": "categorizes",
       "to": "disappear",
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "disappear--causes--illegal-immig": {
       "from": "disappear",
       "relation": "causes",
       "to": "illegal-immig",
-      "scores": [2, null, 6]
+      "scores": [2, null, 6],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "motivations--categorizes--danger": {
       "from": "motivations",
       "relation": "categorizes",
       "to": "danger",
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "danger--causes--illegal-immig": {
       "from": "danger",
       "relation": "causes",
       "to": "illegal-immig",
-      "scores": [7, 8, 3]
+      "scores": [7, 8, 3],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.54,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.54
     },
     "wall-reduces": {
       "from": "wall",
       "relation": "reduces",
       "to": "illegal-immig",
-      "scores": [3, -5, 8]
+      "scores": [3, -5, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 1,
+        "unknown": 0,
+        "active": 1
+      },
+      "hotness": 1
     },
     "wall--has--barbed-wire": {
       "from": "wall",
       "relation": "has",
       "to": "barbed-wire",
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "how-tall--clarifies--wall": {
       "from": "how-tall",
       "relation": "clarifies",
       "to": "wall",
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "more-admin--causes--long-wait": {
       "from": "more-admin",
       "relation": "reduces",
       "to": "long-wait",
-      "scores": [7, 8, null]
+      "scores": [7, 8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "fewer-requirements--causes--admin-burden": {
       "from": "fewer-requirements",
       "relation": "reduces",
       "to": "admin-burden",
-      "scores": [6, 7, null]
+      "scores": [6, 7, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "why-wall--guides--wall": {
       "from": "why-wall",
       "relation": "guides",
       "to": "wall",
-      "scores": [8, 6, 8]
+      "scores": [8, 6, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.236,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.236
     },
     "best-ways--guides--illegal-immig": {
       "from": "best-ways",
       "relation": "guides",
       "to": "illegal-immig",
-      "scores": [7, 5, 8]
+      "scores": [7, 5, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.312,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.312
     },
     "best-ways--guides--why-wall": {
       "from": "best-ways",
       "relation": "guides",
       "to": "why-wall",
-      "scores": [7, 5, 8]
+      "scores": [7, 5, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.312,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.312
     },
     "why-immigrate--guides--best-ways": {
       "from": "why-immigrate",
       "relation": "guides",
       "to": "best-ways",
-      "scores": [6, 8, 1]
+      "scores": [6, 8, 1],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.736,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.736
     },
     "how-enter--clarifies--wall-reduces--implied": {
       "from": "how-enter",
       "relation": "clarifies",
       "to": "wall-reduces--implied",
-      "scores": [6, null, 3]
+      "scores": [6, null, 3],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "enter-on-foot--answers--how-enter": {
       "from": "enter-on-foot",
       "relation": "answers",
       "to": "how-enter",
-      "scores": [7, null, 6]
+      "scores": [7, null, 6],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "visa-overstay--answers--how-enter": {
       "from": "visa-overstay",
       "relation": "answers",
       "to": "how-enter",
-      "scores": [7, 8, null]
+      "scores": [7, 8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "inexpensive--criterion-for--best-ways": {
       "from": "inexpensive",
       "relation": "criterion for",
       "to": "best-ways",
-      "scores": [7, 8, 2]
+      "scores": [7, 8, 2],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.656
     },
     "more-admin--fulfills--inexpensive": {
       "from": "more-admin",
       "relation": "fulfills",
       "to": "inexpensive",
-      "scores": [-3, -4, null]
+      "scores": [-3, -4, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "fewer-requirements--fulfills--inexpensive": {
       "from": "fewer-requirements",
       "relation": "fulfills",
       "to": "inexpensive",
-      "scores": [7, null, 6]
+      "scores": [7, null, 6],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "wall-cost--fulfills--inexpensive": {
       "from": "wall-cost",
       "relation": "fulfills",
       "to": "inexpensive",
-      "scores": [-7, -8, -2]
+      "scores": [-7, -8, -2],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.656
     },
     "wall--causes--wall-cost": {
       "from": "wall",
       "relation": "causes",
       "to": "wall-cost",
-      "scores": [8, 8, 8]
+      "scores": [8, 8, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "quick--criterion-for--best-ways": {
       "from": "quick",
       "relation": "criterion for",
       "to": "best-ways",
-      "scores": [5, 3, 8]
+      "scores": [5, 3, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.514,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.514
     },
     "humane--criterion-for--best-ways": {
       "from": "humane",
       "relation": "criterion for",
       "to": "best-ways",
-      "scores": [8, 8, 3]
+      "scores": [8, 8, 3],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.589,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.589
     },
     "still-immigrate--supports--wait-causes-illegal-immig--implied": {
       "from": "still-immigrate",
       "relation": "supports",
       "to": "wait-causes-illegal-immig--implied",
-      "scores": [-4, null, -6]
+      "scores": [-4, null, -6],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.25
     },
     "physical-barrier--supports--wall-reduces--implied": {
       "from": "physical-barrier",
       "relation": "supports",
       "to": "wall-reduces--implied",
-      "scores": [7, null, 8]
+      "scores": [7, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "caging-effect--supports--wall-reduces--implied": {
       "from": "caging-effect",
       "relation": "supports",
       "to": "wall-reduces--implied",
-      "scores": [null, -7, -3]
+      "scores": [null, -7, -3],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "costly-recrossing--supports--caging-effect": {
       "from": "costly-recrossing",
       "relation": "supports",
       "to": "caging-effect",
-      "scores": [null, 7, 4]
+      "scores": [null, 7, 4],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "climb-over--supports--wall-reduces--implied": {
       "from": "climb-over",
       "relation": "supports",
       "to": "wall-reduces--implied",
-      "scores": [-6, -8, null]
+      "scores": [-6, -8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.25
     },
     "easy-climb--supports--climb-over": {
       "from": "easy-climb",
       "relation": "supports",
       "to": "climb-over",
-      "scores": [5, 7, null]
+      "scores": [5, 7, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.25
     },
     "unclimbable--supports--climb-over": {
       "from": "unclimbable",
       "relation": "supports",
       "to": "climb-over",
-      "scores": [-4, null, -8]
+      "scores": [-4, null, -8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "visa-overstay--supports--wall-reduces--implied": {
       "from": "visa-overstay",
       "relation": "supports",
       "to": "wall-reduces--implied",
-      "scores": [-5, -8, null]
+      "scores": [-5, -8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "fleeing-danger--supports--illegal-immig--implied": {
       "from": "fleeing-danger",
       "relation": "supports",
       "to": "illegal-immig--implied",
-      "scores": [5, 8, null]
+      "scores": [5, 8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "murder-supports-worse-score": {
       "from": "baby-murder",
       "relation": "supports",
       "to": "illegal-immig--implied",
-      "scores": [-4, null, -8]
+      "scores": [-4, null, -8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "texas-stat--supports--murder-supports-worse-score--implied": {
       "from": "texas-stat",
       "relation": "supports",
       "to": "murder-supports-worse-score--implied",
-      "scores": [-7, null, -3]
+      "scores": [-7, null, -3],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "house-doc--mentions--texas-stat": {
       "from": "house-doc",
       "relation": "mentions",
       "to": "texas-stat",
-      "scores": [8, null, null]
+      "scores": [8, null, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     }
   },
   "questions": [
@@ -512,124 +1037,58 @@
   "highlights": [
     {
       "kind": "node",
+      "id": "wall",
+      "categories": ["controversy"]
+    },
+    {
+      "kind": "node",
       "id": "fewer-requirements",
-      "signals": {
-        "change-importance": 0.25,
-        "controversy": 1,
-        "unknown": 0
-      },
-      "categories": ["controversy"],
-      "hotness": 1
+      "categories": ["controversy"]
     },
     {
       "kind": "edge",
       "id": "wall-reduces",
-      "signals": {
-        "change-importance": 0,
-        "controversy": 1,
-        "unknown": 0
-      },
-      "categories": ["controversy"],
-      "hotness": 1
+      "categories": ["controversy", "active"]
     },
     {
       "kind": "node",
       "id": "danger",
-      "signals": {
-        "change-importance": 0.917,
-        "controversy": 0.236,
-        "unknown": 0
-      },
-      "categories": ["change-importance"],
-      "hotness": 0.917
+      "categories": ["change-importance"]
     },
     {
       "kind": "node",
       "id": "illegal-immig",
-      "signals": {
-        "change-importance": 0.5,
-        "controversy": 0.816,
-        "unknown": 0
-      },
-      "categories": ["controversy"],
-      "hotness": 0.816
-    },
-    {
-      "kind": "node",
-      "id": "visa-overstay",
-      "signals": {
-        "change-importance": 0,
-        "controversy": 0.773,
-        "unknown": 0
-      },
-      "categories": ["controversy"],
-      "hotness": 0.773
-    },
-    {
-      "kind": "node",
-      "id": "enter-on-foot",
-      "signals": {
-        "change-importance": 0,
-        "controversy": 0.736,
-        "unknown": 0
-      },
-      "categories": ["controversy"],
-      "hotness": 0.736
-    },
-    {
-      "kind": "node",
-      "id": "legal-immig",
-      "signals": {
-        "change-importance": 0.708,
-        "controversy": 0.656,
-        "unknown": 0
-      },
-      "categories": ["change-importance"],
-      "hotness": 0.708
-    },
-    {
-      "kind": "node",
-      "id": "admin-burden",
-      "signals": {
-        "change-importance": 0.688,
-        "controversy": 0.125,
-        "unknown": 0
-      },
-      "categories": ["change-importance"],
-      "hotness": 0.688
-    },
-    {
-      "kind": "node",
-      "id": "long-wait",
-      "signals": {
-        "change-importance": 0.667,
-        "controversy": 0.425,
-        "unknown": 0
-      },
-      "categories": ["change-importance"],
-      "hotness": 0.667
-    },
-    {
-      "kind": "node",
-      "id": "more-admin",
-      "signals": {
-        "change-importance": 0.625,
-        "controversy": 0.612,
-        "unknown": 0
-      },
-      "categories": ["change-importance"],
-      "hotness": 0.625
+      "categories": ["controversy", "active"]
     },
     {
       "kind": "node",
       "id": "how-tall",
-      "signals": {
-        "change-importance": 0,
-        "controversy": 0,
-        "unknown": 0.5
-      },
-      "categories": ["unknown"],
-      "hotness": 0.5
+      "categories": ["unknown", "active"]
+    },
+    {
+      "kind": "node",
+      "id": "visa-overstay",
+      "categories": ["controversy", "active"]
+    },
+    {
+      "kind": "node",
+      "id": "legal-immig",
+      "categories": ["change-importance"]
+    },
+    {
+      "kind": "node",
+      "id": "admin-burden",
+      "categories": ["change-importance"]
+    },
+    {
+      "kind": "node",
+      "id": "long-wait",
+      "categories": ["change-importance", "active"]
+    },
+    {
+      "kind": "node",
+      "id": "more-admin",
+      "categories": ["change-importance"]
     }
   ]
 }

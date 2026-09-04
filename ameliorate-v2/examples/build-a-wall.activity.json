@@ -1,0 +1,7 @@
+{
+  "wall-reduces": 1.0,
+  "how-tall": 0.8,
+  "long-wait": 0.6,
+  "illegal-immig": 0.5,
+  "visa-overstay": 0.4
+}

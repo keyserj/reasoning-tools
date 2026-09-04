@@ -3,26 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Topic landing v5 — build-a-wall</title>
+<title>Topic landing v8 — build-a-wall</title>
 <!--
-  Clickable wireframe for the "topic selected" state (nothing else selected). v5.
+  Clickable wireframe for the "topic selected" state (nothing else selected). v8.
   Generated from ameliorate-v2/UX-design.md + ontology.md ("Build a wall" example),
   viewed as danny (no own scores; sees alice/bob/casey aggregated).
-  Depends on versions.js and prototype-bar.js for the prototype bar; everything
+  Depends on versions.js and prototype-bar.js for the prototype bar, and on
+  vendor/dagre.min.js + vendor/svg-pan-zoom.min.js for the diagram; everything
   else is inline. Clickable, not functional.
 
   Context + the version switcher live in the prototype bar at the very top
   (the "i" button, and "version N" next to it) - that bar is scaffolding, not design.
 
-  v5 changes are listed in the "i" popover ("What's new" tab). Headlines:
-    - the questions and highlights numbers are generated from the example by
-      ameliorate-v2/scripts, pasted in below as DATA; OVERRIDES holds the rest
-    - guiding scores dropped, because a question now only chains to the topic
-      along guides/clarifies edges
-    - highlights recomputed: disagreement is scaled by 4 rather than 8, and an
-      unscored slot no longer counts as a 0, so claims now reach the list
+  v8 changes are listed in the "i" popover ("What's new" tab). Headlines:
+    - dagre lays the structure diagram out, so edges route around boxes instead
+      of through them and labels get reserved space
+    - the diagram pans by dragging and zooms by wheel, with zoom / fit buttons
+    - the claim popup is chrome now: it holds its size as the diagram scales
 -->
 <script src="versions.js"></script>
+<!-- Layout + pan/zoom for the structure diagram. Plain <script src> like the prototype bar's
+     files, so the wireframe still opens over file://; see ai-designs/dagre-layout-and-pan-zoom.md -->
+<script src="vendor/dagre.min.js"></script>
+<script src="vendor/svg-pan-zoom.min.js"></script>
 <style>
   :root {
     --bg: #f5f6f8;
@@ -109,12 +112,6 @@
   .section h2 {
     font-size: 15px; margin: 6px 0 10px; letter-spacing: .2px;
   }
-  .topic-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .btn {
-    border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px;
-    padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--text);
-  }
-  .btn:hover { border-color: var(--accent); }
   .desc { color: #3d4149; margin: 4px 0 2px; }
 
   /* Pills (nodes / edges / references) */
@@ -130,10 +127,10 @@
   .pill .tag { font-size: 9.5px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin-left: 6px; }
 
   /* Explore questions */
-  .q-list { display: flex; flex-direction: column; gap: 8px; margin-top: 2px; }
+  .q-list { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
   .q-item {
-    display: flex; align-items: flex-start; gap: 9px;
-    cursor: pointer; padding: 7px 9px; border-radius: 8px; border: 1px solid transparent;
+    display: flex; align-items: flex-start; gap: 8px;
+    cursor: pointer; padding: 6px 8px; border-radius: 8px; border: 1px solid transparent;
   }
   .q-item:hover { background: var(--bg); }
   .q-item.selected { background: #eef1fc; border-color: #c7d0f5; }
@@ -142,11 +139,9 @@
     box-shadow: 0 0 0 1px rgba(0,0,0,.12) inset;
   }
   .q-text { flex: 1; min-width: 0; }
-  .q-legend { color: var(--muted); font-size: 11.5px; margin: 10px 0 0; display: flex; align-items: center; gap: 6px; }
-  .q-legend .swatch { width: 42px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #e6dcf0, #6a3d9a); flex: 0 0 auto; }
 
   /* Highlights */
-  .filter-row { display: flex; gap: 8px; margin: 4px 0 12px; flex-wrap: wrap; }
+  .filter-row { display: flex; gap: 8px; margin: 4px 0 8px; flex-wrap: wrap; }
   .filter-pill {
     display: inline-flex; align-items: center; gap: 6px;
     border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px 11px;
@@ -157,8 +152,10 @@
   .filter-pill.active { background: #23262b; color: #fff; border-color: #23262b; }
   .filter-pill .ic { font-size: 12px; }
 
-  .hot-list { display: flex; flex-direction: column; gap: 8px; }
-  .hot-row { display: flex; align-items: flex-start; gap: 8px; }
+  .hot-list { display: flex; flex-direction: column; gap: 2px; }
+  /* padding/radius/hover match .q-item, so Highlights reads at the same density as Explore questions */
+  .hot-row { display: flex; align-items: flex-start; gap: 8px; padding: 6px 8px; border-radius: 8px; }
+  .hot-row:hover { background: var(--bg); }
   /* fixed-width icon column so every row's body starts at the same x; icons centred so a
      single icon lines up with the centre of a double-icon stack */
   .hot-row .categories { flex: 0 0 40px; display: inline-flex; justify-content: center; gap: 1px; padding-top: 2px; }
@@ -178,25 +175,34 @@
     border-bottom: 1px solid var(--line);
   }
   .struct-head h2 { font-size: 15px; margin: 0; }
-  .struct-head .spacer { flex: 1; }
-  .view-toggle { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
-  .view-toggle button {
-    border: none; background: var(--panel); padding: 5px 10px; cursor: pointer; color: var(--muted); font-size: 13px;
-  }
-  .view-toggle button.active { background: #23262b; color: #fff; }
-  .icon-btn {
-    border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px;
-    width: 30px; height: 30px; cursor: pointer; color: var(--muted); font-size: 14px;
-  }
-  .icon-btn:hover { border-color: var(--accent); }
 
-  /* Summary strip — collapsing hides the whole section */
-  .summary {
-    border-bottom: 1px solid var(--line); background: var(--panel);
-    padding: 10px 16px 14px;
+  /* Summary strip — the tab row stays visible when collapsed, so there's always
+     something to click to bring the body back */
+  .summary { border-bottom: 1px solid var(--line); background: var(--panel); }
+  /* the whole row collapses the summary, so it hovers and takes a pointer like the Color key's title */
+  .summary-tabs { display: flex; align-items: center; gap: 2px; padding: 0 12px; cursor: pointer; }
+  /* --line rather than the --bg the agenda rows hover to: this strip is full-width with no
+     unhovered sibling beside it to compare against, and --bg's 4% step goes unnoticed there */
+  .summary-tabs:hover { background: var(--line); }
+  /* the row is the control, so the chevron is only its state indicator - no button chrome, and it
+     brightens with the row rather than hovering on its own */
+  .summary-collapse {
+    border: none; background: none; padding: 0 4px; margin-left: 6px;
+    color: var(--muted); font-size: 11px; line-height: 1; cursor: pointer;
   }
-  .summary.collapsed { display: none; }
-  .summary-title { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
+  .summary-tabs:hover .summary-collapse { color: var(--text); }
+  .summary-tab {
+    border: none; background: none; cursor: pointer; font: inherit; font-size: 12.5px;
+    color: var(--muted); padding: 9px 8px 8px; border-radius: 7px 7px 0 0;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  /* a step darker than the row's own hover, which is always under it when a tab is hovered */
+  .summary-tab:hover { color: var(--text); background: var(--line-strong); }
+  .summary-tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+  /* collapsed hides the body, so the active tab reads as unselected too - nothing is "showing" */
+  .summary.collapsed .summary-tab.active { color: var(--muted); font-weight: normal; border-bottom-color: transparent; }
+  .summary-body { padding: 8px 16px 14px; }
+  .summary.collapsed .summary-body { display: none; }
   /* inline-block refs (own compact line-height, matching the agenda's inline pills) so
      wrapped pill lines get row spacing from the paragraph without inflating pill height */
   .summary-body p { margin: 0; color: #3d4149; line-height: 1.85; }
@@ -209,39 +215,67 @@
   .sunburst-wrap { display: flex; align-items: center; gap: 16px; }
   .sunburst-wrap figcaption { color: var(--muted); font-size: 12px; }
 
-  /* Diagram — responsive canvas locked to the 1000x640 coordinate aspect */
-  .struct-body { flex: 1 1 auto; overflow: auto; padding: 16px; }
+  /* Diagram — dagre lays out a fixed pixel canvas, svg-pan-zoom moves it under a fixed pane.
+     Nodes and edge labels stay HTML inside foreignObject so pillStyle's gradient border, which
+     is a padding-box/border-box background trick, keeps working. */
+  .struct-body { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+  .diagram-box { position: absolute; inset: 0; overflow: hidden; }
   .diagram {
-    position: relative; width: 100%; min-width: 1240px; aspect-ratio: 1000 / 640; margin: 0 auto;
+    display: block; width: 100%; height: 100%;
+    touch-action: none; user-select: none; cursor: grab;
   }
-  .diagram svg.edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-  .diagram .edges path { stroke: #9aa0aa; stroke-width: 1.6; fill: none; transition: opacity .18s, stroke .18s; }
-  .diagram .edges path.hl { stroke: var(--accent); stroke-width: 2.6; }
+  .diagram.panning { cursor: grabbing; }
+  .diagram path.edge { stroke: #9aa0aa; stroke-width: 1.6; fill: none; transition: opacity .18s, stroke .18s; }
+  .diagram path.edge.hl { stroke: var(--accent); stroke-width: 2.6; }
+  /* Chrome clips a foreignObject to its box, so each one is NODE_PAD bigger than the element on
+     every side and the element wears that as margin - otherwise the focus ring, which is an
+     outer box-shadow, gets cut off. Hits belong to the element, not to the padding around it. */
+  .diagram foreignObject { pointer-events: none; }
   .diag-node {
-    position: absolute; transform: translate(-50%, -50%);
-    width: 160px; text-align: center; font-size: 11.5px; line-height: 1.2;
+    margin: 8px; width: 160px; text-align: center; font-size: 11.5px; line-height: 1.2;
     border-radius: 12px; padding: 6px 9px; border: 3px solid transparent; background: #fff;
-    cursor: pointer; z-index: 2; box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    cursor: pointer; pointer-events: auto; box-shadow: 0 1px 2px rgba(0,0,0,.05);
     transition: opacity .18s, filter .18s;
   }
   .diag-node:hover { box-shadow: 0 0 0 3px rgba(59,91,219,.18); }
   .diag-node.hl { box-shadow: 0 0 0 4px rgba(59,91,219,.45); }
   .diag-node .ntag { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin-top: 3px; }
   .edge-label {
-    position: absolute; transform: translate(-50%, -50%);
+    /* max-content rather than an inline width: restyling for the border mode rewrites the whole
+       style attribute, and a width written there wouldn't survive it */
+    margin: 8px; width: max-content;
     font-size: 10.5px; padding: 1px 7px; border-radius: 8px; background: #fff;
-    border: 2px solid transparent; z-index: 3; white-space: nowrap; cursor: pointer;
+    border: 2px solid transparent; white-space: nowrap; cursor: pointer; pointer-events: auto;
     box-shadow: 0 1px 1px rgba(0,0,0,.05); transition: opacity .18s;
   }
   .edge-label:hover { box-shadow: 0 0 0 2px rgba(59,91,219,.15); }
 
+  /* Off-screen box that sizes a node or label before dagre can place it. visibility rather than
+     display, which would measure zero. */
+  .diagram-measure { position: absolute; left: -9999px; top: 0; visibility: hidden; width: max-content; }
+
+  /* Zoom controls — mirrors the Color key across the pane, and the playground's diagram pane */
+  .zoom-controls {
+    position: absolute; right: 14px; bottom: 14px; z-index: 8;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .zoom-btn {
+    width: 30px; height: 30px; padding: 0; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.97); border: 1px solid var(--line-strong);
+    box-shadow: 0 2px 12px rgba(0,0,0,.10);
+    color: var(--muted); font: inherit; font-size: 15px; line-height: 1; cursor: pointer;
+  }
+  .zoom-btn:hover { border-color: var(--accent); color: var(--text); }
+  .zoom-btn svg { width: 15px; height: 15px; }
+
   /* Focus mode — fade the unrelated, emphasise the selection's neighbours */
   .diagram.focus-mode .diag-node.faded { opacity: .17; filter: saturate(.35); }
   .diagram.focus-mode .edge-label.faded { opacity: .12; }
-  .diagram.focus-mode .edges path.edge.faded { opacity: .12; }
-  .diagram.focus-mode .edges path.edge.incident { stroke: #5b616b; stroke-width: 2.2; }
+  .diagram.focus-mode path.edge.faded { opacity: .12; }
+  .diagram.focus-mode path.edge.incident { stroke: #5b616b; stroke-width: 2.2; }
 
-  /* Colour key / legend */
+  /* Color key / legend */
   .legend {
     position: absolute; left: 14px; bottom: 14px; z-index: 8;
     background: rgba(255,255,255,.97); border: 1px solid var(--line-strong);
@@ -257,6 +291,15 @@
   .legend.collapsed .legend-title { margin-bottom: 0; }
   .legend-group { font-size: 10px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin: 4px 0 3px; }
   .legend-group:first-child { margin-top: 0; }
+  /* border-color mode lives here rather than in an app-bar gear: it's the setting the Color
+     key exists to explain, and it sits next to the diagram it changes */
+  .legend-modes { display: flex; gap: 4px; margin-bottom: 6px; }
+  .legend-mode {
+    border: 1px solid var(--line-strong); background: var(--panel); color: var(--muted);
+    border-radius: 999px; padding: 2px 8px; font: inherit; font-size: 10.5px; cursor: pointer;
+  }
+  .legend-mode:hover { border-color: var(--accent); }
+  .legend-mode.active { background: #23262b; color: #fff; border-color: #23262b; }
   .legend-row { display: flex; align-items: center; gap: 7px; margin: 3px 0; color: #3d4149; }
   .legend .sw { width: 18px; height: 12px; border-radius: 3px; flex: 0 0 auto; border: 1px solid rgba(0,0,0,.10); }
 
@@ -267,8 +310,10 @@
     border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.20);
     padding: 12px 13px 13px; font-size: 12px; max-height: 82%; overflow: auto;
   }
-  .claim-pop.side-right { transform: translate(94px, -50%); }
-  .claim-pop.side-left  { transform: translate(calc(-100% - 94px), -50%); }
+  .claim-pop { transform: translateY(-50%); }
+  /* A pan moves the node it points at every frame; re-measuring that per frame is the expensive
+     way, so it goes invisible for the gesture and comes back where the node landed. */
+  .claim-pop.settling { visibility: hidden; }
   .claim-pop .cp-close {
     position: absolute; top: 6px; right: 8px; border: none; background: none;
     color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px;
@@ -299,6 +344,7 @@
   .cp-note { margin-top: 10px; color: var(--muted); font-size: 11px; line-height: 1.45; }
 
   /* Question view panels (replace diagram when a guiding question is selected) */
+  .qview-scroll { position: absolute; inset: 0; overflow: auto; padding: 16px; }
   .qview { max-width: 860px; margin: 0 auto; }
   .qview h3 { font-size: 15px; margin: 0 0 4px; }
   .qview .sub { color: var(--muted); margin: 0 0 16px; font-size: 12.5px; }
@@ -357,14 +403,14 @@
   <div id="protoBarSlot"></div>
   <script>
     // Per-version facts for prototype-bar.js; written once when this version is cut.
-    window.CURRENT_VERSION = "5";
+    window.CURRENT_VERSION = "8";
     window.WHATS_NEW_HTML = `
-      <div class="ver">v5 &mdash; changes since v4</div>
+      <div class="ver">v8 &mdash; changes since v7</div>
       <ol>
-        <li><b>The numbers are generated now.</b> Explore questions and Highlights come from a script that reads the ontology example (<code>npm run generate</code>), pasted in as a data bundle instead of hand-derived. Everything else is unchanged from v4.</li>
-        <li><b>Guiding scores are lower.</b> A question now only counts a path that runs along <i>guides</i> / <i>clarifies</i> edges and ends by guiding the topic, so &ldquo;most effective ways&rdquo; reads 0.76 (was 0.83) and &ldquo;why do people immigrate&rdquo; 0.48 (was 0.52).</li>
-        <li><b>Highlights are recomputed.</b> Disagreement is scaled by 4 rather than 8, and a scorer who left a &ldquo;&mdash;&rdquo; no longer counts as a 0 &mdash; so the list is ordered differently and <b>claims</b> (&ldquo;most enter legally and overstay visas&rdquo;) now reach it alongside concepts and edges.</li>
-        <li>Nothing in the rendering changed: an adapter maps the bundle onto the names v4 already read, and hand-authored bits (which view a question opens, &ldquo;Most active&rdquo;, the criteria scores, the diagram) sit in an <code>OVERRIDES</code> block.</li>
+        <li><b>dagre lays the diagram out.</b> v7 spread each layer evenly and drew every edge as a straight line between two centers, so long edges ran through unrelated boxes. dagre minimizes crossings and routes around them, and each edge is drawn as one bending curve, the same B-spline the ontology playground's diagrams use.</li>
+        <li><b>Edge labels get reserved space</b> instead of being nudged to 40% along the line to dodge collisions. dagre is told each label's real size and hands back where it fits.</li>
+        <li><b>The diagram pans and zooms.</b> Drag anywhere to pan, wheel over the diagram to zoom, or use the zoom in / zoom out / fit-to-screen buttons at the bottom right. The pane no longer scrolls or forces a 1240px floor, so a narrow split zooms out rather than clipping.</li>
+        <li><b>The claim popup is chrome, not diagram content.</b> It keeps its size as the diagram scales under it, sits beside whichever side of the node has room, and hides for the length of a pan rather than being redrawn every frame.</li>
       </ol>
     `;
   </script>
@@ -385,19 +431,13 @@
     <!-- ================= AGENDA PANE ================= -->
     <aside class="agenda">
       <div class="section">
-        <div class="topic-head">
-          <h2 style="margin:0">Topic</h2>
-          <span class="spacer" style="flex:1"></span>
-          <button class="btn" id="tourBtn">Tour this topic</button>
-        </div>
-        <div style="margin:10px 0 8px" id="topicPillSlot"></div>
+        <h2 style="margin-bottom:8px">Topic</h2>
         <p class="desc" id="topicDesc"></p>
       </div>
 
       <div class="section">
         <h2>Explore questions</h2>
         <div class="q-list" id="qList"></div>
-        <div class="q-legend"><span class="swatch"></span> deeper purple = guides the topic more (drives the order)</div>
       </div>
 
       <div class="section">
@@ -415,24 +455,20 @@
     <main class="structure">
       <div class="struct-head">
         <h2>Structure</h2>
-        <div class="spacer"></div>
-        <div class="view-toggle" id="summaryToggle">
-          <button data-mode="text" class="active" title="Text summary">T</button>
-          <button data-mode="sunburst" title="Sunburst">&#9673;</button>
-        </div>
-        <button class="icon-btn" id="summaryCollapseBtn" title="Collapse / expand summary">&#9650;</button>
       </div>
 
       <div class="summary" id="summary">
-        <div class="summary-title">
-          <span id="summaryLabel">Current-view summary</span>
+        <div class="summary-tabs" id="summaryTabs">
+          <button class="summary-tab active" data-mode="text">Summary</button>
+          <button class="summary-tab" data-mode="sunburst">Minimap</button>
+          <button class="summary-collapse" id="summaryCollapseBtn" title="Collapse / expand summary">&#9650;</button>
         </div>
         <div class="summary-body" id="summaryBody"></div>
       </div>
 
       <div class="struct-body" id="structBody">
-        <div class="diagram" id="diagram">
-          <svg class="edges" id="edges" viewBox="0 0 1000 640">
+        <div class="diagram-box" id="diagramBox">
+          <svg class="diagram" id="diagram" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                 <path d="M0,0 L10,5 L0,10 z" fill="#9aa0aa"></path>
@@ -444,16 +480,40 @@
                 <path d="M0,0 L10,5 L0,10 z" fill="#5b616b"></path>
               </marker>
             </defs>
+            <!-- svg-pan-zoom transforms this group (viewportSelector); edges, nodes and labels
+                 are injected into it, and defs stay outside so markers resolve unscaled -->
+            <g id="diagramViewport"></g>
           </svg>
-          <!-- node + edge-label divs injected here -->
+          <div class="zoom-controls" id="zoomControls">
+            <button class="zoom-btn" id="zoomIn" title="Zoom in">+</button>
+            <button class="zoom-btn" id="zoomOut" title="Zoom out">&minus;</button>
+            <!-- corner brackets rather than a glyph like ⤢ or ⛶: + and − read at any size, while
+                 every "fit" glyph is either a hairline diagonal or missing from the font -->
+            <button class="zoom-btn" id="zoomFit" title="Fit to screen" aria-label="Fit to screen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 9V6a2 2 0 0 1 2-2h3"></path>
+                <path d="M15 4h3a2 2 0 0 1 2 2v3"></path>
+                <path d="M20 15v3a2 2 0 0 1-2 2h-3"></path>
+                <path d="M9 20H6a2 2 0 0 1-2-2v-3"></path>
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="qview" id="qview" style="display:none"></div>
+        <div class="qview-scroll" id="qviewScroll" style="display:none">
+          <div class="qview" id="qview"></div>
+        </div>
+        <div class="diagram-measure" id="diagramMeasure"></div>
       </div>
 
-      <!-- Colour key (floats over the structure pane) -->
+      <!-- Color key (floats over the structure pane) -->
       <div class="legend" id="legend">
-        <button class="legend-title" id="legendToggle">Colour key &#9662;</button>
+        <button class="legend-title" id="legendToggle">Color key &#9662;</button>
         <div class="legend-body" id="legendBody">
+          <div class="legend-group">Border color</div>
+          <div class="legend-modes" id="legendModes">
+            <button class="legend-mode" data-mode="average">Average</button>
+            <button class="legend-mode" data-mode="disagreement">Disagreement</button>
+          </div>
           <div class="legend-group">Nodes &mdash; importance to change</div>
           <div class="legend-row"><span class="sw" style="background:#b2182b"></span> Decrease / &ldquo;bad&rdquo; (&minus;)</div>
           <div class="legend-row"><span class="sw" style="background:#e9e9e9"></span> No change (0)</div>
@@ -461,7 +521,7 @@
           <div class="legend-group">Edges &mdash; effect on target</div>
           <div class="legend-row"><span class="sw" style="background:#2166ac"></span> causes &rarr; increases (blue)</div>
           <div class="legend-row"><span class="sw" style="background:#b2182b"></span> reduces / impedes &rarr; decreases (red)</div>
-          <div class="legend-row"><span class="sw sweep" id="legendSweep"></span> Split colours = scorers disagree</div>
+          <div class="legend-row"><span class="sw sweep" id="legendSweep"></span> <span id="legendSweepText"></span></div>
         </div>
       </div>
     </main>
@@ -1146,7 +1206,7 @@ for (const [id, node] of Object.entries(DATA.nodes)) {
   };
 }
 
-/* Two things the syntax leaves unscored that this view still colours, each borrowing the
+/* Two things the syntax leaves unscored that this view still colors, each borrowing the
    edge that carries the score: a criterion's importance is its `criterion for` score, and
    a question's is the `guides` edge it sets its agenda through. Borrowing is the view's
    call - the ontology deliberately keeps the score on the edge. */
@@ -1182,9 +1242,9 @@ const CATEGORIES = {
   active:              { icon: "💬", label: "Most active" },
 };
 
-/* Diagram: concept-only nodes (questions excluded). Positions are computed as a
-   bottom-to-top layered layout from the causal edges below. NODE_ORDER only sets
-   left-to-right order within a layer (to reduce crossings). */
+/* Diagram: concept-only nodes (questions excluded). dagre derives the bottom-to-top
+   layering from the causal edges below and minimizes crossings itself; NODE_ORDER is
+   only the order nodes are handed to it, which is the tiebreak it falls back to. */
 const DIAGRAM_NODE_IDS = [
   "illegal-immig", "legal-immig", "long-wait", "wall-cost",
   "danger", "save-money", "disappear", "admin-burden", "more-admin", "wall",
@@ -1226,11 +1286,16 @@ function colorPurple(s){ return mix(PURPLE.lo, PURPLE.hi, Math.max(0,s)/8); }
 function colorFor(s, palette){ return palette === "purple" ? colorPurple(s) : colorRB(s); }
 function tint(c){ return mix(c, "#ffffff", 0.82); }
 
+/* How a border reads a set of scorers. "average" merges them into one color and is the
+   default, because side-by-side hues on every element read as noise to someone arriving;
+   "disagreement" bands them, which is what you want when hunting contested claims. */
+let borderMode = "average";
+
 /* Build inline style for a pill/node/edge-label from its scores.
-   Border = equal-width HARD-STOP bands (one per scorer, sorted by score); fill = light
-   tint of the average. Consensus reads near-solid; disagreement as distinct side-by-side
-   blocks. The padding-box/border-box background trick keeps the banded border while
-   respecting border-radius. (v4: reverted from v2/v3's smooth gradient to v1's hard bands.) */
+   Fill is always a light tint of the average. In disagreement mode the border is equal-width
+   HARD-STOP bands, one per scorer sorted by score, so consensus reads near-solid and a split
+   reads as distinct side-by-side blocks; the padding-box/border-box background trick keeps
+   that banding while respecting border-radius. */
 function pillStyle(scores, palette, borderPx){
   borderPx = borderPx || 2;
   if (!scores || scores.every(s => s === null)) {
@@ -1238,14 +1303,17 @@ function pillStyle(scores, palette, borderPx){
   }
   const present = scores.filter(s => s !== null).sort((a,b) => a - b);
   const n = present.length;
+  const avg = present.reduce((a,s) => a+s, 0) / n;
+  const fill = tint(colorFor(avg, palette));
+  if (borderMode === "average") {
+    return `background:${fill}; border:${borderPx}px solid ${colorFor(avg, palette)};`;
+  }
   const stops = present.map((s,i) => {
     const c = colorFor(s, palette);
     return `${c} ${(i/n*100).toFixed(2)}% ${((i+1)/n*100).toFixed(2)}%`;
   }).join(", ");
-  // v4: angled hard bands (hard stops at an angle) rather than horizontal
+  // angled hard bands rather than horizontal, so a split stays legible on a one-line pill
   const grad = `linear-gradient(120deg, ${stops})`;
-  const avg = present.reduce((a,s) => a+s, 0) / n;
-  const fill = tint(colorFor(avg, palette));
   return `background:linear-gradient(${fill},${fill}) padding-box, ${grad} border-box;`
        + `border:${borderPx}px solid transparent;`;
 }
@@ -1263,7 +1331,7 @@ function fmtScore(s){ return (s === null || s === undefined) ? "—" : (s > 0 ? 
 
 /* Effect-on-target scores for an edge: causes keeps its sign; reduces/impedes flip
    (a "reduce" is a negative effect). This makes causes read blue, reduces/impedes read
-   red — coloured by what the edge does to its target rather than by belief in the verb. */
+   red — colored by what the edge does to its target rather than by belief in the verb. */
 function effectScores(relation, scores){
   const flip = (relation === "reduces" || relation === "impedes");
   return (scores || []).map(s => s === null ? null : (flip ? -s : s));
@@ -1296,15 +1364,16 @@ function makeNodePill(id, opts){
    RENDER: AGENDA
    ============================================================ */
 function renderTopic(){
-  document.getElementById("topicPillSlot").appendChild(makeNodePill("wall", { tag: true }));
   document.getElementById("topicDesc").textContent = TOPIC_DESC;
 }
 
 function renderQuestions(){
   const list = document.getElementById("qList");
+  list.innerHTML = "";
   QUESTIONS.forEach(q => {
     const item = document.createElement("div");
-    item.className = "q-item";
+    // re-rendering has to restore the selection, since the rows are rebuilt rather than patched
+    item.className = "q-item" + (q.id === selectedQuestion ? " selected" : "");
     item.dataset.q = q.id;
 
     // purple "guides" dot — deeper purple = guides the topic more (explains the ordering)
@@ -1327,17 +1396,17 @@ function renderQuestions(){
 }
 
 let hotExpanded = false;
-const activeFilters = new Set();
+let activeFilter = null; // at most one pill active at a time; null = show all
 
 function renderFilters(){
   const row = document.getElementById("filterRow");
   row.innerHTML = "";
   Object.entries(CATEGORIES).forEach(([key, category]) => {
     const pill = document.createElement("div");
-    pill.className = "filter-pill" + (activeFilters.has(key) ? " active" : "");
+    pill.className = "filter-pill" + (activeFilter === key ? " active" : "");
     pill.innerHTML = `<span class="ic">${category.icon}</span>${category.label}`;
     pill.addEventListener("click", () => {
-      if (activeFilters.has(key)) activeFilters.delete(key); else activeFilters.add(key);
+      activeFilter = (activeFilter === key) ? null : key;
       renderFilters(); renderHottest();
     });
     row.appendChild(pill);
@@ -1371,7 +1440,7 @@ function questionRow(item){
 function renderHottest(){
   const list = document.getElementById("hotList");
   list.innerHTML = "";
-  let items = HOTTEST.filter(item => activeFilters.size === 0 || item.categories.some(category => activeFilters.has(category)));
+  let items = HOTTEST.filter(item => !activeFilter || item.categories.includes(activeFilter));
   const limit = hotExpanded ? items.length : 5;
   items.slice(0, limit).forEach(item => {
     const row = document.createElement("div");
@@ -1401,50 +1470,132 @@ function renderHottest(){
 /* ============================================================
    RENDER: STRUCTURE DIAGRAM (bottom-to-top layered)
    ============================================================ */
-const CANVAS_W = 1000, CANVAS_H = 640;
-let POS = {}; // id -> {x%, y%}
+const SVGNS = "http://www.w3.org/2000/svg";
+/* foreignObject overhang, in graph px - see the .diagram foreignObject rule */
+const NODE_PAD = 8;
+/* how finely a path is walked when pulling an edge label back onto it, in graph px */
+const LABEL_STEP = 2;
 
-// Longest-path layering: each edge forces target at least one layer above source.
-function computeLayout(){
-  const layer = {}; DIAGRAM_NODE_IDS.forEach(id => layer[id] = 0);
-  let changed = true, guard = 0;
-  while (changed && guard++ < 50) {
-    changed = false;
-    DIAGRAM_EDGES.forEach(e => {
-      if (layer[e.to] < layer[e.from] + 1) { layer[e.to] = layer[e.from] + 1; changed = true; }
-    });
-  }
-  const maxLayer = Math.max(...DIAGRAM_NODE_IDS.map(id => layer[id]));
-  const byLayer = {};
-  DIAGRAM_NODE_IDS.forEach(id => { (byLayer[layer[id]] = byLayer[layer[id]] || []).push(id); });
-  const topY = 12, botY = 88, margin = 8;
-  const pos = {};
-  Object.keys(byLayer).forEach(L => {
-    const grp = byLayer[L].sort((a,b) => (NODE_ORDER[a] || 0) - (NODE_ORDER[b] || 0));
-    const k = grp.length;
-    const y = maxLayer === 0 ? (topY + botY) / 2 : botY - (L / maxLayer) * (botY - topY);
-    grp.forEach((id, i) => { pos[id] = { x: margin + (i + 0.5) * ((100 - 2 * margin) / k), y }; });
-  });
-  return pos;
+let POS = {};   // id -> { x, y, w, h } - center and visual size, in graph px
+let panZoom = null;
+
+/* A node's size is whatever the browser makes of its text, and dagre needs that number before it
+   can place anything, so each element is built and measured off-screen first. */
+function measure(el){
+  const box = document.getElementById("diagramMeasure");
+  box.appendChild(el);
+  const size = { width: el.offsetWidth, height: el.offsetHeight };
+  box.removeChild(el);
+  return size;
+}
+
+function makeDiagramNode(id){
+  const node = NODES[id];
+  const el = document.createElement("div");
+  el.className = "diag-node";
+  el.dataset.node = id;
+  el.setAttribute("style", pillStyle(node.scores, paletteForNode(id), 3));
+  el.innerHTML = node.label + (node.tag ? `<span class="ntag">${node.tag}</span>` : "");
+  return el;
+}
+
+function makeEdgeLabel(edge){
+  const el = document.createElement("div");
+  el.className = "edge-label";
+  // v4: color by effect on target (causes blue, reduces/impedes red)
+  el.setAttribute("style", pillStyle(effectScores(edge.relation, edge.scores), "rb", 2));
+  el.dataset.from = edge.from; el.dataset.to = edge.to;
+  el.textContent = edge.relation;
+  return el;
+}
+
+function placeInForeignObject(el, size, cx, cy){
+  const fo = document.createElementNS(SVGNS, "foreignObject");
+  fo.setAttribute("x", cx - size.width / 2 - NODE_PAD);
+  fo.setAttribute("y", cy - size.height / 2 - NODE_PAD);
+  fo.setAttribute("width", size.width + NODE_PAD * 2);
+  fo.setAttribute("height", size.height + NODE_PAD * 2);
+  fo.appendChild(el);
+  return fo;
 }
 
 function renderDiagram(){
-  POS = computeLayout();
-  const diagram = document.getElementById("diagram");
-  diagram.querySelectorAll(".diag-node, .edge-label").forEach(el => el.remove());
+  const viewport = document.getElementById("diagramViewport");
+  viewport.replaceChildren();
 
+  const nodeEls = {}, nodeSize = {};
   DIAGRAM_NODE_IDS.forEach(id => {
-    const node = NODES[id];
-    const el = document.createElement("div");
-    el.className = "diag-node";
-    el.dataset.node = id;
-    el.setAttribute("style", `left:${POS[id].x}%; top:${POS[id].y}%;` + pillStyle(node.scores, paletteForNode(id), 3));
-    el.innerHTML = node.label + (node.tag ? `<span class="ntag">${node.tag}</span>` : "");
-    el.addEventListener("click", (e) => { e.stopPropagation(); onNodeActivate(id); });
-    diagram.appendChild(el);
+    nodeEls[id] = makeDiagramNode(id);
+    nodeSize[id] = measure(nodeEls[id]);
+  });
+  const labelEls = [], labelSize = [];
+  DIAGRAM_EDGES.forEach((edge, i) => {
+    labelEls[i] = makeEdgeLabel(edge);
+    labelSize[i] = measure(labelEls[i]);
   });
 
-  layoutEdges();
+  const g = new dagre.graphlib.Graph();
+  g.setGraph({ rankdir: "BT", nodesep: 30, ranksep: 58, edgesep: 16, marginx: 28, marginy: 28 });
+  g.setDefaultEdgeLabel(() => ({}));
+  // NODE_ORDER is dagre's tiebreak now rather than the placement itself: crossing minimization
+  // reorders a rank, and insertion order is only what it falls back to.
+  DIAGRAM_NODE_IDS.slice()
+    .sort((a, b) => (NODE_ORDER[a] || 0) - (NODE_ORDER[b] || 0))
+    .forEach(id => g.setNode(id, { width: nodeSize[id].width, height: nodeSize[id].height }));
+  // giving dagre each label's real size is what reserves room for it, so labels no longer have to
+  // be nudged along the line to miss the boxes
+  DIAGRAM_EDGES.forEach((edge, i) => g.setEdge(edge.from, edge.to, {
+    width: labelSize[i].width, height: labelSize[i].height, labelpos: "c",
+  }));
+  dagre.layout(g);
+
+  // svg-pan-zoom folds this into its own transform and then drops the attribute, so it reads as
+  // dead - it isn't. fit() measures the viewBox when there is one and the content's bbox when
+  // there isn't, and only the viewBox carries dagre's margins, which is the breathing room
+  // around a fitted diagram.
+  const size = g.graph();
+  document.getElementById("diagram").setAttribute("viewBox", `0 0 ${size.width} ${size.height}`);
+
+  POS = {};
+  DIAGRAM_NODE_IDS.forEach(id => {
+    const n = g.node(id);
+    POS[id] = { x: n.x, y: n.y, w: nodeSize[id].width, h: nodeSize[id].height };
+  });
+  // document order is paint order in SVG: lines under the boxes they end on, labels over both
+  const paths = DIAGRAM_EDGES.map(edge => {
+    const e = g.edge(edge.from, edge.to);
+    const path = document.createElementNS(SVGNS, "path");
+    path.setAttribute("class", "edge");
+    path.setAttribute("d", edgePath(e.points, edge.from, edge.to));
+    path.setAttribute("marker-end", "url(#arrow)");
+    path.dataset.from = edge.from; path.dataset.to = edge.to;
+    viewport.appendChild(path);
+    return path;
+  });
+  DIAGRAM_NODE_IDS.forEach(id => {
+    viewport.appendChild(placeInForeignObject(nodeEls[id], nodeSize[id], POS[id].x, POS[id].y));
+  });
+  DIAGRAM_EDGES.forEach((edge, i) => {
+    const e = g.edge(edge.from, edge.to);
+    const at = nearestPointOnPath(paths[i], e);
+    viewport.appendChild(placeInForeignObject(labelEls[i], labelSize[i], at.x, at.y));
+  });
+
+  initPanZoom();
+  if (focusState) applyFocus();
+}
+
+/* Border mode only changes colors, so the picture is repainted rather than laid out again -
+   which also leaves the current pan and zoom where the reader put them. */
+function restyleDiagram(){
+  DIAGRAM_NODE_IDS.forEach(id => {
+    const el = document.querySelector(`.diag-node[data-node="${id}"]`);
+    if (el) el.setAttribute("style", pillStyle(NODES[id].scores, paletteForNode(id), 3));
+  });
+  DIAGRAM_EDGES.forEach(edge => {
+    const el = document.querySelector(`.edge-label[data-from="${edge.from}"][data-to="${edge.to}"]`);
+    if (el) el.setAttribute("style", pillStyle(effectScores(edge.relation, edge.scores), "rb", 2));
+  });
 }
 
 // Boundary point of the target node's rect in the direction of (cx,cy)
@@ -1457,56 +1608,122 @@ function trimToRect(cx, cy, tx, ty, hw, hh){
   return { x: tx + dx * s, y: ty + dy * s };
 }
 
-function nodeCenter(id){ return { x: POS[id].x / 100 * CANVAS_W, y: POS[id].y / 100 * CANVAS_H }; }
+/* dagre's endpoints sit on the rank boundary rather than on the box, so both ends are
+   re-intersected against the node's own rectangle the way dagre-d3 does it. */
+function edgePath(points, from, to){
+  const a = POS[from], b = POS[to];
+  const first = trimToRect(points[1].x, points[1].y, a.x, a.y, a.w / 2 + 3, a.h / 2 + 3);
+  const last = trimToRect(points[points.length - 2].x, points[points.length - 2].y,
+                          b.x, b.y, b.w / 2 + 5, b.h / 2 + 5);
+  return curveThrough([first, ...points.slice(1, -1), last]);
+}
 
-function layoutEdges(){
-  const diagram = document.getElementById("diagram");
-  const svg = document.getElementById("edges");
-  // rebuild both paths and labels each pass (keeps them from duplicating on resize)
-  svg.querySelectorAll("path.edge").forEach(p => p.remove());
-  diagram.querySelectorAll(".edge-label").forEach(l => l.remove());
-  const rect = diagram.getBoundingClientRect();
-  const scaleX = CANVAS_W / rect.width, scaleY = CANVAS_H / rect.height;
+/* A cubic B-spline over dagre's points, written as Beziers - the curve mermaid draws, and the
+   reason its edges read as one bend rather than a run of segments.
 
-  DIAGRAM_EDGES.forEach(edge => {
-    const a = nodeCenter(edge.from), b = nodeCenter(edge.to);
-    const nodeA = diagram.querySelector(`.diag-node[data-node="${edge.from}"]`);
-    const nodeB = diagram.querySelector(`.diag-node[data-node="${edge.to}"]`);
-    const ar = nodeA.getBoundingClientRect(), br = nodeB.getBoundingClientRect();
-    const ahw = (ar.width * scaleX) / 2 + 3, ahh = (ar.height * scaleY) / 2 + 3;
-    const bhw = (br.width * scaleX) / 2 + 5, bhh = (br.height * scaleY) / 2 + 5;
-    const start = trimToRect(b.x, b.y, a.x, a.y, ahw, ahh);
-    const end = trimToRect(a.x, a.y, b.x, b.y, bhw, bhh);
+   It approximates the points instead of passing through them, which is the point: dagre's middle
+   point is a label slot rather than a routing bend, and it often sits straight above the source,
+   so a curve forced through it has to leave at a right angle and bow outward to come back. A
+   B-spline stays inside the hull of its points, so it cuts that corner and never bows out.
+   The ends are tripled, which pins the curve to the node borders where the arrowheads land. */
+function curveThrough(pts){
+  if (pts.length < 3) return `M ${pts[0].x} ${pts[0].y} L ${pts[1].x} ${pts[1].y}`;
+  const c = [pts[0], pts[0], ...pts, pts[pts.length - 1], pts[pts.length - 1]];
+  let d = `M ${(c[0].x + 4 * c[1].x + c[2].x) / 6} ${(c[0].y + 4 * c[1].y + c[2].y) / 6}`;
+  for (let i = 1; i < c.length - 2; i++) {
+    const a = c[i], b = c[i + 1], next = c[i + 2];
+    d += ` C ${(2 * a.x + b.x) / 3} ${(2 * a.y + b.y) / 3}`
+       + ` ${(a.x + 2 * b.x) / 3} ${(a.y + 2 * b.y) / 3}`
+       + ` ${(a.x + 4 * b.x + next.x) / 6} ${(a.y + 4 * b.y + next.y) / 6}`;
+  }
+  return d;
+}
 
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("class", "edge");
-    path.setAttribute("d", `M ${start.x} ${start.y} L ${end.x} ${end.y}`);
-    path.setAttribute("marker-end", "url(#arrow)");
-    path.dataset.from = edge.from; path.dataset.to = edge.to;
-    svg.appendChild(path);
+/* The curve only approximates dagre's polyline, so the label slot dagre reserved is no longer on
+   the line the label belongs to. Walking the drawn path for the nearest point puts it back,
+   keeping dagre's choice of roughly where along the edge it sits. */
+function nearestPointOnPath(path, target){
+  const len = path.getTotalLength();
+  let best = path.getPointAtLength(0), bestDist = Infinity;
+  for (let l = 0; l <= len; l += LABEL_STEP) {
+    const pt = path.getPointAtLength(l);
+    const dist = (pt.x - target.x) ** 2 + (pt.y - target.y) ** 2;
+    if (dist < bestDist) { bestDist = dist; best = pt; }
+  }
+  return best;
+}
 
-    const label = document.createElement("div");
-    label.className = "edge-label";
-    // v4: colour by effect on target (causes blue, reduces/impedes red)
-    label.setAttribute("style", pillStyle(effectScores(edge.relation, edge.scores), "rb", 2));
-    label.dataset.from = edge.from; label.dataset.to = edge.to;
-    // place labels ~40% from the source (not the midpoint) to keep them off the target/middle nodes
-    const f = 0.4;
-    label.style.left = ((start.x + (end.x - start.x) * f) / CANVAS_W * 100) + "%";
-    label.style.top = ((start.y + (end.y - start.y) * f) / CANVAS_H * 100) + "%";
-    label.textContent = edge.relation;
-    label.addEventListener("click", (e) => { e.stopPropagation(); onEdgeActivate(edge.from, edge.to); });
-    diagram.appendChild(label);
+/* ============================================================
+   DIAGRAM PAN / ZOOM
+   ============================================================ */
+function initPanZoom(){
+  if (panZoom) { panZoom.updateBBox(); panZoom.resize(); panZoom.fit(); panZoom.center(); return; }
+  panZoom = svgPanZoom(document.getElementById("diagram"), {
+    viewportSelector: "#diagramViewport",
+    zoomEnabled: true, controlIconsEnabled: false, dblClickZoomEnabled: false,
+    fit: true, center: true, minZoom: 0.2, maxZoom: 20,
+    // uniwheel binds to the SVG itself, so the wheel only zooms while the pointer is over the
+    // diagram and keeps scrolling everything else on the page
+    mouseWheelZoomEnabled: true,
+    onPan: settlePopup, onZoom: settlePopup,
+  });
+}
+
+/* Pan vs tap: svg-pan-zoom preventDefaults mousedown and touchstart, so clicks are recognized
+   here by how far the pointer travelled rather than left to a click event on the node. */
+const TAP_SLOP = 6;
+let pressedAt = null;
+let pannedSinceDown = false;
+
+function initDiagramPointer(){
+  const svg = document.getElementById("diagram");
+  svg.addEventListener("pointerdown", (e) => {
+    pressedAt = e.button === 0 ? { x: e.clientX, y: e.clientY } : null;
+    pannedSinceDown = false;
+    if (pressedAt) svg.classList.add("panning");
+  });
+  svg.addEventListener("pointerup", (e) => {
+    const from = pressedAt;
+    pressedAt = null;
+    svg.classList.remove("panning");
+    if (!from) return;
+    if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP) { pannedSinceDown = true; return; }
+    const node = e.target.closest(".diag-node");
+    if (node) { onNodeActivate(node.dataset.node); return; }
+    const label = e.target.closest(".edge-label");
+    if (label) onEdgeActivate(label.dataset.from, label.dataset.to);
+  });
+  svg.addEventListener("pointercancel", () => { pressedAt = null; svg.classList.remove("panning"); });
+
+  document.getElementById("zoomIn").addEventListener("click", () => panZoom && panZoom.zoomBy(1.2));
+  document.getElementById("zoomOut").addEventListener("click", () => panZoom && panZoom.zoomBy(0.8));
+  document.getElementById("zoomFit").addEventListener("click", () => {
+    if (!panZoom) return;
+    panZoom.fit(); panZoom.center();
   });
 
-  // paths/labels were just rebuilt — re-apply any active focus styling to them
-  if (focusState) applyFocus();
+  // svg-pan-zoom measures the SVG once and caches it, so without this every later fit() would
+  // scale to the pane's size at load rather than its size now. Re-measuring leaves the current
+  // pan/zoom alone; it only refreshes what "fit" means.
+  new ResizeObserver(() => {
+    const box = document.getElementById("diagramBox");
+    // a zero-size measurement (question view showing) would cache a garbage scale
+    if (!box.clientWidth || !box.clientHeight) return;
+    if (panZoom) panZoom.resize();
+  }).observe(document.getElementById("diagramBox"));
 }
 
 /* ============================================================
    RENDER: SUMMARY STRIP
    ============================================================ */
 let summaryMode = "text";
+
+function isSummaryCollapsed(){ return document.getElementById("summary").classList.contains("collapsed"); }
+
+function setSummaryCollapsed(collapsed){
+  document.getElementById("summary").classList.toggle("collapsed", collapsed);
+  document.getElementById("summaryCollapseBtn").innerHTML = collapsed ? "▼" : "▲";
+}
 
 const SUMMARY_TEXT = [
   { t: "This topic weighs building a " }, { ref: "wall" }, { t: " against illegal immigration. The group broadly agrees " },
@@ -1517,13 +1734,11 @@ const SUMMARY_TEXT = [
 ];
 
 function renderSummary(){
-  const label = document.getElementById("summaryLabel");
   const body = document.getElementById("summaryBody");
   body.innerHTML = "";
-  document.querySelectorAll("#summaryToggle button").forEach(b => b.classList.toggle("active", b.dataset.mode === summaryMode));
+  document.querySelectorAll("#summaryTabs .summary-tab").forEach(b => b.classList.toggle("active", b.dataset.mode === summaryMode));
 
   if (summaryMode === "text") {
-    label.textContent = "Current-view summary";
     const p = document.createElement("p");
     SUMMARY_TEXT.forEach(seg => {
       if (seg.t) p.appendChild(document.createTextNode(seg.t));
@@ -1537,7 +1752,7 @@ function renderSummary(){
       if (seg.edge) {
         const s = document.createElement("span");
         s.className = "ref"; s.textContent = seg.t2;
-        // v4: edge ref coloured by effect on target
+        // v4: edge ref colored by effect on target
         s.setAttribute("style", pillStyle(effectScores(seg.relation, seg.scores), "rb", 2));
         s.addEventListener("click", () => onEdgeActivate(seg.edge[0], seg.edge[1]));
         p.appendChild(s);
@@ -1545,7 +1760,6 @@ function renderSummary(){
     });
     body.appendChild(p);
   } else {
-    label.textContent = "Sunburst";
     body.appendChild(buildSunburst());
   }
 }
@@ -1586,7 +1800,7 @@ function buildSunburst(){
   center.addEventListener("click", () => highlightNode("wall"));
   svg.appendChild(center);
   const cap = document.createElement("figcaption");
-  cap.innerHTML = "Sunburst (placeholder) — center is the topic; ring segments are related concepts colored by score. Click a segment to highlight it.";
+  cap.innerHTML = "Minimap (placeholder) — center is the topic; ring segments are related concepts colored by score. Click a segment to highlight it.";
   wrap.appendChild(svg); wrap.appendChild(cap);
   return wrap;
 }
@@ -1599,9 +1813,10 @@ let selectedQuestion = null;
 function showDefaultView(){
   selectedQuestion = null;
   document.querySelectorAll(".q-item").forEach(el => el.classList.remove("selected"));
-  document.getElementById("diagram").style.display = "";
-  document.getElementById("qview").style.display = "none";
-  layoutEdges();
+  document.getElementById("diagramBox").style.display = "";
+  document.getElementById("qviewScroll").style.display = "none";
+  // the box was display:none while the question view showed, so re-measure before fit() means anything
+  if (panZoom) panZoom.resize();
 }
 
 function toggleQuestion(id){
@@ -1613,8 +1828,8 @@ function toggleQuestion(id){
   }
   clearHighlight(); // leaving the diagram; drop any focus/popup
   document.querySelectorAll(".q-item").forEach(el => el.classList.toggle("selected", el.dataset.q === selectedQuestion));
-  document.getElementById("diagram").style.display = "none";
-  document.getElementById("qview").style.display = "";
+  document.getElementById("diagramBox").style.display = "none";
+  document.getElementById("qviewScroll").style.display = "";
   const q = QUESTIONS.find(x => x.id === id);
   renderQuestionView(q);
   renderSummaryForQuestion(q);
@@ -1622,8 +1837,7 @@ function toggleQuestion(id){
 
 function renderSummaryForQuestion(q){
   const body = document.getElementById("summaryBody");
-  document.getElementById("summaryLabel").textContent = "Current-view summary";
-  document.querySelectorAll("#summaryToggle button").forEach(b => b.classList.toggle("active", b.dataset.mode === "text"));
+  document.querySelectorAll("#summaryTabs .summary-tab").forEach(b => b.classList.toggle("active", b.dataset.mode === "text"));
   const texts = {
     "why-wall": "Showing the wall's pros (left) and cons (right): good things it causes and bad things it reduces vs. the reverse. Its main pro is reducing illegal immigration — though how much is the topic's biggest disagreement.",
     "best-ways": "Comparing actions against criteria. Only “inexpensive” has scored fulfilment in the example; “quick” and “humane” are shown but unscored here.",
@@ -1691,7 +1905,7 @@ function argCardColumn(title, kind, dir, fromId, list){
 }
 
 /* small causes diagram: illegal-immig on top, its causal parents below. Edges are drawn
-   like the main diagram — gray line + gray arrowhead + a colour-coded (effect) label. */
+   like the main diagram — gray line + gray arrowhead + a color-coded (effect) label. */
 function buildCausesMiniDiagram(){
   const wrap = document.createElement("div");
   const dia = document.createElement("div"); dia.className = "mini-diagram";
@@ -1721,7 +1935,7 @@ function buildCausesMiniDiagram(){
     path.setAttribute("vector-effect", "non-scaling-stroke");
     svg.appendChild(path);
 
-    // colour-coded label ~1/3 up from the cause, matching the main diagram
+    // color-coded label ~1/3 up from the cause, matching the main diagram
     const f = 0.36;
     const label = document.createElement("div"); label.className = "edge-label";
     label.setAttribute("style", pillStyle(effectScores(edge.relation, edge.scores), "rb", 2));
@@ -1742,7 +1956,7 @@ function buildCausesMiniDiagram(){
   wrap.appendChild(dia);
 
   const cap = document.createElement("p"); cap.className = "hint"; cap.style.textAlign = "center";
-  cap.textContent = "Same as the main diagram: gray “causes” arrows with labels coloured by effect (blue = increases illegal immigration). Click a concept or edge to open it in the full diagram.";
+  cap.textContent = "Same as the main diagram: gray “causes” arrows with labels colored by effect (blue = increases illegal immigration). Click a concept or edge to open it in the full diagram.";
   wrap.appendChild(cap);
   return wrap;
 }
@@ -1860,15 +2074,44 @@ function makePopupShell(){
   pop.appendChild(close);
   return pop;
 }
-function positionPopupAtNode(pop, id){
-  pop.style.left = POS[id].x + "%";
-  pop.style.top = POS[id].y + "%";
-  pop.classList.add(POS[id].x < 52 ? "side-right" : "side-left");
-}
-function hideClaimPopup(){ const p = document.getElementById("claimPop"); if (p) p.remove(); }
+const POPUP_W = 272; // matches .claim-pop's width, which JS has to know to place it on the left
 
-/* Scroll the (horizontally + vertically scrollable) structure body so the whole
-   popup — and therefore the selected node beside it — is in view. */
+/* The popup is chrome rather than diagram content, so it lives in the pane and anchors to where
+   the node currently renders: it keeps its size while the diagram scales under it, and its gap
+   to the node stays a real 12px at any zoom. */
+let popupAnchor = null;
+function positionPopupAtNode(pop, id){
+  const el = document.querySelector(`.diag-node[data-node="${id}"]`);
+  if (!el) return;
+  popupAnchor = id;
+  const nr = el.getBoundingClientRect(), br = document.getElementById("structBody").getBoundingClientRect();
+  const gap = 12;
+  const fitsRight = br.right - nr.right >= POPUP_W + gap * 2;
+  pop.style.left = (fitsRight ? nr.right - br.left + gap : nr.left - br.left - gap - POPUP_W) + "px";
+  pop.style.top = (nr.top + nr.height / 2 - br.top) + "px";
+}
+function hideClaimPopup(){
+  const p = document.getElementById("claimPop");
+  if (p) p.remove();
+  popupAnchor = null;
+}
+
+/* Hide for the length of the gesture, then reappear beside wherever the node ended up. */
+let popupSettleTimer = null;
+function settlePopup(){
+  const pop = document.getElementById("claimPop");
+  if (!pop) return;
+  pop.classList.add("settling");
+  clearTimeout(popupSettleTimer);
+  popupSettleTimer = setTimeout(() => {
+    if (popupAnchor) positionPopupAtNode(pop, popupAnchor);
+    pop.classList.remove("settling");
+  }, 120);
+}
+
+/* Pan the diagram so the whole popup — and therefore the selected node beside it — is in view.
+   The pane doesn't scroll any more, so what used to be a scrollBy is the same nudge applied to
+   the diagram underneath instead. */
 function ensurePopupVisible(pop){
   const body = document.getElementById("structBody");
   const pr = pop.getBoundingClientRect(), br = body.getBoundingClientRect();
@@ -1878,7 +2121,7 @@ function ensurePopupVisible(pop){
   else if (pr.left < br.left + pad) dx = pr.left - (br.left + pad);
   if (pr.bottom > br.bottom - pad) dy = pr.bottom - (br.bottom - pad);
   else if (pr.top < br.top + pad) dy = pr.top - (br.top + pad);
-  if (dx || dy) body.scrollBy({ left: dx, top: dy, behavior: "smooth" });
+  if ((dx || dy) && panZoom) panZoom.panBy({ x: -dx, y: -dy });
 }
 
 function showClaimPopupForNode(id){
@@ -1909,7 +2152,7 @@ function showClaimPopupForNode(id){
   }
   pop.appendChild(sec);
 
-  document.getElementById("diagram").appendChild(pop);
+  document.getElementById("structBody").appendChild(pop);
   positionPopupAtNode(pop, id);
 }
 
@@ -1934,10 +2177,10 @@ function showClaimPopupForEdge(from, to){
   pop.appendChild(scoreSection(eff, "Per-scorer effect on the target"));
 
   const note = document.createElement("div"); note.className = "cp-note";
-  note.textContent = `Shown as each scorer's effect on “${NODES[to].label}”: “${edge.relation}” is ${flip ? "a decrease (red)" : "an increase (blue)"}. Split colours = scorers disagree.`;
+  note.textContent = `Shown as each scorer's effect on “${NODES[to].label}”: “${edge.relation}” is ${flip ? "a decrease (red)" : "an increase (blue)"}. Split colors = scorers disagree.`;
   pop.appendChild(note);
 
-  document.getElementById("diagram").appendChild(pop);
+  document.getElementById("structBody").appendChild(pop);
   positionPopupAtNode(pop, from);
 }
 
@@ -1967,7 +2210,7 @@ function applyFocus(){
       el.classList.toggle("hl", el.dataset.node === id);
       el.classList.toggle("faded", !nb.has(el.dataset.node));
     });
-    document.querySelectorAll("#edges path.edge").forEach(p => {
+    document.querySelectorAll("#diagramViewport path.edge").forEach(p => {
       const inc = p.dataset.from === id || p.dataset.to === id;
       p.classList.remove("hl");
       p.classList.toggle("incident", inc);
@@ -1984,7 +2227,7 @@ function applyFocus(){
       el.classList.toggle("hl", on);
       el.classList.toggle("faded", !on);
     });
-    document.querySelectorAll("#edges path.edge").forEach(p => {
+    document.querySelectorAll("#diagramViewport path.edge").forEach(p => {
       const on = p.dataset.from === from && p.dataset.to === to;
       p.classList.remove("incident");
       p.classList.toggle("hl", on);
@@ -1995,6 +2238,38 @@ function applyFocus(){
       l.classList.toggle("faded", !(l.dataset.from === from && l.dataset.to === to));
     });
   }
+}
+
+/* ============================================================
+   RENDER: COLOR KEY
+   ============================================================ */
+/* The bottom row demonstrates the active mode on scores of its own: a wide split for
+   disagreement, and a same-sign pair for average, since any pair straddling zero averages
+   to the gray that the row above already claims for "no change". */
+function renderLegend(){
+  const disagreement = borderMode === "disagreement";
+  document.querySelectorAll("#legendModes .legend-mode")
+    .forEach(b => b.classList.toggle("active", b.dataset.mode === borderMode));
+  document.getElementById("legendSweep")
+    .setAttribute("style", pillStyle(disagreement ? [-8, 8] : [4, 8], "rb", 2));
+  document.getElementById("legendSweepText").textContent =
+    disagreement ? "Split colors = scorers disagree" : "One color = scorers averaged";
+}
+
+/* Every colored element takes its border from pillStyle, so switching mode means re-running
+   the renders. The claim popup is dropped rather than re-rendered - it reopens from whatever
+   it was describing. */
+function rerenderForBorderMode(){
+  clearHighlight();
+  renderQuestions();
+  renderHottest();
+  renderLegend();
+  // repainted even while a question view hides it, or its nodes would still be in the old mode on
+  // the way back
+  restyleDiagram();
+  const q = selectedQuestion ? QUESTIONS.find(x => x.id === selectedQuestion) : null;
+  if (q) { renderQuestionView(q); renderSummaryForQuestion(q); }
+  else { renderSummary(); }
 }
 
 /* ============================================================
@@ -2010,7 +2285,7 @@ function onNodeActivate(id){
 function clearHighlight(){
   focusState = null;
   document.querySelectorAll(".diag-node").forEach(el => el.classList.remove("hl", "faded"));
-  document.querySelectorAll("#edges path.edge").forEach(p => {
+  document.querySelectorAll("#diagramViewport path.edge").forEach(p => {
     p.classList.remove("hl", "incident", "faded"); p.setAttribute("marker-end", "url(#arrow)");
   });
   document.querySelectorAll(".edge-label").forEach(l => l.classList.remove("faded"));
@@ -2073,13 +2348,11 @@ function initDivider(){
     const min = 280, max = rect.width - 360 - 6; // keep structure >= 360px
     let w = Math.max(min, Math.min(max, e.clientX - rect.left));
     agenda.style.width = w + "px";
-    if (!selectedQuestion) layoutEdges();
   });
   const stop = () => {
     if (!dragging) return;
     dragging = false;
     divider.classList.remove("dragging");
-    if (!selectedQuestion) layoutEdges();
   };
   divider.addEventListener("pointerup", stop);
   divider.addEventListener("pointercancel", stop);
@@ -2093,50 +2366,58 @@ function init(){
   renderQuestions();
   renderFilters();
   renderHottest();
-  renderDiagram();
   renderSummary();
+  renderLegend();
+  // last: the summary strip's height is what's left over for the diagram, and the initial
+  // fit has to measure the pane at the size it ends up
+  renderDiagram();
+  initDiagramPointer();
   initDivider();
 
-  // legend "split colours" swatch reuses the disagreement banding
-  document.getElementById("legendSweep").setAttribute("style", pillStyle([-8, 8], "rb", 2));
+  document.querySelectorAll("#legendModes .legend-mode").forEach(b => {
+    b.addEventListener("click", () => {
+      if (b.dataset.mode === borderMode) return;
+      borderMode = b.dataset.mode;
+      rerenderForBorderMode();
+    });
+  });
   document.getElementById("legendToggle").addEventListener("click", (e) => {
     e.stopPropagation();
     const lg = document.getElementById("legend");
     lg.classList.toggle("collapsed");
     document.getElementById("legendToggle").innerHTML =
-      "Colour key " + (lg.classList.contains("collapsed") ? "▸" : "▾");
+      "Color key " + (lg.classList.contains("collapsed") ? "▸" : "▾");
   });
 
   document.getElementById("hotMore").addEventListener("click", () => { hotExpanded = !hotExpanded; renderHottest(); });
-  document.getElementById("tourBtn").addEventListener("click", () => toast("“Tour this topic” would step through the hottest nodes one at a time (not built)."));
 
-  document.querySelectorAll("#summaryToggle button").forEach(b => {
+  // the shown tab and the collapse state are one state: re-clicking the tab that's showing hides it
+  document.querySelectorAll("#summaryTabs .summary-tab").forEach(b => {
     b.addEventListener("click", () => {
+      // read the active class rather than summaryMode: a selected question forces the Summary
+      // tab active without changing the mode, and what's marked active is what the user sees
+      if (b.classList.contains("active") && !isSummaryCollapsed()) { setSummaryCollapsed(true); return; }
       summaryMode = b.dataset.mode;
-      const s = document.getElementById("summary");
-      s.classList.remove("collapsed"); // choosing a mode reveals the summary
-      document.getElementById("summaryCollapseBtn").innerHTML = "▲";
       if (selectedQuestion) showDefaultView();
       renderSummary();
+      setSummaryCollapsed(false);
     });
   });
-  document.getElementById("summaryCollapseBtn").addEventListener("click", () => {
-    const s = document.getElementById("summary");
-    s.classList.toggle("collapsed");
-    document.getElementById("summaryCollapseBtn").innerHTML = s.classList.contains("collapsed") ? "▼" : "▲";
-    if (!selectedQuestion) layoutEdges();
+  // anywhere else on the row - the chevron included - toggles, the way the Color key's title does
+  document.getElementById("summaryTabs").addEventListener("click", (e) => {
+    if (e.target.closest(".summary-tab")) return;
+    setSummaryCollapsed(!isSummaryCollapsed());
   });
 
   document.querySelectorAll("[data-stub]").forEach(el => el.addEventListener("click", () => toast(el.dataset.stub)));
 
   // Clear the highlight when clicking truly blank space (not a highlight source or popup).
   document.addEventListener("click", (e) => {
-    if (e.target.closest(".diag-node, .edge-label, .pill, .ref, .sb-seg, .claim-pop, .legend, .mini-node")) return;
+    // a pan that ends on blank canvas still fires a click there, and it must not drop the selection
+    if (pannedSinceDown) { pannedSinceDown = false; return; }
+    if (e.target.closest(".diag-node, .edge-label, .pill, .ref, .sb-seg, .claim-pop, .legend, .mini-node, .zoom-controls")) return;
     clearHighlight();
   });
-
-  window.addEventListener("resize", () => { if (!selectedQuestion) layoutEdges(); });
-  requestAnimationFrame(() => requestAnimationFrame(layoutEdges));
 }
 
 document.addEventListener("DOMContentLoaded", init);

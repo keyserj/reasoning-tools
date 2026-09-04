@@ -3,26 +3,29 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Topic landing v5 — build-a-wall</title>
+<title>Topic landing v9 — build-a-wall</title>
 <!--
-  Clickable wireframe for the "topic selected" state (nothing else selected). v5.
+  Clickable wireframe for the "topic selected" state (nothing else selected). v9.
   Generated from ameliorate-v2/UX-design.md + ontology.md ("Build a wall" example),
   viewed as danny (no own scores; sees alice/bob/casey aggregated).
-  Depends on versions.js and prototype-bar.js for the prototype bar; everything
+  Depends on versions.js and prototype-bar.js for the prototype bar, and on
+  vendor/dagre.min.js + vendor/svg-pan-zoom.min.js for the diagram; everything
   else is inline. Clickable, not functional.
 
   Context + the version switcher live in the prototype bar at the very top
   (the "i" button, and "version N" next to it) - that bar is scaffolding, not design.
 
-  v5 changes are listed in the "i" popover ("What's new" tab). Headlines:
-    - the questions and highlights numbers are generated from the example by
-      ameliorate-v2/scripts, pasted in below as DATA; OVERRIDES holds the rest
-    - guiding scores dropped, because a question now only chains to the topic
-      along guides/clarifies edges
-    - highlights recomputed: disagreement is scaled by 4 rather than 8, and an
-      unscored slot no longer counts as a 0, so claims now reach the list
+  v9 changes are listed in the "i" popover ("What's new" tab). Headlines:
+    - the diagram's nodes and edges are derived from the bundle's hotness rather
+      than hand-picked, behind two overlay checkboxes
+    - every edge is a box dagre places, so an argument about an edge's score
+      can point at it
 -->
 <script src="versions.js"></script>
+<!-- Layout + pan/zoom for the structure diagram. Plain <script src> like the prototype bar's
+     files, so the wireframe still opens over file://; see ai-designs/dagre-layout-and-pan-zoom.md -->
+<script src="vendor/dagre.min.js"></script>
+<script src="vendor/svg-pan-zoom.min.js"></script>
 <style>
   :root {
     --bg: #f5f6f8;
@@ -109,12 +112,6 @@
   .section h2 {
     font-size: 15px; margin: 6px 0 10px; letter-spacing: .2px;
   }
-  .topic-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .btn {
-    border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px;
-    padding: 6px 12px; cursor: pointer; font-size: 13px; color: var(--text);
-  }
-  .btn:hover { border-color: var(--accent); }
   .desc { color: #3d4149; margin: 4px 0 2px; }
 
   /* Pills (nodes / edges / references) */
@@ -130,10 +127,10 @@
   .pill .tag { font-size: 9.5px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin-left: 6px; }
 
   /* Explore questions */
-  .q-list { display: flex; flex-direction: column; gap: 8px; margin-top: 2px; }
+  .q-list { display: flex; flex-direction: column; gap: 2px; margin-top: 2px; }
   .q-item {
-    display: flex; align-items: flex-start; gap: 9px;
-    cursor: pointer; padding: 7px 9px; border-radius: 8px; border: 1px solid transparent;
+    display: flex; align-items: flex-start; gap: 8px;
+    cursor: pointer; padding: 6px 8px; border-radius: 8px; border: 1px solid transparent;
   }
   .q-item:hover { background: var(--bg); }
   .q-item.selected { background: #eef1fc; border-color: #c7d0f5; }
@@ -142,11 +139,9 @@
     box-shadow: 0 0 0 1px rgba(0,0,0,.12) inset;
   }
   .q-text { flex: 1; min-width: 0; }
-  .q-legend { color: var(--muted); font-size: 11.5px; margin: 10px 0 0; display: flex; align-items: center; gap: 6px; }
-  .q-legend .swatch { width: 42px; height: 10px; border-radius: 5px; background: linear-gradient(90deg, #e6dcf0, #6a3d9a); flex: 0 0 auto; }
 
   /* Highlights */
-  .filter-row { display: flex; gap: 8px; margin: 4px 0 12px; flex-wrap: wrap; }
+  .filter-row { display: flex; gap: 8px; margin: 4px 0 8px; flex-wrap: wrap; }
   .filter-pill {
     display: inline-flex; align-items: center; gap: 6px;
     border: 1px solid var(--line-strong); border-radius: 999px; padding: 4px 11px;
@@ -157,8 +152,10 @@
   .filter-pill.active { background: #23262b; color: #fff; border-color: #23262b; }
   .filter-pill .ic { font-size: 12px; }
 
-  .hot-list { display: flex; flex-direction: column; gap: 8px; }
-  .hot-row { display: flex; align-items: flex-start; gap: 8px; }
+  .hot-list { display: flex; flex-direction: column; gap: 2px; }
+  /* padding/radius/hover match .q-item, so Highlights reads at the same density as Explore questions */
+  .hot-row { display: flex; align-items: flex-start; gap: 8px; padding: 6px 8px; border-radius: 8px; }
+  .hot-row:hover { background: var(--bg); }
   /* fixed-width icon column so every row's body starts at the same x; icons centred so a
      single icon lines up with the centre of a double-icon stack */
   .hot-row .categories { flex: 0 0 40px; display: inline-flex; justify-content: center; gap: 1px; padding-top: 2px; }
@@ -178,25 +175,34 @@
     border-bottom: 1px solid var(--line);
   }
   .struct-head h2 { font-size: 15px; margin: 0; }
-  .struct-head .spacer { flex: 1; }
-  .view-toggle { display: inline-flex; border: 1px solid var(--line-strong); border-radius: 8px; overflow: hidden; }
-  .view-toggle button {
-    border: none; background: var(--panel); padding: 5px 10px; cursor: pointer; color: var(--muted); font-size: 13px;
-  }
-  .view-toggle button.active { background: #23262b; color: #fff; }
-  .icon-btn {
-    border: 1px solid var(--line-strong); background: var(--panel); border-radius: 8px;
-    width: 30px; height: 30px; cursor: pointer; color: var(--muted); font-size: 14px;
-  }
-  .icon-btn:hover { border-color: var(--accent); }
 
-  /* Summary strip — collapsing hides the whole section */
-  .summary {
-    border-bottom: 1px solid var(--line); background: var(--panel);
-    padding: 10px 16px 14px;
+  /* Summary strip — the tab row stays visible when collapsed, so there's always
+     something to click to bring the body back */
+  .summary { border-bottom: 1px solid var(--line); background: var(--panel); }
+  /* the whole row collapses the summary, so it hovers and takes a pointer like the Color key's title */
+  .summary-tabs { display: flex; align-items: center; gap: 2px; padding: 0 12px; cursor: pointer; }
+  /* --line rather than the --bg the agenda rows hover to: this strip is full-width with no
+     unhovered sibling beside it to compare against, and --bg's 4% step goes unnoticed there */
+  .summary-tabs:hover { background: var(--line); }
+  /* the row is the control, so the chevron is only its state indicator - no button chrome, and it
+     brightens with the row rather than hovering on its own */
+  .summary-collapse {
+    border: none; background: none; padding: 0 4px; margin-left: 6px;
+    color: var(--muted); font-size: 11px; line-height: 1; cursor: pointer;
   }
-  .summary.collapsed { display: none; }
-  .summary-title { display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 12px; text-transform: uppercase; letter-spacing: .4px; margin-bottom: 6px; }
+  .summary-tabs:hover .summary-collapse { color: var(--text); }
+  .summary-tab {
+    border: none; background: none; cursor: pointer; font: inherit; font-size: 12.5px;
+    color: var(--muted); padding: 9px 8px 8px; border-radius: 7px 7px 0 0;
+    border-bottom: 2px solid transparent; margin-bottom: -1px;
+  }
+  /* a step darker than the row's own hover, which is always under it when a tab is hovered */
+  .summary-tab:hover { color: var(--text); background: var(--line-strong); }
+  .summary-tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
+  /* collapsed hides the body, so the active tab reads as unselected too - nothing is "showing" */
+  .summary.collapsed .summary-tab.active { color: var(--muted); font-weight: normal; border-bottom-color: transparent; }
+  .summary-body { padding: 8px 16px 14px; }
+  .summary.collapsed .summary-body { display: none; }
   /* inline-block refs (own compact line-height, matching the agenda's inline pills) so
      wrapped pill lines get row spacing from the paragraph without inflating pill height */
   .summary-body p { margin: 0; color: #3d4149; line-height: 1.85; }
@@ -209,39 +215,86 @@
   .sunburst-wrap { display: flex; align-items: center; gap: 16px; }
   .sunburst-wrap figcaption { color: var(--muted); font-size: 12px; }
 
-  /* Diagram — responsive canvas locked to the 1000x640 coordinate aspect */
-  .struct-body { flex: 1 1 auto; overflow: auto; padding: 16px; }
+  /* Diagram — dagre lays out a fixed pixel canvas, svg-pan-zoom moves it under a fixed pane.
+     Nodes and edge labels stay HTML inside foreignObject so pillStyle's gradient border, which
+     is a padding-box/border-box background trick, keeps working. */
+  .struct-body { position: relative; flex: 1 1 auto; min-height: 0; overflow: hidden; }
+  .diagram-box { position: absolute; inset: 0; overflow: hidden; }
   .diagram {
-    position: relative; width: 100%; min-width: 1240px; aspect-ratio: 1000 / 640; margin: 0 auto;
+    display: block; width: 100%; height: 100%;
+    touch-action: none; user-select: none; cursor: grab;
   }
-  .diagram svg.edges { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; }
-  .diagram .edges path { stroke: #9aa0aa; stroke-width: 1.6; fill: none; transition: opacity .18s, stroke .18s; }
-  .diagram .edges path.hl { stroke: var(--accent); stroke-width: 2.6; }
+  .diagram.panning { cursor: grabbing; }
+  .diagram path.edge { stroke: #9aa0aa; stroke-width: 1.6; fill: none; transition: opacity .18s, stroke .18s; }
+  .diagram path.edge.hl { stroke: var(--accent); stroke-width: 2.6; }
+  /* Chrome clips a foreignObject to its box, so each one is NODE_PAD bigger than the element on
+     every side and the element wears that as margin - otherwise the focus ring, which is an
+     outer box-shadow, gets cut off. Hits belong to the element, not to the padding around it. */
+  .diagram foreignObject { pointer-events: none; }
   .diag-node {
-    position: absolute; transform: translate(-50%, -50%);
-    width: 160px; text-align: center; font-size: 11.5px; line-height: 1.2;
+    margin: 8px; width: 160px; text-align: center; font-size: 11.5px; line-height: 1.2;
     border-radius: 12px; padding: 6px 9px; border: 3px solid transparent; background: #fff;
-    cursor: pointer; z-index: 2; box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    cursor: pointer; pointer-events: auto; box-shadow: 0 1px 2px rgba(0,0,0,.05);
     transition: opacity .18s, filter .18s;
   }
   .diag-node:hover { box-shadow: 0 0 0 3px rgba(59,91,219,.18); }
   .diag-node.hl { box-shadow: 0 0 0 4px rgba(59,91,219,.45); }
   .diag-node .ntag { display: block; font-size: 9px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin-top: 3px; }
+  .diag-node .nicon { color: var(--muted); margin-right: 4px; font-weight: 600; }
   .edge-label {
-    position: absolute; transform: translate(-50%, -50%);
-    font-size: 10.5px; padding: 1px 7px; border-radius: 8px; background: #fff;
-    border: 2px solid transparent; z-index: 3; white-space: nowrap; cursor: pointer;
+    /* max-content rather than an inline width: restyling for the border mode rewrites the whole
+       style attribute, and a width written there wouldn't survive it */
+    margin: 8px; width: max-content;
+    /* stadium: the playground's shape for an edge drawn as a box, which is what says the box is
+       an edge rather than a node */
+    font-size: 10.5px; padding: 1px 7px; border-radius: 999px; background: #fff;
+    border: 2px solid transparent; white-space: nowrap; cursor: pointer; pointer-events: auto;
     box-shadow: 0 1px 1px rgba(0,0,0,.05); transition: opacity .18s;
   }
   .edge-label:hover { box-shadow: 0 0 0 2px rgba(59,91,219,.15); }
+  .edge-label.hl { box-shadow: 0 0 0 4px rgba(59,91,219,.45); }
+
+  /* Off-screen box that sizes a node or label before dagre can place it. visibility rather than
+     display, which would measure zero. */
+  .diagram-measure { position: absolute; left: -9999px; top: 0; visibility: hidden; width: max-content; }
+
+  /* Diagram filters — what's on screen, opposite the zoom controls diagonally */
+  .diagram-filters {
+    position: absolute; left: 14px; top: 14px; z-index: 8;
+    display: flex; flex-direction: column; gap: 2px;
+    background: rgba(255,255,255,.97); border: 1px solid var(--line-strong);
+    border-radius: 10px; padding: 7px 10px; box-shadow: 0 2px 12px rgba(0,0,0,.10);
+  }
+  .filter-check {
+    display: flex; align-items: center; gap: 6px;
+    font-size: 12px; color: #3d4149; cursor: pointer; white-space: nowrap;
+  }
+  .filter-check:hover { color: var(--text); }
+  .filter-check input { margin: 0; cursor: pointer; accent-color: var(--accent); }
+  .filter-count { color: var(--muted); font-size: 11px; margin-left: auto; padding-left: 8px; }
+
+  /* Zoom controls — mirrors the Color key across the pane, and the playground's diagram pane */
+  .zoom-controls {
+    position: absolute; right: 14px; bottom: 14px; z-index: 8;
+    display: flex; flex-direction: column; gap: 6px;
+  }
+  .zoom-btn {
+    width: 30px; height: 30px; padding: 0; border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(255,255,255,.97); border: 1px solid var(--line-strong);
+    box-shadow: 0 2px 12px rgba(0,0,0,.10);
+    color: var(--muted); font: inherit; font-size: 15px; line-height: 1; cursor: pointer;
+  }
+  .zoom-btn:hover { border-color: var(--accent); color: var(--text); }
+  .zoom-btn svg { width: 15px; height: 15px; }
 
   /* Focus mode — fade the unrelated, emphasise the selection's neighbours */
   .diagram.focus-mode .diag-node.faded { opacity: .17; filter: saturate(.35); }
   .diagram.focus-mode .edge-label.faded { opacity: .12; }
-  .diagram.focus-mode .edges path.edge.faded { opacity: .12; }
-  .diagram.focus-mode .edges path.edge.incident { stroke: #5b616b; stroke-width: 2.2; }
+  .diagram.focus-mode path.edge.faded { opacity: .12; }
+  .diagram.focus-mode path.edge.incident { stroke: #5b616b; stroke-width: 2.2; }
 
-  /* Colour key / legend */
+  /* Color key / legend */
   .legend {
     position: absolute; left: 14px; bottom: 14px; z-index: 8;
     background: rgba(255,255,255,.97); border: 1px solid var(--line-strong);
@@ -257,6 +310,15 @@
   .legend.collapsed .legend-title { margin-bottom: 0; }
   .legend-group { font-size: 10px; text-transform: uppercase; letter-spacing: .4px; color: var(--muted); margin: 4px 0 3px; }
   .legend-group:first-child { margin-top: 0; }
+  /* border-color mode lives here rather than in an app-bar gear: it's the setting the Color
+     key exists to explain, and it sits next to the diagram it changes */
+  .legend-modes { display: flex; gap: 4px; margin-bottom: 6px; }
+  .legend-mode {
+    border: 1px solid var(--line-strong); background: var(--panel); color: var(--muted);
+    border-radius: 999px; padding: 2px 8px; font: inherit; font-size: 10.5px; cursor: pointer;
+  }
+  .legend-mode:hover { border-color: var(--accent); }
+  .legend-mode.active { background: #23262b; color: #fff; border-color: #23262b; }
   .legend-row { display: flex; align-items: center; gap: 7px; margin: 3px 0; color: #3d4149; }
   .legend .sw { width: 18px; height: 12px; border-radius: 3px; flex: 0 0 auto; border: 1px solid rgba(0,0,0,.10); }
 
@@ -267,8 +329,10 @@
     border-radius: 12px; box-shadow: 0 10px 30px rgba(0,0,0,.20);
     padding: 12px 13px 13px; font-size: 12px; max-height: 82%; overflow: auto;
   }
-  .claim-pop.side-right { transform: translate(94px, -50%); }
-  .claim-pop.side-left  { transform: translate(calc(-100% - 94px), -50%); }
+  .claim-pop { transform: translateY(-50%); }
+  /* A pan moves the node it points at every frame; re-measuring that per frame is the expensive
+     way, so it goes invisible for the gesture and comes back where the node landed. */
+  .claim-pop.settling { visibility: hidden; }
   .claim-pop .cp-close {
     position: absolute; top: 6px; right: 8px; border: none; background: none;
     color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 2px 4px;
@@ -299,6 +363,7 @@
   .cp-note { margin-top: 10px; color: var(--muted); font-size: 11px; line-height: 1.45; }
 
   /* Question view panels (replace diagram when a guiding question is selected) */
+  .qview-scroll { position: absolute; inset: 0; overflow: auto; padding: 16px; }
   .qview { max-width: 860px; margin: 0 auto; }
   .qview h3 { font-size: 15px; margin: 0 0 4px; }
   .qview .sub { color: var(--muted); margin: 0 0 16px; font-size: 12.5px; }
@@ -357,14 +422,16 @@
   <div id="protoBarSlot"></div>
   <script>
     // Per-version facts for prototype-bar.js; written once when this version is cut.
-    window.CURRENT_VERSION = "5";
+    window.CURRENT_VERSION = "9";
     window.WHATS_NEW_HTML = `
-      <div class="ver">v5 &mdash; changes since v4</div>
+      <div class="ver">v9 &mdash; changes since v8</div>
       <ol>
-        <li><b>The numbers are generated now.</b> Explore questions and Highlights come from a script that reads the ontology example (<code>npm run generate</code>), pasted in as a data bundle instead of hand-derived. Everything else is unchanged from v4.</li>
-        <li><b>Guiding scores are lower.</b> A question now only counts a path that runs along <i>guides</i> / <i>clarifies</i> edges and ends by guiding the topic, so &ldquo;most effective ways&rdquo; reads 0.76 (was 0.83) and &ldquo;why do people immigrate&rdquo; 0.48 (was 0.52).</li>
-        <li><b>Highlights are recomputed.</b> Disagreement is scaled by 4 rather than 8, and a scorer who left a &ldquo;&mdash;&rdquo; no longer counts as a 0 &mdash; so the list is ordered differently and <b>claims</b> (&ldquo;most enter legally and overstay visas&rdquo;) now reach it alongside concepts and edges.</li>
-        <li>Nothing in the rendering changed: an adapter maps the bundle onto the names v4 already read, and hand-authored bits (which view a question opens, &ldquo;Most active&rdquo;, the criteria scores, the diagram) sit in an <code>OVERRIDES</code> block.</li>
+        <li><b>Nothing in the diagram is hand-picked any more.</b> v8 listed ten concept ids and ten edges by hand; v9 ranks every node by the hotness the generator already calculates and takes the top 10. Two checkboxes at the top left of the diagram widen it: <i>Top 10 hottest</i> off shows the whole topic, <i>Only cause &amp; effect</i> off adds claims, questions and sources.</li>
+        <li><b>Every edge is a box now, so arrows can point at edges.</b> An argument in this ontology argues about a <i>score</i>, and half the scores belong to edges &mdash; "most enter legally and overstay visas" argues about how much a wall <i>reduces</i> illegal immigration, not about either concept it sits between. Uncheck "Only cause &amp; effect" to see three of those land on the <i>reduces</i> pill. Nothing looks different in the causal view: the pill was always drawn, it just wasn't something dagre placed.</li>
+        <li><b>The topic node is listed in Hottest Details.</b> It was excluded on the grounds that the page is already about it &mdash; but here it is the single most disputed thing in its own topic (alice +2, bob &minus;7, casey +8), which is worth saying out loud.</li>
+        <li><b>"Most active" is a real number.</b> It was a hand-written list in the wireframe that could decorate a row but not rank it. It now ships in the bundle as a strength per node/edge and competes with the other three signals &mdash; which is why an open question, "how tall is the wall?", is now hot enough to make the top 10.</li>
+        <li><b>A hot claim brings its context.</b> A claim or question only means something next to what it argues about, so one that lands on screen with its referent missing pulls it in.</li>
+        <li><b>Non-causal boxes carry the syntax's own marker</b> &mdash; <code>?</code> for a question, <code>=</code> for a claim, a page for a source. A concept never gets one, so an icon at all means "not cause and effect".</li>
       </ol>
     `;
   </script>
@@ -385,19 +452,13 @@
     <!-- ================= AGENDA PANE ================= -->
     <aside class="agenda">
       <div class="section">
-        <div class="topic-head">
-          <h2 style="margin:0">Topic</h2>
-          <span class="spacer" style="flex:1"></span>
-          <button class="btn" id="tourBtn">Tour this topic</button>
-        </div>
-        <div style="margin:10px 0 8px" id="topicPillSlot"></div>
+        <h2 style="margin-bottom:8px">Topic</h2>
         <p class="desc" id="topicDesc"></p>
       </div>
 
       <div class="section">
         <h2>Explore questions</h2>
         <div class="q-list" id="qList"></div>
-        <div class="q-legend"><span class="swatch"></span> deeper purple = guides the topic more (drives the order)</div>
       </div>
 
       <div class="section">
@@ -415,24 +476,20 @@
     <main class="structure">
       <div class="struct-head">
         <h2>Structure</h2>
-        <div class="spacer"></div>
-        <div class="view-toggle" id="summaryToggle">
-          <button data-mode="text" class="active" title="Text summary">T</button>
-          <button data-mode="sunburst" title="Sunburst">&#9673;</button>
-        </div>
-        <button class="icon-btn" id="summaryCollapseBtn" title="Collapse / expand summary">&#9650;</button>
       </div>
 
       <div class="summary" id="summary">
-        <div class="summary-title">
-          <span id="summaryLabel">Current-view summary</span>
+        <div class="summary-tabs" id="summaryTabs">
+          <button class="summary-tab active" data-mode="text">Summary</button>
+          <button class="summary-tab" data-mode="sunburst">Minimap</button>
+          <button class="summary-collapse" id="summaryCollapseBtn" title="Collapse / expand summary">&#9650;</button>
         </div>
         <div class="summary-body" id="summaryBody"></div>
       </div>
 
       <div class="struct-body" id="structBody">
-        <div class="diagram" id="diagram">
-          <svg class="edges" id="edges" viewBox="0 0 1000 640">
+        <div class="diagram-box" id="diagramBox">
+          <svg class="diagram" id="diagram" xmlns="http://www.w3.org/2000/svg">
             <defs>
               <marker id="arrow" viewBox="0 0 10 10" refX="8.5" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
                 <path d="M0,0 L10,5 L0,10 z" fill="#9aa0aa"></path>
@@ -444,16 +501,49 @@
                 <path d="M0,0 L10,5 L0,10 z" fill="#5b616b"></path>
               </marker>
             </defs>
+            <!-- svg-pan-zoom transforms this group (viewportSelector); edges, nodes and labels
+                 are injected into it, and defs stay outside so markers resolve unscaled -->
+            <g id="diagramViewport"></g>
           </svg>
-          <!-- node + edge-label divs injected here -->
+          <div class="diagram-filters" id="diagramFilters">
+            <label class="filter-check">
+              <input type="checkbox" id="filterHottestBox" checked> Top 10 hottest
+              <span class="filter-count" id="filterCount"></span>
+            </label>
+            <label class="filter-check">
+              <input type="checkbox" id="filterCausalBox" checked> Only cause &amp; effect
+            </label>
+          </div>
+          <div class="zoom-controls" id="zoomControls">
+            <button class="zoom-btn" id="zoomIn" title="Zoom in">+</button>
+            <button class="zoom-btn" id="zoomOut" title="Zoom out">&minus;</button>
+            <!-- corner brackets rather than a glyph like ⤢ or ⛶: + and − read at any size, while
+                 every "fit" glyph is either a hairline diagonal or missing from the font -->
+            <button class="zoom-btn" id="zoomFit" title="Fit to screen" aria-label="Fit to screen">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M4 9V6a2 2 0 0 1 2-2h3"></path>
+                <path d="M15 4h3a2 2 0 0 1 2 2v3"></path>
+                <path d="M20 15v3a2 2 0 0 1-2 2h-3"></path>
+                <path d="M9 20H6a2 2 0 0 1-2-2v-3"></path>
+              </svg>
+            </button>
+          </div>
         </div>
-        <div class="qview" id="qview" style="display:none"></div>
+        <div class="qview-scroll" id="qviewScroll" style="display:none">
+          <div class="qview" id="qview"></div>
+        </div>
+        <div class="diagram-measure" id="diagramMeasure"></div>
       </div>
 
-      <!-- Colour key (floats over the structure pane) -->
+      <!-- Color key (floats over the structure pane) -->
       <div class="legend" id="legend">
-        <button class="legend-title" id="legendToggle">Colour key &#9662;</button>
+        <button class="legend-title" id="legendToggle">Color key &#9662;</button>
         <div class="legend-body" id="legendBody">
+          <div class="legend-group">Border color</div>
+          <div class="legend-modes" id="legendModes">
+            <button class="legend-mode" data-mode="average">Average</button>
+            <button class="legend-mode" data-mode="disagreement">Disagreement</button>
+          </div>
           <div class="legend-group">Nodes &mdash; importance to change</div>
           <div class="legend-row"><span class="sw" style="background:#b2182b"></span> Decrease / &ldquo;bad&rdquo; (&minus;)</div>
           <div class="legend-row"><span class="sw" style="background:#e9e9e9"></span> No change (0)</div>
@@ -461,7 +551,7 @@
           <div class="legend-group">Edges &mdash; effect on target</div>
           <div class="legend-row"><span class="sw" style="background:#2166ac"></span> causes &rarr; increases (blue)</div>
           <div class="legend-row"><span class="sw" style="background:#b2182b"></span> reduces / impedes &rarr; decreases (red)</div>
-          <div class="legend-row"><span class="sw sweep" id="legendSweep"></span> Split colours = scorers disagree</div>
+          <div class="legend-row"><span class="sw sweep" id="legendSweep"></span> <span id="legendSweepText"></span></div>
         </div>
       </div>
     </main>
@@ -490,238 +580,476 @@ const DATA = {
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-4, 0, -8]
+      "scores": [-4, 0, -8],
+      "signals": {
+        "change-importance": 0.5,
+        "controversy": 0.816,
+        "unknown": 0,
+        "active": 0.5
+      },
+      "hotness": 0.816
     },
     "long-wait": {
       "label": "Long legal processing times",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-6, -3, -7]
+      "scores": [-6, -3, -7],
+      "signals": {
+        "change-importance": 0.667,
+        "controversy": 0.425,
+        "unknown": 0,
+        "active": 0.6
+      },
+      "hotness": 0.667
     },
     "admin-burden": {
       "label": "Administrative burden of enforcing immigration requirements",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-5, null, -6]
+      "scores": [-5, null, -6],
+      "signals": {
+        "change-importance": 0.688,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.688
     },
     "legal-immig": {
       "label": "Legal immigration into the US",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [7, 8, 2]
+      "scores": [7, 8, 2],
+      "signals": {
+        "change-importance": 0.708,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.708
     },
     "motivations": {
       "label": "Motivations to immigrate illegally",
       "kind": "concept",
       "tags": [],
       "subtypes": ["category"],
-      "scores": [0, null, null]
+      "scores": [0, null, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "save-money": {
       "label": "Saving money by skipping the legal process",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-2, null, -5]
+      "scores": [-2, null, -5],
+      "signals": {
+        "change-importance": 0.438,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.438
     },
     "disappear": {
       "label": "Wanting to \"disappear\" (avoid government records)",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-3, null, null]
+      "scores": [-3, null, null],
+      "signals": {
+        "change-importance": 0.375,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "danger": {
       "label": "Danger in home countries",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-8, -8, -6]
+      "scores": [-8, -8, -6],
+      "signals": {
+        "change-importance": 0.917,
+        "controversy": 0.236,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.917
     },
     "wall": {
       "label": "Border wall along the southern US border",
       "kind": "concept",
       "tags": ["topic", "action"],
       "subtypes": [],
-      "scores": [2, -7, 8]
+      "scores": [2, -7, 8],
+      "signals": {
+        "change-importance": 0.125,
+        "controversy": 1,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 1
     },
     "barbed-wire": {
       "label": "Barbed wire along the top",
       "kind": "concept",
       "tags": [],
       "subtypes": ["component"],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "how-tall": {
       "label": "How tall is the proposed wall design?",
       "kind": "clarifying",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0.5,
+        "active": 0.8
+      },
+      "hotness": 0.8
     },
     "more-admin": {
       "label": "Increased administrative resources for processing immigration",
       "kind": "concept",
       "tags": ["action"],
       "subtypes": [],
-      "scores": [5, 8, 2]
+      "scores": [5, 8, 2],
+      "signals": {
+        "change-importance": 0.625,
+        "controversy": 0.612,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.625
     },
     "fewer-requirements": {
       "label": "Reduced immigration requirements",
       "kind": "concept",
       "tags": ["action"],
       "subtypes": [],
-      "scores": [3, 7, -4]
+      "scores": [3, 7, -4],
+      "signals": {
+        "change-importance": 0.25,
+        "controversy": 1,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 1
     },
     "why-wall": {
       "label": "Why might we want the wall?",
       "kind": "guiding",
       "tags": ["guiding"],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "best-ways": {
       "label": "What are the most effective ways to reduce illegal immigration?",
       "kind": "guiding",
       "tags": ["guiding"],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "why-immigrate": {
       "label": "Why do people immigrate illegally?",
       "kind": "guiding",
       "tags": ["guiding"],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "how-enter": {
       "label": "How do most people illegally enter the US?",
       "kind": "clarifying",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "enter-on-foot": {
       "label": "Most enter by crossing the border on foot between ports of entry",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [3, 1, 8]
+      "scores": [3, 1, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.736,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.736
     },
     "visa-overstay": {
       "label": "Most enter legally and overstay visas",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [7, 8, 1]
+      "scores": [7, 8, 1],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.773,
+        "unknown": 0,
+        "active": 0.4
+      },
+      "hotness": 0.773
     },
     "inexpensive": {
       "label": "Inexpensive",
       "kind": "concept",
       "tags": [],
       "subtypes": ["criterion"],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "wall-cost": {
       "label": "Billions of dollars of construction and maintenance spending",
       "kind": "concept",
       "tags": [],
       "subtypes": [],
-      "scores": [-2, -4, null]
+      "scores": [-2, -4, null],
+      "signals": {
+        "change-importance": 0.375,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "quick": {
       "label": "Quick to implement",
       "kind": "concept",
       "tags": [],
       "subtypes": ["criterion"],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "humane": {
       "label": "Humane treatment of immigrants",
       "kind": "concept",
       "tags": [],
       "subtypes": ["criterion"],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "still-immigrate": {
       "label": "Even with instant processing, people would still immigrate illegally to save money or \"disappear\"",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [6, null, 8]
+      "scores": [6, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.25
     },
     "physical-barrier": {
       "label": "A wall physically stops crossings without needing continuous surveillance",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [8, null, 8]
+      "scores": [8, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "caging-effect": {
       "label": "Hardened borders trap circular migrants who used to return home",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [2, 7, 1]
+      "scores": [2, 7, 1],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.656
     },
     "costly-recrossing": {
       "label": "Re-crossing a hardened border is costly and dangerous, so seasonal migrants stay and bring their families over",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [3, 8, 2]
+      "scores": [3, 8, 2],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.656
     },
     "climb-over": {
       "label": "People will find a way over the barrier",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [6, 8, 1]
+      "scores": [6, 8, 1],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.736,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.736
     },
     "easy-climb": {
       "label": "It's easy to climb a fence",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [8, 8, null]
+      "scores": [8, 8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "unclimbable": {
       "label": "The wall design is tall, without handholds, and topped with barbed wire",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [5, null, 8]
+      "scores": [5, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "fleeing-danger": {
       "label": "Most people who immigrate illegally are protecting themselves from danger",
       "kind": "claim",
       "tags": [],
       "subtypes": [],
-      "scores": [7, 8, 2]
+      "scores": [7, 8, 2],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.656
     },
     "baby-murder": {
       "label": "An illegal immigrant murdered a baby in cold blood last year",
       "kind": "claim",
       "tags": ["anecdote"],
       "subtypes": [],
-      "scores": [3, null, 8]
+      "scores": [3, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.625,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.625
     },
     "texas-stat": {
       "label": "In Texas 2012-2018, illegal immigrants were arrested for violent crimes at half the rate of native-born citizens",
       "kind": "claim",
       "tags": ["statistic"],
       "subtypes": [],
-      "scores": [8, null, 4]
+      "scores": [8, null, 4],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "house-doc": {
       "label": "House Judiciary hearing document, Jan 2025 (docs.house.gov)",
       "kind": "source",
       "tags": [],
       "subtypes": [],
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     }
   },
   "edges": {
@@ -729,247 +1057,534 @@ const DATA = {
       "from": "long-wait",
       "relation": "causes",
       "to": "illegal-immig",
-      "scores": [6, 2, null]
+      "scores": [6, 2, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "admin-burden--causes--long-wait": {
       "from": "admin-burden",
       "relation": "causes",
       "to": "long-wait",
-      "scores": [7, null, 8]
+      "scores": [7, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "legal-immig--causes--illegal-immig": {
       "from": "legal-immig",
       "relation": "reduces",
       "to": "illegal-immig",
-      "scores": [3, 7, 1]
+      "scores": [3, 7, 1],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.624,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.624
     },
     "long-wait--causes--legal-immig": {
       "from": "long-wait",
       "relation": "impedes",
       "to": "legal-immig",
-      "scores": [6, 8, null]
+      "scores": [6, 8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.25
     },
     "motivations--categorizes--save-money": {
       "from": "motivations",
       "relation": "categorizes",
       "to": "save-money",
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "save-money--causes--illegal-immig": {
       "from": "save-money",
       "relation": "causes",
       "to": "illegal-immig",
-      "scores": [4, null, 7]
+      "scores": [4, null, 7],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "motivations--categorizes--disappear": {
       "from": "motivations",
       "relation": "categorizes",
       "to": "disappear",
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "disappear--causes--illegal-immig": {
       "from": "disappear",
       "relation": "causes",
       "to": "illegal-immig",
-      "scores": [2, null, 6]
+      "scores": [2, null, 6],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "motivations--categorizes--danger": {
       "from": "motivations",
       "relation": "categorizes",
       "to": "danger",
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "danger--causes--illegal-immig": {
       "from": "danger",
       "relation": "causes",
       "to": "illegal-immig",
-      "scores": [7, 8, 3]
+      "scores": [7, 8, 3],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.54,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.54
     },
     "wall-reduces": {
       "from": "wall",
       "relation": "reduces",
       "to": "illegal-immig",
-      "scores": [3, -5, 8]
+      "scores": [3, -5, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 1,
+        "unknown": 0,
+        "active": 1
+      },
+      "hotness": 1
     },
     "wall--has--barbed-wire": {
       "from": "wall",
       "relation": "has",
       "to": "barbed-wire",
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "how-tall--clarifies--wall": {
       "from": "how-tall",
       "relation": "clarifies",
       "to": "wall",
-      "scores": null
+      "scores": null,
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "more-admin--causes--long-wait": {
       "from": "more-admin",
       "relation": "reduces",
       "to": "long-wait",
-      "scores": [7, 8, null]
+      "scores": [7, 8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "fewer-requirements--causes--admin-burden": {
       "from": "fewer-requirements",
       "relation": "reduces",
       "to": "admin-burden",
-      "scores": [6, 7, null]
+      "scores": [6, 7, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "why-wall--guides--wall": {
       "from": "why-wall",
       "relation": "guides",
       "to": "wall",
-      "scores": [8, 6, 8]
+      "scores": [8, 6, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.236,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.236
     },
     "best-ways--guides--illegal-immig": {
       "from": "best-ways",
       "relation": "guides",
       "to": "illegal-immig",
-      "scores": [7, 5, 8]
+      "scores": [7, 5, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.312,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.312
     },
     "best-ways--guides--why-wall": {
       "from": "best-ways",
       "relation": "guides",
       "to": "why-wall",
-      "scores": [7, 5, 8]
+      "scores": [7, 5, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.312,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.312
     },
     "why-immigrate--guides--best-ways": {
       "from": "why-immigrate",
       "relation": "guides",
       "to": "best-ways",
-      "scores": [6, 8, 1]
+      "scores": [6, 8, 1],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.736,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.736
     },
     "how-enter--clarifies--wall-reduces--implied": {
       "from": "how-enter",
       "relation": "clarifies",
       "to": "wall-reduces--implied",
-      "scores": [6, null, 3]
+      "scores": [6, null, 3],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "enter-on-foot--answers--how-enter": {
       "from": "enter-on-foot",
       "relation": "answers",
       "to": "how-enter",
-      "scores": [7, null, 6]
+      "scores": [7, null, 6],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "visa-overstay--answers--how-enter": {
       "from": "visa-overstay",
       "relation": "answers",
       "to": "how-enter",
-      "scores": [7, 8, null]
+      "scores": [7, 8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "inexpensive--criterion-for--best-ways": {
       "from": "inexpensive",
       "relation": "criterion for",
       "to": "best-ways",
-      "scores": [7, 8, 2]
+      "scores": [7, 8, 2],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.656
     },
     "more-admin--fulfills--inexpensive": {
       "from": "more-admin",
       "relation": "fulfills",
       "to": "inexpensive",
-      "scores": [-3, -4, null]
+      "scores": [-3, -4, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "fewer-requirements--fulfills--inexpensive": {
       "from": "fewer-requirements",
       "relation": "fulfills",
       "to": "inexpensive",
-      "scores": [7, null, 6]
+      "scores": [7, null, 6],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "wall-cost--fulfills--inexpensive": {
       "from": "wall-cost",
       "relation": "fulfills",
       "to": "inexpensive",
-      "scores": [-7, -8, -2]
+      "scores": [-7, -8, -2],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.656,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.656
     },
     "wall--causes--wall-cost": {
       "from": "wall",
       "relation": "causes",
       "to": "wall-cost",
-      "scores": [8, 8, 8]
+      "scores": [8, 8, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     },
     "quick--criterion-for--best-ways": {
       "from": "quick",
       "relation": "criterion for",
       "to": "best-ways",
-      "scores": [5, 3, 8]
+      "scores": [5, 3, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.514,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.514
     },
     "humane--criterion-for--best-ways": {
       "from": "humane",
       "relation": "criterion for",
       "to": "best-ways",
-      "scores": [8, 8, 3]
+      "scores": [8, 8, 3],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.589,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.589
     },
     "still-immigrate--supports--wait-causes-illegal-immig--implied": {
       "from": "still-immigrate",
       "relation": "supports",
       "to": "wait-causes-illegal-immig--implied",
-      "scores": [-4, null, -6]
+      "scores": [-4, null, -6],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.25
     },
     "physical-barrier--supports--wall-reduces--implied": {
       "from": "physical-barrier",
       "relation": "supports",
       "to": "wall-reduces--implied",
-      "scores": [7, null, 8]
+      "scores": [7, null, 8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.125,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.125
     },
     "caging-effect--supports--wall-reduces--implied": {
       "from": "caging-effect",
       "relation": "supports",
       "to": "wall-reduces--implied",
-      "scores": [null, -7, -3]
+      "scores": [null, -7, -3],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "costly-recrossing--supports--caging-effect": {
       "from": "costly-recrossing",
       "relation": "supports",
       "to": "caging-effect",
-      "scores": [null, 7, 4]
+      "scores": [null, 7, 4],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "climb-over--supports--wall-reduces--implied": {
       "from": "climb-over",
       "relation": "supports",
       "to": "wall-reduces--implied",
-      "scores": [-6, -8, null]
+      "scores": [-6, -8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.25
     },
     "easy-climb--supports--climb-over": {
       "from": "easy-climb",
       "relation": "supports",
       "to": "climb-over",
-      "scores": [5, 7, null]
+      "scores": [5, 7, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.25,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.25
     },
     "unclimbable--supports--climb-over": {
       "from": "unclimbable",
       "relation": "supports",
       "to": "climb-over",
-      "scores": [-4, null, -8]
+      "scores": [-4, null, -8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "visa-overstay--supports--wall-reduces--implied": {
       "from": "visa-overstay",
       "relation": "supports",
       "to": "wall-reduces--implied",
-      "scores": [-5, -8, null]
+      "scores": [-5, -8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "fleeing-danger--supports--illegal-immig--implied": {
       "from": "fleeing-danger",
       "relation": "supports",
       "to": "illegal-immig--implied",
-      "scores": [5, 8, null]
+      "scores": [5, 8, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.375,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.375
     },
     "murder-supports-worse-score": {
       "from": "baby-murder",
       "relation": "supports",
       "to": "illegal-immig--implied",
-      "scores": [-4, null, -8]
+      "scores": [-4, null, -8],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "texas-stat--supports--murder-supports-worse-score--implied": {
       "from": "texas-stat",
       "relation": "supports",
       "to": "murder-supports-worse-score--implied",
-      "scores": [-7, null, -3]
+      "scores": [-7, null, -3],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0.5,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0.5
     },
     "house-doc--mentions--texas-stat": {
       "from": "house-doc",
       "relation": "mentions",
       "to": "texas-stat",
-      "scores": [8, null, null]
+      "scores": [8, null, null],
+      "signals": {
+        "change-importance": 0,
+        "controversy": 0,
+        "unknown": 0,
+        "active": 0
+      },
+      "hotness": 0
     }
   },
   "questions": [
@@ -992,134 +1607,64 @@ const DATA = {
   "highlights": [
     {
       "kind": "node",
+      "id": "wall",
+      "categories": ["controversy"]
+    },
+    {
+      "kind": "node",
       "id": "fewer-requirements",
-      "signals": {
-        "change-importance": 0.25,
-        "controversy": 1,
-        "unknown": 0
-      },
-      "categories": ["controversy"],
-      "hotness": 1
+      "categories": ["controversy"]
     },
     {
       "kind": "edge",
       "id": "wall-reduces",
-      "signals": {
-        "change-importance": 0,
-        "controversy": 1,
-        "unknown": 0
-      },
-      "categories": ["controversy"],
-      "hotness": 1
+      "categories": ["controversy", "active"]
     },
     {
       "kind": "node",
       "id": "danger",
-      "signals": {
-        "change-importance": 0.917,
-        "controversy": 0.236,
-        "unknown": 0
-      },
-      "categories": ["change-importance"],
-      "hotness": 0.917
+      "categories": ["change-importance"]
     },
     {
       "kind": "node",
       "id": "illegal-immig",
-      "signals": {
-        "change-importance": 0.5,
-        "controversy": 0.816,
-        "unknown": 0
-      },
-      "categories": ["controversy"],
-      "hotness": 0.816
-    },
-    {
-      "kind": "node",
-      "id": "visa-overstay",
-      "signals": {
-        "change-importance": 0,
-        "controversy": 0.773,
-        "unknown": 0
-      },
-      "categories": ["controversy"],
-      "hotness": 0.773
-    },
-    {
-      "kind": "node",
-      "id": "enter-on-foot",
-      "signals": {
-        "change-importance": 0,
-        "controversy": 0.736,
-        "unknown": 0
-      },
-      "categories": ["controversy"],
-      "hotness": 0.736
-    },
-    {
-      "kind": "node",
-      "id": "legal-immig",
-      "signals": {
-        "change-importance": 0.708,
-        "controversy": 0.656,
-        "unknown": 0
-      },
-      "categories": ["change-importance"],
-      "hotness": 0.708
-    },
-    {
-      "kind": "node",
-      "id": "admin-burden",
-      "signals": {
-        "change-importance": 0.688,
-        "controversy": 0.125,
-        "unknown": 0
-      },
-      "categories": ["change-importance"],
-      "hotness": 0.688
-    },
-    {
-      "kind": "node",
-      "id": "long-wait",
-      "signals": {
-        "change-importance": 0.667,
-        "controversy": 0.425,
-        "unknown": 0
-      },
-      "categories": ["change-importance"],
-      "hotness": 0.667
-    },
-    {
-      "kind": "node",
-      "id": "more-admin",
-      "signals": {
-        "change-importance": 0.625,
-        "controversy": 0.612,
-        "unknown": 0
-      },
-      "categories": ["change-importance"],
-      "hotness": 0.625
+      "categories": ["controversy", "active"]
     },
     {
       "kind": "node",
       "id": "how-tall",
-      "signals": {
-        "change-importance": 0,
-        "controversy": 0,
-        "unknown": 0.5
-      },
-      "categories": ["unknown"],
-      "hotness": 0.5
+      "categories": ["unknown", "active"]
+    },
+    {
+      "kind": "node",
+      "id": "visa-overstay",
+      "categories": ["controversy", "active"]
+    },
+    {
+      "kind": "node",
+      "id": "legal-immig",
+      "categories": ["change-importance"]
+    },
+    {
+      "kind": "node",
+      "id": "admin-burden",
+      "categories": ["change-importance"]
+    },
+    {
+      "kind": "node",
+      "id": "long-wait",
+      "categories": ["change-importance", "active"]
+    },
+    {
+      "kind": "node",
+      "id": "more-admin",
+      "categories": ["change-importance"]
     }
   ]
 };
 
 /* OVERRIDES - what no part of the ontology says, so this view has to. */
 const OVERRIDES = {
-  /* The syntax carries no timestamps, so "Most active" is authored. Keyed by node or
-     edge id, the way DATA keys everything else. */
-  active: ["wall-reduces", "how-tall", "long-wait"],
-
   /* Which canned view a question opens, and the phrasing that embeds concept pills.
      DATA carries a question's plain text; both of these are the view's call. */
   questions: {
@@ -1142,16 +1687,20 @@ for (const [id, node] of Object.entries(DATA.nodes)) {
     kind: node.kind,
     // a written #tag and a subtype an edge implies read the same on a pill
     tag: [...node.tags, ...node.subtypes].join(" \u00b7 ") || undefined,
+    subtypes: node.subtypes,
     scores: node.scores,
+    hotness: node.hotness,
   };
 }
 
-/* Two things the syntax leaves unscored that this view still colours, each borrowing the
-   edge that carries the score: a criterion's importance is its `criterion for` score, and
-   a question's is the `guides` edge it sets its agenda through. Borrowing is the view's
-   call - the ontology deliberately keeps the score on the edge. */
+/* Keyed like DATA.edges, plus the id, so an edge can be passed around by id the way a node is. */
+const EDGES = {};
+for (const [id, edge] of Object.entries(DATA.edges)) EDGES[id] = { id, ...edge };
+
+/* A criterion's importance is the score on its `criterion for` edge. Borrowing it onto the node is
+   the view's call - the ontology deliberately keeps the score on the edge. */
 for (const edge of Object.values(DATA.edges)) {
-  if (edge.relation !== "criterion for" && edge.relation !== "guides") continue;
+  if (edge.relation !== "criterion for") continue;
   if (NODES[edge.from].scores === null) NODES[edge.from].scores = edge.scores;
 }
 
@@ -1163,16 +1712,13 @@ const QUESTIONS = DATA.questions.map(q => ({
 
 function isQuestionNode(id){ return NODES[id].kind === "guiding" || NODES[id].kind === "clarifying"; }
 
-/* A highlight names what it points at; DATA.nodes / DATA.edges say the rest, and `hotness`
-   carries every signal's score even where only one of them listed the item. A question row
-   has its own shape, so it's a third kind here even though DATA knows only two. */
+/* A highlight names what it points at and which signals listed it; DATA.nodes / DATA.edges say
+   the rest. A question row has its own shape, so it's a third kind here even though DATA knows
+   only two. */
 const HOTTEST = DATA.highlights.map(item => ({
   ...item,
-  ...(item.kind === "edge" ? DATA.edges[item.id] : { scores: NODES[item.id].scores }),
+  ...(item.kind === "edge" ? EDGES[item.id] : { scores: NODES[item.id].scores }),
   kind: item.kind === "node" && isQuestionNode(item.id) ? "question" : item.kind,
-  categories: OVERRIDES.active.includes(item.id)
-    ? [...item.categories, "active"]
-    : item.categories,
 }));
 
 const CATEGORIES = {
@@ -1182,32 +1728,102 @@ const CATEGORIES = {
   active:              { icon: "💬", label: "Most active" },
 };
 
-/* Diagram: concept-only nodes (questions excluded). Positions are computed as a
-   bottom-to-top layered layout from the causal edges below. NODE_ORDER only sets
-   left-to-right order within a layer (to reduce crossings). */
-const DIAGRAM_NODE_IDS = [
-  "illegal-immig", "legal-immig", "long-wait", "wall-cost",
-  "danger", "save-money", "disappear", "admin-burden", "more-admin", "wall",
-];
-const NODE_ORDER = {
-  "more-admin": 0, "admin-burden": 1, "danger": 2, "save-money": 3, "disappear": 4, "wall": 5, // bottom layer
-  "long-wait": 0, "wall-cost": 1,  // layer 1
-  "legal-immig": 0,                // layer 2
-  "illegal-immig": 0,              // top layer
-};
-/* Edges point from the acting/causing node (lower) to the affected node (higher). */
-const DIAGRAM_EDGES = [
-  { from: "wall",         to: "illegal-immig", relation: "reduces", scores: [3, -5, 8] },
-  { from: "legal-immig",  to: "illegal-immig", relation: "reduces", scores: [3, 7, 1] },
-  { from: "more-admin",   to: "long-wait",     relation: "reduces", scores: [7, 8, null] },
-  { from: "admin-burden", to: "long-wait",     relation: "causes",  scores: [7, null, 8] },
-  { from: "long-wait",    to: "illegal-immig", relation: "causes",  scores: [6, 2, null] },
-  { from: "danger",       to: "illegal-immig", relation: "causes",  scores: [7, 8, 3] },
-  { from: "save-money",   to: "illegal-immig", relation: "causes",  scores: [4, null, 7] },
-  { from: "disappear",    to: "illegal-immig", relation: "causes",  scores: [2, null, 6] },
-  { from: "wall",         to: "wall-cost",     relation: "causes",  scores: [8, 8, 8] },
-  { from: "long-wait",    to: "legal-immig",   relation: "impedes", scores: [6, 8, null] },
-];
+/* ============================================================
+   DIAGRAM SET - which nodes and edges are on screen.
+   Derived from the bundle's hotness rather than authored, behind two independent filters.
+   ============================================================ */
+const TOP_N = 10;
+let filterHottest = true;
+let filterCausal = true;
+
+/* By node kind rather than by edge type: a concept nobody has connected yet still belongs on the
+   map. Criteria and categories are the framing layer rather than the causal one, so they go with
+   the claims. */
+const FRAMING_SUBTYPES = ["criterion", "category"];
+function isCausalNode(id){
+  const node = NODES[id];
+  return node.kind === "concept" && !node.subtypes.some(s => FRAMING_SUBTYPES.includes(s));
+}
+
+/* An implied claim stands behind a score rather than holding one, so an edge naming one is really
+   naming the node or edge it stands behind. Both of those are boxes, so nothing draws the implied
+   claim itself - the arrow lands on the box that owns the score. */
+const IMPLIED_SUFFIX = "--implied";
+function referentOf(id){
+  return id.endsWith(IMPLIED_SUFFIX) ? id.slice(0, -IMPLIED_SUFFIX.length) : id;
+}
+
+/* The relations a claim or question attaches through. */
+const ATTACH_RELATIONS = ["supports", "critiques", "answers", "clarifies", "mentions"];
+
+/* Every edge with both ends on screen. A target can be another edge, which is itself only on
+   screen once its own ends are, so this loops until it stops finding new ones. */
+function edgesAmong(shown){
+  const drawn = new Map();
+  for (let more = true; more; ) {
+    more = false;
+    for (const edge of Object.values(EDGES)) {
+      if (drawn.has(edge.id) || !shown.has(edge.from)) continue;
+      const target = referentOf(edge.to);
+      if (!shown.has(target) && !drawn.has(target)) continue;
+      drawn.set(edge.id, edge);
+      more = true;
+    }
+  }
+  return [...drawn.values()];
+}
+
+/* Hotness scores a claim and the thing it argues about independently, so a hot claim can arrive
+   with its referent nowhere on screen, where it says nothing. Each one gets one hop toward that
+   referent, and only when nothing already anchors it. */
+function anchorInto(shown){
+  const queue = [...shown];
+  while (queue.length > 0) {
+    const id = queue.shift();
+    if (NODES[id].kind === "concept") continue;
+    const attaches = Object.values(EDGES)
+      .filter(edge => edge.from === id && ATTACH_RELATIONS.includes(edge.relation));
+    if (attaches.length === 0 || attaches.some(edge => isAnchored(edge.to, shown))) continue;
+    for (const id of endpointsOf(referentOf(attaches[0].to))) {
+      if (shown.has(id)) continue;
+      shown.add(id);
+      queue.push(id);
+    }
+  }
+}
+
+function isAnchored(target, shown){
+  return endpointsOf(referentOf(target)).every(id => shown.has(id));
+}
+
+/* The nodes a referent needs on screen before it can be drawn: an edge needs both of its ends. */
+function endpointsOf(id){
+  const edge = EDGES[id];
+  return edge ? [edge.from, ...endpointsOf(referentOf(edge.to))] : [id];
+}
+
+function diagramSet(){
+  let ids = Object.keys(NODES).toSorted((a, b) => NODES[b].hotness - NODES[a].hotness);
+  if (filterHottest) ids = ids.slice(0, TOP_N);
+  // "the hottest ten, of those the causal ones" rather than "the ten hottest causal ones", so
+  // that unchecking a box only ever adds boxes
+  if (filterCausal) ids = ids.filter(isCausalNode);
+  const shown = new Set(ids);
+  // a causal-only view holds no claims or questions, so nothing needs anchoring
+  if (!filterCausal) anchorInto(shown);
+  return {
+    // hotness order is dagre's tiebreak when crossing minimization leaves a rank's order open
+    nodeIds: [...shown].toSorted((a, b) => NODES[b].hotness - NODES[a].hotness),
+    edges: edgesAmong(shown),
+  };
+}
+
+let VISIBLE_NODES = [];
+let VISIBLE_EDGES = [];
+function isVisible(id){ return VISIBLE_NODES.includes(id) || VISIBLE_EDGES.some(e => e.id === id); }
+function findEdge(from, to){
+  return Object.values(EDGES).find(e => e.from === from && referentOf(e.to) === to);
+}
 
 /* ============================================================
    COLOR HELPERS — colorblind-safe RdBu diverging + purple for guides.
@@ -1226,11 +1842,16 @@ function colorPurple(s){ return mix(PURPLE.lo, PURPLE.hi, Math.max(0,s)/8); }
 function colorFor(s, palette){ return palette === "purple" ? colorPurple(s) : colorRB(s); }
 function tint(c){ return mix(c, "#ffffff", 0.82); }
 
+/* How a border reads a set of scorers. "average" merges them into one color and is the
+   default, because side-by-side hues on every element read as noise to someone arriving;
+   "disagreement" bands them, which is what you want when hunting contested claims. */
+let borderMode = "average";
+
 /* Build inline style for a pill/node/edge-label from its scores.
-   Border = equal-width HARD-STOP bands (one per scorer, sorted by score); fill = light
-   tint of the average. Consensus reads near-solid; disagreement as distinct side-by-side
-   blocks. The padding-box/border-box background trick keeps the banded border while
-   respecting border-radius. (v4: reverted from v2/v3's smooth gradient to v1's hard bands.) */
+   Fill is always a light tint of the average. In disagreement mode the border is equal-width
+   HARD-STOP bands, one per scorer sorted by score, so consensus reads near-solid and a split
+   reads as distinct side-by-side blocks; the padding-box/border-box background trick keeps
+   that banding while respecting border-radius. */
 function pillStyle(scores, palette, borderPx){
   borderPx = borderPx || 2;
   if (!scores || scores.every(s => s === null)) {
@@ -1238,19 +1859,20 @@ function pillStyle(scores, palette, borderPx){
   }
   const present = scores.filter(s => s !== null).sort((a,b) => a - b);
   const n = present.length;
+  const avg = present.reduce((a,s) => a+s, 0) / n;
+  const fill = tint(colorFor(avg, palette));
+  if (borderMode === "average") {
+    return `background:${fill}; border:${borderPx}px solid ${colorFor(avg, palette)};`;
+  }
   const stops = present.map((s,i) => {
     const c = colorFor(s, palette);
     return `${c} ${(i/n*100).toFixed(2)}% ${((i+1)/n*100).toFixed(2)}%`;
   }).join(", ");
-  // v4: angled hard bands (hard stops at an angle) rather than horizontal
+  // angled hard bands rather than horizontal, so a split stays legible on a one-line pill
   const grad = `linear-gradient(120deg, ${stops})`;
-  const avg = present.reduce((a,s) => a+s, 0) / n;
-  const fill = tint(colorFor(avg, palette));
   return `background:linear-gradient(${fill},${fill}) padding-box, ${grad} border-box;`
        + `border:${borderPx}px solid transparent;`;
 }
-
-function paletteForNode(id){ return NODES[id].kind === "guiding" ? "purple" : "rb"; }
 
 /* mean of a scores array, ignoring nulls (0 if all null) */
 function avgScore(scores){
@@ -1263,7 +1885,7 @@ function fmtScore(s){ return (s === null || s === undefined) ? "—" : (s > 0 ? 
 
 /* Effect-on-target scores for an edge: causes keeps its sign; reduces/impedes flip
    (a "reduce" is a negative effect). This makes causes read blue, reduces/impedes read
-   red — coloured by what the edge does to its target rather than by belief in the verb. */
+   red — colored by what the edge does to its target rather than by belief in the verb. */
 function effectScores(relation, scores){
   const flip = (relation === "reduces" || relation === "impedes");
   return (scores || []).map(s => s === null ? null : (flip ? -s : s));
@@ -1277,7 +1899,7 @@ function makeNodePill(id, opts){
   const node = NODES[id];
   const el = document.createElement(opts.inline ? "span" : "button");
   el.className = "pill" + (opts.inline ? " inline" : "");
-  el.setAttribute("style", pillStyle(node.scores, paletteForNode(id), 2));
+  el.setAttribute("style", pillStyle(node.scores, "rb", 2));
   el.dataset.node = id;
   el.textContent = node.label;
   if (opts.tag && node.tag) {
@@ -1296,15 +1918,16 @@ function makeNodePill(id, opts){
    RENDER: AGENDA
    ============================================================ */
 function renderTopic(){
-  document.getElementById("topicPillSlot").appendChild(makeNodePill("wall", { tag: true }));
   document.getElementById("topicDesc").textContent = TOPIC_DESC;
 }
 
 function renderQuestions(){
   const list = document.getElementById("qList");
+  list.innerHTML = "";
   QUESTIONS.forEach(q => {
     const item = document.createElement("div");
-    item.className = "q-item";
+    // re-rendering has to restore the selection, since the rows are rebuilt rather than patched
+    item.className = "q-item" + (q.id === selectedQuestion ? " selected" : "");
     item.dataset.q = q.id;
 
     // purple "guides" dot — deeper purple = guides the topic more (explains the ordering)
@@ -1327,17 +1950,17 @@ function renderQuestions(){
 }
 
 let hotExpanded = false;
-const activeFilters = new Set();
+let activeFilter = null; // at most one pill active at a time; null = show all
 
 function renderFilters(){
   const row = document.getElementById("filterRow");
   row.innerHTML = "";
   Object.entries(CATEGORIES).forEach(([key, category]) => {
     const pill = document.createElement("div");
-    pill.className = "filter-pill" + (activeFilters.has(key) ? " active" : "");
+    pill.className = "filter-pill" + (activeFilter === key ? " active" : "");
     pill.innerHTML = `<span class="ic">${category.icon}</span>${category.label}`;
     pill.addEventListener("click", () => {
-      if (activeFilters.has(key)) activeFilters.delete(key); else activeFilters.add(key);
+      activeFilter = (activeFilter === key) ? null : key;
       renderFilters(); renderHottest();
     });
     row.appendChild(pill);
@@ -1351,7 +1974,7 @@ function edgePhrase(item){
   const relation = document.createElement("span"); relation.className = "relation-word"; relation.textContent = " " + item.relation + " "; wrap.appendChild(relation);
   wrap.appendChild(makeNodePill(item.to, { inline: true }));
   relation.style.cursor = "pointer";
-  relation.addEventListener("click", (e) => { e.stopPropagation(); onEdgeActivate(item.from, item.to); });
+  relation.addEventListener("click", (e) => { e.stopPropagation(); onEdgeActivate(item.id); });
   return wrap;
 }
 
@@ -1363,7 +1986,7 @@ function questionRow(item){
   el.className = "pill inline";
   el.setAttribute("style", pillStyle(q.scores, "rb", 2));
   el.textContent = q.label;
-  el.style.cursor = "default";
+  el.addEventListener("click", (e) => { e.stopPropagation(); onNodeActivate(item.id); });
   wrap.appendChild(el);
   return wrap;
 }
@@ -1371,7 +1994,7 @@ function questionRow(item){
 function renderHottest(){
   const list = document.getElementById("hotList");
   list.innerHTML = "";
-  let items = HOTTEST.filter(item => activeFilters.size === 0 || item.categories.some(category => activeFilters.has(category)));
+  let items = HOTTEST.filter(item => !activeFilter || item.categories.includes(activeFilter));
   const limit = hotExpanded ? items.length : 5;
   items.slice(0, limit).forEach(item => {
     const row = document.createElement("div");
@@ -1401,50 +2024,143 @@ function renderHottest(){
 /* ============================================================
    RENDER: STRUCTURE DIAGRAM (bottom-to-top layered)
    ============================================================ */
-const CANVAS_W = 1000, CANVAS_H = 640;
-let POS = {}; // id -> {x%, y%}
+const SVGNS = "http://www.w3.org/2000/svg";
+/* foreignObject overhang, in graph px - see the .diagram foreignObject rule */
+const NODE_PAD = 8;
+let POS = {};   // id -> { x, y, w, h } - center and visual size, in graph px
+let panZoom = null;
 
-// Longest-path layering: each edge forces target at least one layer above source.
-function computeLayout(){
-  const layer = {}; DIAGRAM_NODE_IDS.forEach(id => layer[id] = 0);
-  let changed = true, guard = 0;
-  while (changed && guard++ < 50) {
-    changed = false;
-    DIAGRAM_EDGES.forEach(e => {
-      if (layer[e.to] < layer[e.from] + 1) { layer[e.to] = layer[e.from] + 1; changed = true; }
-    });
-  }
-  const maxLayer = Math.max(...DIAGRAM_NODE_IDS.map(id => layer[id]));
-  const byLayer = {};
-  DIAGRAM_NODE_IDS.forEach(id => { (byLayer[layer[id]] = byLayer[layer[id]] || []).push(id); });
-  const topY = 12, botY = 88, margin = 8;
-  const pos = {};
-  Object.keys(byLayer).forEach(L => {
-    const grp = byLayer[L].sort((a,b) => (NODE_ORDER[a] || 0) - (NODE_ORDER[b] || 0));
-    const k = grp.length;
-    const y = maxLayer === 0 ? (topY + botY) / 2 : botY - (L / maxLayer) * (botY - topY);
-    grp.forEach((id, i) => { pos[id] = { x: margin + (i + 0.5) * ((100 - 2 * margin) / k), y }; });
-  });
-  return pos;
+/* A box's size is whatever the browser makes of its text, and dagre needs that number before it
+   can place anything, so each element is built and measured off-screen first. */
+function measure(el){
+  const box = document.getElementById("diagramMeasure");
+  box.appendChild(el);
+  const size = { width: el.offsetWidth, height: el.offsetHeight };
+  box.removeChild(el);
+  return size;
+}
+
+/* The syntax's own markers, so a box reads the way the line that wrote it does (`ontology.md` ->
+   Syntax legend). A concept gets none, which is what makes an icon mean "not cause and effect". */
+const KIND_ICONS = { guiding: "?", clarifying: "?", claim: "=", source: "\u{1F4C4}" };
+
+function makeDiagramNode(id){
+  const node = NODES[id];
+  const el = document.createElement("div");
+  el.className = "diag-node";
+  el.dataset.node = id;
+  el.setAttribute("style", pillStyle(node.scores, "rb", 3));
+  const icon = KIND_ICONS[node.kind];
+  el.innerHTML = (icon ? `<span class="nicon">${icon}</span>` : "") + node.label
+    + (node.tag ? `<span class="ntag">${node.tag}</span>` : "");
+  return el;
+}
+
+/* An edge is a box dagre places, which is what lets an arrow land on it. The playground's arg-map
+   ontology calls the same move "implied" rendering and owns the reasoning, in its rendering.md. */
+function makeEdgeBox(edge){
+  const el = document.createElement("div");
+  el.className = "edge-label";
+  // v4: color by effect on target (causes blue, reduces/impedes red)
+  el.setAttribute("style", pillStyle(effectScores(edge.relation, edge.scores), "rb", 2));
+  el.dataset.edge = edge.id;
+  el.textContent = edge.relation;
+  return el;
+}
+
+function placeInForeignObject(el, size, cx, cy){
+  const fo = document.createElementNS(SVGNS, "foreignObject");
+  fo.setAttribute("x", cx - size.width / 2 - NODE_PAD);
+  fo.setAttribute("y", cy - size.height / 2 - NODE_PAD);
+  fo.setAttribute("width", size.width + NODE_PAD * 2);
+  fo.setAttribute("height", size.height + NODE_PAD * 2);
+  fo.appendChild(el);
+  return fo;
 }
 
 function renderDiagram(){
-  POS = computeLayout();
-  const diagram = document.getElementById("diagram");
-  diagram.querySelectorAll(".diag-node, .edge-label").forEach(el => el.remove());
+  // svg-pan-zoom folds the viewBox into a transform of its own at setup, so a new viewBox only
+  // takes effect on a fresh instance. Re-fitting is right anyway once the picture has changed.
+  if (panZoom) { panZoom.destroy(); panZoom = null; }
+  const viewport = document.getElementById("diagramViewport");
+  viewport.replaceChildren();
 
-  DIAGRAM_NODE_IDS.forEach(id => {
-    const node = NODES[id];
-    const el = document.createElement("div");
-    el.className = "diag-node";
-    el.dataset.node = id;
-    el.setAttribute("style", `left:${POS[id].x}%; top:${POS[id].y}%;` + pillStyle(node.scores, paletteForNode(id), 3));
-    el.innerHTML = node.label + (node.tag ? `<span class="ntag">${node.tag}</span>` : "");
-    el.addEventListener("click", (e) => { e.stopPropagation(); onNodeActivate(id); });
-    diagram.appendChild(el);
+  const view = diagramSet();
+  VISIBLE_NODES = view.nodeIds;
+  VISIBLE_EDGES = view.edges;
+
+  const els = {}, sizes = {};
+  const measured = (id, el) => { els[id] = el; sizes[id] = measure(el); };
+  VISIBLE_NODES.forEach(id => measured(id, makeDiagramNode(id)));
+  VISIBLE_EDGES.forEach(edge => measured(edge.id, makeEdgeBox(edge)));
+
+  const g = new dagre.graphlib.Graph();
+  // ranksep is halved to pay for the edge boxes: each relationship spans two dagre edges, and
+  // dagre's makeSpaceForEdgeLabels doubles every edge's minlen on top of that.
+  g.setGraph({ rankdir: "BT", nodesep: 30, ranksep: 29, edgesep: 16, marginx: 28, marginy: 28 });
+  g.setDefaultEdgeLabel(() => ({}));
+  Object.keys(sizes).forEach(id => g.setNode(id, sizes[id]));
+  // One relationship, two connectors: `source -> edge box -> target`. No two can collide, since
+  // one end of each is the ontology edge's own id.
+  VISIBLE_EDGES.forEach(edge => {
+    g.setEdge(edge.from, edge.id, {});
+    g.setEdge(edge.id, referentOf(edge.to), {});
+  });
+  dagre.layout(g);
+
+  // svg-pan-zoom folds this into its own transform and then drops the attribute, so it reads as
+  // dead - it isn't. fit() measures the viewBox when there is one and the content's bbox when
+  // there isn't, and only the viewBox carries dagre's margins, which is the breathing room
+  // around a fitted diagram.
+  const size = g.graph();
+  document.getElementById("diagram").setAttribute("viewBox", `0 0 ${size.width} ${size.height}`);
+
+  POS = {};
+  Object.keys(sizes).forEach(id => {
+    const n = g.node(id);
+    POS[id] = { x: n.x, y: n.y, w: sizes[id].width, h: sizes[id].height };
   });
 
-  layoutEdges();
+  // document order is paint order in SVG: lines under the boxes they end on
+  VISIBLE_EDGES.forEach(edge => {
+    const target = referentOf(edge.to);
+    viewport.appendChild(halfPath(g.edge(edge.from, edge.id), edge.from, edge.id, edge.id, "in"));
+    viewport.appendChild(halfPath(g.edge(edge.id, target), edge.id, target, edge.id, "out"));
+  });
+  Object.keys(sizes).forEach(id => {
+    viewport.appendChild(placeInForeignObject(els[id], sizes[id], POS[id].x, POS[id].y));
+  });
+
+  document.getElementById("filterCount").textContent =
+    `${VISIBLE_NODES.length} of ${Object.keys(NODES).length}`;
+
+  initPanZoom();
+  if (focusState) applyFocus();
+}
+
+/* Only the outgoing half carries the arrowhead, so the pair reads as one line through a pill
+   rather than as two relationships. */
+function halfPath(dagreEdge, from, to, edgeId, half){
+  const path = document.createElementNS(SVGNS, "path");
+  path.setAttribute("class", "edge");
+  path.setAttribute("d", edgePath(dagreEdge.points, from, to));
+  if (half === "out") path.setAttribute("marker-end", "url(#arrow)");
+  path.dataset.edge = edgeId;
+  path.dataset.half = half;
+  return path;
+}
+
+/* Border mode only changes colors, so the picture is repainted rather than laid out again -
+   which also leaves the current pan and zoom where the reader put them. */
+function restyleDiagram(){
+  VISIBLE_NODES.forEach(id => {
+    const el = document.querySelector(`.diag-node[data-node="${id}"]`);
+    if (el) el.setAttribute("style", pillStyle(NODES[id].scores, "rb", 3));
+  });
+  VISIBLE_EDGES.forEach(edge => {
+    const el = document.querySelector(`.edge-label[data-edge="${edge.id}"]`);
+    if (el) el.setAttribute("style", pillStyle(effectScores(edge.relation, edge.scores), "rb", 2));
+  });
 }
 
 // Boundary point of the target node's rect in the direction of (cx,cy)
@@ -1457,56 +2173,117 @@ function trimToRect(cx, cy, tx, ty, hw, hh){
   return { x: tx + dx * s, y: ty + dy * s };
 }
 
-function nodeCenter(id){ return { x: POS[id].x / 100 * CANVAS_W, y: POS[id].y / 100 * CANVAS_H }; }
+/* dagre's endpoints sit on the rank boundary rather than on the box, so both ends are
+   re-intersected against the node's own rectangle the way dagre-d3 does it. */
+function edgePath(points, from, to){
+  const a = POS[from], b = POS[to];
+  const first = trimToRect(points[1].x, points[1].y, a.x, a.y, a.w / 2 + 3, a.h / 2 + 3);
+  const last = trimToRect(points[points.length - 2].x, points[points.length - 2].y,
+                          b.x, b.y, b.w / 2 + 5, b.h / 2 + 5);
+  return curveThrough([first, ...points.slice(1, -1), last]);
+}
 
-function layoutEdges(){
-  const diagram = document.getElementById("diagram");
-  const svg = document.getElementById("edges");
-  // rebuild both paths and labels each pass (keeps them from duplicating on resize)
-  svg.querySelectorAll("path.edge").forEach(p => p.remove());
-  diagram.querySelectorAll(".edge-label").forEach(l => l.remove());
-  const rect = diagram.getBoundingClientRect();
-  const scaleX = CANVAS_W / rect.width, scaleY = CANVAS_H / rect.height;
+/* A cubic B-spline over dagre's points, written as Beziers - the curve mermaid draws, and the
+   reason its edges read as one bend rather than a run of segments.
 
-  DIAGRAM_EDGES.forEach(edge => {
-    const a = nodeCenter(edge.from), b = nodeCenter(edge.to);
-    const nodeA = diagram.querySelector(`.diag-node[data-node="${edge.from}"]`);
-    const nodeB = diagram.querySelector(`.diag-node[data-node="${edge.to}"]`);
-    const ar = nodeA.getBoundingClientRect(), br = nodeB.getBoundingClientRect();
-    const ahw = (ar.width * scaleX) / 2 + 3, ahh = (ar.height * scaleY) / 2 + 3;
-    const bhw = (br.width * scaleX) / 2 + 5, bhh = (br.height * scaleY) / 2 + 5;
-    const start = trimToRect(b.x, b.y, a.x, a.y, ahw, ahh);
-    const end = trimToRect(a.x, a.y, b.x, b.y, bhw, bhh);
+   It approximates the points instead of passing through them, which is the point: dagre's middle
+   point is a label slot rather than a routing bend, and it often sits straight above the source,
+   so a curve forced through it has to leave at a right angle and bow outward to come back. A
+   B-spline stays inside the hull of its points, so it cuts that corner and never bows out.
+   The ends are tripled, which pins the curve to the node borders where the arrowheads land. */
+function curveThrough(pts){
+  if (pts.length < 3) return `M ${pts[0].x} ${pts[0].y} L ${pts[1].x} ${pts[1].y}`;
+  const c = [pts[0], pts[0], ...pts, pts[pts.length - 1], pts[pts.length - 1]];
+  let d = `M ${(c[0].x + 4 * c[1].x + c[2].x) / 6} ${(c[0].y + 4 * c[1].y + c[2].y) / 6}`;
+  for (let i = 1; i < c.length - 2; i++) {
+    const a = c[i], b = c[i + 1], next = c[i + 2];
+    d += ` C ${(2 * a.x + b.x) / 3} ${(2 * a.y + b.y) / 3}`
+       + ` ${(a.x + 2 * b.x) / 3} ${(a.y + 2 * b.y) / 3}`
+       + ` ${(a.x + 4 * b.x + next.x) / 6} ${(a.y + 4 * b.y + next.y) / 6}`;
+  }
+  return d;
+}
 
-    const path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-    path.setAttribute("class", "edge");
-    path.setAttribute("d", `M ${start.x} ${start.y} L ${end.x} ${end.y}`);
-    path.setAttribute("marker-end", "url(#arrow)");
-    path.dataset.from = edge.from; path.dataset.to = edge.to;
-    svg.appendChild(path);
+/* ============================================================
+   DIAGRAM PAN / ZOOM
+   ============================================================ */
+function initPanZoom(){
+  panZoom = svgPanZoom(document.getElementById("diagram"), {
+    viewportSelector: "#diagramViewport",
+    zoomEnabled: true, controlIconsEnabled: false, dblClickZoomEnabled: false,
+    fit: true, center: true, minZoom: 0.2, maxZoom: 20,
+    // uniwheel binds to the SVG itself, so the wheel only zooms while the pointer is over the
+    // diagram and keeps scrolling everything else on the page
+    mouseWheelZoomEnabled: true,
+    onPan: settlePopup, onZoom: settlePopup,
+  });
+}
 
-    const label = document.createElement("div");
-    label.className = "edge-label";
-    // v4: colour by effect on target (causes blue, reduces/impedes red)
-    label.setAttribute("style", pillStyle(effectScores(edge.relation, edge.scores), "rb", 2));
-    label.dataset.from = edge.from; label.dataset.to = edge.to;
-    // place labels ~40% from the source (not the midpoint) to keep them off the target/middle nodes
-    const f = 0.4;
-    label.style.left = ((start.x + (end.x - start.x) * f) / CANVAS_W * 100) + "%";
-    label.style.top = ((start.y + (end.y - start.y) * f) / CANVAS_H * 100) + "%";
-    label.textContent = edge.relation;
-    label.addEventListener("click", (e) => { e.stopPropagation(); onEdgeActivate(edge.from, edge.to); });
-    diagram.appendChild(label);
+/* Pan vs tap: svg-pan-zoom preventDefaults mousedown and touchstart, so clicks are recognized
+   here by how far the pointer travelled rather than left to a click event on the node. */
+const TAP_SLOP = 6;
+let pressedAt = null;
+let pannedSinceDown = false;
+
+function initDiagramPointer(){
+  const svg = document.getElementById("diagram");
+  svg.addEventListener("pointerdown", (e) => {
+    pressedAt = e.button === 0 ? { x: e.clientX, y: e.clientY } : null;
+    pannedSinceDown = false;
+    if (pressedAt) svg.classList.add("panning");
+  });
+  svg.addEventListener("pointerup", (e) => {
+    const from = pressedAt;
+    pressedAt = null;
+    svg.classList.remove("panning");
+    if (!from) return;
+    if (Math.hypot(e.clientX - from.x, e.clientY - from.y) > TAP_SLOP) { pannedSinceDown = true; return; }
+    const node = e.target.closest(".diag-node");
+    if (node) { onNodeActivate(node.dataset.node); return; }
+    const box = e.target.closest(".edge-label");
+    if (box) onEdgeActivate(box.dataset.edge);
+  });
+  svg.addEventListener("pointercancel", () => { pressedAt = null; svg.classList.remove("panning"); });
+
+  const refilter = () => { clearHighlight(); renderDiagram(); };
+  document.getElementById("filterHottestBox").addEventListener("change", (e) => {
+    filterHottest = e.target.checked;
+    refilter();
+  });
+  document.getElementById("filterCausalBox").addEventListener("change", (e) => {
+    filterCausal = e.target.checked;
+    refilter();
   });
 
-  // paths/labels were just rebuilt — re-apply any active focus styling to them
-  if (focusState) applyFocus();
+  document.getElementById("zoomIn").addEventListener("click", () => panZoom && panZoom.zoomBy(1.2));
+  document.getElementById("zoomOut").addEventListener("click", () => panZoom && panZoom.zoomBy(0.8));
+  document.getElementById("zoomFit").addEventListener("click", () => {
+    if (!panZoom) return;
+    panZoom.fit(); panZoom.center();
+  });
+
+  // svg-pan-zoom measures the SVG once and caches it, so without this every later fit() would
+  // scale to the pane's size at load rather than its size now. Re-measuring leaves the current
+  // pan/zoom alone; it only refreshes what "fit" means.
+  new ResizeObserver(() => {
+    const box = document.getElementById("diagramBox");
+    // a zero-size measurement (question view showing) would cache a garbage scale
+    if (!box.clientWidth || !box.clientHeight) return;
+    if (panZoom) panZoom.resize();
+  }).observe(document.getElementById("diagramBox"));
 }
 
 /* ============================================================
    RENDER: SUMMARY STRIP
    ============================================================ */
 let summaryMode = "text";
+
+function isSummaryCollapsed(){ return document.getElementById("summary").classList.contains("collapsed"); }
+
+function setSummaryCollapsed(collapsed){
+  document.getElementById("summary").classList.toggle("collapsed", collapsed);
+  document.getElementById("summaryCollapseBtn").innerHTML = collapsed ? "▼" : "▲";
+}
 
 const SUMMARY_TEXT = [
   { t: "This topic weighs building a " }, { ref: "wall" }, { t: " against illegal immigration. The group broadly agrees " },
@@ -1517,35 +2294,32 @@ const SUMMARY_TEXT = [
 ];
 
 function renderSummary(){
-  const label = document.getElementById("summaryLabel");
   const body = document.getElementById("summaryBody");
   body.innerHTML = "";
-  document.querySelectorAll("#summaryToggle button").forEach(b => b.classList.toggle("active", b.dataset.mode === summaryMode));
+  document.querySelectorAll("#summaryTabs .summary-tab").forEach(b => b.classList.toggle("active", b.dataset.mode === summaryMode));
 
   if (summaryMode === "text") {
-    label.textContent = "Current-view summary";
     const p = document.createElement("p");
     SUMMARY_TEXT.forEach(seg => {
       if (seg.t) p.appendChild(document.createTextNode(seg.t));
       if (seg.ref) {
         const s = document.createElement("span");
         s.className = "ref"; s.textContent = NODES[seg.ref].label;
-        s.setAttribute("style", pillStyle(NODES[seg.ref].scores, paletteForNode(seg.ref), 2));
+        s.setAttribute("style", pillStyle(NODES[seg.ref].scores, "rb", 2));
         s.addEventListener("click", () => highlightNode(seg.ref));
         p.appendChild(s);
       }
       if (seg.edge) {
         const s = document.createElement("span");
         s.className = "ref"; s.textContent = seg.t2;
-        // v4: edge ref coloured by effect on target
+        // v4: edge ref colored by effect on target
         s.setAttribute("style", pillStyle(effectScores(seg.relation, seg.scores), "rb", 2));
-        s.addEventListener("click", () => onEdgeActivate(seg.edge[0], seg.edge[1]));
+        s.addEventListener("click", () => onEdgeActivate(findEdge(seg.edge[0], seg.edge[1]).id));
         p.appendChild(s);
       }
     });
     body.appendChild(p);
   } else {
-    label.textContent = "Sunburst";
     body.appendChild(buildSunburst());
   }
 }
@@ -1586,7 +2360,7 @@ function buildSunburst(){
   center.addEventListener("click", () => highlightNode("wall"));
   svg.appendChild(center);
   const cap = document.createElement("figcaption");
-  cap.innerHTML = "Sunburst (placeholder) — center is the topic; ring segments are related concepts colored by score. Click a segment to highlight it.";
+  cap.innerHTML = "Minimap (placeholder) — center is the topic; ring segments are related concepts colored by score. Click a segment to highlight it.";
   wrap.appendChild(svg); wrap.appendChild(cap);
   return wrap;
 }
@@ -1599,9 +2373,10 @@ let selectedQuestion = null;
 function showDefaultView(){
   selectedQuestion = null;
   document.querySelectorAll(".q-item").forEach(el => el.classList.remove("selected"));
-  document.getElementById("diagram").style.display = "";
-  document.getElementById("qview").style.display = "none";
-  layoutEdges();
+  document.getElementById("diagramBox").style.display = "";
+  document.getElementById("qviewScroll").style.display = "none";
+  // the box was display:none while the question view showed, so re-measure before fit() means anything
+  if (panZoom) panZoom.resize();
 }
 
 function toggleQuestion(id){
@@ -1613,8 +2388,8 @@ function toggleQuestion(id){
   }
   clearHighlight(); // leaving the diagram; drop any focus/popup
   document.querySelectorAll(".q-item").forEach(el => el.classList.toggle("selected", el.dataset.q === selectedQuestion));
-  document.getElementById("diagram").style.display = "none";
-  document.getElementById("qview").style.display = "";
+  document.getElementById("diagramBox").style.display = "none";
+  document.getElementById("qviewScroll").style.display = "";
   const q = QUESTIONS.find(x => x.id === id);
   renderQuestionView(q);
   renderSummaryForQuestion(q);
@@ -1622,8 +2397,7 @@ function toggleQuestion(id){
 
 function renderSummaryForQuestion(q){
   const body = document.getElementById("summaryBody");
-  document.getElementById("summaryLabel").textContent = "Current-view summary";
-  document.querySelectorAll("#summaryToggle button").forEach(b => b.classList.toggle("active", b.dataset.mode === "text"));
+  document.querySelectorAll("#summaryTabs .summary-tab").forEach(b => b.classList.toggle("active", b.dataset.mode === "text"));
   const texts = {
     "why-wall": "Showing the wall's pros (left) and cons (right): good things it causes and bad things it reduces vs. the reverse. Its main pro is reducing illegal immigration — though how much is the topic's biggest disagreement.",
     "best-ways": "Comparing actions against criteria. Only “inexpensive” has scored fulfilment in the example; “quick” and “humane” are shown but unscored here.",
@@ -1691,7 +2465,7 @@ function argCardColumn(title, kind, dir, fromId, list){
 }
 
 /* small causes diagram: illegal-immig on top, its causal parents below. Edges are drawn
-   like the main diagram — gray line + gray arrowhead + a colour-coded (effect) label. */
+   like the main diagram — gray line + gray arrowhead + a color-coded (effect) label. */
 function buildCausesMiniDiagram(){
   const wrap = document.createElement("div");
   const dia = document.createElement("div"); dia.className = "mini-diagram";
@@ -1712,7 +2486,7 @@ function buildCausesMiniDiagram(){
   ];
 
   causes.forEach(c => {
-    const edge = DIAGRAM_EDGES.find(e => e.from === c.id && e.to === target.id);
+    const edge = findEdge(c.id, target.id);
     const x1 = c.x, y1 = c.y - 12, x2 = target.x, y2 = target.y + 13;
     const path = document.createElementNS(svgns, "path");
     path.setAttribute("d", `M ${x1} ${y1} L ${x2} ${y2}`);
@@ -1721,14 +2495,14 @@ function buildCausesMiniDiagram(){
     path.setAttribute("vector-effect", "non-scaling-stroke");
     svg.appendChild(path);
 
-    // colour-coded label ~1/3 up from the cause, matching the main diagram
+    // color-coded label ~1/3 up from the cause, matching the main diagram
     const f = 0.36;
     const label = document.createElement("div"); label.className = "edge-label";
     label.setAttribute("style", pillStyle(effectScores(edge.relation, edge.scores), "rb", 2));
     label.style.left = (x1 + (x2 - x1) * f) + "%";
     label.style.top = (y1 + (y2 - y1) * f) + "%";
     label.textContent = edge.relation;
-    label.addEventListener("click", (e) => { e.stopPropagation(); onEdgeActivate(c.id, target.id); });
+    label.addEventListener("click", (e) => { e.stopPropagation(); onEdgeActivate(edge.id); });
     dia.appendChild(label);
   });
 
@@ -1742,7 +2516,7 @@ function buildCausesMiniDiagram(){
   wrap.appendChild(dia);
 
   const cap = document.createElement("p"); cap.className = "hint"; cap.style.textAlign = "center";
-  cap.textContent = "Same as the main diagram: gray “causes” arrows with labels coloured by effect (blue = increases illegal immigration). Click a concept or edge to open it in the full diagram.";
+  cap.textContent = "Same as the main diagram: gray “causes” arrows with labels colored by effect (blue = increases illegal immigration). Click a concept or edge to open it in the full diagram.";
   wrap.appendChild(cap);
   return wrap;
 }
@@ -1797,9 +2571,14 @@ function cellTh(txt, cls){ const th = document.createElement("th"); if (cls) th.
      pro  = causes a positive concept, or reduces/impedes a negative one
      con  = causes a negative concept, or reduces/impedes a positive one
    ============================================================ */
+/* Reads the whole document rather than what the diagram shows: a concept's pros and cons are a
+   fact about the topic, and a filter checkbox must not quietly change them. */
+const CAUSAL_RELATIONS = ["causes", "reduces", "impedes"];
 function calcArguments(id){
   const pros = [], cons = [];
-  DIAGRAM_EDGES.filter(e => e.from === id).forEach(e => {
+  const outgoing = Object.values(EDGES)
+    .filter(e => e.from === id && CAUSAL_RELATIONS.includes(e.relation));
+  outgoing.forEach(e => {
     const tAvg = avgScore(NODES[e.to].scores);
     const decreases = (e.relation === "reduces" || e.relation === "impedes");
     const isPro = decreases ? (tAvg < 0) : (tAvg > 0);
@@ -1814,6 +2593,12 @@ function calcArguments(id){
 /* ============================================================
    CLAIM-INSPECTOR POPUP
    ============================================================ */
+/* An edge's target can be another edge, as in `how-enter clarifies (wall reduces illegal
+   immigration)`, so an endpoint with no label of its own reads as its whole phrase. */
+function labelOf(id){
+  const edge = EDGES[id];
+  return edge ? `${labelOf(edge.from)} ${edge.relation} ${labelOf(referentOf(edge.to))}` : NODES[id].label;
+}
 function cpLabel(parent, text){
   const d = document.createElement("div"); d.className = "cp-label"; d.textContent = text; parent.appendChild(d);
 }
@@ -1860,15 +2645,44 @@ function makePopupShell(){
   pop.appendChild(close);
   return pop;
 }
-function positionPopupAtNode(pop, id){
-  pop.style.left = POS[id].x + "%";
-  pop.style.top = POS[id].y + "%";
-  pop.classList.add(POS[id].x < 52 ? "side-right" : "side-left");
-}
-function hideClaimPopup(){ const p = document.getElementById("claimPop"); if (p) p.remove(); }
+const POPUP_W = 272; // matches .claim-pop's width, which JS has to know to place it on the left
 
-/* Scroll the (horizontally + vertically scrollable) structure body so the whole
-   popup — and therefore the selected node beside it — is in view. */
+/* The popup is chrome rather than diagram content, so it lives in the pane and anchors to where
+   the node currently renders: it keeps its size while the diagram scales under it, and its gap
+   to the node stays a real 12px at any zoom. */
+let popupAnchor = null;
+function positionPopupAtNode(pop, id){
+  const el = document.querySelector(`.diag-node[data-node="${id}"], .edge-label[data-edge="${id}"]`);
+  if (!el) return;
+  popupAnchor = id;
+  const nr = el.getBoundingClientRect(), br = document.getElementById("structBody").getBoundingClientRect();
+  const gap = 12;
+  const fitsRight = br.right - nr.right >= POPUP_W + gap * 2;
+  pop.style.left = (fitsRight ? nr.right - br.left + gap : nr.left - br.left - gap - POPUP_W) + "px";
+  pop.style.top = (nr.top + nr.height / 2 - br.top) + "px";
+}
+function hideClaimPopup(){
+  const p = document.getElementById("claimPop");
+  if (p) p.remove();
+  popupAnchor = null;
+}
+
+/* Hide for the length of the gesture, then reappear beside wherever the node ended up. */
+let popupSettleTimer = null;
+function settlePopup(){
+  const pop = document.getElementById("claimPop");
+  if (!pop) return;
+  pop.classList.add("settling");
+  clearTimeout(popupSettleTimer);
+  popupSettleTimer = setTimeout(() => {
+    if (popupAnchor) positionPopupAtNode(pop, popupAnchor);
+    pop.classList.remove("settling");
+  }, 120);
+}
+
+/* Pan the diagram so the whole popup — and therefore the selected node beside it — is in view.
+   The pane doesn't scroll any more, so what used to be a scrollBy is the same nudge applied to
+   the diagram underneath instead. */
 function ensurePopupVisible(pop){
   const body = document.getElementById("structBody");
   const pr = pop.getBoundingClientRect(), br = body.getBoundingClientRect();
@@ -1878,7 +2692,17 @@ function ensurePopupVisible(pop){
   else if (pr.left < br.left + pad) dx = pr.left - (br.left + pad);
   if (pr.bottom > br.bottom - pad) dy = pr.bottom - (br.bottom - pad);
   else if (pr.top < br.top + pad) dy = pr.top - (br.top + pad);
-  if (dx || dy) body.scrollBy({ left: dx, top: dy, behavior: "smooth" });
+  if ((dx || dy) && panZoom) panZoom.panBy({ x: -dx, y: -dy });
+}
+
+/* A concept's score is held by the implied claim behind it (`ontology.md` -> Implied claim
+   wordings), while a claim's own score is its truth. */
+function scoreClaimFor(id){
+  const node = NODES[id];
+  if (node.kind === "claim") return { label: "This claim's truth score", text: `“${node.label}”` };
+  if (node.kind === "source") return { label: "A source holds no score", text: `“${node.label}”` };
+  return { label: "Implied claim behind this concept's score",
+           text: `“${node.label} is important to increase”` };
 }
 
 function showClaimPopupForNode(id){
@@ -1886,37 +2710,52 @@ function showClaimPopupForNode(id){
   const node = NODES[id];
   const pop = makePopupShell();
 
-  cpLabel(pop, "Implied claim behind this concept's score");
+  if (isQuestionNode(id)) {
+    const note = document.createElement("div"); note.className = "cp-note";
+    note.textContent = "Questions don't hold scores — see its edges.";
+    pop.appendChild(note);
+    document.getElementById("structBody").appendChild(pop);
+    positionPopupAtNode(pop, id);
+    return;
+  }
+
+  const claimed = scoreClaimFor(id);
+  cpLabel(pop, claimed.label);
   const claim = document.createElement("div"); claim.className = "cp-claim";
-  claim.setAttribute("style", pillStyle(node.scores, paletteForNode(id), 2));
-  claim.textContent = `“${node.label} is important to increase”`;
+  claim.setAttribute("style", pillStyle(node.scores, "rb", 2));
+  claim.textContent = claimed.text;
   pop.appendChild(claim);
 
   pop.appendChild(scoreSection(node.scores, "Per-scorer scores"));
 
-  const sec = document.createElement("div"); sec.className = "cp-section";
-  cpLabel(sec, "Calculated arguments (from causal edges)");
-  const { pros, cons } = calcArguments(id);
-  if (!pros.length && !cons.length) {
-    const note = document.createElement("div"); note.className = "cp-note";
-    note.textContent = "No outgoing causal edges here, so this concept's score has no calculated arguments — its neighbours argue about their own scores instead.";
-    sec.appendChild(note);
-  } else {
-    const grid = document.createElement("div"); grid.className = "cp-args";
-    grid.appendChild(argColumn("pro", "Pros ↑", pros));
-    grid.appendChild(argColumn("con", "Cons ↓", cons));
-    sec.appendChild(grid);
+  // pros and cons are chained off causal edges, which only a concept has
+  if (node.kind === "concept") {
+    const sec = document.createElement("div"); sec.className = "cp-section";
+    cpLabel(sec, "Calculated arguments (from causal edges)");
+    const { pros, cons } = calcArguments(id);
+    if (!pros.length && !cons.length) {
+      const note = document.createElement("div"); note.className = "cp-note";
+      note.textContent = "No outgoing causal edges here, so this concept's score has no calculated arguments — its neighbours argue about their own scores instead.";
+      sec.appendChild(note);
+    } else {
+      const grid = document.createElement("div"); grid.className = "cp-args";
+      grid.appendChild(argColumn("pro", "Pros ↑", pros));
+      grid.appendChild(argColumn("con", "Cons ↓", cons));
+      sec.appendChild(grid);
+    }
+    pop.appendChild(sec);
   }
-  pop.appendChild(sec);
 
-  document.getElementById("diagram").appendChild(pop);
+  document.getElementById("structBody").appendChild(pop);
   positionPopupAtNode(pop, id);
 }
 
-function showClaimPopupForEdge(from, to){
+function showClaimPopupForEdge(edgeId){
   hideClaimPopup();
-  const edge = DIAGRAM_EDGES.find(e => e.from === from && e.to === to);
+  const edge = EDGES[edgeId];
   if (!edge) return;
+  const to = referentOf(edge.to);
+  const from = edge.from;
   const flip = (edge.relation === "reduces" || edge.relation === "impedes");
   const eff = effectScores(edge.relation, edge.scores);
   const pop = makePopupShell();
@@ -1925,34 +2764,45 @@ function showClaimPopupForEdge(from, to){
   const claim = document.createElement("div"); claim.className = "cp-claim";
   claim.setAttribute("style", pillStyle(eff, "rb", 2));
   // v4: bold the relation (edge) word
-  claim.appendChild(document.createTextNode(`“${NODES[from].label} `));
+  claim.appendChild(document.createTextNode(`“${labelOf(from)} `));
   const relationBold = document.createElement("b"); relationBold.textContent = edge.relation; claim.appendChild(relationBold);
-  claim.appendChild(document.createTextNode(` ${NODES[to].label}”`));
+  claim.appendChild(document.createTextNode(` ${labelOf(to)}”`));
   pop.appendChild(claim);
 
   // effect framing: scores flipped for reduces/impedes so they read as effect-on-target
   pop.appendChild(scoreSection(eff, "Per-scorer effect on the target"));
 
   const note = document.createElement("div"); note.className = "cp-note";
-  note.textContent = `Shown as each scorer's effect on “${NODES[to].label}”: “${edge.relation}” is ${flip ? "a decrease (red)" : "an increase (blue)"}. Split colours = scorers disagree.`;
+  note.textContent = `Shown as each scorer's effect on “${labelOf(to)}”: “${edge.relation}” is ${flip ? "a decrease (red)" : "an increase (blue)"}. Split colors = scorers disagree.`;
   pop.appendChild(note);
 
-  document.getElementById("diagram").appendChild(pop);
-  positionPopupAtNode(pop, from);
+  document.getElementById("structBody").appendChild(pop);
+  positionPopupAtNode(pop, edge.id);
 }
 
 /* ============================================================
    FOCUS MODE — fade unrelated, emphasise the selection's neighbours
    ============================================================ */
-let focusState = null; // { kind: "node", id } | { kind: "edge", from, to }
+let focusState = null; // the id of the focused node or edge, which are both boxes
 
-function neighborSet(id){
+/* What stays lit around a box. An edge box lights its two endpoints; a node lights every edge
+   box on it and whatever is on the other side. */
+function relatedSet(id){
   const set = new Set([id]);
-  DIAGRAM_EDGES.forEach(e => {
-    if (e.from === id) set.add(e.to);
-    if (e.to === id) set.add(e.from);
+  VISIBLE_EDGES.forEach(edge => {
+    const target = referentOf(edge.to);
+    if (edge.id === id) { set.add(edge.from); set.add(target); }
+    if (edge.from === id) { set.add(edge.id); set.add(target); }
+    if (target === id) { set.add(edge.id); set.add(edge.from); }
   });
   return set;
+}
+
+function incidentEdgeIds(id){
+  if (EDGES[id]) return new Set([id]);
+  return new Set(
+    VISIBLE_EDGES.filter(e => e.from === id || referentOf(e.to) === id).map(e => e.id),
+  );
 }
 
 function applyFocus(){
@@ -1960,41 +2810,60 @@ function applyFocus(){
   if (!focusState) { diagram.classList.remove("focus-mode"); return; }
   diagram.classList.add("focus-mode");
 
-  if (focusState.kind === "node") {
-    const id = focusState.id;
-    const nb = neighborSet(id);
-    document.querySelectorAll(".diag-node").forEach(el => {
-      el.classList.toggle("hl", el.dataset.node === id);
-      el.classList.toggle("faded", !nb.has(el.dataset.node));
-    });
-    document.querySelectorAll("#edges path.edge").forEach(p => {
-      const inc = p.dataset.from === id || p.dataset.to === id;
-      p.classList.remove("hl");
-      p.classList.toggle("incident", inc);
-      p.classList.toggle("faded", !inc);
-      p.setAttribute("marker-end", inc ? "url(#arrowFocus)" : "url(#arrow)");
-    });
-    document.querySelectorAll(".edge-label").forEach(l => {
-      l.classList.toggle("faded", !(l.dataset.from === id || l.dataset.to === id));
-    });
-  } else {
-    const { from, to } = focusState;
-    document.querySelectorAll(".diag-node").forEach(el => {
-      const on = el.dataset.node === from || el.dataset.node === to;
-      el.classList.toggle("hl", on);
-      el.classList.toggle("faded", !on);
-    });
-    document.querySelectorAll("#edges path.edge").forEach(p => {
-      const on = p.dataset.from === from && p.dataset.to === to;
-      p.classList.remove("incident");
-      p.classList.toggle("hl", on);
-      p.classList.toggle("faded", !on);
-      p.setAttribute("marker-end", on ? "url(#arrowHl)" : "url(#arrow)");
-    });
-    document.querySelectorAll(".edge-label").forEach(l => {
-      l.classList.toggle("faded", !(l.dataset.from === from && l.dataset.to === to));
-    });
-  }
+  const related = relatedSet(focusState);
+  const incident = incidentEdgeIds(focusState);
+  // an edge selection highlights its own line; a node selection only marks the lines around it
+  const picked = Boolean(EDGES[focusState]);
+
+  document.querySelectorAll(".diag-node").forEach(el => {
+    el.classList.toggle("hl", el.dataset.node === focusState);
+    el.classList.toggle("faded", !related.has(el.dataset.node));
+  });
+  document.querySelectorAll(".edge-label").forEach(el => {
+    el.classList.toggle("hl", el.dataset.edge === focusState);
+    el.classList.toggle("faded", !related.has(el.dataset.edge));
+  });
+  document.querySelectorAll("#diagramViewport path.edge").forEach(path => {
+    const on = incident.has(path.dataset.edge);
+    path.classList.toggle("hl", on && picked);
+    path.classList.toggle("incident", on && !picked);
+    path.classList.toggle("faded", !on);
+    if (path.dataset.half !== "out") return;
+    const marker = !on ? "arrow" : (picked ? "arrowHl" : "arrowFocus");
+    path.setAttribute("marker-end", `url(#${marker})`);
+  });
+}
+
+/* ============================================================
+   RENDER: COLOR KEY
+   ============================================================ */
+/* The bottom row demonstrates the active mode on scores of its own: a wide split for
+   disagreement, and a same-sign pair for average, since any pair straddling zero averages
+   to the gray that the row above already claims for "no change". */
+function renderLegend(){
+  const disagreement = borderMode === "disagreement";
+  document.querySelectorAll("#legendModes .legend-mode")
+    .forEach(b => b.classList.toggle("active", b.dataset.mode === borderMode));
+  document.getElementById("legendSweep")
+    .setAttribute("style", pillStyle(disagreement ? [-8, 8] : [4, 8], "rb", 2));
+  document.getElementById("legendSweepText").textContent =
+    disagreement ? "Split colors = scorers disagree" : "One color = scorers averaged";
+}
+
+/* Every colored element takes its border from pillStyle, so switching mode means re-running
+   the renders. The claim popup is dropped rather than re-rendered - it reopens from whatever
+   it was describing. */
+function rerenderForBorderMode(){
+  clearHighlight();
+  renderQuestions();
+  renderHottest();
+  renderLegend();
+  // repainted even while a question view hides it, or its nodes would still be in the old mode on
+  // the way back
+  restyleDiagram();
+  const q = selectedQuestion ? QUESTIONS.find(x => x.id === selectedQuestion) : null;
+  if (q) { renderQuestionView(q); renderSummaryForQuestion(q); }
+  else { renderSummary(); }
 }
 
 /* ============================================================
@@ -2010,10 +2879,11 @@ function onNodeActivate(id){
 function clearHighlight(){
   focusState = null;
   document.querySelectorAll(".diag-node").forEach(el => el.classList.remove("hl", "faded"));
-  document.querySelectorAll("#edges path.edge").forEach(p => {
-    p.classList.remove("hl", "incident", "faded"); p.setAttribute("marker-end", "url(#arrow)");
+  document.querySelectorAll("#diagramViewport path.edge").forEach(p => {
+    p.classList.remove("hl", "incident", "faded");
+    if (p.dataset.half === "out") p.setAttribute("marker-end", "url(#arrow)");
   });
-  document.querySelectorAll(".edge-label").forEach(l => l.classList.remove("faded"));
+  document.querySelectorAll(".edge-label").forEach(l => l.classList.remove("hl", "faded"));
   document.getElementById("diagram").classList.remove("focus-mode");
   hideClaimPopup();
   lastHighlighted = null;
@@ -2021,28 +2891,38 @@ function clearHighlight(){
 
 function highlightNode(id){
   if (selectedQuestion) toggleQuestion(selectedQuestion); // return to default diagram
-  const inDiagram = DIAGRAM_NODE_IDS.includes(id);
-  if (!inDiagram) {
-    clearHighlight();
-    lastHighlighted = id;
-    toast(`“${NODES[id].label}” isn't among the concepts shown here.`);
-    return;
-  }
-  focusState = { kind: "node", id };
+  if (!isVisible(id)) { missingFromDiagram(NODES[id].label, id); return; }
+  focusState = id;
   applyFocus();
   showClaimPopupForNode(id);
   lastHighlighted = id;
   ensurePopupVisible(document.getElementById("claimPop"));
 }
 
-function onEdgeActivate(from, to){
+function onEdgeActivate(edgeId){
   if (selectedQuestion) toggleQuestion(selectedQuestion);
-  focusState = { kind: "edge", from, to };
+  const edge = EDGES[edgeId];
+  if (!isVisible(edgeId)) {
+    missingFromDiagram(`${NODES[edge.from].label} ${edge.relation} …`, edgeId);
+    return;
+  }
+  focusState = edgeId;
   applyFocus();
-  showClaimPopupForEdge(from, to);
+  showClaimPopupForEdge(edgeId);
   lastHighlighted = null;
   ensurePopupVisible(document.getElementById("claimPop"));
 }
+
+/* Most of what the agenda lists isn't drawn under the default filters, so the toast names the
+   checkbox that would show it. */
+function missingFromDiagram(label, id){
+  clearHighlight();
+  lastHighlighted = id;
+  const box = filterCausal && !isCausalKind(id) ? "Only cause & effect" : "Top 10 hottest";
+  toast(`“${label}” isn't shown — uncheck “${box}” to see it.`);
+}
+
+function isCausalKind(id){ return Boolean(EDGES[id]) || isCausalNode(id); }
 
 let toastTimer = null;
 function toast(msg){
@@ -2073,13 +2953,11 @@ function initDivider(){
     const min = 280, max = rect.width - 360 - 6; // keep structure >= 360px
     let w = Math.max(min, Math.min(max, e.clientX - rect.left));
     agenda.style.width = w + "px";
-    if (!selectedQuestion) layoutEdges();
   });
   const stop = () => {
     if (!dragging) return;
     dragging = false;
     divider.classList.remove("dragging");
-    if (!selectedQuestion) layoutEdges();
   };
   divider.addEventListener("pointerup", stop);
   divider.addEventListener("pointercancel", stop);
@@ -2093,50 +2971,58 @@ function init(){
   renderQuestions();
   renderFilters();
   renderHottest();
-  renderDiagram();
   renderSummary();
+  renderLegend();
+  // last: the summary strip's height is what's left over for the diagram, and the initial
+  // fit has to measure the pane at the size it ends up
+  renderDiagram();
+  initDiagramPointer();
   initDivider();
 
-  // legend "split colours" swatch reuses the disagreement banding
-  document.getElementById("legendSweep").setAttribute("style", pillStyle([-8, 8], "rb", 2));
+  document.querySelectorAll("#legendModes .legend-mode").forEach(b => {
+    b.addEventListener("click", () => {
+      if (b.dataset.mode === borderMode) return;
+      borderMode = b.dataset.mode;
+      rerenderForBorderMode();
+    });
+  });
   document.getElementById("legendToggle").addEventListener("click", (e) => {
     e.stopPropagation();
     const lg = document.getElementById("legend");
     lg.classList.toggle("collapsed");
     document.getElementById("legendToggle").innerHTML =
-      "Colour key " + (lg.classList.contains("collapsed") ? "▸" : "▾");
+      "Color key " + (lg.classList.contains("collapsed") ? "▸" : "▾");
   });
 
   document.getElementById("hotMore").addEventListener("click", () => { hotExpanded = !hotExpanded; renderHottest(); });
-  document.getElementById("tourBtn").addEventListener("click", () => toast("“Tour this topic” would step through the hottest nodes one at a time (not built)."));
 
-  document.querySelectorAll("#summaryToggle button").forEach(b => {
+  // the shown tab and the collapse state are one state: re-clicking the tab that's showing hides it
+  document.querySelectorAll("#summaryTabs .summary-tab").forEach(b => {
     b.addEventListener("click", () => {
+      // read the active class rather than summaryMode: a selected question forces the Summary
+      // tab active without changing the mode, and what's marked active is what the user sees
+      if (b.classList.contains("active") && !isSummaryCollapsed()) { setSummaryCollapsed(true); return; }
       summaryMode = b.dataset.mode;
-      const s = document.getElementById("summary");
-      s.classList.remove("collapsed"); // choosing a mode reveals the summary
-      document.getElementById("summaryCollapseBtn").innerHTML = "▲";
       if (selectedQuestion) showDefaultView();
       renderSummary();
+      setSummaryCollapsed(false);
     });
   });
-  document.getElementById("summaryCollapseBtn").addEventListener("click", () => {
-    const s = document.getElementById("summary");
-    s.classList.toggle("collapsed");
-    document.getElementById("summaryCollapseBtn").innerHTML = s.classList.contains("collapsed") ? "▼" : "▲";
-    if (!selectedQuestion) layoutEdges();
+  // anywhere else on the row - the chevron included - toggles, the way the Color key's title does
+  document.getElementById("summaryTabs").addEventListener("click", (e) => {
+    if (e.target.closest(".summary-tab")) return;
+    setSummaryCollapsed(!isSummaryCollapsed());
   });
 
   document.querySelectorAll("[data-stub]").forEach(el => el.addEventListener("click", () => toast(el.dataset.stub)));
 
   // Clear the highlight when clicking truly blank space (not a highlight source or popup).
   document.addEventListener("click", (e) => {
-    if (e.target.closest(".diag-node, .edge-label, .pill, .ref, .sb-seg, .claim-pop, .legend, .mini-node")) return;
+    // a pan that ends on blank canvas still fires a click there, and it must not drop the selection
+    if (pannedSinceDown) { pannedSinceDown = false; return; }
+    if (e.target.closest(".diag-node, .edge-label, .pill, .ref, .sb-seg, .claim-pop, .legend, .mini-node, .zoom-controls, .diagram-filters")) return;
     clearHighlight();
   });
-
-  window.addEventListener("resize", () => { if (!selectedQuestion) layoutEdges(); });
-  requestAnimationFrame(() => requestAnimationFrame(layoutEdges));
 }
 
 document.addEventListener("DOMContentLoaded", init);

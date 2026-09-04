@@ -8,11 +8,13 @@
   Clickable wireframe for the "topic selected" state (nothing else selected). v1.
   Generated from ameliorate-v2/UX-design.md + ontology.md ("Build a wall" example),
   viewed as danny (no own scores; sees alice/bob/casey aggregated).
-  Self-contained: no external dependencies. Clickable, not functional.
+  Depends on versions.js and prototype-bar.js for the prototype bar; everything
+  else is inline. Clickable, not functional.
 
   Context + the version switcher live in the prototype bar at the very top
   (the "i" button, and "version N" next to it) - that bar is scaffolding, not design.
 -->
+<script src="versions.js"></script>
 <style>
   :root {
     --bg: #f5f6f8;
@@ -73,74 +75,7 @@
   }
 
   /* ---- Prototype scaffolding: version switcher + info popover ----
-     Chrome for reviewing the wireframe, deliberately styled apart from the app
-     below it so it never reads as part of the design being evaluated. */
-  .proto-bar {
-    position: relative; z-index: 70; flex: 0 0 auto;
-    display: flex; align-items: center; gap: 5px;
-    padding: 4px 12px;
-    background: #e9ebef; border-bottom: 1px solid var(--line-strong);
-    color: var(--muted); font-size: 11.5px;
-  }
-  .proto-bar .proto-spacer { flex: 1; }
-  .proto-bar .proto-sep { opacity: .5; }
-  .proto-ver {
-    border: 1px solid transparent; background: none; cursor: pointer;
-    color: var(--muted); font: inherit; padding: 2px 7px; border-radius: 6px;
-  }
-  .proto-ver:hover, .proto-ver.active {
-    border-color: var(--line-strong); background: var(--panel); color: var(--text);
-  }
-  .proto-ver .caret { font-size: 9px; margin-left: 3px; }
-
-  .ver-pop {
-    position: absolute; top: calc(100% + 5px); left: 10px; width: 330px; z-index: 80;
-    background: var(--panel); border: 1px solid var(--line-strong); border-radius: 10px;
-    box-shadow: 0 12px 34px rgba(0,0,0,.18); padding: 5px; display: none;
-    max-height: 62vh; overflow-y: auto;
-  }
-  .ver-pop.show { display: block; }
-  .proto-ver:disabled { cursor: default; opacity: .7; }
-  .ver-link { display: block; padding: 7px 9px; border-radius: 7px; text-decoration: none; color: var(--text); }
-  .ver-link:hover { background: var(--bg); }
-  .ver-link.current { background: #eef1fc; }
-  .ver-link b { font-size: 12.5px; font-weight: 600; }
-  .ver-link span { display: block; color: var(--muted); font-size: 11.5px; }
-
-  .info-btn {
-    width: 21px; height: 21px; border-radius: 50%; flex: 0 0 auto;
-    border: 1px solid var(--line-strong); background: var(--panel);
-    color: var(--muted); cursor: pointer;
-    font-family: Georgia, "Times New Roman", serif; font-style: italic; font-weight: 700; font-size: 12px;
-    display: inline-flex; align-items: center; justify-content: center;
-  }
-  .info-btn:hover { border-color: var(--accent); color: var(--accent); }
-  .info-btn.active { background: #23262b; color: #fff; border-color: #23262b; }
-  .info-pop {
-    position: absolute; top: calc(100% + 5px); right: 10px; width: 430px; z-index: 80;
-    background: var(--panel); border: 1px solid var(--line-strong); border-radius: 12px;
-    box-shadow: 0 12px 34px rgba(0,0,0,.18); display: none;
-    color: var(--text); line-height: 1.45;
-  }
-  .info-pop.show { display: block; }
-  .info-tabs { display: flex; gap: 2px; padding: 6px 6px 0; border-bottom: 1px solid var(--line); }
-  .info-tab {
-    border: none; background: none; cursor: pointer; font: inherit; font-size: 12.5px;
-    color: var(--muted); padding: 7px 10px; border-radius: 7px 7px 0 0;
-    border-bottom: 2px solid transparent; margin-bottom: -1px;
-  }
-  .info-tab:hover { color: var(--text); background: var(--bg); }
-  .info-tab.active { color: var(--text); font-weight: 600; border-bottom-color: var(--accent); }
-  .info-body { padding: 12px 16px 14px; max-height: 64vh; overflow-y: auto; }
-  .info-body[hidden] { display: none; }
-  .info-body p { margin: 0 0 9px; font-size: 12.5px; color: #3d4149; }
-  .info-body ol, .info-body ul { margin: 0 0 9px; padding-left: 18px; }
-  .info-body li { margin: 0 0 8px; font-size: 12.5px; color: #3d4149; }
-  .info-body > :last-child { margin-bottom: 0; }
-  .info-body li:last-child { margin-bottom: 0; }
-  .info-body b { color: var(--text); }
-  .info-body a { color: var(--accent); }
-  .info-body .ver { color: var(--muted); font-size: 11.5px; margin-bottom: 10px; }
+     Housed in prototype-bar.js - see that file's own header. */
 
   /* ---- Panes ---- */
   .panes { flex: 1 1 auto; display: flex; min-height: 0; }
@@ -301,39 +236,23 @@
 </head>
 <body>
 <div class="app">
-  <!-- Prototype scaffolding: version switcher + info popover. Not part of the
-       design being evaluated - see the "What is this?" tab. -->
-  <div class="proto-bar">
-    <span>ameliorate-v2 prototype</span>
-    <span class="proto-sep">/</span>
-    <button class="proto-ver" id="verBtn" title="Switch version">version 1 <span class="caret">&#9662;</span></button>
-    <span class="proto-spacer"></span>
-    <button class="info-btn" id="infoBtn" title="About this prototype">i</button>
-
-    <div class="ver-pop" id="verPop"><!-- built from versions.js --></div>
-
-    <div class="info-pop" id="infoPop">
-      <div class="info-tabs">
-        <button class="info-tab active" data-tab="what">What is this?</button>
-        <button class="info-tab" data-tab="new">What&rsquo;s new in this version</button>
-      </div>
-      <div class="info-body" data-tab="what">
-        <p>This is a prototype of an app for integrating disputed knowledge about uncertain problems.</p>
-        <p>It&rsquo;s entirely based on this <a href="https://github.com/keyserj/reasoning-tools/blob/main/ameliorate-v2/ontology.md" target="_blank">ontology.md</a>, using that as the data structure and visualizing some features that are enabled by the structure. This <a href="https://github.com/keyserj/reasoning-tools/blob/main/ameliorate-v2/UX-design.md" target="_blank">UX-design.md</a> describes some of the prototype&rsquo;s design in text.</p>
-        <p>Nothing here is functional. It&rsquo;s hard-coded to the ontology&rsquo;s &ldquo;Build a wall&rdquo; example, viewed as <b>danny</b> &mdash; new to the topic, hasn&rsquo;t scored anything yet; the scores shown are alice&rsquo;s, bob&rsquo;s and casey&rsquo;s.</p>
-      </div>
-      <div class="info-body" data-tab="new" hidden>
-        <div class="ver">v1 &mdash; the first wireframe, so nothing to compare against yet. What it establishes:</div>
-        <ol>
-          <li><b>Split panes:</b> an <b>agenda</b> pane (left, ranked text) and a <b>structure</b> pane (right, visuals).</li>
-          <li>Agenda sections: <b>Topic</b> (description + &ldquo;tour&rdquo;), <b>Guiding questions</b>, <b>Hottest details</b> with filter pills.</li>
-          <li>Structure pane: a collapsible <b>generated summary</b> strip above a causal <b>diagram of the top-10 hottest items</b>.</li>
-          <li>Score distributions drawn as <b>one colour band per scorer</b> on node and edge-label borders.</li>
-          <li>Clicking a pill in the summary or agenda <b>highlights</b> the matching node/edge in the diagram, and vice versa.</li>
-        </ol>
-      </div>
-    </div>
-  </div>
+  <!-- Prototype scaffolding: shared across every wireframe, see prototype-bar.js. -->
+  <div id="protoBarSlot"></div>
+  <script>
+    // Per-version facts for prototype-bar.js; written once when this version is cut.
+    window.CURRENT_VERSION = "1";
+    window.WHATS_NEW_HTML = `
+      <div class="ver">v1 &mdash; the first wireframe, so nothing to compare against yet. What it establishes:</div>
+      <ol>
+        <li><b>Split panes:</b> an <b>agenda</b> pane (left, ranked text) and a <b>structure</b> pane (right, visuals).</li>
+        <li>Agenda sections: <b>Topic</b> (description + &ldquo;tour&rdquo;), <b>Guiding questions</b>, <b>Hottest details</b> with filter pills.</li>
+        <li>Structure pane: a collapsible <b>generated summary</b> strip above a causal <b>diagram of the top-10 hottest items</b>.</li>
+        <li>Score distributions drawn as <b>one colour band per scorer</b> on node and edge-label borders.</li>
+        <li>Clicking a pill in the summary or agenda <b>highlights</b> the matching node/edge in the diagram, and vice versa.</li>
+      </ol>
+    `;
+  </script>
+  <script src="prototype-bar.js"></script>
 
   <!-- Top bar -->
   <header class="topbar">
@@ -415,7 +334,6 @@
 
 <div class="toast" id="toast"></div>
 
-<script src="versions.js"></script>
 <script>
 /* ============================================================
    DATA — derived by hand from ontology.md "Build a wall" example.
@@ -1042,82 +960,6 @@ function init(){
 }
 
 document.addEventListener("DOMContentLoaded", init);
-/* ============================================================
-   PROTOTYPE SCAFFOLDING: version switcher + info popover
-   Not part of the design - chrome for reviewing the wireframes.
-   The version list is built from the shared versions.js so that adding a
-   version means editing one file instead of all of them. If versions.js isn't
-   alongside this file the switcher hides itself; nothing else changes.
-   ============================================================ */
-(function initProtoBar(){
-  const CURRENT_VERSION = "1";
-  const INTRO_SEEN_KEY = "ameliorate-v2-wireframe-intro-seen";
-
-  const verBtn = document.getElementById("verBtn");
-  const verPop = document.getElementById("verPop");
-  const infoBtn = document.getElementById("infoBtn");
-  const infoPop = document.getElementById("infoPop");
-
-  const setVer = (show) => {
-    verPop.classList.toggle("show", show);
-    verBtn.classList.toggle("active", show);
-    if (show) verPop.querySelector(".ver-link.current")?.scrollIntoView({ block: "nearest" });
-  };
-  const setInfo = (show) => {
-    infoPop.classList.toggle("show", show);
-    infoBtn.classList.toggle("active", show);
-  };
-
-  const versions = window.WIREFRAME_VERSIONS;
-  if (Array.isArray(versions)) {
-    verPop.innerHTML = versions.map(({ v, desc }) =>
-      `<a class="ver-link${v === CURRENT_VERSION ? " current" : ""}" href="topic-landing-v${v}.html">` +
-      `<b>version ${v}</b><span>${desc}</span></a>`
-    ).join("");
-    verBtn.addEventListener("click", (e) => {
-      e.stopPropagation();
-      const show = !verPop.classList.contains("show");
-      setInfo(false); setVer(show);
-    });
-  } else {
-    verBtn.disabled = true;
-    verBtn.title = "The version list needs versions.js alongside this file";
-    verBtn.querySelector(".caret").remove();
-  }
-
-  infoBtn.addEventListener("click", (e) => {
-    e.stopPropagation();
-    const show = !infoPop.classList.contains("show");
-    setVer(false); setInfo(show);
-  });
-
-  document.querySelectorAll(".info-tab").forEach(tab => {
-    tab.addEventListener("click", (e) => {
-      e.stopPropagation();
-      document.querySelectorAll(".info-tab").forEach(t => t.classList.toggle("active", t === tab));
-      document.querySelectorAll(".info-body").forEach(b => { b.hidden = b.dataset.tab !== tab.dataset.tab; });
-    });
-  });
-
-  // Close on outside click. Capture phase so it still fires for targets (nodes,
-  // pills, edges) whose own handlers call stopPropagation().
-  document.addEventListener("click", (e) => {
-    if (!e.target.closest(".proto-bar")) { setVer(false); setInfo(false); }
-  }, true);
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape") { setVer(false); setInfo(false); }
-  });
-
-  // First visit: open the intro instead of hoping the small "i" gets noticed.
-  // The flag is shared across versions (one file:// origin), so this shows once
-  // overall, not once per wireframe. If storage is blocked, just show it.
-  let seen = false;
-  try { seen = localStorage.getItem(INTRO_SEEN_KEY) === "1"; } catch (e) { /* blocked */ }
-  if (!seen) {
-    setInfo(true);
-    try { localStorage.setItem(INTRO_SEEN_KEY, "1"); } catch (e) { /* blocked */ }
-  }
-})();
 </script>
 </body>
 </html>

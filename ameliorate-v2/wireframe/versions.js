@@ -22,4 +22,5 @@ window.WIREFRAME_VERSIONS = [
   { v: "7", desc: "average border color by default, switchable in the color key; tighter agenda rows" },
   { v: "8", desc: "dagre layout with routed edges; drag to pan, wheel and buttons to zoom" },
   { v: "9", desc: "diagram derived from hotness behind two filters; edges are boxes arrows can point at" },
+  { v: "10", desc: "minimap derived from the causal map, with relation glyphs; edges read as one box" },
 ];

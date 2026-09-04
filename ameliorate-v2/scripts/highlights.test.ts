@@ -85,8 +85,8 @@ describe("candidates: unknowns", () => {
 });
 
 describe("candidates", () => {
-  it("drops the topic node, which the whole page is already about", () => {
-    expect(candidatesOf("*[8,2] T &t #topic\n*[8,2] A &a").has("t")).toBe(false);
+  it("keeps the topic node, which can be the most disputed thing in its own topic", () => {
+    expect(candidatesOf("*[8,2] T &t #topic\n*[8,2] A &a").has("t")).toBe(true);
   });
 
   it("drops an implied claim, which holds no score beyond the one it stands behind", () => {
@@ -98,6 +98,36 @@ describe("candidates", () => {
   });
 });
 
+describe("candidates: activity", () => {
+  const parsed = (text: string) => {
+    const { doc, errors } = parse(text);
+    expect(errors).toEqual([]);
+    return doc;
+  };
+  const source = "%perspectives: [alice, bob]\n* T &t #topic\n* A &a\n  > causes &e\n    * B &b";
+
+  it("takes an authored strength for a node or an edge, since no timestamp reaches the syntax", () => {
+    const byId = new Map(
+      candidates(parsed(source), { a: 0.6, e: 0.4 }).map((item) => [item.id, item]),
+    );
+    expect(byId.get("a")?.signals.active).toBe(0.6);
+    expect(byId.get("e")?.signals.active).toBe(0.4);
+    expect(byId.get("b")?.signals.active).toBe(0);
+  });
+
+  it("lists an item nothing else would, since activity is the one signal an unscored item has", () => {
+    expect(highlights(parsed(source), { b: 0.3 })).toEqual([
+      {
+        id: "b",
+        kind: "node",
+        signals: { "change-importance": 0, controversy: 0, unknown: 0, active: 0.3 },
+        categories: ["active"],
+        hotness: 0.3,
+      },
+    ]);
+  });
+});
+
 describe("highlights", () => {
   it("lists an item once, under every reason that put it in the top 5", () => {
     const { doc } = parse("%perspectives: [alice, bob]\n* T &t #topic\n*[8,4] A &a");
@@ -105,7 +135,7 @@ describe("highlights", () => {
       {
         id: "a",
         kind: "node",
-        signals: { "change-importance": 0.75, controversy: 0.5, unknown: 0 },
+        signals: { "change-importance": 0.75, controversy: 0.5, unknown: 0, active: 0 },
         categories: ["change-importance", "controversy"],
         hotness: 0.75,
       },
@@ -124,12 +154,12 @@ describe("highlights: build-a-wall", () => {
 
   it("lists the union of each reason's top 5, strongest reason first", () => {
     expect(listed.map((item) => item.id)).toEqual([
+      "wall",
       "fewer-requirements",
       "wall-reduces",
       "danger",
       "illegal-immig",
       "visa-overstay",
-      "enter-on-foot",
       "legal-immig",
       "admin-burden",
       "long-wait",

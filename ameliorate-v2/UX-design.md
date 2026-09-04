@@ -248,7 +248,7 @@ So the top 3 questions would be GQ1[0.88], GQ2[0.60], GQ4[0.50].
 
 #### What
 
-Show the top 20 nodes/edges to look at ("show more" to see beyond the top 5), excluding topic node, with pills to filter by hotness reason.
+Show the top 20 nodes/edges to look at ("show more" to see beyond the top 5), with pills to filter by hotness reason.
 
 These should all show in the same list, but clicking a pill should filter to the top 5 nodes/edges for that hotness reason. Fewer than 20 can show if the same node/edge appears for multiple hotness reasons. If a node/edge has multiple hotness reasons, it's sorted in the combined list using its _highest_ hotness score.
 

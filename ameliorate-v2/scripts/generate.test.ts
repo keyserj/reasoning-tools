@@ -9,6 +9,9 @@ const bundle = readFileSync(
   join(import.meta.dirname, "../examples/build-a-wall.views.json"),
   "utf8",
 );
+const activity = JSON.parse(
+  readFileSync(join(import.meta.dirname, "../examples/build-a-wall.activity.json"), "utf8"),
+);
 
 /** Refuses a document the generator itself would refuse, so a test can't pass where it would fail. */
 const viewsOf = (text: string) => {
@@ -16,7 +19,7 @@ const viewsOf = (text: string) => {
   if (errors.length > 0) {
     throw new Error(errors.map((error) => `${error.line}: ${error.message}`).join("\n"));
   }
-  return buildViews(doc);
+  return buildViews(doc, activity);
 };
 
 describe("the committed bundle", () => {
@@ -46,12 +49,16 @@ describe("buildViews", () => {
   });
 
   it("carries every signal's score, not just the ones that listed the item", () => {
-    const listed = views.highlights.find((item) => item.id === "illegal-immig");
-    expect(listed).toMatchObject({
-      signals: { "change-importance": 0.5, controversy: 0.816, unknown: 0 },
-      categories: ["controversy"],
+    expect(views.nodes["illegal-immig"]).toMatchObject({
+      signals: { "change-importance": 0.5, controversy: 0.816, unknown: 0, active: 0.5 },
       hotness: 0.816,
     });
+  });
+
+  it("scores every node and edge, so a view can rank what no highlight listed", () => {
+    expect(views.nodes["caging-effect"].hotness).toBeCloseTo(0.656, 3);
+    expect(views.edges["wall--has--barbed-wire"].hotness).toBe(0);
+    expect(views.highlights.map((item) => item.id)).not.toContain("caging-effect");
   });
 
   it("leaves a question node's score alone, since the guides edge holds it", () => {
@@ -67,15 +74,15 @@ describe("buildViews", () => {
     expect(views.highlights.find((item) => item.kind === "edge")).toEqual({
       kind: "edge",
       id: "wall-reduces",
-      signals: { "change-importance": 0, controversy: 1, unknown: 0 },
-      categories: ["controversy"],
-      hotness: 1,
+      categories: ["controversy", "active"],
     });
     expect(views.edges["wall-reduces"]).toEqual({
       from: "wall",
       relation: "reduces",
       to: "illegal-immig",
       scores: [3, -5, 8],
+      signals: { "change-importance": 0, controversy: 1, unknown: 0, active: 1 },
+      hotness: 1,
     });
   });
 

@@ -2,8 +2,7 @@
 // `UX-design.md` -> Hottest Details owns the reasons and carries the worked example
 // ./highlights.test.ts pins.
 //
-// The doc lists a fourth signal, "Active", from the frequency and recency of comments and edits.
-// The syntax carries no timestamps, so nothing here can compute it and the wireframe supplies it.
+// The fourth signal, "Active", is hardcoded rather than calculated - see {@link Activity}.
 
 import {
   DEFAULT_CONCEPT_SCORE,
@@ -13,10 +12,10 @@ import {
   normalizeForSorting,
 } from "./aggregate.ts";
 import type { Doc, Edge, Node } from "./model.ts";
-import { isGuiding, topicNode } from "./model.ts";
+import { isGuiding } from "./model.ts";
 
 /** An item's signals are listed in this order. */
-export const SIGNALS = ["change-importance", "controversy", "unknown"] as const;
+export const SIGNALS = ["change-importance", "controversy", "unknown", "active"] as const;
 
 export type SignalName = (typeof SIGNALS)[number];
 
@@ -29,6 +28,15 @@ export interface Candidate {
   signals: Signals;
 }
 
+/**
+ * How active each node or edge is, 0..1. Hardcoded, because this prototype doesn't model comments
+ * or edit history - the frequency and recency `UX-design.md` asks for have nothing to read.
+ */
+export type Activity = Record<string, number>;
+
+const activeOf = (activity: Activity, id: string): number =>
+  Math.min(1, Math.max(0, activity[id] ?? 0));
+
 export interface Highlight extends Candidate {
   /** the signals that listed this item, which is what the section's pills filter on */
   categories: SignalName[];
@@ -40,14 +48,13 @@ export interface Highlight extends Candidate {
 const TOP_PER_SIGNAL = 5;
 
 /**
- * Every node and scored edge that could be listed, with all three signals scored for each.
+ * Every node and edge that could be listed, with all four signals scored for each.
  *
- * The topic node is excluded because the whole page is already about it. An implied claim is too:
- * it and the thing it stands behind hold one score between them, so listing both would say the
- * same thing twice.
+ * An implied claim is left out: it and the thing it stands behind hold one score between them, so
+ * listing both would say the same thing twice. An unscored edge stays in and scores 0, because
+ * generate.ts needs a number for every node and edge in the bundle.
  */
-export function candidates(doc: Doc): Candidate[] {
-  const topic = topicNode(doc);
+export function candidates(doc: Doc, activity: Activity = {}): Candidate[] {
   const answered = new Set(
     doc.edges.filter((edge) => edge.type === "answers").map((edge) => edge.targetId),
   );
@@ -75,7 +82,7 @@ export function candidates(doc: Doc): Candidate[] {
   };
 
   const nodes: Candidate[] = doc.nodes
-    .filter((node) => node.id !== topic?.id && node.impliedForId === undefined)
+    .filter((node) => node.impliedForId === undefined)
     .map((node) => ({
       id: node.id,
       kind: "node",
@@ -86,16 +93,20 @@ export function candidates(doc: Doc): Candidate[] {
             : 0,
         controversy: controversy(node.scores),
         unknown: unknown(node),
+        active: activeOf(activity, node.id),
       },
     }));
 
-  const edges: Candidate[] = doc.edges
-    .filter((edge) => edge.scores !== null)
-    .map((edge) => ({
-      id: edge.id,
-      kind: "edge",
-      signals: { "change-importance": 0, controversy: controversy(edge.scores), unknown: 0 },
-    }));
+  const edges: Candidate[] = doc.edges.map((edge) => ({
+    id: edge.id,
+    kind: "edge",
+    signals: {
+      "change-importance": 0,
+      controversy: controversy(edge.scores),
+      unknown: 0,
+      active: activeOf(activity, edge.id),
+    },
+  }));
 
   return [...nodes, ...edges];
 }
@@ -106,8 +117,8 @@ export function candidates(doc: Doc): Candidate[] {
  *
  * Ties are broken by declaration order, which is what makes the generated bundle diffable.
  */
-export function highlights(doc: Doc): Highlight[] {
-  const all = candidates(doc);
+export function highlights(doc: Doc, activity: Activity = {}): Highlight[] {
+  const all = candidates(doc, activity);
   const categories = new Map<string, SignalName[]>();
 
   for (const signal of SIGNALS) {

@@ -123,7 +123,7 @@ Keep a short syntax-teaching placeholder for an empty editor. The local `src/ont
 
 Each numbered step is a separate review boundary. Implement only that step, run its checks, create one focused commit on the working branch, and report the commit and results. Stop for user review before starting the next step. If a step exposes a decision that changes the remaining design, update the plan before continuing.
 
-Step 1 is reviewed; its [rendering findings and screenshots](./ameliorate-v2-rendering-spike.md) document the full map's need for zoom and pan. The selected defaults are BT / Full structure / Implied, with top-to-bottom also available. Steps 2–5 have not started.
+Step 1 is reviewed; its [rendering findings and screenshots](./ameliorate-v2-rendering-spike.md) document the full map's need for zoom and pan. The selected defaults are BT / Full structure / Implied, with top-to-bottom also available. Step 2 is implemented and awaiting review: the moved implementation and snapshot remain byte-for-byte identical, all four projected graphs match, and native generation reproduces the views bundle unchanged. Both packages pass their checks, with 335 playground tests and 54 remaining script tests. Steps 3–5 have not started.
 
 Every implementation step runs the playground's typecheck, tests, lint, and `format:check`. Scripts checks are additionally called out where their code or parsed input changes. Inspect deliberate snapshot changes before committing them.
 

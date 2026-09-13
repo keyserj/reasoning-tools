@@ -4,7 +4,7 @@ import {
   type Doc,
   type Edge,
   type Node,
-} from "../../../../ameliorate-v2/scripts/model.ts";
+} from "../../ontology/ameliorate-v2/model.ts";
 import { addDocumentNotes, addNotes, type NoteOwner } from "../../ontology/notes.ts";
 import { formatScores, type Scores } from "../../ontology/scores.ts";
 import type { RenderGraph } from "../../ontology/types.ts";

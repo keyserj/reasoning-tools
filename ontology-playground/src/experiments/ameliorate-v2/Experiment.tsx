@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { parse } from "../../../../ameliorate-v2/scripts/parse.ts";
+import { parse } from "../../ontology/ameliorate-v2/parse.ts";
 import source from "../../../../ameliorate-v2/examples/build-a-wall.txt?raw";
 import DiagramPane from "../../components/DiagramPane.tsx";
 import { flowchart } from "../../ontology/mermaidFlowchart.ts";

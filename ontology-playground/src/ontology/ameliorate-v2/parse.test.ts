@@ -1,9 +1,6 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "./parse.ts";
-
-const buildAWall = readFileSync(join(import.meta.dirname, "../examples/build-a-wall.txt"), "utf8");
+import buildAWall from "../../../../ameliorate-v2/examples/build-a-wall.txt?raw";
 
 const messages = (text: string): string[] => parse(text).errors.map((e) => e.message);
 

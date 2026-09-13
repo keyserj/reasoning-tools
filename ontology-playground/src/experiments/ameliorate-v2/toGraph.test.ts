@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parse } from "../../../../ameliorate-v2/scripts/parse.ts";
+import { parse } from "../../ontology/ameliorate-v2/parse.ts";
 import source from "../../../../ameliorate-v2/examples/build-a-wall.txt?raw";
 import { toGraph } from "./toGraph.ts";
 

@@ -2,7 +2,7 @@
 
 The real build-a-wall example renders through the existing Mermaid emitter and `DiagramPane` in both views, both edge-claim displays, and both themes. Direction options are BT, top-to-bottom, and LR. The main obstacle is density: the full map needs zoom and pan to read. Changing direction does not make the complete example readable at fit-to-screen scale.
 
-[Open the experiment](http://localhost:5173/reasoning-tools/ontology-playground/ai-designs/ameliorate-v2-rendering-spike.html) with the playground dev server running. Its entry is [the HTML harness](./ameliorate-v2-rendering-spike.html); the temporary [projection](../src/experiments/ameliorate-v2/toGraph.ts) imports the existing script model, and [the component](../src/experiments/ameliorate-v2/Experiment.tsx) imports the original parser and example. This implements step 1 of [the integration plan](./add-ameliorate-v2.md). Parser relocation and registration follow review.
+[Open the experiment](http://localhost:5173/reasoning-tools/ontology-playground/ai-designs/ameliorate-v2-rendering-spike.html) with the playground dev server running. Its entry is [the HTML harness](./ameliorate-v2-rendering-spike.html); the temporary [projection](../src/experiments/ameliorate-v2/toGraph.ts) and [component](../src/experiments/ameliorate-v2/Experiment.tsx) import the model and parser from `src/ontology/ameliorate-v2/`. The original example stays in `ameliorate-v2/examples/`. This experiment implements the rendering check in [the integration plan](./add-ameliorate-v2.md).
 
 ## Defaults and limitations
 

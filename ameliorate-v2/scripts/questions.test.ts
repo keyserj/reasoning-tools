@@ -1,7 +1,7 @@
 import { readFileSync } from "node:fs";
 import { join } from "node:path";
 import { describe, expect, it } from "vitest";
-import { parse } from "./parse.ts";
+import { parse } from "../../ontology-playground/src/ontology/ameliorate-v2/parse.ts";
 import { guidingQuestions, guidingScore } from "./questions.ts";
 
 const buildAWall = readFileSync(join(import.meta.dirname, "../examples/build-a-wall.txt"), "utf8");

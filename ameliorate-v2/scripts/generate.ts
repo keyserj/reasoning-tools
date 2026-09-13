@@ -8,12 +8,18 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { join } from "node:path";
 import type { Activity, SignalName, Signals } from "./highlights.ts";
 import { SIGNALS, candidates, highlights } from "./highlights.ts";
-import type { Doc, Node } from "./model.ts";
-import { isGuiding, subtypesOf, topicNode } from "./model.ts";
-import { DESCRIPTION_KEY } from "./markers.ts";
-import { parse } from "./parse.ts";
+// Importing playground internals is an awkward dependency; these scripts are expected to
+// migrate there too.
+import type { Doc, Node } from "../../ontology-playground/src/ontology/ameliorate-v2/model.ts";
+import {
+  isGuiding,
+  subtypesOf,
+  topicNode,
+} from "../../ontology-playground/src/ontology/ameliorate-v2/model.ts";
+import { DESCRIPTION_KEY } from "../../ontology-playground/src/ontology/ameliorate-v2/markers.ts";
+import { parse } from "../../ontology-playground/src/ontology/ameliorate-v2/parse.ts";
 import { guidingQuestions } from "./questions.ts";
-import type { Scores } from "./scores.ts";
+import type { Scores } from "../../ontology-playground/src/ontology/ameliorate-v2/scores.ts";
 
 const EXAMPLE_PATH = join(import.meta.dirname, "../examples/build-a-wall.txt");
 /** `{ id: 0..1 }` - hardcoded "Active" strengths, since nothing here models comments or history. */
@@ -127,7 +133,7 @@ export function buildViews(doc: Doc, activity: Activity = {}): Views {
   if (topic === undefined)
     throw new Error("No node is tagged #topic, so there are no views to build");
 
-  // one map for both kinds: ./parse.ts allocates node and edge ids from a single set
+  // one map for both kinds: the parser allocates node and edge ids from a single set
   const signalsById = new Map(candidates(doc, activity).map((item) => [item.id, item.signals]));
 
   const nodes: Record<string, ViewNode> = {};

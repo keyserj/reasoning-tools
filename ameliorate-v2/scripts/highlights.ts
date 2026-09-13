@@ -11,8 +11,12 @@ import {
   controversy,
   normalizeForSorting,
 } from "./aggregate.ts";
-import type { Doc, Edge, Node } from "./model.ts";
-import { isGuiding } from "./model.ts";
+import type {
+  Doc,
+  Edge,
+  Node,
+} from "../../ontology-playground/src/ontology/ameliorate-v2/model.ts";
+import { isGuiding } from "../../ontology-playground/src/ontology/ameliorate-v2/model.ts";
 
 /** An item's signals are listed in this order. */
 export const SIGNALS = ["change-importance", "controversy", "unknown", "active"] as const;

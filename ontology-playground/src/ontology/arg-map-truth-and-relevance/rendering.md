@@ -6,7 +6,7 @@ How the playground draws [this ontology](./ontology.md) — a separate question 
 
 Every supports/critiques edge makes a claim — `A supports B` — which can itself be scored and argued about, and mermaid can't point an arrow at another arrow. Both ways of drawing that are implemented, and the **Edge claims** feature ([features.ts](./features.ts)) switches between them live. Neither is obviously right, which is why this is a switch rather than a decision.
 
-**Spelled out** (the default). An edge is a labeled connector, `source ──"✅ ① supports [8,2,8]"──▶ target`. An edge someone argued about — one that is another edge's endpoint, or that carries a note — _additionally_ gets a **detached** node whose text spells its claim out (`① "wall-reduces" supports "wall"`, each side quoted and truncated to ~40 chars), and the arguments hang off that node instead of off either endpoint.
+**Spelled out.** An edge is a labeled connector, `source ──"✅ ① supports [8,2,8]"──▶ target`. An edge someone argued about — one that is another edge's endpoint, or that carries a note — _additionally_ gets a **detached** node whose text spells its claim out (`① "wall-reduces" supports "wall"`, each side quoted and truncated to ~40 chars), and the arguments hang off that node instead of off either endpoint.
 
 - boxes appear only where something was actually argued, which is most of the box-count saving
 - the source text already reads this way: `= $reduction-supports-wall` is a block about a claim you can state in words
@@ -16,7 +16,7 @@ Every supports/critiques edge makes a claim — `A supports B` — which can its
 - a detached node is a plain `claim`, not a `supports`/`critiques` box: its text already says which it is, and the connector carries the blue/red. The cost is that those two _node_ styles only bite in the **implied** rendering, while the legend and style panel offer them either way
 - a labeled connector always says type + scores; there is no param for saying less
 
-**Implied.** Every edge is reified into a node between its endpoints: `source ──▶ [✅ supports 8,2,8] ──▶ target`.
+**Implied** (the default). Every edge is reified into a node between its endpoints: `source ──▶ [✅ supports 8,2,8] ──▶ target`.
 
 - arguing about an edge is then structurally identical to arguing about a claim, which is what this ontology says they are — every `$ref` resolves to a plain node and no case is special
 - it puts every score in a box, uniformly

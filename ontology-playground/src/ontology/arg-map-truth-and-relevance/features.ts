@@ -10,6 +10,7 @@ import type { FeatureDef } from "../types.ts";
 export const EDGE_CLAIMS = "edge-claims";
 export const SPELLED_OUT = "spelled-out";
 export const IMPLIED = "implied";
+export const DEFAULT_EDGE_CLAIMS = IMPLIED;
 
 export const EDGE_DISPLAY = "edge-display";
 export const EDGE_DISPLAY_DISTINGUISH = "distinguish-edge-to-edge";
@@ -29,7 +30,7 @@ export const features: FeatureDef[] = [
     label: "Edge claims",
     description:
       "Every supports/critiques edge makes a claim about the two claims it joins. This is how that claim gets drawn.",
-    defaultOption: SPELLED_OUT,
+    defaultOption: DEFAULT_EDGE_CLAIMS,
     options: [
       {
         id: SPELLED_OUT,

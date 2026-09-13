@@ -1,14 +1,14 @@
 # Ameliorate v2 rendering experiment
 
-The real build-a-wall example renders through the existing Mermaid emitter and `DiagramPane` in both views, both edge-claim displays, both directions, and both themes. The main obstacle is density: the full map needs zoom and pan to read. Changing direction does not make the complete example readable at fit-to-screen scale.
+The real build-a-wall example renders through the existing Mermaid emitter and `DiagramPane` in both views, both edge-claim displays, and both themes. Direction options are BT, top-to-bottom, and LR. The main obstacle is density: the full map needs zoom and pan to read. Changing direction does not make the complete example readable at fit-to-screen scale.
 
 [Open the experiment](http://localhost:5173/reasoning-tools/ontology-playground/ai-designs/ameliorate-v2-rendering-spike.html) with the playground dev server running. Its entry is [the HTML harness](./ameliorate-v2-rendering-spike.html); the temporary [projection](../src/experiments/ameliorate-v2/toGraph.ts) imports the existing script model, and [the component](../src/experiments/ameliorate-v2/Experiment.tsx) imports the original parser and example. This implements step 1 of [the integration plan](./add-ameliorate-v2.md). Parser relocation and registration follow review.
 
 ## Defaults and limitations
 
-- Keep **BT** as the initial direction. It fits the causal view better and keeps arguments below the proposition they discuss. LR offers a useful comparison but gives no material improvement in full-map legibility.
-- Keep **Full structure / Spelled out** as the proposed integration defaults. Full structure preserves an argument-only example such as session-storage; Spelled out keeps a relation's proposition readable alongside its arguments. Build-a-wall's full view remains a map to explore through zoom and pan, not a diagram that can be read in its entirety at once.
-- Keep **Implied** available. It draws many more boxes, but its full-map fit scale is slightly larger than Spelled out's because the layout distributes them differently. Box count alone does not predict readability. Arguments attach directly to the relation box, at the cost of an extra row of relation boxes between claims.
+- Keep **BT** as the initial direction. It fits the causal view better than LR and keeps arguments below the proposition they discuss. Top-to-bottom is available as **TD**, using the playground's existing `TB` value; Mermaid treats TD and TB identically.
+- Use **Full structure / Implied** as the integration defaults, and Implied as the existing argument-map ontology's default. Full structure preserves an argument-only example such as session-storage. Implied attaches arguments directly to the relation box, at the cost of an extra row of relation boxes between claims. Its full-map fit scale is slightly larger than Spelled out's because the layout distributes the boxes differently; box count alone does not predict readability.
+- Keep **Spelled out** available to show the complete relation proposition beside its arguments. Build-a-wall's full view requires zoom and pan in both displays.
 - **Causal only / Spelled out** is the clearest overview of build-a-wall. It retains 11 concepts, 11 causal relations, the relevant note, and score context. It intentionally omits the wall's arguments, criteria, and questions.
 
 The rendering represents all written scores without interpreting a negative `supports` score as positive support. Relation connectors and boxes use a neutral style; node shapes and icons distinguish the base types. Tags and relation-derived subtypes appear as annotations. The topic's full description and the two written opposites remain with their nodes, increasing label height. At a readable zoom, long cross-map connectors and detached-claim matching still require panning. These are accepted limits of this experiment, not evidence that the final browsing experience is solved.
@@ -50,8 +50,10 @@ In Implied, those arguments reach the original `wall-reduces` relation box, whic
 
 LR fit comparisons: [Full / Spelled out](./ameliorate-v2-rendering-spike/full-spelled-out-lr-light.png) and [Causal / Spelled out](./ameliorate-v2-rendering-spike/causal-spelled-out-lr-light.png).
 
+Top-to-bottom reverses BT's ranks and has the same unscaled bounds. Its score-context box follows the sinks to the bottom. TD fit comparisons: [Full / Implied](./ameliorate-v2-rendering-spike/full-implied-td-light.png) and [Causal / Implied](./ameliorate-v2-rendering-spike/causal-implied-td-light.png).
+
 ## Verification and remaining work
 
-All 16 view/display/direction/theme combinations render successfully. The existing zoom, fit, and drag controls work on the experiment. Editing the external example updates the diagram through Vite, including adding and removing a document note; the original example is restored unchanged. Fresh loading and example updates produce no browser errors. Four focused tests protect the real example's reused claim, implied-claim aliasing and score ownership, model immutability, and causal filtering with notes.
+All 24 view/display/direction/theme combinations render successfully, including the eight top-to-bottom combinations. The existing zoom, fit, and drag controls work on the experiment. Editing the external example updates the diagram through Vite, including adding and removing a document note; the original example is restored unchanged. Fresh loading and example updates produce no browser errors. Four focused tests protect the real example's reused claim, implied-claim aliasing and score ownership, model immutability, and causal filtering with notes.
 
 The experiment uses empty source maps and provides no editor, tokenizer, style dialog, or ontology registration. General parser recovery, synthetic-ID edge cases, and the full source-linking test matrix remain in later plan steps. The temporary harness is outside the production entry graph and is removed after integration reproduces its reviewed behavior.

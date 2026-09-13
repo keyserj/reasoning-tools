@@ -12,7 +12,7 @@ const parsed = parse(source);
 
 export default function Experiment() {
   const [view, setView] = useState<View>("full");
-  const [display, setDisplay] = useState<EdgeClaims>("spelled-out");
+  const [display, setDisplay] = useState<EdgeClaims>("implied");
   const [direction, setDirection] = useState<LayoutDirection>(defaultConfig.direction);
   const [theme, setTheme] = useState<Theme>("light");
   const graph = useMemo(() => toGraph(parsed.doc, view, display), [view, display]);
@@ -63,6 +63,7 @@ export default function Experiment() {
             onChange={(e) => setDirection(e.target.value as LayoutDirection)}
           >
             <option value="BT">Bottom to top</option>
+            <option value="TB">Top to bottom (TD)</option>
             <option value="LR">Left to right</option>
           </select>
         </label>

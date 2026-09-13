@@ -5,7 +5,7 @@
 Add Ameliorate v2 as a playground ontology for inspecting its structure and written scores. The existing parser provides most of the semantic implementation; rendering implied claims and keeping a dense graph understandable are the largest remaining tasks. Move the reusable code into the playground and let the existing scripts import it directly. The ontology document remains the source of truth as the design evolves.
 
 - Ship **Full structure** and **Causal only** views, with Full structure as the initial default.
-- Keep **Edge claims: Spelled out / Implied**, with Spelled out as the initial default. Confirm these defaults in an early rendering experiment before moving the parser.
+- Keep **Edge claims: Spelled out / Implied**, with Implied as the initial default for both Ameliorate and the existing argument-map ontology. Keep BT as the initial direction and offer top-to-bottom (TD, represented as TB in the playground) alongside LR in the experiment.
 - Ship a small session-storage example first and reuse the original build-a-wall example as the comprehensive example.
 - Preserve current parsing and validation behavior, including documented discrepancies with the ontology specification.
 - Defer calculated arguments, tradeoffs tables, perspective selection, score-distribution coloring, and the wireframes' agenda/detail navigation. The scripts do not yet implement calculated arguments or tradeoffs, and those features involve additional semantic and UI decisions.
@@ -123,7 +123,7 @@ Keep a short syntax-teaching placeholder for an empty editor. The local `src/ont
 
 Each numbered step is a separate review boundary. Implement only that step, run its checks, create one focused commit on the working branch, and report the commit and results. Stop for user review before starting the next step. If a step exposes a decision that changes the remaining design, update the plan before continuing.
 
-Step 1 is implemented and awaiting review; its [rendering findings and screenshots](./ameliorate-v2-rendering-spike.md) retain BT / Full structure / Spelled out as the proposed defaults and document the full map's need for zoom and pan. Steps 2–5 have not started.
+Step 1 is reviewed; its [rendering findings and screenshots](./ameliorate-v2-rendering-spike.md) document the full map's need for zoom and pan. The selected defaults are BT / Full structure / Implied, with top-to-bottom also available. Steps 2–5 have not started.
 
 Every implementation step runs the playground's typecheck, tests, lint, and `format:check`. Scripts checks are additionally called out where their code or parsed input changes. Inspect deliberate snapshot changes before committing them.
 
@@ -131,9 +131,9 @@ Every implementation step runs the playground's typecheck, tests, lint, and `for
 
 Add a development-only HTML entry at `ai-designs/ameliorate-v2-rendering-spike.html`, loading a small React harness under `src/experiments/ameliorate-v2/` so TypeScript and lint cover it. The harness imports the existing script parser and the original build-a-wall text, runs a temporary `toGraph` projection through `flowchart`, and mounts the existing `DiagramPane`. Pass `activeLine={null}` and a no-op `onPickLine`; source maps can be empty for this visual experiment.
 
-Implement the rendering rules above in the temporary projection, with controls for both views, both edge-claim displays, theme, and BT/LR direction. Include actual notes, descriptions, opposites, tags, and written scores. Add the Vite filesystem allowance described above so the external raw example loads in development. Registration and the parser contract remain outside this step.
+Implement the rendering rules above in the temporary projection, with controls for both views, both edge-claim displays, theme, and BT/TB/LR direction. Include actual notes, descriptions, opposites, tags, and written scores. Add the Vite filesystem allowance described above so the external raw example loads in development. Registration and the parser contract remain outside this step.
 
-Acceptance: inspect both themes, fit-to-view and readable zoom, reused-node connections, detached claim markers, and the causal core. Trace the wall-reduces argument to its referent. Record screenshots, rendered node/connector counts, the chosen direction, and findings about the Full structure / Spelled out defaults beside the harness. Readability and any resulting default changes are reviewed before the parser moves.
+Acceptance: inspect both themes, fit-to-view and readable zoom, reused-node connections, detached claim markers, and the causal core. Trace the wall-reduces argument to its referent. Record screenshots, rendered node/connector counts, the chosen direction, and findings about the Full structure / Implied defaults beside the harness. Readability and any resulting default changes are reviewed before the parser moves.
 
 Follow the repository's server rule: check for an existing server through Playwright; if unavailable, ask the user to run `cd ontology-playground && npm run dev`. Do not start a server.
 

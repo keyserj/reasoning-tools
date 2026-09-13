@@ -3,12 +3,9 @@ import type { FeatureState } from "../types.ts";
 import { withoutLines } from "../testing.ts";
 import { parse } from "./parse.ts";
 import { toGraph } from "./toGraph.ts";
-import { EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_SAME, IMPLIED } from "./features.ts";
+import { EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_SAME, IMPLIED, SPELLED_OUT } from "./features.ts";
 
-// The two renderings the `Edge claims` feature switches between. An empty state is the
-// default one, which is what an old shared URL and a fresh document both decode to.
-
-const spelledOut = (): FeatureState => ({});
+const spelledOut = (): FeatureState => ({ [EDGE_CLAIMS]: { option: SPELLED_OUT } });
 
 const implied: FeatureState = { [EDGE_CLAIMS]: { option: IMPLIED } };
 
@@ -23,7 +20,7 @@ const graphOf = (text: string, features: FeatureState) =>
 /** The same graph with the lines left on, which the block at the bottom is about. */
 const withLines = (text: string, features: FeatureState) => toGraph(parse(text).doc, features);
 
-describe("toGraph — spelled out (default)", () => {
+describe("toGraph — spelled out", () => {
   it("draws a plain edge as a labeled connector, with no node of its own", () => {
     const graph = graphOf("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", spelledOut());
     expect(graph.nodes).toEqual([
@@ -139,9 +136,9 @@ describe("toGraph — spelled out (default)", () => {
   });
 });
 
-describe("toGraph — implied", () => {
+describe("toGraph — implied (default)", () => {
   it("reifies an edge into a node between its child source and parent target", () => {
-    const graph = graphOf("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", implied);
+    const graph = graphOf("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", {});
     expect(graph.nodes).toEqual([
       { id: "t", type: "claim", text: "Thesis" },
       { id: "r", type: "claim", text: "Reason" },

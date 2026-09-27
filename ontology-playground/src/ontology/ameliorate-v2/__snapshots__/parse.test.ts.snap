@@ -954,10 +954,281 @@ exports[`parse: the build-a-wall example > produces the same model it did last t
     },
   ],
   "notes": [],
+  "perspectiveLines": [
+    1,
+  ],
   "perspectives": [
     "alice",
     "bob",
     "casey",
   ],
+  "sourceLines": {
+    "admin-burden": [
+      10,
+      53,
+    ],
+    "admin-burden--causes--long-wait": [
+      9,
+    ],
+    "baby-murder": [
+      145,
+    ],
+    "barbed-wire": [
+      40,
+    ],
+    "best-ways": [
+      62,
+      89,
+      103,
+      108,
+    ],
+    "best-ways--guides--illegal-immig": [
+      64,
+    ],
+    "best-ways--guides--why-wall": [
+      66,
+    ],
+    "caging-effect": [
+      126,
+    ],
+    "caging-effect--supports--wall-reduces--implied": [
+      125,
+    ],
+    "climb-over": [
+      130,
+    ],
+    "climb-over--supports--wall-reduces--implied": [
+      129,
+    ],
+    "costly-recrossing": [
+      128,
+    ],
+    "costly-recrossing--supports--caging-effect": [
+      127,
+    ],
+    "danger": [
+      28,
+    ],
+    "danger--causes--illegal-immig": [
+      29,
+    ],
+    "disappear": [
+      24,
+    ],
+    "disappear--causes--illegal-immig": [
+      25,
+    ],
+    "easy-climb": [
+      132,
+    ],
+    "easy-climb--supports--climb-over": [
+      131,
+    ],
+    "enter-on-foot": [
+      77,
+    ],
+    "enter-on-foot--answers--how-enter": [
+      76,
+    ],
+    "fewer-requirements": [
+      50,
+      93,
+    ],
+    "fewer-requirements--causes--admin-burden": [
+      52,
+    ],
+    "fewer-requirements--fulfills--inexpensive": [
+      92,
+    ],
+    "fleeing-danger": [
+      143,
+    ],
+    "fleeing-danger--supports--illegal-immig--implied": [
+      142,
+    ],
+    "house-doc": [
+      156,
+    ],
+    "house-doc--mentions--texas-stat": [
+      157,
+    ],
+    "how-enter": [
+      72,
+    ],
+    "how-enter--clarifies--wall-reduces--implied": [
+      74,
+    ],
+    "how-tall": [
+      43,
+    ],
+    "how-tall--clarifies--wall": [
+      42,
+    ],
+    "humane": [
+      105,
+    ],
+    "humane--criterion-for--best-ways": [
+      107,
+    ],
+    "illegal-immig": [
+      6,
+      14,
+      22,
+      26,
+      30,
+      37,
+      65,
+    ],
+    "illegal-immig--implied": [
+      139,
+    ],
+    "inexpensive": [
+      85,
+      86,
+    ],
+    "inexpensive--criterion-for--best-ways": [
+      88,
+    ],
+    "legal-immig": [
+      12,
+    ],
+    "legal-immig--causes--illegal-immig": [
+      13,
+    ],
+    "long-wait": [
+      8,
+      16,
+      48,
+    ],
+    "long-wait--causes--legal-immig": [
+      15,
+    ],
+    "more-admin": [
+      46,
+      91,
+    ],
+    "more-admin--causes--long-wait": [
+      47,
+    ],
+    "more-admin--fulfills--inexpensive": [
+      90,
+    ],
+    "motivations": [
+      18,
+    ],
+    "motivations--categorizes--danger": [
+      27,
+    ],
+    "motivations--categorizes--disappear": [
+      23,
+    ],
+    "motivations--categorizes--save-money": [
+      19,
+    ],
+    "murder-supports-worse-score": [
+      144,
+    ],
+    "murder-supports-worse-score--implied": [
+      147,
+    ],
+    "note-ambiguous-it-wasn-t-stated-which-require": [
+      51,
+    ],
+    "note-rates-vary-by-year-and-state-texas-is-us": [
+      152,
+    ],
+    "physical-barrier": [
+      123,
+      124,
+    ],
+    "physical-barrier--supports--wall-reduces--implied": [
+      122,
+    ],
+    "quick": [
+      100,
+    ],
+    "quick--criterion-for--best-ways": [
+      102,
+    ],
+    "save-money": [
+      20,
+    ],
+    "save-money--causes--illegal-immig": [
+      21,
+    ],
+    "still-immigrate": [
+      116,
+    ],
+    "still-immigrate--supports--wait-causes-illegal-immig--implied": [
+      115,
+    ],
+    "texas-stat": [
+      151,
+      158,
+    ],
+    "texas-stat--supports--murder-supports-worse-score--implied": [
+      150,
+    ],
+    "unclimbable": [
+      134,
+    ],
+    "unclimbable--supports--climb-over": [
+      133,
+    ],
+    "visa-overstay": [
+      80,
+      137,
+    ],
+    "visa-overstay--answers--how-enter": [
+      79,
+    ],
+    "visa-overstay--supports--wall-reduces--implied": [
+      135,
+    ],
+    "wait-causes-illegal-immig": [
+      7,
+    ],
+    "wait-causes-illegal-immig--implied": [
+      112,
+    ],
+    "wall": [
+      34,
+      35,
+      60,
+      98,
+    ],
+    "wall--causes--wall-cost": [
+      96,
+    ],
+    "wall--has--barbed-wire": [
+      38,
+    ],
+    "wall-cost": [
+      95,
+    ],
+    "wall-cost--fulfills--inexpensive": [
+      94,
+    ],
+    "wall-reduces": [
+      36,
+    ],
+    "wall-reduces--implied": [
+      75,
+      119,
+    ],
+    "why-immigrate": [
+      69,
+    ],
+    "why-immigrate--guides--best-ways": [
+      68,
+    ],
+    "why-wall": [
+      57,
+      67,
+    ],
+    "why-wall--guides--wall": [
+      59,
+    ],
+  },
 }
 `;

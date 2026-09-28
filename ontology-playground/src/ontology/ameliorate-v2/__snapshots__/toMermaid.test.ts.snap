@@ -1,0 +1,85 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`toMermaid > emits 'causal' / 'implied' 1`] = `
+"flowchart BT
+  w("🔎 Wall<br/>#action"):::concept
+  i("🔎 Immigration"):::concept
+  r(["🔗 reduces<br/>[3,-5]"]):::relation
+  _score_context["📋 Scores: [alice, bob]"]:::context
+  w e0@--- r
+  r e1@--> i
+  i ~~~ _score_context
+  classDef concept fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
+  classDef question fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
+  classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
+  classDef source fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
+  classDef relation fill:#edf2fa,stroke:#64748b,color:#2b3340,stroke-width:1.5px
+  classDef note fill:#fcf2d3,stroke:#d3ad20,color:#3f3100,stroke-width:1.5px
+  classDef context fill:#edf2fa,stroke:#64748b,color:#2b3340,stroke-width:1.5px
+  linkStyle 0,1 stroke:#64748b,stroke-width:1.5px"
+`;
+
+exports[`toMermaid > emits 'causal' / 'spelled-out' 1`] = `
+"flowchart BT
+  w("🔎 Wall<br/>#action"):::concept
+  i("🔎 Immigration"):::concept
+  _score_context["📋 Scores: [alice, bob]"]:::context
+  w e0@-->|"reduces [3,-5]"| i
+  i ~~~ _score_context
+  classDef concept fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
+  classDef question fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
+  classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
+  classDef source fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
+  classDef relation fill:#edf2fa,stroke:#64748b,color:#2b3340,stroke-width:1.5px
+  classDef note fill:#fcf2d3,stroke:#d3ad20,color:#3f3100,stroke-width:1.5px
+  classDef context fill:#edf2fa,stroke:#64748b,color:#2b3340,stroke-width:1.5px
+  linkStyle 0 stroke:#64748b,stroke-width:1.5px"
+`;
+
+exports[`toMermaid > emits 'full' / 'implied' 1`] = `
+"flowchart BT
+  w("🔎 Wall<br/>#action"):::concept
+  i("🔎 Immigration"):::concept
+  e["💬 Evidence"]:::claim
+  r(["🔗 reduces<br/>[3,-5]"]):::relation
+  s(["🔗 supports<br/>[8,-]"]):::relation
+  note_note[/"📝 Note"/]:::note
+  _score_context["📋 Scores: [alice, bob]"]:::context
+  w e0@--- r
+  r e1@--> i
+  e e2@--- s
+  s e3@--> r
+  note_note e4@-.-> e
+  i ~~~ _score_context
+  classDef concept fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
+  classDef question fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
+  classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
+  classDef source fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
+  classDef relation fill:#edf2fa,stroke:#64748b,color:#2b3340,stroke-width:1.5px
+  classDef note fill:#fcf2d3,stroke:#d3ad20,color:#3f3100,stroke-width:1.5px
+  classDef context fill:#edf2fa,stroke:#64748b,color:#2b3340,stroke-width:1.5px
+  linkStyle 0,1,2,3 stroke:#64748b,stroke-width:1.5px"
+`;
+
+exports[`toMermaid > emits 'full' / 'spelled-out' 1`] = `
+"flowchart BT
+  w("🔎 Wall<br/>#action"):::concept
+  i("🔎 Immigration"):::concept
+  e["💬 Evidence"]:::claim
+  r__implied["💬 ① &quot;Wall&quot; reduces &quot;Immigration&quot;<br/>[3,-5]"]:::claim
+  note_note[/"📝 Note"/]:::note
+  _score_context["📋 Scores: [alice, bob]"]:::context
+  w e0@-->|"① reduces [3,-5]"| i
+  e e1@-->|"supports [8,-]"| r__implied
+  r__implied ~~~ i
+  note_note e3@-.-> e
+  i ~~~ _score_context
+  classDef concept fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
+  classDef question fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
+  classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
+  classDef source fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
+  classDef relation fill:#edf2fa,stroke:#64748b,color:#2b3340,stroke-width:1.5px
+  classDef note fill:#fcf2d3,stroke:#d3ad20,color:#3f3100,stroke-width:1.5px
+  classDef context fill:#edf2fa,stroke:#64748b,color:#2b3340,stroke-width:1.5px
+  linkStyle 0,1 stroke:#64748b,stroke-width:1.5px"
+`;

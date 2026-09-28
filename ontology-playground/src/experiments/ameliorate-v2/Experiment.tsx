@@ -2,23 +2,38 @@ import { useEffect, useMemo, useState } from "react";
 import { parse } from "../../ontology/ameliorate-v2/parse.ts";
 import source from "../../../../ameliorate-v2/examples/build-a-wall.txt?raw";
 import DiagramPane from "../../components/DiagramPane.tsx";
-import { flowchart } from "../../ontology/mermaidFlowchart.ts";
 import { deriveTypeStyle } from "../../ontology/typeColors.ts";
-import type { LayoutDirection, Theme } from "../../ontology/types.ts";
-import { toGraph, type EdgeClaims, type View } from "./toGraph.ts";
-import { defaultConfig, nodeTypes, tables } from "./styles.ts";
+import type { FeatureState, LayoutDirection, Theme } from "../../ontology/types.ts";
+import { toGraph } from "../../ontology/ameliorate-v2/toGraph.ts";
+import { toMermaid } from "../../ontology/ameliorate-v2/toMermaid.ts";
+import { defaultConfig } from "../../ontology/ameliorate-v2/defaultConfig.ts";
+import { renderedNodeTypes } from "../../ontology/ameliorate-v2/renderedNodeTypes.ts";
+import {
+  features,
+  VIEW,
+  EDGE_CLAIMS,
+  DEFAULT_VIEW,
+  DEFAULT_EDGE_CLAIMS,
+} from "../../ontology/ameliorate-v2/features.ts";
 
 const parsed = parse(source);
 
 export default function Experiment() {
-  const [view, setView] = useState<View>("full");
-  const [display, setDisplay] = useState<EdgeClaims>("implied");
+  const [view, setView] = useState<string>(DEFAULT_VIEW);
+  const [display, setDisplay] = useState<string>(DEFAULT_EDGE_CLAIMS);
   const [direction, setDirection] = useState<LayoutDirection>(defaultConfig.direction);
   const [theme, setTheme] = useState<Theme>("light");
-  const graph = useMemo(() => toGraph(parsed.doc, view, display), [view, display]);
+  const featureState: FeatureState = useMemo(
+    () => ({
+      [VIEW]: { option: view },
+      [EDGE_CLAIMS]: { option: display },
+    }),
+    [view, display],
+  );
+  const graph = useMemo(() => toGraph(parsed.doc, featureState), [featureState]);
   const mermaid = useMemo(
-    () => flowchart(graph, { ...defaultConfig, direction }, tables, theme),
-    [graph, direction, theme],
+    () => toMermaid(parsed.doc, { ...defaultConfig, direction }, featureState, theme),
+    [featureState, direction, theme],
   );
   const anchors = graph.edges.filter((edge) => edge.type === "anchor").length;
 
@@ -38,10 +53,15 @@ export default function Experiment() {
           <select
             className="select select-sm w-auto"
             value={view}
-            onChange={(e) => setView(e.target.value as View)}
+            onChange={(e) => setView(e.target.value)}
           >
-            <option value="full">Full structure</option>
-            <option value="causal">Causal only</option>
+            {features
+              .find((feature) => feature.id === VIEW)!
+              .options.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
           </select>
         </label>
         <label className="flex items-center gap-2 text-sm">
@@ -49,10 +69,15 @@ export default function Experiment() {
           <select
             className="select select-sm w-auto"
             value={display}
-            onChange={(e) => setDisplay(e.target.value as EdgeClaims)}
+            onChange={(e) => setDisplay(e.target.value)}
           >
-            <option value="spelled-out">spelled out</option>
-            <option value="implied">implied</option>
+            {features
+              .find((feature) => feature.id === EDGE_CLAIMS)!
+              .options.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.label}
+                </option>
+              ))}
           </select>
         </label>
         <label className="flex items-center gap-2 text-sm">
@@ -86,7 +111,7 @@ export default function Experiment() {
           layout anchors
         </p>
         <div className="flex flex-wrap gap-3" aria-label="Node types">
-          {nodeTypes.map((type) => (
+          {renderedNodeTypes.map((type) => (
             <span
               key={type.id}
               className="border-l-2 pl-1"

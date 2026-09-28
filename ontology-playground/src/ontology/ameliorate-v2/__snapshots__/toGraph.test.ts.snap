@@ -1,0 +1,379 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`toGraph > projects 'causal' / 'implied' without changing the document 1`] = `
+{
+  "edges": [
+    {
+      "from": "f",
+      "to": "r",
+      "type": "half",
+    },
+    {
+      "from": "r",
+      "to": "p",
+      "type": "relation",
+    },
+    {
+      "from": "note-relation-note",
+      "to": "r",
+      "type": "note",
+    },
+    {
+      "from": "p",
+      "to": "note-about-this-map",
+      "type": "anchor",
+    },
+    {
+      "from": "p",
+      "to": "_score_context",
+      "type": "anchor",
+    },
+  ],
+  "nodes": [
+    {
+      "id": "p",
+      "text": "Pollution
+[-4,2]
+#topic
+Air quality",
+      "type": "concept",
+    },
+    {
+      "id": "f",
+      "text": "Filters
+[-,6]
+#action",
+      "type": "concept",
+    },
+    {
+      "id": "r",
+      "text": "reduces
+[4,-2]",
+      "type": "relation",
+    },
+    {
+      "id": "note-relation-note",
+      "text": "Relation note",
+      "type": "note",
+    },
+    {
+      "id": "note-about-this-map",
+      "text": "About this map",
+      "type": "note",
+    },
+    {
+      "id": "_score_context",
+      "text": "Scores: [alice, bob]",
+      "type": "context",
+    },
+  ],
+}
+`;
+
+exports[`toGraph > projects 'causal' / 'spelled-out' without changing the document 1`] = `
+{
+  "edges": [
+    {
+      "from": "f",
+      "label": "① reduces [4,-2]",
+      "to": "p",
+      "type": "relation",
+    },
+    {
+      "from": "_note_owner_r",
+      "to": "p",
+      "type": "anchor",
+    },
+    {
+      "from": "note-relation-note",
+      "to": "_note_owner_r",
+      "type": "note",
+    },
+    {
+      "from": "p",
+      "to": "note-about-this-map",
+      "type": "anchor",
+    },
+    {
+      "from": "p",
+      "to": "_score_context",
+      "type": "anchor",
+    },
+  ],
+  "nodes": [
+    {
+      "id": "p",
+      "text": "Pollution
+[-4,2]
+#topic
+Air quality",
+      "type": "concept",
+    },
+    {
+      "id": "f",
+      "text": "Filters
+[-,6]
+#action",
+      "type": "concept",
+    },
+    {
+      "id": "_note_owner_r",
+      "text": "① "Filters" reduces "Pollution"
+[4,-2]",
+      "type": "relation",
+    },
+    {
+      "id": "note-relation-note",
+      "text": "Relation note",
+      "type": "note",
+    },
+    {
+      "id": "note-about-this-map",
+      "text": "About this map",
+      "type": "note",
+    },
+    {
+      "id": "_score_context",
+      "text": "Scores: [alice, bob]",
+      "type": "context",
+    },
+  ],
+}
+`;
+
+exports[`toGraph > projects 'full' / 'implied' without changing the document 1`] = `
+{
+  "edges": [
+    {
+      "from": "f",
+      "to": "r",
+      "type": "half",
+    },
+    {
+      "from": "r",
+      "to": "p",
+      "type": "relation",
+    },
+    {
+      "from": "e",
+      "to": "s",
+      "type": "half",
+    },
+    {
+      "from": "s",
+      "to": "r",
+      "type": "relation",
+    },
+    {
+      "from": "p--implied",
+      "to": "p",
+      "type": "anchor",
+    },
+    {
+      "from": "note-claim-note",
+      "to": "r",
+      "type": "note",
+    },
+    {
+      "from": "note-importance-note",
+      "to": "p--implied",
+      "type": "note",
+    },
+    {
+      "from": "note-relation-note",
+      "to": "r",
+      "type": "note",
+    },
+    {
+      "from": "p",
+      "to": "note-about-this-map",
+      "type": "anchor",
+    },
+    {
+      "from": "p",
+      "to": "_score_context",
+      "type": "anchor",
+    },
+  ],
+  "nodes": [
+    {
+      "id": "p",
+      "text": "① Pollution
+[-4,2]
+#topic
+Air quality",
+      "type": "concept",
+    },
+    {
+      "id": "f",
+      "text": "Filters
+[-,6]
+#action",
+      "type": "concept",
+    },
+    {
+      "id": "e",
+      "text": "Filters trap particles
+[5,3]",
+      "type": "claim",
+    },
+    {
+      "id": "p--implied",
+      "text": "① Pollution is important to increase
+[-4,2]",
+      "type": "claim",
+    },
+    {
+      "id": "r",
+      "text": "reduces
+[4,-2]",
+      "type": "relation",
+    },
+    {
+      "id": "s",
+      "text": "supports
+[6,-]",
+      "type": "relation",
+    },
+    {
+      "id": "note-claim-note",
+      "text": "Claim note",
+      "type": "note",
+    },
+    {
+      "id": "note-importance-note",
+      "text": "Importance note",
+      "type": "note",
+    },
+    {
+      "id": "note-relation-note",
+      "text": "Relation note",
+      "type": "note",
+    },
+    {
+      "id": "note-about-this-map",
+      "text": "About this map",
+      "type": "note",
+    },
+    {
+      "id": "_score_context",
+      "text": "Scores: [alice, bob]",
+      "type": "context",
+    },
+  ],
+}
+`;
+
+exports[`toGraph > projects 'full' / 'spelled-out' without changing the document 1`] = `
+{
+  "edges": [
+    {
+      "from": "f",
+      "label": "① reduces [4,-2]",
+      "to": "p",
+      "type": "relation",
+    },
+    {
+      "from": "e",
+      "label": "supports [6,-]",
+      "to": "r--implied",
+      "type": "relation",
+    },
+    {
+      "from": "r--implied",
+      "to": "p",
+      "type": "anchor",
+    },
+    {
+      "from": "p--implied",
+      "to": "p",
+      "type": "anchor",
+    },
+    {
+      "from": "note-claim-note",
+      "to": "r--implied",
+      "type": "note",
+    },
+    {
+      "from": "note-importance-note",
+      "to": "p--implied",
+      "type": "note",
+    },
+    {
+      "from": "note-relation-note",
+      "to": "r--implied",
+      "type": "note",
+    },
+    {
+      "from": "p",
+      "to": "note-about-this-map",
+      "type": "anchor",
+    },
+    {
+      "from": "p",
+      "to": "_score_context",
+      "type": "anchor",
+    },
+  ],
+  "nodes": [
+    {
+      "id": "p",
+      "text": "② Pollution
+[-4,2]
+#topic
+Air quality",
+      "type": "concept",
+    },
+    {
+      "id": "f",
+      "text": "Filters
+[-,6]
+#action",
+      "type": "concept",
+    },
+    {
+      "id": "e",
+      "text": "Filters trap particles
+[5,3]",
+      "type": "claim",
+    },
+    {
+      "id": "r--implied",
+      "text": "① "Filters" reduces "Pollution"
+[4,-2]",
+      "type": "claim",
+    },
+    {
+      "id": "p--implied",
+      "text": "② Pollution is important to increase
+[-4,2]",
+      "type": "claim",
+    },
+    {
+      "id": "note-claim-note",
+      "text": "Claim note",
+      "type": "note",
+    },
+    {
+      "id": "note-importance-note",
+      "text": "Importance note",
+      "type": "note",
+    },
+    {
+      "id": "note-relation-note",
+      "text": "Relation note",
+      "type": "note",
+    },
+    {
+      "id": "note-about-this-map",
+      "text": "About this map",
+      "type": "note",
+    },
+    {
+      "id": "_score_context",
+      "text": "Scores: [alice, bob]",
+      "type": "context",
+    },
+  ],
+}
+`;

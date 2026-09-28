@@ -1,9 +1,7 @@
-import type { EdgeTypeDef, NodeTypeDef, StyleConfig } from "../../ontology/types.ts";
-import { anchorEdgeType } from "../../ontology/anchoring.ts";
-import { noteEdgeType, noteNodeType } from "../../ontology/notes.ts";
-import type { FlowchartTables } from "../../ontology/mermaidFlowchart.ts";
+import type { NodeTypeDef } from "../types.ts";
+import { noteNodeType } from "../notes.ts";
 
-export const nodeTypes: NodeTypeDef[] = [
+export const renderedNodeTypes: NodeTypeDef[] = [
   {
     id: "concept",
     label: "Concept",
@@ -55,21 +53,6 @@ export const nodeTypes: NodeTypeDef[] = [
   },
 ];
 
-const edgeTypes: EdgeTypeDef[] = [
-  { id: "relation", connector: "-->", colorTypeId: "relation" },
-  { id: "half", connector: "---", colorTypeId: "relation" },
-  noteEdgeType,
-  anchorEdgeType,
-];
-
-export const tables: FlowchartTables = {
-  renderedNodeTypesById: Object.fromEntries(nodeTypes.map((type) => [type.id, type])),
-  renderedEdgeTypesById: Object.fromEntries(edgeTypes.map((type) => [type.id, type])),
-  defaultConnector: "-->",
-};
-
-export const defaultConfig: StyleConfig = {
-  direction: "BT",
-  showIcons: true,
-  typeColors: Object.fromEntries(nodeTypes.map((type) => [type.id, type.defaultColor])),
-};
+export const renderedNodeTypesById: Record<string, NodeTypeDef> = Object.fromEntries(
+  renderedNodeTypes.map((type) => [type.id, type]),
+);

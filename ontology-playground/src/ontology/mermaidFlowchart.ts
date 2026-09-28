@@ -138,7 +138,15 @@ export function flowchart(
     // Named so the SVG can be asked which edge it is: mermaid's invented `L_<from>_<to>_<n>` is
     // ambiguous because ids contain `_`. Anchors stay unnamed — nothing looks them up.
     const name = edge.lines?.length ? `e${emitted}` : undefined;
-    if (name && edge.lines) sourceMap.edges[name] = edge.lines;
+    if (from === to) {
+      // Mermaid's Dagre renderer replaces a self-loop with three node-keyed segments;
+      // another loop on that node overwrites them, including an unmapped layout anchor.
+      for (const part of ["1", "mid", "2"]) {
+        const key = `${from}-cyclic-special-${part}`;
+        if (name && edge.lines) sourceMap.edges[key] = edge.lines;
+        else delete sourceMap.edges[key];
+      }
+    } else if (name && edge.lines) sourceMap.edges[name] = edge.lines;
     lines.push(`  ${from} ${name ? `${name}@` : ""}${connector}${label} ${to}`);
     // A colored connector reads the same `StyleConfig` entry its node-type twin does, so the
     // two forms of one concept can't be styled apart. Grouping by the resolved color means two

@@ -226,6 +226,7 @@ export default function App() {
             ontologyLabel={ontology.label}
             placeholder={ontology.placeholder}
             errors={parseResult.errors}
+            warnings={parseResult.warnings}
             onOpenLegend={() => setLegendOpen(true)}
             onOpenMiscConfig={() => setMiscConfigOpen(true)}
             highlightLine={ontology.highlightLine}

@@ -54,8 +54,8 @@ App chrome is Tailwind v4 + daisyUI v5 (theme via `data-theme` on `<html>`). `in
 - `ontology-playground/` — the only app. React + Vite + TypeScript: write a markdown-ish syntax, get a rendered mermaid diagram. Published to GitHub Pages.
 - `ameliorate-v2/` — design docs for a "contested causal map" ontology and an app built on it, plus HTML wireframes of that UX.
 - `site/` — the published site's root `index.html`; it just redirects into the playground.
-- `.github/workflows/deploy.yml` — on pushes to `main` touching `ontology-playground/`, `site/`, or the workflow itself: tests, builds, and assembles `_site/` (playground into a subdirectory, `site/index.html` at root).
-- `.github/workflows/ameliorate-v2-scripts.yml` — on pushes to `main` touching `ameliorate-v2/scripts/` or `examples/`: typecheck, test, lint, format:check. Nothing under those directories is deployed, which is why it isn't part of the deploy. Nothing runs on a PR, in either package.
+- `.github/workflows/deploy.yml` — on pushes to `main` touching `ontology-playground/`, `site/`, the wireframes, `ameliorate-v2/examples/build-a-wall.txt`, or the workflow itself: tests, builds, and assembles `_site/` (playground and wireframes in subdirectories, `site/index.html` at root). The playground bundles the canonical build-a-wall text.
+- `.github/workflows/ameliorate-v2-scripts.yml` — on pushes to `main` touching `ameliorate-v2/scripts/` or `examples/`: typecheck, test, lint, format:check. The scripts are not deployed. Nothing runs on a PR, in either package.
 
 ## Don't start web servers yourself
 

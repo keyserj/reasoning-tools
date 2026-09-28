@@ -5,6 +5,7 @@ on:
     branches: [main]
     paths:
       - "ontology-playground/**"
+      - "ameliorate-v2/examples/build-a-wall.txt"
       - "ameliorate-v2/wireframe/**"
       - "site/**"
       - ".github/workflows/deploy.yml"

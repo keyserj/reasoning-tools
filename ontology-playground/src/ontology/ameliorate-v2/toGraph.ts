@@ -14,7 +14,7 @@ import {
 } from "./features.ts";
 
 // A relation and its implied claim can share one box; the parsed entities keep their identities.
-// The rendering choices are described in ../../../ai-designs/add-ameliorate-v2.md.
+// The rendering choices are described in ./rendering.md.
 
 const CAUSAL_TYPES = new Set(["causes", "reduces", "impedes"]);
 const SIDE_MAX = 70;

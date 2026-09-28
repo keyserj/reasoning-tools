@@ -86,6 +86,7 @@ export interface ParseError {
 export interface ParseResult {
   doc: unknown;
   errors: ParseError[];
+  warnings?: ParseError[];
 }
 
 export const LAYOUT_DIRECTIONS = ["TB", "BT", "LR", "RL"] as const;
@@ -281,7 +282,7 @@ export interface OntologyExample {
  */
 export function defineOntology<Doc>(
   spec: Omit<Ontology, "parse" | "toMermaid"> & {
-    parse: (text: string) => { doc: Doc; errors: ParseError[] };
+    parse: (text: string) => { doc: Doc; errors: ParseError[]; warnings?: ParseError[] };
     toMermaid: (
       doc: Doc,
       config: StyleConfig,

@@ -7,14 +7,25 @@ on:
   push:
     branches: [main]
     paths:
-      - "ameliorate-v2/scripts/**"
-      - "ameliorate-v2/examples/**"
-      - "ameliorate-v2/package.json"
+      - ".github/workflows/ameliorate-v2-scripts.yml"
+      - "ameliorate-v2/.oxlintrc.json"
       - "ameliorate-v2/package-lock.json"
+      - "ameliorate-v2/package.json"
       - "ameliorate-v2/tsconfig.json"
       - "ameliorate-v2/vitest.config.ts"
-      - "ameliorate-v2/.oxlintrc.json"
-      - ".github/workflows/ameliorate-v2-scripts.yml"
+      - "ameliorate-v2/examples/**"
+      - "ameliorate-v2/scripts/**"
+      # The scripts reach into the playground for parser/model code instead of a shared package.
+      # Changes to these dependencies must run the scripts' checks.
+      - "ontology-playground/src/ontology/ids.ts"
+      - "ontology-playground/src/ontology/types.ts"
+      - "ontology-playground/src/ontology/ameliorate-v2/diagnostics.ts"
+      - "ontology-playground/src/ontology/ameliorate-v2/ids.ts"
+      - "ontology-playground/src/ontology/ameliorate-v2/markers.ts"
+      - "ontology-playground/src/ontology/ameliorate-v2/model.ts"
+      - "ontology-playground/src/ontology/ameliorate-v2/parse.ts"
+      - "ontology-playground/src/ontology/ameliorate-v2/scores.ts"
+      - "ontology-playground/src/ontology/ameliorate-v2/validate.ts"
   workflow_dispatch:
 
 permissions:

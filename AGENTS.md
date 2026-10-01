@@ -55,7 +55,7 @@ App chrome is Tailwind v4 + daisyUI v5 (theme via `data-theme` on `<html>`). `in
 - `ameliorate-v2/` — design docs for a "contested causal map" ontology and an app built on it, plus HTML wireframes of that UX.
 - `site/` — the published site's root `index.html`; it just redirects into the playground.
 - `.github/workflows/deploy.yml` — on pushes to `main` touching `ontology-playground/`, `site/`, the wireframes, `ameliorate-v2/examples/build-a-wall.txt`, or the workflow itself: tests, builds, and assembles `_site/` (playground and wireframes in subdirectories, `site/index.html` at root). The playground bundles the canonical build-a-wall text.
-- `.github/workflows/ameliorate-v2-scripts.yml` — on pushes to `main` touching `ameliorate-v2/scripts/` or `examples/`: typecheck, test, lint, format:check. The scripts are not deployed. Nothing runs on a PR, in either package.
+- `.github/workflows/ameliorate-v2-scripts.yml` — on pushes to `main` touching `ameliorate-v2/scripts/`, `examples/`, or the parser/model dependencies in the playground: typecheck, test, lint, format:check. The scripts are not deployed. Nothing runs on a PR, in either package.
 
 ## Don't start web servers yourself
 

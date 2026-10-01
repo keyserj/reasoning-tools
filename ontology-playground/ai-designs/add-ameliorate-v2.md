@@ -56,7 +56,7 @@ Keep [build-a-wall.txt](../../ameliorate-v2/examples/build-a-wall.txt) at its cu
 
 Add `../ameliorate-v2/examples` to Vite's `server.fs.allow`, alongside `searchForWorkspaceRoot(".")` for the playground root. Vite resolves the relative entry against its app root; run commands from the playground as documented. Preserve the existing allowed-host configuration. The external raw import needs this explicit allowance in development; a successful production build does not verify dev-server access. Verify loading and updates after an edit through `npm run dev`.
 
-Add the external build-a-wall text file to the deployment workflow's paths so an example-only edit rebuilds the app. Keep the scripts workflow as it is; do not add cross-package CI triggers or a blanket requirement to run both packages for every playground change. The relocation and parser-metadata steps verify the remaining scripts explicitly because those changes affect their imports or input model.
+Add the external build-a-wall text file to the deployment workflow's paths so an example-only edit rebuilds the app. The scripts workflow watches the relocated parser/model files and their shared ID/type dependencies, so changes to code consumed by both packages run the scripts' checks too. Rendering-only playground changes do not trigger the scripts workflow.
 
 ## Syntax, model, and diagnostics
 

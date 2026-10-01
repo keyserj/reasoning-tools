@@ -1,13 +1,13 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`toMermaid > emits 'causal' / 'implied' 1`] = `
+exports[`mermaidExport > emits 'causal' / 'implied' 1`] = `
 "flowchart BT
   w("🔎 Wall<br/>#action"):::concept
   i("🔎 Immigration"):::concept
   r(["⛔ reduces<br/>[3,-5]"]):::negative-relation
   _score_context["📋 Scores: [alice, bob]"]:::context
-  w e0@--- r
-  r e1@--> i
+  w --- r
+  r --> i
   i ~~~ _score_context
   classDef concept fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef question fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
@@ -21,12 +21,12 @@ exports[`toMermaid > emits 'causal' / 'implied' 1`] = `
   linkStyle 0,1 stroke:#b2182b,stroke-width:1.5px"
 `;
 
-exports[`toMermaid > emits 'causal' / 'spelled-out' 1`] = `
+exports[`mermaidExport > emits 'causal' / 'spelled-out' 1`] = `
 "flowchart BT
   w("🔎 Wall<br/>#action"):::concept
   i("🔎 Immigration"):::concept
   _score_context["📋 Scores: [alice, bob]"]:::context
-  w e0@-->|"⛔ reduces [3,-5]"| i
+  w -->|"⛔ reduces [3,-5]"| i
   i ~~~ _score_context
   classDef concept fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef question fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
@@ -40,7 +40,7 @@ exports[`toMermaid > emits 'causal' / 'spelled-out' 1`] = `
   linkStyle 0 stroke:#b2182b,stroke-width:1.5px"
 `;
 
-exports[`toMermaid > emits 'full' / 'implied' 1`] = `
+exports[`mermaidExport > emits 'full' / 'implied' 1`] = `
 "flowchart BT
   w("🔎 Wall<br/>#action"):::concept
   i("🔎 Immigration"):::concept
@@ -49,11 +49,11 @@ exports[`toMermaid > emits 'full' / 'implied' 1`] = `
   s(["✅ supports<br/>[8,-]"]):::positive-relation
   note_note[/"📝 Note"/]:::note
   _score_context["📋 Scores: [alice, bob]"]:::context
-  w e0@--- r
-  r e1@--> i
-  e e2@--- s
-  s e3@--> r
-  note_note e4@-.-> e
+  w --- r
+  r --> i
+  e --- s
+  s --> r
+  note_note -.-> e
   i ~~~ _score_context
   classDef concept fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef question fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px
@@ -68,7 +68,7 @@ exports[`toMermaid > emits 'full' / 'implied' 1`] = `
   linkStyle 2,3 stroke:#2166ac,stroke-width:1.5px"
 `;
 
-exports[`toMermaid > emits 'full' / 'spelled-out' 1`] = `
+exports[`mermaidExport > emits 'full' / 'spelled-out' 1`] = `
 "flowchart BT
   w("🔎 Wall<br/>#action"):::concept
   i("🔎 Immigration"):::concept
@@ -76,10 +76,10 @@ exports[`toMermaid > emits 'full' / 'spelled-out' 1`] = `
   r__implied["💬 ① &quot;Wall&quot; reduces &quot;Immigration&quot;<br/>[3,-5]"]:::claim
   note_note[/"📝 Note"/]:::note
   _score_context["📋 Scores: [alice, bob]"]:::context
-  w e0@-->|"⛔ ① reduces [3,-5]"| i
-  e e1@-->|"✅ supports [8,-]"| r__implied
+  w -->|"⛔ ① reduces [3,-5]"| i
+  e -->|"✅ supports [8,-]"| r__implied
   r__implied ~~~ i
-  note_note e3@-.-> e
+  note_note -.-> e
   i ~~~ _score_context
   classDef concept fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef question fill:#f2f0ff,stroke:#7c3aed,color:#3a1477,stroke-width:1.5px

@@ -8,7 +8,7 @@ import { paramApplies } from "../ontology/features.ts";
 // feature's options get read and picked, plus the shell's own Style button.
 //
 // Nothing here knows what a feature *means* — an ontology declares the table (see
-// arg-map-truth-and-relevance/features.ts) and only its `toMermaid` gives an option effect.
+// arg-map-truth-and-relevance/features.ts) and only its `toGraph` gives an option effect.
 // Style is handed in by the shell rather than declared as a `FeatureDef`, which is what keeps
 // that true: an ontology can't reach it, and the features path never learns a second meaning.
 //

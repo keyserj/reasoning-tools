@@ -7,7 +7,7 @@ import { toGraph } from "./toGraph.ts";
 const graph = (source: string) => withoutLines(toGraph(parse(source).doc));
 
 // The link names are the only thing this file decides, and mermaid can't show them: Arg map: basic gives
-// every link the same `-->` and no color, so toMermaid.test.ts would pass either way.
+// every link the same `-->` and no color, so ./mermaidExport.test.ts would pass either way.
 
 describe("toGraph", () => {
   it("names each edge after the child it runs from", () => {

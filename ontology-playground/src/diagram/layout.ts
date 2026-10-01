@@ -1,11 +1,12 @@
-import dagre, { type EdgeLabel, type GraphLabel, type NodeLabel } from "@dagrejs/dagre";
+// dagre 2, not 3: 3.1 routes two edges out of one box across each other, and lands self-loops
+// far from their box.
+import dagre, { type GraphLabel } from "@dagrejs/dagre";
 import type {
   Connector,
-  EdgeTypeDef,
   NodeShape,
-  NodeTypeDef,
   RenderGraph,
   StyleConfig,
+  TypeTables,
 } from "../ontology/types.ts";
 import { type Point, type Size, intersectOutline, outlineOf, sizeOf } from "./shapes.ts";
 
@@ -14,11 +15,6 @@ import { type Point, type Size, intersectOutline, outlineOf, sizeOf } from "./sh
 
 /** Label text → rendered size, in the order asked. */
 export type MeasureLabels = (texts: string[]) => Size[];
-
-export interface TypeTables {
-  renderedNodeTypes: NodeTypeDef[];
-  renderedEdgeTypes: EdgeTypeDef[];
-}
 
 export interface Label {
   text: string;
@@ -42,11 +38,13 @@ export interface LaidOutNode {
   label: Label;
 }
 
+type DrawnConnector = Exclude<Connector, "invisible">;
+
 export interface LaidOutEdge {
   from: string;
   to: string;
   type: string;
-  connector: Exclude<Connector, "invisible">;
+  connector: DrawnConnector;
   /** first and last on the outlines of the boxes the edge joins */
   points: Point[];
   path: string;
@@ -60,7 +58,9 @@ export type DiagramLayout =
       empty: false;
       nodes: LaidOutNode[];
       edges: LaidOutEdge[];
-      viewBox: { x: number; y: number; width: number; height: number };
+      /** The picture spans (0, 0) to here, margin included. */
+      width: number;
+      height: number;
       /**
        * Changes exactly when the picture's geometry or text does: what a refit keys on. Colors,
        * the theme and source lines stay out, so a recolor or an edit above the argument keeps
@@ -128,24 +128,6 @@ function knot(points: Point[], i: number): Point {
 
 const distance = (a: Point, b: Point) => Math.hypot(a.x - b.x, a.y - b.y);
 
-/**
- * A loop out to the slot dagre reserves beside the node and back, as dagre 0.8 drew it: dagre 3's
- * own self-loop points land far from the node.
- */
-function selfLoopPoints(center: Point, size: Size, slot: Point): Point[] {
-  let d = distance(center, slot);
-  let u = d === 0 ? { x: 1, y: 0 } : { x: (slot.x - center.x) / d, y: (slot.y - center.y) / d };
-  if (d === 0) d = size.width / 2 + NODE_SEP / 2;
-  // `v` runs along the rank axis, so the loop leaves and returns through the node's sides.
-  const v = { x: -u.y, y: u.x };
-  const e = Math.abs(v.x) * (size.width / 2) + Math.abs(v.y) * (size.height / 2);
-  const at = (along: number, across: number) => ({
-    x: center.x + along * d * u.x + across * e * v.x,
-    y: center.y + along * d * u.y + across * e * v.y,
-  });
-  return [at(2 / 3, -1), at(5 / 6, -1), at(1, 0), at(5 / 6, 1), at(2 / 3, 1)];
-}
-
 export function layoutDiagram(
   graph: RenderGraph,
   types: TypeTables,
@@ -177,7 +159,11 @@ export function layoutDiagram(
   let nextEdgeSize = nodes.length;
   const edgeSizes = edgeTexts.map((text) => (text === null ? null : sizes[nextEdgeSize++]));
 
-  const g = new dagre.graphlib.Graph<GraphLabel, NodeLabel, EdgeLabel>({ multigraph: true });
+  const g = new dagre.graphlib.Graph<
+    GraphLabel,
+    Size & Partial<Point>,
+    { labelpos: "c"; points?: Point[]; x?: number; y?: number } & Partial<Size>
+  >({ multigraph: true });
   g.setGraph({
     rankdir: config.direction,
     nodesep: NODE_SEP,
@@ -188,6 +174,7 @@ export function layoutDiagram(
 
   // Insertion order is dagre's initial ordering, which several `toGraph`s lean on to say
   // where a box lands relative to its siblings.
+  const index = new Map(nodes.map((node, i) => [node.id, i]));
   const shapes = nodes.map((node, i) => {
     const shape = nodeTypes.get(node.type)?.shape ?? "rect";
     const outline = outlineOf(shape, sizes[i]);
@@ -210,30 +197,21 @@ export function layoutDiagram(
 
   dagre.layout(g);
 
-  const center = nodes.map((node) => g.node(keyOf.get(node.id)!) as Point);
+  const center = nodes.map((node) => {
+    const { x, y } = g.node(keyOf.get(node.id)!);
+    return { x: x!, y: y! };
+  });
   const placed = shapes.map(({ outline }, i) =>
     outline.points.map((p) => ({ x: p.x + center[i].x, y: p.y + center[i].y })),
   );
 
-  const laidOutNodes: LaidOutNode[] = nodes.map((node, i) => {
-    const { x, y } = center[i];
-    const { shape, outline } = shapes[i];
-    return {
-      id: node.id,
-      type: node.type,
-      shape,
-      dashed: node.dashed === true,
-      lines: node.lines ?? [],
-      path: polygonPath(placed[i]),
-      bars: outline.bars
-        .map(([a, b]) => `M${round(a.x + x)},${round(a.y + y)}L${round(b.x + x)},${round(b.y + y)}`)
-        .join(""),
-      label: { text: nodeTexts[i], x, y, ...sizes[i] },
-    };
-  });
-
-  const index = new Map(nodes.map((node, i) => [node.id, i]));
-  const laidOutEdges: LaidOutEdge[] = [];
+  const routes: {
+    edge: (typeof edges)[number];
+    connector: DrawnConnector;
+    points: Point[];
+    drawn: Point[];
+    label?: Label;
+  }[] = [];
   edges.forEach((edge, i) => {
     const connector = edgeTypes.get(edge.type)?.connector ?? "arrow";
     if (connector === "invisible") return;
@@ -243,20 +221,17 @@ export function layoutDiagram(
     const slot =
       routed.x === undefined || routed.y === undefined ? null : { x: routed.x, y: routed.y };
 
-    const points =
-      from === to
-        ? selfLoopPoints(center[from], shapes[from].size, slot ?? center[from])
-        : routed.points!.map((p) => ({ x: p.x, y: p.y }));
+    const points = routed.points!.map((p) => ({ x: p.x, y: p.y }));
     // dagre ends an edge on the node's bounding box; ours ends on the outline, toward the
-    // next routing point in.
+    // next routing point in. A self-loop's ends are trimmed the same way.
     points[0] = intersectOutline(center[from], placed[from], points[1]);
     const last = points.length - 1;
     points[last] = intersectOutline(center[to], placed[to], points[last - 1]);
 
     const drawn = points.slice();
     const tail = distance(points[last], points[last - 1]);
-    if (connector !== "line" && tail > 2 * ARROW_INSET) {
-      const k = ARROW_INSET / tail;
+    if (connector !== "line" && tail > 0) {
+      const k = Math.min(ARROW_INSET, tail / 2) / tail;
       drawn[last] = {
         x: points[last].x + (points[last - 1].x - points[last].x) * k,
         y: points[last].y + (points[last - 1].y - points[last].y) * k,
@@ -280,40 +255,12 @@ export function layoutDiagram(
       }
       label = { text: edgeTexts[i]!, ...at, ...size };
     }
-
-    laidOutEdges.push({
-      from: edge.from,
-      to: edge.to,
-      type: edge.type,
-      connector,
-      points,
-      path: basisPath(drawn),
-      ...(label ? { label } : {}),
-      lines: edge.lines ?? [],
-    });
+    routes.push({ edge, connector, points, drawn, label });
   });
 
-  return {
-    empty: false,
-    nodes: laidOutNodes,
-    edges: laidOutEdges,
-    viewBox: bounds(shapes, center, laidOutEdges),
-    key: JSON.stringify([
-      laidOutNodes.map((n) => [n.shape, n.path, n.label.text, n.dashed]),
-      laidOutEdges.map((e) => [e.connector, e.path, e.label?.text, e.label?.x, e.label?.y]),
-    ]),
-  };
-}
-
-/**
- * Everything drawn, plus the margin. Not dagre's own size, which leaves out edge points: a
- * self-loop reaches past it.
- */
-function bounds(
-  shapes: { size: Size }[],
-  center: Point[],
-  edges: LaidOutEdge[],
-): { x: number; y: number; width: number; height: number } {
+  // dagre's own bounds leave out edge points, which a self-loop reaches past. Everything moves so
+  // the picture starts at the origin: svg-pan-zoom centers a viewBox that doesn't by its offset
+  // twice over.
   let minX = Infinity;
   let minY = Infinity;
   let maxX = -Infinity;
@@ -324,19 +271,52 @@ function bounds(
     minY = Math.min(minY, y - halfHeight);
     maxY = Math.max(maxY, y + halfHeight);
   };
-  shapes.forEach(({ size }, i) => {
-    include(center[i].x, center[i].y, size.width / 2, size.height / 2);
-  });
-  for (const edge of edges) {
+  shapes.forEach(({ size }, i) =>
+    include(center[i].x, center[i].y, size.width / 2, size.height / 2),
+  );
+  for (const { points, label } of routes) {
     // A B-spline stays inside the hull of its points.
-    for (const p of edge.points) include(p.x, p.y);
-    if (edge.label)
-      include(edge.label.x, edge.label.y, edge.label.width / 2, edge.label.height / 2);
+    for (const p of points) include(p.x, p.y);
+    if (label) include(label.x, label.y, label.width / 2, label.height / 2);
   }
+  const shift = (p: Point) => ({ x: p.x - minX + MARGIN, y: p.y - minY + MARGIN });
+
+  const laidOutNodes: LaidOutNode[] = nodes.map((node, i) => {
+    const { x, y } = shift(center[i]);
+    return {
+      id: node.id,
+      type: node.type,
+      shape: shapes[i].shape,
+      dashed: node.dashed === true,
+      lines: node.lines ?? [],
+      path: polygonPath(placed[i].map(shift)),
+      bars: shapes[i].outline.bars
+        .map(([a, b]) => `M${round(a.x + x)},${round(a.y + y)}L${round(b.x + x)},${round(b.y + y)}`)
+        .join(""),
+      label: { text: nodeTexts[i], x, y, ...sizes[i] },
+    };
+  });
+
+  const laidOutEdges: LaidOutEdge[] = routes.map(({ edge, connector, points, drawn, label }) => ({
+    from: edge.from,
+    to: edge.to,
+    type: edge.type,
+    connector,
+    points: points.map(shift),
+    path: basisPath(drawn.map(shift)),
+    ...(label ? { label: { ...label, ...shift(label) } } : {}),
+    lines: edge.lines ?? [],
+  }));
+
   return {
-    x: minX - MARGIN,
-    y: minY - MARGIN,
+    empty: false,
+    nodes: laidOutNodes,
+    edges: laidOutEdges,
     width: maxX - minX + 2 * MARGIN,
     height: maxY - minY + 2 * MARGIN,
+    key: JSON.stringify([
+      laidOutNodes.map((n) => [n.shape, n.path, n.label.text, n.dashed]),
+      laidOutEdges.map((e) => [e.connector, e.path, e.label?.text, e.label?.x, e.label?.y]),
+    ]),
   };
 }

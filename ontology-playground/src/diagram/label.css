@@ -1,22 +1,35 @@
 /* A diagram label, both where it's drawn and where ./measure.ts sizes it off-screen, so not scoped
-   under `.diagram-pane`. Every property that could change its size is set here rather than
-   inherited, since the two places inherit different things. Mermaid's label typography: its font
-   at 16px, line-height 1.5, wrapping at 200px. */
+   under `.diagram-pane`. The two places inherit different things, so whatever could change the
+   label's size is pinned here rather than inherited, and its width doesn't depend on its
+   container's. Mermaid's label typography: its font at 16px, line-height 1.5, wrapping at 200px. */
 @layer components {
   .diagram-label {
-    display: inline-block;
+    display: block;
+    width: max-content;
     max-width: 200px;
     font-family: "trebuchet ms", verdana, arial, sans-serif;
     font-size: 16px;
     font-weight: normal;
     font-style: normal;
+    font-variant: normal;
+    font-stretch: normal;
+    font-kerning: auto;
+    font-feature-settings: normal;
+    font-variation-settings: normal;
     line-height: 1.5;
     letter-spacing: normal;
     word-spacing: normal;
     text-transform: none;
+    text-indent: 0;
     text-align: center;
-    /* The node text's own `\n`s break lines; past 200px, so does the box. */
-    white-space: pre-line;
+    text-rendering: auto;
+    direction: ltr;
+    writing-mode: horizontal-tb;
+    /* The node text's own `\n`s break lines; past 200px, so does the box, wrapping where
+       mermaid's labels did. */
+    white-space: break-spaces;
+    word-break: normal;
     overflow-wrap: anywhere;
+    hyphens: manual;
   }
 }

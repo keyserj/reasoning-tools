@@ -6,7 +6,7 @@ import { toGraph } from "./toGraph.ts";
 // A box per usage, case by case. A score and a stance belong to one usage of a claim, so a `$id`
 // usage gets a copy of the box rather than another connector into one — see ./rendering.md. A
 // mermaid snapshot records what happened without saying what was meant, which is why these are
-// separate from ./toMermaid.test.ts.
+// separate from ./mermaidExport.test.ts.
 
 // Shape only — the lines every box and connector also carries have their own block at the bottom.
 const graph = (source: string, showIcons = true) =>

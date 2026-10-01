@@ -7,7 +7,7 @@
 // own vocabulary (IBIS's question/idea/pro/con/note, a causal map's concept/action/
 // criterion + causes/reduces/guides edges) via the tables below.
 //
-// `parse` produces the ontology's *own* semantic model, and `toMermaid` flattens it into a
+// `parse` produces the ontology's *own* semantic model, and `toGraph` flattens it into a
 // `RenderGraph` on the way out — see arg-map-truth-and-relevance/toGraph.ts, which turns edges
 // into nodes because an edge there can be argued about like any other claim. Which layer may
 // know what, and why the flattening sits on the render side, is ./pipeline.md's.
@@ -50,23 +50,9 @@ export interface RenderEdge {
  */
 export type SourceLines = Record<string, number[]>;
 
-/** Drawn element → source lines, keyed by the id mermaid gives it in the SVG */
-export interface SourceMap {
-  /** mermaid node id — the `<id>` in the SVG's `flowchart-<id>-<n>` */
-  nodes: Record<string, number[]>;
-  /** the path's `data-id`; a self-loop has one key per rendered segment */
-  edges: Record<string, number[]>;
-}
-
-/** The drawn document: mermaid to render, plus the way back from it to the text. */
-export interface MermaidOutput {
-  text: string;
-  sourceMap: SourceMap;
-}
-
 /**
- * The renderer's projection of an ontology model. It holds only what `flowchart` needs to emit
- * Mermaid; an ontology's semantic model may preserve richer meaning before it reaches here.
+ * The renderer's projection of an ontology model. It holds only what the diagram needs to draw;
+ * an ontology's semantic model may preserve richer meaning before it reaches here.
  */
 export interface RenderGraph {
   nodes: RenderNode[];
@@ -81,7 +67,7 @@ export interface ParseError {
 
 /**
  * `doc` is the ontology's own model, opaque to the shell: it is only ever handed back to the
- * ontology that produced it (as `toMermaid`'s first argument), never inspected here.
+ * ontology that produced it (as `toGraph`'s first argument), never inspected here.
  */
 export interface ParseResult {
   doc: unknown;
@@ -196,7 +182,7 @@ export interface HighlightToken {
 //
 // A feature is a switchable rendering lens an ontology declares and the shell renders
 // generically (see components/RenderingStrip.tsx): the shell knows nothing beyond these
-// shapes, and only `toMermaid` gives an option meaning. That's what lets an ontology pose
+// shapes, and only `toGraph` gives an option meaning. That's what lets an ontology pose
 // a rendering question as something you can answer by looking, rather than by rebuilding.
 //
 // Deliberately narrow for now — one option per feature, chosen from a fixed list — but the
@@ -240,18 +226,7 @@ export interface Ontology {
   id: string;
   label: string;
   parse: (text: string) => ParseResult;
-  /**
-   * `theme` decides how each type's one configured color becomes a fill, a border and a text
-   * color (./typeColors.ts). It is an argument rather than a `StyleConfig` field because it
-   * isn't part of the document: it's a local preference, and a document that carried one would
-   * impose the sender's theme on everyone they share a link with.
-   */
-  toMermaid: (
-    doc: unknown,
-    config: StyleConfig,
-    features: FeatureState,
-    theme: Theme,
-  ) => MermaidOutput;
+  toGraph: (doc: unknown, config: StyleConfig, features: FeatureState) => RenderGraph;
   /**
    * Tokenize one line for the editor's highlight overlay. Line-local by contract: no state
    * carries between lines, since the overlay re-tokenizes only what changed. The tokens' texts
@@ -283,22 +258,20 @@ export interface OntologyExample {
   source: string;
 }
 
+/** The type tables a drawing reads: what shape a box takes, what a connector looks like. */
+export type TypeTables = Pick<Ontology, "renderedNodeTypes" | "renderedEdgeTypes">;
+
 /**
- * An ontology's own `parse`/`toMermaid` speak in its own model; the shell's `Ontology` says
+ * An ontology's own `parse`/`toGraph` speak in its own model; the shell's `Ontology` says
  * `unknown`. This is the one place that gap is bridged, so every ontology module stays
  * cast-free. It is sound because the shell never inspects a doc — it hands the value from
- * `parse` straight back to the same ontology's `toMermaid`, which is the only function that
+ * `parse` straight back to the same ontology's `toGraph`, which is the only function that
  * ever sees it.
  */
 export function defineOntology<Doc>(
-  spec: Omit<Ontology, "parse" | "toMermaid"> & {
+  spec: Omit<Ontology, "parse" | "toGraph"> & {
     parse: (text: string) => { doc: Doc; errors: ParseError[]; warnings?: ParseError[] };
-    toMermaid: (
-      doc: Doc,
-      config: StyleConfig,
-      features: FeatureState,
-      theme: Theme,
-    ) => MermaidOutput;
+    toGraph: (doc: Doc, config: StyleConfig, features: FeatureState) => RenderGraph;
   },
 ): Ontology {
   return spec as Ontology;

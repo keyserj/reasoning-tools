@@ -1,6 +1,6 @@
 import { defineOntology } from "../types.ts";
 import { parse } from "./parse.ts";
-import { toMermaid } from "./toMermaid.ts";
+import { toGraph } from "./toGraph.ts";
 import type { IbisDoc } from "./model.ts";
 import { highlightLine } from "./highlight.ts";
 import { legend } from "./legend.ts";
@@ -18,7 +18,7 @@ export const ibis = defineOntology<IbisDoc>({
   id: "ibis",
   label: "IBIS",
   parse,
-  toMermaid,
+  toGraph,
   highlightLine,
   legend,
   legendNote,

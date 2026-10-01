@@ -1,17 +1,14 @@
-import { type PointerEvent, useCallback, useEffect, useRef, useState } from "react";
+import { type PointerEvent, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import svgPanZoom from "svg-pan-zoom";
-import type { MermaidOutput, Theme } from "../ontology/types.ts";
-import { renderMermaid } from "../mermaidClient.ts";
-import {
-  ACTIVE_CLASS,
-  type LinkedElement,
-  lineAtTarget,
-  linkDrawnElements,
-  unlinkDrawnElements,
-} from "./diagramTargets.ts";
+import type { RenderGraph, StyleConfig, Theme, TypeTables } from "../ontology/types.ts";
+import { type DiagramLayout, layoutDiagram } from "../diagram/layout.ts";
+import { measureLabels } from "../diagram/measure.ts";
+import Diagram from "./Diagram.tsx";
 
 interface Props {
-  mermaid: MermaidOutput;
+  graph: RenderGraph;
+  types: TypeTables;
+  config: StyleConfig;
   theme: Theme;
   activeLine: number | null;
   onPickLine: (line: number | null) => void;
@@ -26,7 +23,7 @@ const TAP_SLOP = 6;
 const MIN_ZOOM = 0.2;
 const MAX_ZOOM = 20;
 
-/** Uncapped, fitting a one-box map blows it up to fill the pane. 1 is mermaid's own size. */
+/** Uncapped, fitting a one-box map blows it up to fill the pane. 1 is the layout's own size. */
 const MAX_FIT_SCALE = 1.5;
 
 /** The fit, capped, as a zoom relative to svg-pan-zoom's uncapped one. */
@@ -46,94 +43,72 @@ function fitToPane(panZoom: PanZoom) {
   panZoom.center();
 }
 
-export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: Props) {
+type Attempt = { layout: DiagramLayout; error: null } | { layout: null; error: string };
+
+export default function DiagramPane({
+  graph,
+  types,
+  config,
+  theme,
+  activeLine,
+  onPickLine,
+}: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const svgRef = useRef<SVGSVGElement>(null);
+  const viewportRef = useRef<SVGGElement>(null);
   const panZoomRef = useRef<PanZoom | null>(null);
-  const linkedRef = useRef<LinkedElement[]>([]);
   const pressedAt = useRef<{ x: number; y: number } | null>(null);
-  const activeLineRef = useRef(activeLine);
-  const drawn = useRef<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  /** The picture key svg-pan-zoom was last fitted to. */
+  const fittedKey = useRef<string | null>(null);
 
-  const markActive = useCallback((line: number | null) => {
-    for (const { el, lines } of linkedRef.current) {
-      el.classList.toggle(ACTIVE_CLASS, line !== null && lines.includes(line));
+  // Accepted compromise: `measureLabels` reads the DOM, which a render isn't supposed to do. It is
+  // idempotent and cached, so StrictMode's double render and a render React throws away both cost
+  // nothing. Measuring in a layout effect and storing the result in state would keep the render
+  // pure at the price of a second render pass every time.
+  const attempt = useMemo((): Attempt => {
+    try {
+      return { layout: layoutDiagram(graph, types, config, measureLabels), error: null };
+    } catch (err) {
+      return { layout: null, error: err instanceof Error ? err.message : String(err) };
     }
-  }, []);
+  }, [graph, types, config]);
 
+  // A layout that throws is this app's bug, not the document's, so the last good picture stays up.
+  const lastGood = useRef<DiagramLayout | null>(null);
   useEffect(() => {
-    let cancelled = false;
+    if (attempt.layout) lastGood.current = attempt.layout;
+  }, [attempt]);
+  const layout = attempt.layout ?? lastGood.current;
+  const picture = layout && !layout.empty ? layout : null;
 
-    const destroyPanZoom = () => {
-      if (panZoomRef.current) {
-        panZoomRef.current.destroy();
-        panZoomRef.current = null;
-      }
-    };
+  // Refit when the picture's structure changes, and only then: a recolor, the theme or a caret
+  // move keeps the reader's pan and zoom. svg-pan-zoom folds the viewBox into its own transform
+  // and deletes the attribute, so it's written here on every refit rather than left to React,
+  // which wouldn't restore a value it thinks is unchanged.
+  useLayoutEffect(() => {
+    const svg = svgRef.current;
+    const viewport = viewportRef.current;
+    if (!svg || !viewport) return;
+    const key = picture?.key ?? null;
+    if (key === fittedKey.current) return;
+    fittedKey.current = key;
+    panZoomRef.current?.destroy();
+    panZoomRef.current = null;
+    if (!picture) return;
 
-    // Same picture (an edit inside a comment, say) keeps pan/zoom; the map can still have moved,
-    // so retag.
-    const key = `${theme}\u0000${mermaid.text}`;
-    if (key === drawn.current) {
-      const svg = containerRef.current?.querySelector("svg");
-      if (svg) {
-        linkedRef.current = linkDrawnElements(svg, mermaid.sourceMap);
-        markActive(activeLineRef.current);
-      }
-      return;
-    }
-
-    void (async () => {
-      const result = await renderMermaid(mermaid.text, theme);
-      const container = containerRef.current;
-      if (cancelled || !container) return;
-
-      destroyPanZoom();
-      linkedRef.current = [];
-
-      if (!result.ok) {
-        // Last good picture stays up, but its lines have moved, so it stops being clickable.
-        unlinkDrawnElements(container);
-        drawn.current = null;
-        setError(result.error);
-        return;
-      }
-
-      setError(null);
-      container.innerHTML = result.svg;
-      drawn.current = key;
-      const svg = container.querySelector("svg");
-      if (svg) {
-        // Closed-over map, not a later prop: the render is awaited, so a newer map can already
-        // describe a different SVG.
-        linkedRef.current = linkDrawnElements(svg, mermaid.sourceMap);
-        markActive(activeLineRef.current);
-        svg.setAttribute("width", "100%");
-        svg.setAttribute("height", "100%");
-        svg.style.maxWidth = "none";
-        const panZoom = svgPanZoom(svg, {
-          zoomEnabled: true,
-          controlIconsEnabled: false,
-          fit: true,
-          center: true,
-          dblClickZoomEnabled: false,
-        });
-        syncZoomLimits(panZoom);
-        fitToPane(panZoom);
-        panZoomRef.current = panZoom;
-      }
-    })();
-
-    return () => {
-      cancelled = true;
-    };
-  }, [mermaid, theme, markActive]);
-
-  // Don't rebuild the SVG on a caret move: that would throw away pan/zoom.
-  useEffect(() => {
-    activeLineRef.current = activeLine;
-    markActive(activeLine);
-  }, [activeLine, markActive]);
+    svg.setAttribute("viewBox", `0 0 ${picture.width} ${picture.height}`);
+    const panZoom = svgPanZoom(svg, {
+      viewportSelector: viewport,
+      zoomEnabled: true,
+      controlIconsEnabled: false,
+      fit: true,
+      center: true,
+      dblClickZoomEnabled: false,
+    });
+    syncZoomLimits(panZoom);
+    fitToPane(panZoom);
+    panZoomRef.current = panZoom;
+  }, [picture]);
 
   // svg-pan-zoom measures the SVG once at init and caches it, so without this every later fit
   // would scale to the pane's size at render time rather than its size now.
@@ -155,10 +130,12 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
     return () => observer.disconnect();
   }, []);
 
+  // Forgetting the fit too, so a remount (StrictMode's, in development) sets svg-pan-zoom up again.
   useEffect(
     () => () => {
       panZoomRef.current?.destroy();
       panZoomRef.current = null;
+      fittedKey.current = null;
     },
     [],
   );
@@ -167,9 +144,10 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
   const handlePointerUp = (e: PointerEvent<HTMLDivElement>) => {
     const pressed = pressedAt.current;
     pressedAt.current = null;
-    if (pressed === null || error !== null) return;
+    if (pressed === null) return;
     if (Math.hypot(e.clientX - pressed.x, e.clientY - pressed.y) > TAP_SLOP) return;
-    onPickLine(lineAtTarget(e.target, linkedRef.current));
+    const target = e.target instanceof Element ? e.target.closest("[data-line]") : null;
+    onPickLine(target === null ? null : Number(target.getAttribute("data-line")));
   };
 
   return (
@@ -187,12 +165,34 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
           pressedAt.current = e.button === 0 ? { x: e.clientX, y: e.clientY } : null;
         }}
         onPointerUp={handlePointerUp}
-      />
+      >
+        <svg ref={svgRef} className="diagram" width="100%" height="100%">
+          <g ref={viewportRef}>
+            {picture && (
+              <Diagram
+                nodes={picture.nodes}
+                edges={picture.edges}
+                types={types}
+                typeColors={config.typeColors}
+                theme={theme}
+                activeLine={activeLine}
+                linked={attempt.error === null}
+              />
+            )}
+          </g>
+        </svg>
+      </div>
 
-      {error && (
+      {layout?.empty && (
+        <div className="absolute inset-0 flex items-center justify-center p-6 pointer-events-none text-sm opacity-60">
+          {layout.placeholder}
+        </div>
+      )}
+
+      {attempt.error !== null && (
         <div className="absolute inset-0 flex items-center justify-center p-6 pointer-events-none">
           <div className="alert alert-error max-w-md whitespace-pre-wrap text-sm pointer-events-auto">
-            {error}
+            {attempt.error}
           </div>
         </div>
       )}

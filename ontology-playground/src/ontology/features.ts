@@ -2,7 +2,7 @@ import type { FeatureState, Ontology } from "./types.ts";
 
 // Reading a `FeatureState` is always defaulting: it arrives from a URL hash written by an
 // older build, from an ontology that has since gained a feature, or from an ontology switch
-// that hasn't run yet. Rather than making every caller (the strip, each `toMermaid`) handle
+// that hasn't run yet. Rather than making every caller (the strip, each `toGraph`) handle
 // "missing", everything reads through the accessors here, which fall back to the ontology's
 // declared defaults.
 

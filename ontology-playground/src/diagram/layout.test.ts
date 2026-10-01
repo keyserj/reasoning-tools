@@ -8,33 +8,18 @@ import type {
 } from "../ontology/types.ts";
 import { ontologyList } from "../ontology/registry.ts";
 import { defaultFeatureState } from "../ontology/features.ts";
-import { toGraph as ibisGraph } from "../ontology/ibis/toGraph.ts";
-import { toGraph as kialoGraph } from "../ontology/kialo/toGraph.ts";
-import { toGraph as basicGraph } from "../ontology/arg-map-basic/toGraph.ts";
-import { toGraph as truthGraph } from "../ontology/arg-map-truth-and-relevance/toGraph.ts";
-import { toGraph as ameliorateGraph } from "../ontology/ameliorate-v2/toGraph.ts";
 import { parse as parseBasic } from "../ontology/arg-map-basic/parse.ts";
-import type { BasicArgDoc } from "../ontology/arg-map-basic/model.ts";
-import type { KialoDoc } from "../ontology/kialo/model.ts";
-import type { ArgDoc } from "../ontology/arg-map-truth-and-relevance/model.ts";
-import type { Doc as AmeliorateDoc } from "../ontology/ameliorate-v2/model.ts";
-import type { IbisDoc } from "../ontology/ibis/model.ts";
 import { argMapBasic } from "../ontology/arg-map-basic/index.ts";
 import { argMapTruthAndRelevance } from "../ontology/arg-map-truth-and-relevance/index.ts";
 import { EDGE_CLAIMS, SPELLED_OUT } from "../ontology/arg-map-truth-and-relevance/features.ts";
-import { ARROW_INSET, type DiagramLayout, EMPTY_PLACEHOLDER, layoutDiagram } from "./layout.ts";
+import {
+  ARROW_INSET,
+  type DiagramLayout,
+  EMPTY_PLACEHOLDER,
+  basisPath,
+  layoutDiagram,
+} from "./layout.ts";
 import { distanceToOutline, fakeMeasure, nearestOn, outlinePoints, samplePath } from "./testing.ts";
-
-const GRAPHS: Record<
-  string,
-  (doc: unknown, config: StyleConfig, features: FeatureState) => RenderGraph
-> = {
-  ibis: (doc) => ibisGraph(doc as IbisDoc),
-  kialo: (doc, config) => kialoGraph(doc as KialoDoc, config.showIcons),
-  "arg-map-basic": (doc) => basicGraph(doc as BasicArgDoc),
-  "arg-map-truth-and-relevance": (doc, _config, features) => truthGraph(doc as ArgDoc, features),
-  "ameliorate-v2": (doc, _config, features) => ameliorateGraph(doc as AmeliorateDoc, features),
-};
 
 /** The default lens, then every option and param option of each feature on its own. */
 function lenses(ontology: Ontology): { lens: string; features: FeatureState }[] {
@@ -70,11 +55,7 @@ const cases = ontologyList.flatMap((ontology) =>
     lenses(ontology).map(({ lens, features }) => ({
       name: `${ontology.id} / ${example.id} / ${lens}`,
       ontology,
-      graph: GRAPHS[ontology.id](
-        ontology.parse(example.source).doc,
-        ontology.defaultConfig,
-        features,
-      ),
+      graph: ontology.toGraph(ontology.parse(example.source).doc, ontology.defaultConfig, features),
     })),
   ),
 );
@@ -220,12 +201,11 @@ describe("layoutDiagram", () => {
       expect(Math.hypot(first.x - last.x, first.y - last.y)).toBeGreaterThan(5);
       expect(loop.lines).toEqual([3]);
       // Inside the picture, which dagre's own size would cut it off from.
-      const { viewBox } = layout;
       for (const p of samplePath(loop.path)) {
-        expect(p.x).toBeGreaterThanOrEqual(viewBox.x);
-        expect(p.x).toBeLessThanOrEqual(viewBox.x + viewBox.width);
-        expect(p.y).toBeGreaterThanOrEqual(viewBox.y);
-        expect(p.y).toBeLessThanOrEqual(viewBox.y + viewBox.height);
+        expect(p.x).toBeGreaterThanOrEqual(0);
+        expect(p.x).toBeLessThanOrEqual(layout.width);
+        expect(p.y).toBeGreaterThanOrEqual(0);
+        expect(p.y).toBeLessThanOrEqual(layout.height);
       }
     },
   );
@@ -246,11 +226,45 @@ describe("layoutDiagram", () => {
     expect(nearestOn(loop.label!, samplePath(loop.path))).toBeLessThan(0.5);
   });
 
+  it.each(["TB", "LR"] as const)(
+    "routes a wide box's self-loop outside it, arrowhead and all, %s",
+    (direction) => {
+      const text = "a claim long enough that its label wraps at the full two hundred pixels";
+      const layout = laidOut(
+        layoutDiagram(
+          {
+            nodes: [node("a", text)],
+            edges: [{ from: "a", to: "a", type: "supports" }],
+          },
+          types,
+          config({ direction }),
+          fakeMeasure,
+        ),
+      );
+      const [loop] = layout.edges;
+      const outline = outlinePoints(layout.nodes[0].path);
+      const xs = outline.map((p) => p.x);
+      const ys = outline.map((p) => p.y);
+      const inside = (p: { x: number; y: number }) =>
+        p.x > Math.min(...xs) + 0.5 &&
+        p.x < Math.max(...xs) - 0.5 &&
+        p.y > Math.min(...ys) + 0.5 &&
+        p.y < Math.max(...ys) - 0.5;
+      expect(loop.points.slice(1, -1).some(inside)).toBe(false);
+      const samples = samplePath(loop.path);
+      const end = samples[samples.length - 1];
+      const tip = loop.points[loop.points.length - 1];
+      expect(Math.hypot(end.x - tip.x, end.y - tip.y)).toBeCloseTo(ARROW_INSET, 1);
+    },
+  );
+
   it("keeps parallel edges apart, each with its own lines", () => {
     // A child plus a repeated `$ref` of it: two connectors between the same two boxes.
     const { doc, errors } = parseBasic("= A &a\n  + B &b\n  + $b");
     expect(errors).toEqual([]);
-    const layout = laidOut(layoutDiagram(basicGraph(doc), types, config(), fakeMeasure));
+    const layout = laidOut(
+      layoutDiagram(argMapBasic.toGraph(doc, config(), {}), types, config(), fakeMeasure),
+    );
     expect(layout.edges.map((e) => [e.from, e.to, e.lines])).toEqual([
       ["b", "a", [2]],
       ["b", "a", [3]],
@@ -284,20 +298,47 @@ describe("layoutDiagram", () => {
   });
 });
 
+describe("basisPath", () => {
+  it("draws d3's basis curve, pinned to the first and last points", () => {
+    expect(
+      basisPath([
+        { x: 0, y: 0 },
+        { x: 60, y: 0 },
+        { x: 60, y: 60 },
+        { x: 120, y: 60 },
+      ]),
+    ).toBe("M0,0L10,0C20,0 40,0 50,10C60,20 60,40 70,50C80,60 100,60 110,60L120,60");
+  });
+
+  it("draws two points as a straight line", () => {
+    expect(
+      basisPath([
+        { x: 1, y: 2 },
+        { x: 3, y: 4 },
+      ]),
+    ).toBe("M1,2L3,4");
+  });
+});
+
 describe("picture key", () => {
   const source =
     "= Thesis &t\n  < supports[8] &sup\n    = Reason &r\n  < critiques &c\n    = Doubt &d\n      ~ aside";
   const spelledOut = { [EDGE_CLAIMS]: { option: SPELLED_OUT } };
-  const graph = truthGraph(argMapTruthAndRelevance.parse(source).doc as ArgDoc, spelledOut);
+  const graph = argMapTruthAndRelevance.toGraph(
+    argMapTruthAndRelevance.parse(source).doc,
+    argMapTruthAndRelevance.defaultConfig,
+    spelledOut,
+  );
   const keyOf = (g: RenderGraph, c = argMapTruthAndRelevance.defaultConfig) =>
     laidOut(layoutDiagram(g, argMapTruthAndRelevance, c, fakeMeasure)).key;
 
   it("ignores source lines moving, as an edit above the argument moves them", () => {
-    const shift = (lines?: number[]) => lines?.map((line) => line + 1);
-    const shifted = {
-      nodes: graph.nodes.map((n) => ({ ...n, lines: shift(n.lines) })),
-      edges: graph.edges.map((e) => ({ ...e, lines: shift(e.lines) })),
-    };
+    const shifted = argMapTruthAndRelevance.toGraph(
+      argMapTruthAndRelevance.parse(`\n${source}`).doc,
+      argMapTruthAndRelevance.defaultConfig,
+      spelledOut,
+    );
+    expect(shifted.nodes.find((n) => n.id === "t")?.lines).toEqual([2]);
     expect(keyOf(shifted)).toBe(keyOf(graph));
   });
 
@@ -338,7 +379,10 @@ describe("picture key", () => {
     };
     const layoutOf = (g: RenderGraph) =>
       laidOut(layoutDiagram(g, argMapTruthAndRelevance, config(), fakeMeasure));
-    expect(layoutOf(one).viewBox).toEqual(layoutOf(both).viewBox);
+    expect([layoutOf(one).width, layoutOf(one).height]).toEqual([
+      layoutOf(both).width,
+      layoutOf(both).height,
+    ]);
     expect(layoutOf(one).key).not.toBe(layoutOf(both).key);
   });
 });

@@ -1,6 +1,6 @@
 import { defineOntology } from "../types.ts";
 import { parse } from "./parse.ts";
-import { toMermaid } from "./toMermaid.ts";
+import { toGraph } from "./toGraph.ts";
 import { highlightLine } from "./highlight.ts";
 import type { KialoDoc } from "./model.ts";
 import { legend } from "./legend.ts";
@@ -20,7 +20,7 @@ export const kialo = defineOntology<KialoDoc>({
   id: "kialo",
   label: "Kialo",
   parse,
-  toMermaid,
+  toGraph: (doc, config) => toGraph(doc, config.showIcons),
   highlightLine,
   legend,
   legendNote,

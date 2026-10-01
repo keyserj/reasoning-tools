@@ -16,7 +16,7 @@ A `= $id` thesis is no special case — it is a dashed `thesis`, which means it 
 
 ## Sources
 
-A claim with sources gets a `🔗` appended to its text and the URL never reaches the diagram. Sources are the one thing a real Kialo discussion has dozens of — the map this ontology was reviewed against carries 64 — so a box each would swamp the argument, and the useful fact at a glance is that evidence exists at all. It's an icon, so it rides on `showIcons` like every other; that's the one icon this ontology adds itself rather than leaving to the shared renderer, which is why `toMermaid` passes `showIcons` down into `toGraph`.
+A claim with sources gets a `🔗` appended to its text and the URL never reaches the diagram. Sources are the one thing a real Kialo discussion has dozens of — the map this ontology was reviewed against carries 64 — so a box each would swamp the argument, and the useful fact at a glance is that evidence exists at all. It's an icon, so it rides on `showIcons` like every other; that's the one icon this ontology adds itself rather than leaving to the shared renderer, which is why its `index.ts` passes `showIcons` down into `toGraph`.
 
 ## Scores
 

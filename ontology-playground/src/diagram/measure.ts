@@ -15,22 +15,26 @@ let host: HTMLDivElement | null = null;
 function createHost(): HTMLDivElement {
   const el = document.createElement("div");
   el.setAttribute("aria-hidden", "true");
-  // Laid out, so it can be measured, but never seen. Wide, so no label's width is capped by it
-  // before its own `max-width` applies; fixed and clipped, so that width never scrolls the page.
+  // Laid out, so it can be measured, but never seen; fixed and clipped, so nothing in it can
+  // scroll the page.
   el.style.cssText =
-    "position:fixed;top:0;left:0;width:10000px;height:0;overflow:hidden;visibility:hidden;pointer-events:none;contain:strict";
+    "position:fixed;top:0;left:0;width:0;height:0;overflow:hidden;visibility:hidden;pointer-events:none;contain:strict";
   document.body.append(el);
   return el;
 }
 
 /**
  * Sizes for the given label texts, in order, measured in one forced layout: every label not seen
- * before is written into the host, then all of them are read.
+ * before is written into the host, then all of them are read. They stay there until the next
+ * call replaces them, which saves the page a second restyle.
  */
 export function measureLabels(texts: string[]): Size[] {
-  const missing = [...new Set(texts.filter((text) => !cache.has(text)))];
+  let missing = [...new Set(texts.filter((text) => !cache.has(text)))];
+  if (cache.size + missing.length > CACHE_LIMIT) {
+    cache.clear();
+    missing = [...new Set(texts)];
+  }
   if (missing.length > 0) {
-    if (cache.size + missing.length > CACHE_LIMIT) cache.clear();
     host ??= createHost();
     const els = missing.map((text) => {
       const el = document.createElement("div");
@@ -43,7 +47,6 @@ export function measureLabels(texts: string[]): Size[] {
       const { width, height } = el.getBoundingClientRect();
       cache.set(missing[i], { width, height });
     });
-    host.replaceChildren();
   }
   return texts.map((text) => cache.get(text)!);
 }

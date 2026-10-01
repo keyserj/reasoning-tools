@@ -1,6 +1,6 @@
 // Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
 
-exports[`toMermaid > matches the generated-mermaid snapshot for the session-storage example 1`] = `
+exports[`mermaidExport > matches the generated-mermaid snapshot for the session-storage example 1`] = `
 "flowchart BT
   i1["💡 Use Redis"]:::claim
   n1["✅ Fast, battle-tested"]:::support
@@ -11,13 +11,13 @@ exports[`toMermaid > matches the generated-mermaid snapshot for the session-stor
   n4["⛔ Slower for hot reads"]:::critique
   n5["💡 Use a worker queue"]:::claim
   n6[/"📝 worker queues hit the same operational cost"/]:::note
-  n6 e0@-.-> n5
-  n1 e1@--> i1
-  c1 e2@--> i1
-  n2 e3@--> c1
-  n3 e4@--> i2
-  n4 e5@--> i2
-  c1 e6@--> n5
+  n6 -.-> n5
+  n1 --> i1
+  c1 --> i1
+  n2 --> c1
+  n3 --> i2
+  n4 --> i2
+  c1 --> n5
   classDef claim fill:#ffeee3,stroke:#d97706,color:#502600,stroke-width:1.5px
   classDef support fill:#e9f3fe,stroke:#2166ac,color:#0e345a,stroke-width:1.5px
   classDef critique fill:#ffedec,stroke:#b2182b,color:#600d15,stroke-width:1.5px

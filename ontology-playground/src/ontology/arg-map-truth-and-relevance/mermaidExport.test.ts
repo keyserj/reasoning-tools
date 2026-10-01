@@ -1,7 +1,8 @@
 import { describe, expect, it } from "vitest";
 import type { FeatureState } from "../types.ts";
 import { parse } from "./parse.ts";
-import { toMermaid } from "./toMermaid.ts";
+import { mermaidExport } from "../mermaidExport.ts";
+import { argMapTruthAndRelevance as ontology } from "./index.ts";
 import { defaultConfig } from "./defaultConfig.ts";
 import { EDGE_CLAIMS, IMPLIED, SPELLED_OUT } from "./features.ts";
 import sessionStorage from "./examples/session-storage.txt?raw";
@@ -11,24 +12,21 @@ const spelledOut: FeatureState = { [EDGE_CLAIMS]: { option: SPELLED_OUT } };
 const implied: FeatureState = { [EDGE_CLAIMS]: { option: IMPLIED } };
 
 const render = (text: string, features = spelledOut, config = defaultConfig) =>
-  toMermaid(parse(text).doc, config, features, "light").text;
+  mermaidExport(ontology.toGraph(parse(text).doc, config, features), config, ontology, "light");
 
-const sourceMap = (text: string, features = spelledOut) =>
-  toMermaid(parse(text).doc, defaultConfig, features, "light").sourceMap;
-
-describe("toMermaid", () => {
+describe("mermaidExport", () => {
   it("draws claims as rectangles joined by a labeled, colored edge", () => {
     const out = render("= Thesis &t\n  < supports[8] &sup\n    = Reason &r");
     expect(out.startsWith("flowchart BT")).toBe(true);
     expect(out).toContain('t["💬 Thesis"]:::claim');
-    expect(out).toContain('r e0@-->|"✅ supports [8]"| t');
+    expect(out).toContain('r -->|"✅ supports [8]"| t');
     // Without color the two edge types would differ only by the word in the label.
     expect(out).toContain("linkStyle 0 stroke:#2166ac");
   });
 
   it("styles a critiques edge distinctly from a supports edge", () => {
     const out = render("= A &a\n  < critiques[2] &crit\n    = B &b");
-    expect(out).toContain('b e0@-->|"⛔ critiques [2]"| a');
+    expect(out).toContain('b -->|"⛔ critiques [2]"| a');
     expect(out).toContain("linkStyle 0 stroke:#b2182b");
   });
 
@@ -41,15 +39,15 @@ describe("toMermaid", () => {
     );
     // The same marker on the edge is what says which edge that node is about, and the
     // invisible anchor is what stops dagre from parking it across the diagram.
-    expect(out).toContain('r e0@-->|"✅ ① supports [8]"| t');
+    expect(out).toContain('r -->|"✅ ① supports [8]"| t');
     expect(out).toContain("sup ~~~ t");
   });
 
   it("reifies every edge into a stadium in the implied rendering", () => {
     const out = render("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", {});
     expect(out).toContain('sup(["✅ supports<br/>[8]"]):::supports');
-    expect(out).toContain("r e0@--- sup");
-    expect(out).toContain("sup e1@--> t");
+    expect(out).toContain("r --- sup");
+    expect(out).toContain("sup --> t");
     expect(out).not.toContain("linkStyle");
   });
 
@@ -58,7 +56,7 @@ describe("toMermaid", () => {
       "= Thesis &t\n  < supports &sup\n    = Reason &r\n= $sup\n  < critiques &c\n    = No &n",
       implied,
     );
-    expect(out).toContain("c e3@--> sup");
+    expect(out).toContain("c --> sup");
   });
 
   it("puts scores on a second line", () => {
@@ -68,7 +66,7 @@ describe("toMermaid", () => {
   it("uses a dotted edge and parallelogram shape for notes", () => {
     const out = render("= A &a\n  ~ a note &nt");
     expect(out).toContain('nt[/"📝 a note"/]:::note');
-    expect(out).toContain("nt e0@-.-> a");
+    expect(out).toContain("nt -.-> a");
   });
 
   it("renders the topic header as a subroutine box carrying the perspectives key", () => {
@@ -89,7 +87,7 @@ describe("toMermaid", () => {
     // The first edge's `$nope` never resolves, so it is dropped and the *second* edge
     // is mermaid's edge 0. Using the array index here would paint the wrong edge.
     const out = render("= A &a\n  < supports &l\n    = $nope\n  < critiques[2] &c\n    = B &b");
-    expect(out).toContain('b e0@-->|"⛔ critiques [2]"| a');
+    expect(out).toContain('b -->|"⛔ critiques [2]"| a');
     expect(out).toContain("linkStyle 0 stroke:#b2182b");
   });
 
@@ -99,7 +97,7 @@ describe("toMermaid", () => {
       showIcons: false,
     });
     expect(out).toContain('a["A"]:::claim');
-    expect(out).toContain('b e0@-->|"supports [8]"| a');
+    expect(out).toContain('b -->|"supports [8]"| a');
   });
 
   it("escapes embedded quotes and sanitizes unsafe ids", () => {
@@ -108,27 +106,13 @@ describe("toMermaid", () => {
     expect(out).toContain("wall_reduces[");
   });
 
-  it("returns a placeholder for an empty document", () => {
-    expect(render("")).toContain("_empty");
+  it("emits just the header for an empty document", () => {
+    expect(render("")).toBe("flowchart BT");
   });
 
   it("matches the generated-mermaid snapshots for the bundled examples", () => {
     expect(render(sessionStorage)).toMatchSnapshot();
     expect(render(buildAWall)).toMatchSnapshot();
     expect(render(buildAWall, implied)).toMatchSnapshot();
-  });
-});
-
-describe("sourceMap", () => {
-  it("maps a labeled connector to its own line and each claim to theirs", () => {
-    const map = sourceMap("= Thesis &t\n  < supports[8] &sup\n    = Reason &r");
-    expect(map.nodes).toEqual({ t: [1], r: [3] });
-    expect(map.edges).toEqual({ e0: [2] });
-  });
-
-  it("gives the reified edge box and both its halves the edge's line", () => {
-    const map = sourceMap("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", implied);
-    expect(map.nodes).toEqual({ t: [1], r: [3], sup: [2] });
-    expect(map.edges).toEqual({ e0: [2], e1: [2] });
   });
 });

@@ -8,6 +8,7 @@ import {
   missingExampleNote,
 } from "./ontology/examples.ts";
 import { defaultFeatureState } from "./ontology/features.ts";
+import { mermaidExport } from "./ontology/mermaidExport.ts";
 import type { Ontology, OntologyExample, Theme } from "./ontology/types.ts";
 import { type ShareState, decodeState, encodeState } from "./share/url.ts";
 import Toolbar, { type PaneView } from "./components/Toolbar.tsx";
@@ -99,11 +100,14 @@ export default function App() {
 
   const ontology = getOntology(shared.ontologyId);
   const parseResult = useMemo(() => ontology.parse(shared.source), [ontology, shared.source]);
-  // Depends on the theme because each type's one configured color resolves into a fill, a
-  // border and a text color differently in each (ontology/typeColors.ts).
-  const mermaidOutput = useMemo(
-    () => ontology.toMermaid(parseResult.doc, shared.config, shared.features, theme),
-    [ontology, parseResult, shared.config, shared.features, theme],
+  const graph = useMemo(
+    () => ontology.toGraph(parseResult.doc, shared.config, shared.features),
+    [ontology, parseResult, shared.config, shared.features],
+  );
+  // Only built while the tab that shows it is open.
+  const mermaidText = useMemo(
+    () => (activeTab === "mermaid" ? mermaidExport(graph, shared.config, ontology, theme) : ""),
+    [activeTab, graph, shared.config, ontology, theme],
   );
 
   // "Dirty" is derived rather than stored, so an edit that happens to restore the original
@@ -220,7 +224,7 @@ export default function App() {
           <EditorPane
             source={shared.source}
             onSourceChange={(source) => setShared((d) => ({ ...d, source }))}
-            mermaidText={mermaidOutput.text}
+            mermaidText={mermaidText}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             ontologyLabel={ontology.label}
@@ -245,7 +249,9 @@ export default function App() {
             onOpenStyle={() => setConfigOpen(true)}
           />
           <DiagramPane
-            mermaid={mermaidOutput}
+            graph={graph}
+            types={ontology}
+            config={shared.config}
             theme={theme}
             activeLine={activeLine}
             onPickLine={pickLine}

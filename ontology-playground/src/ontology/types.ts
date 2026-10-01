@@ -54,7 +54,7 @@ export type SourceLines = Record<string, number[]>;
 export interface SourceMap {
   /** mermaid node id — the `<id>` in the SVG's `flowchart-<id>-<n>` */
   nodes: Record<string, number[]>;
-  /** the id emitted for the edge, which mermaid writes onto the path as `data-id` */
+  /** the path's `data-id`; a self-loop has one key per rendered segment */
   edges: Record<string, number[]>;
 }
 
@@ -86,6 +86,7 @@ export interface ParseError {
 export interface ParseResult {
   doc: unknown;
   errors: ParseError[];
+  warnings?: ParseError[];
 }
 
 export const LAYOUT_DIRECTIONS = ["TB", "BT", "LR", "RL"] as const;
@@ -145,10 +146,6 @@ export interface LegendEntry {
 // knows a color and the shell knows no ontology's words. `type` is the reason this exists —
 // a marker is drawn in the color its rendered type carries in the document's `StyleConfig`,
 // so the editor, the legend and the diagram can't disagree.
-//
-// `keyword` and `tag` are emitted by nobody today; they're the slots the Ameliorate syntax
-// (multiword edge words, `#action` subtype tags) needs, kept here so adding it isn't a change
-// to this contract.
 
 export type HighlightKind =
   /** a marker or word that produces one of the ontology's rendered types */
@@ -285,7 +282,7 @@ export interface OntologyExample {
  */
 export function defineOntology<Doc>(
   spec: Omit<Ontology, "parse" | "toMermaid"> & {
-    parse: (text: string) => { doc: Doc; errors: ParseError[] };
+    parse: (text: string) => { doc: Doc; errors: ParseError[]; warnings?: ParseError[] };
     toMermaid: (
       doc: Doc,
       config: StyleConfig,

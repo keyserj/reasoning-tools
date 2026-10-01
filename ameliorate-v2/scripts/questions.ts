@@ -3,8 +3,11 @@
 // rule and carries the worked example ./questions.test.ts pins.
 
 import { DEFAULT_EDGE_SCORE, average, normalizeForChaining } from "./aggregate.ts";
-import type { Doc, Edge } from "./model.ts";
-import { isGuiding, topicNode } from "./model.ts";
+import type { Doc, Edge } from "../../ontology-playground/src/ontology/ameliorate-v2/model.ts";
+import {
+  isGuiding,
+  topicNode,
+} from "../../ontology-playground/src/ontology/ameliorate-v2/model.ts";
 
 /** The only relations a Guiding Score path may run along, since they're the ones that carry an agenda. */
 const AGENDA_TYPES = new Set<Edge["type"]>(["guides", "clarifies"]);

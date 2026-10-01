@@ -19,6 +19,7 @@ Each lives in `src/ontology/<id>/` and documents itself: `ontology.md` for what 
 - **[IBIS](./src/ontology/ibis/ontology.md)** ([rendering](./src/ontology/ibis/rendering.md)) — the classic question / idea / pro / con argument map.
 - **[Argument map: truth and relevance](./src/ontology/arg-map-truth-and-relevance/ontology.md)** ([rendering](./src/ontology/arg-map-truth-and-relevance/rendering.md)) — claims joined by supports/critiques edges, where each edge is itself a claim that can be scored and argued about.
 - **[Kialo](./src/ontology/kialo/ontology.md)** ([rendering](./src/ontology/kialo/rendering.md)) — pro/con claims under a thesis, each voted 0-4 on one number that folds how true it is together with how much it bears on its parent.
+- **[Ameliorate v2](./src/ontology/ameliorate-v2/ontology.md)** ([rendering](./src/ontology/ameliorate-v2/rendering.md)) — concepts, causal relations, and arguments about their scores, with Full structure and Causal only views.
 
 ## Examples
 
@@ -42,7 +43,7 @@ npm run build      # production build into dist/
 
 ## Deploy
 
-Pushing to `main` (touching this folder or `site/`) runs the repo-root `.github/workflows/deploy.yml`, which builds this app into `ontology-playground/` of the published site and copies `site/index.html` to the root as a redirect. The repo's **Settings → Pages → Source** must be set to **GitHub Actions** once.
+Pushing to `main` (touching this folder, `site/`, the wireframes, or `ameliorate-v2/examples/build-a-wall.txt`) runs the repo-root `.github/workflows/deploy.yml`, which builds this app into `ontology-playground/` of the published site and copies `site/index.html` to the root as a redirect. The repo's **Settings → Pages → Source** must be set to **GitHub Actions** once.
 
 The app is served from a subpath, so `base` in `vite.config.ts` must stay in sync with the directory name used by the workflow.
 

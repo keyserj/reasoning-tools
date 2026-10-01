@@ -3,7 +3,10 @@
 // normalization belongs to which purpose; `ontology.md` -> Individual: Scores -> Notes owns the
 // defaults.
 
-import { MAX_SCORE, type Scores } from "./scores.ts";
+import {
+  MAX_SCORE,
+  type Scores,
+} from "../../ontology-playground/src/ontology/ameliorate-v2/scores.ts";
 
 /** A concept nobody scored is not important to change. */
 export const DEFAULT_CONCEPT_SCORE = 0;

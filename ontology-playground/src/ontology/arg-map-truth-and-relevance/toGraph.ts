@@ -9,7 +9,7 @@ import {
   EDGE_DISPLAY,
   EDGE_DISPLAY_DISTINGUISH,
   IMPLIED,
-  SPELLED_OUT,
+  DEFAULT_EDGE_CLAIMS,
 } from "./features.ts";
 import { type Scores, formatScores } from "./scores.ts";
 
@@ -235,7 +235,7 @@ function spelledOutClaims(doc: ArgDoc): RenderGraph {
 
 /** Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, per the `Edge claims` feature. */
 export function toGraph(doc: ArgDoc, features: FeatureState): RenderGraph {
-  const option = featureOption(features, EDGE_CLAIMS, SPELLED_OUT);
+  const option = featureOption(features, EDGE_CLAIMS, DEFAULT_EDGE_CLAIMS);
   if (option !== IMPLIED) return spelledOutClaims(doc);
   const display = featureParam(features, EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_DISTINGUISH);
   return impliedClaims(doc, display === EDGE_DISPLAY_DISTINGUISH);

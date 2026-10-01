@@ -42,6 +42,7 @@ interface Props {
   ontologyLabel: string;
   placeholder: string;
   errors: ParseError[];
+  warnings?: ParseError[];
   onOpenLegend: () => void;
   onOpenMiscConfig: () => void;
   highlightLine: (line: string) => HighlightToken[];
@@ -82,6 +83,7 @@ export default function EditorPane({
   ontologyLabel,
   placeholder,
   errors,
+  warnings = [],
   onOpenLegend,
   onOpenMiscConfig,
   highlightLine,
@@ -295,11 +297,20 @@ export default function EditorPane({
         </div>
       </div>
 
-      {errors.length > 0 && (
-        <div className="shrink-0 max-h-32 overflow-auto border-t border-warning/50 bg-warning/10 px-3 py-2 text-xs font-mono">
+      {(errors.length > 0 || warnings.length > 0) && (
+        <div
+          role="region"
+          aria-label="Diagnostics"
+          className="shrink-0 max-h-32 overflow-auto border-t border-warning/50 bg-warning/10 px-3 py-2 text-xs font-mono"
+        >
           {errors.map((err, i) => (
-            <div key={i}>
-              line {err.line}: {err.message}
+            <div key={`error-${i}`}>
+              Error, line {err.line}: {err.message}
+            </div>
+          ))}
+          {warnings.map((warning, i) => (
+            <div key={`warning-${i}`}>
+              Warning, line {warning.line}: {warning.message}
             </div>
           ))}
         </div>

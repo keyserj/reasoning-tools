@@ -1,9 +1,6 @@
-import { readFileSync } from "node:fs";
-import { join } from "node:path";
 import { describe, expect, it } from "vitest";
 import { parse } from "./parse.ts";
-
-const buildAWall = readFileSync(join(import.meta.dirname, "../examples/build-a-wall.txt"), "utf8");
+import buildAWall from "../../../../ameliorate-v2/examples/build-a-wall.txt?raw";
 
 const messages = (text: string): string[] => parse(text).errors.map((e) => e.message);
 
@@ -33,6 +30,7 @@ describe("parse: nodes", () => {
     const { doc, errors, warnings } = parse("* Same text\n* Same text");
     expect(errors).toEqual([]);
     expect(doc.nodes.map((n) => n.id)).toEqual(["same-text", "same-text-2"]);
+    expect(doc.sourceLines).toEqual({ "same-text": [1], "same-text-2": [2] });
     expect(warnings[0].message).toContain('give it an explicit "&id"');
   });
 
@@ -47,6 +45,8 @@ describe("parse: nodes", () => {
     expect(errors.map((e) => e.message)).toEqual(['Duplicate id "&dup"']);
     expect(warnings).toEqual([]);
     expect(doc.edges.map((e) => e.id)).toEqual(["dup", "a--has--c"]);
+    expect(doc.sourceLines.dup).toEqual([2]);
+    expect(doc.sourceLines["a--has--c"]).toEqual([5]);
   });
 
   it("attaches %description and %opposite to the declaration above them", () => {
@@ -232,6 +232,211 @@ describe("parse: notes, comments and properties", () => {
     expect(messages("! Something")).toEqual([
       'Unrecognized marker "!" (expected * ? = @ < > ~ % /)',
     ]);
+  });
+});
+
+describe("parse: source lines", () => {
+  it.each(["", "/ A comment\n\n"])("returns empty locations for %j", (text) => {
+    const { doc } = parse(text);
+    expect(doc.sourceLines).toEqual({});
+    expect(doc.perspectiveLines).toEqual([]);
+  });
+
+  it("leads with declarations and keeps concept references separate from implied claims", () => {
+    const { doc, errors } = parse(
+      [
+        "= $wall",
+        "* $wall",
+        "= $claim",
+        "* Wall &wall",
+        "= Explicit claim &claim",
+        "= $wall",
+        "* $wall",
+        "= $claim",
+      ].join("\n"),
+    );
+    expect(errors).toEqual([]);
+    expect(doc.sourceLines).toEqual({
+      wall: [4, 2, 7],
+      claim: [5, 3, 8],
+      "wall--implied": [1, 6],
+    });
+  });
+
+  it("records relation lines under final IDs and their implied references under the claim", () => {
+    const { doc, errors } = parse(
+      [
+        "= $reduces",
+        "* A &a",
+        "  > reduces[4] &reduces",
+        "    * $b",
+        "* B &b",
+        "  < causes[2]",
+        "    * $c",
+        "* C &c",
+        "= $reduces",
+      ].join("\n"),
+    );
+    expect(errors).toEqual([]);
+    expect(doc.sourceLines).toEqual({
+      a: [2],
+      b: [5, 4],
+      c: [8, 7],
+      reduces: [3],
+      "reduces--implied": [1, 9],
+      "c--causes--b": [6],
+    });
+  });
+
+  it("records accepted properties on their owner and leaves rejected properties unmapped", () => {
+    const { doc, errors } = parse(
+      [
+        "* Wall &wall",
+        "  %description: A border barrier",
+        "  %opposite: No wall",
+        "  %description: A duplicate",
+        "  %color: blue",
+        "* $wall",
+        "  %opposite: A reference property",
+        "= Claim &claim",
+        "  %description: A claim description",
+        "  %opposite: Counterclaim",
+      ].join("\n"),
+    );
+    expect(errors.map((error) => error.line)).toEqual([4, 5, 7, 9]);
+    expect(doc.sourceLines).toEqual({ wall: [1, 2, 3, 6], claim: [8, 10] });
+    expect(doc.nodes[0].properties).toEqual({
+      description: "A border barrier",
+      opposite: "No wall",
+    });
+  });
+
+  it("records valid perspective lists separately, preserving duplicate-property recovery", () => {
+    const { doc, errors } = parse(
+      [
+        "%perspectives: [alice]",
+        "%perspectives: [bob]",
+        "%perspectives: invalid",
+        "* Topic &perspectives",
+        "  %perspectives: [casey]",
+      ].join("\n"),
+    );
+    expect(doc.perspectives).toEqual(["bob"]);
+    expect(doc.perspectiveLines).toEqual([1, 2]);
+    expect(doc.sourceLines).toEqual({ perspectives: [4] });
+    expect(errors.map((error) => error.line)).toEqual([2, 3, 3, 5]);
+  });
+
+  it("gives document, node and edge notes their own locations", () => {
+    const { doc, errors } = parse(
+      [
+        "~ Document note",
+        "* A &a",
+        "  ~ Node note",
+        "  > causes &e",
+        "    ~ Edge note",
+        "    / A comment",
+        "    * B &b",
+      ].join("\n"),
+    );
+    expect(errors).toEqual([]);
+    expect(doc.sourceLines).toEqual({
+      a: [2],
+      b: [7],
+      e: [4],
+      "note-document-note": [1],
+      "note-node-note": [3],
+      "note-edge-note": [5],
+    });
+  });
+
+  it("keeps note locations when forward and repeated references settle their owner", () => {
+    const { doc, errors } = parse(
+      [
+        "* $wall",
+        "  ~ Same note",
+        "= $wall",
+        "  ~ Same note",
+        "* Wall &wall",
+        "= $wall",
+        "  ~ Same note",
+      ].join("\n"),
+    );
+    expect(errors).toEqual([]);
+    expect(doc.sourceLines).toEqual({
+      wall: [5, 1],
+      "wall--implied": [3, 6],
+      "note-same-note": [2],
+      "note-same-note-2": [4],
+      "note-same-note-3": [7],
+    });
+    expect(doc.nodes.find((node) => node.id === "wall")?.notes.map((note) => note.id)).toEqual([
+      "note-same-note",
+    ]);
+    expect(
+      doc.nodes.find((node) => node.impliedForId === "wall")?.notes.map((note) => note.id),
+    ).toEqual(["note-same-note-2", "note-same-note-3"]);
+  });
+
+  it("records locations for prototype names and underscore-prefixed IDs", () => {
+    const { doc, errors } = parse(
+      [
+        "* Prototype &__proto__",
+        "? Constructor &constructor",
+        "= String &toString",
+        "@ Context &_score_context",
+        "* $__proto__",
+        "? $constructor",
+        "= $toString",
+        "@ $_score_context",
+      ].join("\n"),
+    );
+    expect(errors).toEqual([]);
+    expect(doc.sourceLines).toEqual({
+      ["__proto__"]: [1, 5],
+      constructor: [2, 6],
+      toString: [3, 7],
+      _score_context: [4, 8],
+    });
+  });
+
+  it("records implied references under their allocated ID when the usual name is taken", () => {
+    const { doc, errors, warnings } = parse(
+      "= $wall\n* Wall &wall\n= Existing &wall--implied\n= $wall",
+    );
+    expect(errors).toEqual([]);
+    expect(warnings).toHaveLength(1);
+    expect(doc.sourceLines).toEqual({
+      wall: [2],
+      "wall--implied": [3],
+      "wall--implied-2": [1, 4],
+    });
+  });
+
+  it("records a resolved reference even when its marker is wrong", () => {
+    const { doc, errors } = parse("* $claim\n= Claim &claim");
+    expect(errors).toEqual([
+      { line: 1, message: '"$claim" is a claim, so the reference should read "= $claim"' },
+    ]);
+    expect(doc.sourceLines).toEqual({ claim: [2, 1] });
+  });
+
+  it("doesn't map missing references, rejected implied claims or unfinished relations", () => {
+    const { doc, errors } = parse(
+      [
+        "* A &a",
+        "  > has &h",
+        "    * B &b",
+        "? Q &q",
+        "= $h",
+        "= $q",
+        "= $missing",
+        "* $a",
+        "  > causes &unfinished",
+      ].join("\n"),
+    );
+    expect(errors.map((error) => error.line)).toEqual([5, 6, 7, 9]);
+    expect(doc.sourceLines).toEqual({ a: [1, 8], h: [2], b: [3], q: [4] });
   });
 });
 

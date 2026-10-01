@@ -1,4 +1,4 @@
-import { defineConfig } from "vite";
+import { defineConfig, searchForWorkspaceRoot } from "vite";
 import react from "@vitejs/plugin-react";
 import tailwindcss from "@tailwindcss/vite";
 
@@ -7,6 +7,10 @@ export default defineConfig({
   base: "/reasoning-tools/ontology-playground/",
   plugins: [react(), tailwindcss()],
   server: {
+    // The canonical Ameliorate example lives beside the playground and is imported with ?raw.
+    fs: {
+      allow: [searchForWorkspaceRoot("."), "../ameliorate-v2/examples"],
+    },
     // Allow sharing local server through ngrok tunnels
     allowedHosts: [".ngrok-free.app"],
   },

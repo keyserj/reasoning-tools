@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { ibis } from "../ontology/ibis/index.ts";
 import { argMapTruthAndRelevance } from "../ontology/arg-map-truth-and-relevance/index.ts";
+import { ameliorateV2 } from "../ontology/ameliorate-v2/index.ts";
 import { defaultExample, findExample } from "../ontology/examples.ts";
 import { defaultFeatureState } from "../ontology/features.ts";
 import { defaultOntologyId, getOntology } from "../ontology/registry.ts";
@@ -22,6 +23,24 @@ const shared: ShareState = {
 };
 
 describe("share/url", () => {
+  it.each(ameliorateV2.examples)(
+    "round-trips Ameliorate's $id with both feature choices",
+    (example) => {
+      const state: ShareState = {
+        ontologyId: ameliorateV2.id,
+        exampleId: example.id,
+        source: example.source,
+        config: {
+          ...ameliorateV2.defaultConfig,
+          direction: "TB",
+          typeColors: { ...ameliorateV2.defaultConfig.typeColors, relation: "#9452a5" },
+        },
+        features: { view: { option: "causal" }, "edge-claims": { option: "spelled-out" } },
+      };
+      expect(decodeState(encodeState(state))).toEqual(state);
+    },
+  );
+
   it("round-trips a document", () => {
     expect(decodeState(encodeState(shared))).toEqual(shared);
   });
@@ -44,7 +63,7 @@ describe("share/url", () => {
       source: argMapExample.source,
       config: structuredClone(argMapTruthAndRelevance.defaultConfig),
       features: {
-        "edge-claims": { option: "implied", params: { "edge-display": "all-edges-same" } },
+        "edge-claims": { option: "spelled-out", params: { "edge-display": "all-edges-same" } },
       },
     };
     expect(decodeState(encodeState(other))?.features).toEqual(other.features);

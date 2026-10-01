@@ -3,18 +3,17 @@ import type { FeatureState } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toMermaid } from "./toMermaid.ts";
 import { defaultConfig } from "./defaultConfig.ts";
-import { EDGE_CLAIMS, IMPLIED } from "./features.ts";
+import { EDGE_CLAIMS, IMPLIED, SPELLED_OUT } from "./features.ts";
 import sessionStorage from "./examples/session-storage.txt?raw";
 import buildAWall from "./examples/build-a-wall.txt?raw";
 
-/** `{}` resolves to every feature's default, which is what a fresh document has. */
-const defaults: FeatureState = {};
+const spelledOut: FeatureState = { [EDGE_CLAIMS]: { option: SPELLED_OUT } };
 const implied: FeatureState = { [EDGE_CLAIMS]: { option: IMPLIED } };
 
-const render = (text: string, features = defaults, config = defaultConfig) =>
+const render = (text: string, features = spelledOut, config = defaultConfig) =>
   toMermaid(parse(text).doc, config, features, "light").text;
 
-const sourceMap = (text: string, features = defaults) =>
+const sourceMap = (text: string, features = spelledOut) =>
   toMermaid(parse(text).doc, defaultConfig, features, "light").sourceMap;
 
 describe("toMermaid", () => {
@@ -47,7 +46,7 @@ describe("toMermaid", () => {
   });
 
   it("reifies every edge into a stadium in the implied rendering", () => {
-    const out = render("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", implied);
+    const out = render("= Thesis &t\n  < supports[8] &sup\n    = Reason &r", {});
     expect(out).toContain('sup(["✅ supports<br/>[8]"]):::supports');
     expect(out).toContain("r e0@--- sup");
     expect(out).toContain("sup e1@--> t");
@@ -95,7 +94,7 @@ describe("toMermaid", () => {
   });
 
   it("omits icons on nodes and edge labels when showIcons is false", () => {
-    const out = render("= A &a\n  < supports[8] &sup\n    = B &b", defaults, {
+    const out = render("= A &a\n  < supports[8] &sup\n    = B &b", spelledOut, {
       ...defaultConfig,
       showIcons: false,
     });

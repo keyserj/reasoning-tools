@@ -1,6 +1,6 @@
-// The ontology's own model - `ontology.md`'s structure and nothing else. Nothing here records
-// where in the source a thing was written, and nothing here knows how any of it is drawn.
+// The ontology's entities describe its meaning. Source locations stay on Doc, per ../pipeline.md.
 
+import type { SourceLines } from "../types.ts";
 import type { EdgeTypeName } from "./markers.ts";
 import type { Scores } from "./scores.ts";
 
@@ -48,6 +48,9 @@ export interface Doc {
   edges: Edge[];
   /** `~` lines with nothing above them: notes about the document rather than about a line */
   notes: Note[];
+  sourceLines: SourceLines;
+  /** Perspective metadata has no entity ID; reserving one would exclude valid user IDs. */
+  perspectiveLines: number[];
 }
 
 /** The one concept a document is about, per `ontology.md`'s Structure. */

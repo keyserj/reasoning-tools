@@ -1,3 +1,5 @@
+import { idTable } from "../ids.ts";
+import type { SourceLines } from "../types.ts";
 import type { ParseError } from "./diagnostics.ts";
 import type { Doc, Edge, Node, NodeType, Note } from "./model.ts";
 import {
@@ -132,6 +134,8 @@ export function parse(text: string): ParseResult {
   const edges: Edge[] = [];
   const errors: ParseError[] = [];
   const warnings: ParseError[] = [];
+  const sourceLines: SourceLines = idTable();
+  const perspectiveLines: number[] = [];
   const usedIds = new Set<string>();
   const declaredNodeTypes = new Map<string, NodeType>();
   const refUses: RefUse[] = [];
@@ -139,11 +143,14 @@ export function parse(text: string): ParseResult {
   const unnamedEdges: UnnamedEdge[] = [];
   const docNotes: Note[] = [];
   const stack: Frame[] = [];
-  // `%perspectives` may appear anywhere, so slot counts can't be checked until the end. This is
-  // the only reason a line number outlives the loop; nothing in the model carries one.
+  // `%perspectives` may appear anywhere, so slot counts can't be checked until the end.
   const declaredAt = new Map<string, number>();
   let lastNoteIndent: number | null = null;
   let perspectives: string[] = [];
+
+  const fileLine = (id: string, line: number): void => {
+    (sourceLines[id] ??= []).push(line);
+  };
 
   const claimId = (explicit: string, line: number): boolean => {
     if (usedIds.has(explicit)) {
@@ -226,6 +233,7 @@ export function parse(text: string): ParseResult {
               .split(",")
               .map((name) => name.trim())
               .filter((name) => name !== "");
+            perspectiveLines.push(lineNo);
           }
         } else {
           errors.push({
@@ -253,6 +261,7 @@ export function parse(text: string): ParseResult {
           });
         } else {
           parent.node.properties[key] = value.trim();
+          fileLine(parent.node.id, lineNo);
         }
       } else {
         errors.push({
@@ -271,6 +280,7 @@ export function parse(text: string): ParseResult {
       }
       const { id } = allocateId(usedIds, `note-${slugify(body)}`);
       const note: Note = { id, text: body };
+      fileLine(id, lineNo);
       // A note is a leaf, so it never becomes a frame: a sibling node at the same indent still
       // counts as the enclosing edge line's endpoint.
       if (!parent) docNotes.push(note);
@@ -352,6 +362,7 @@ export function parse(text: string): ParseResult {
         }
         frameId = reserveId(explicitId, slugify(body), lineNo);
         declaredAt.set(frameId, lineNo);
+        fileLine(frameId, lineNo);
         declaredNodeTypes.set(frameId, nodeType);
         declared = {
           id: frameId,
@@ -391,6 +402,7 @@ export function parse(text: string): ParseResult {
             if (pending.explicitId !== undefined && claimId(pending.explicitId, pending.line)) {
               edge.id = pending.explicitId;
               declaredAt.set(edge.id, pending.line);
+              fileLine(edge.id, pending.line);
             } else {
               unnamedEdges.push({ edge, line: pending.line });
             }
@@ -471,10 +483,11 @@ export function parse(text: string): ParseResult {
     }
   }
 
-  resolveReferences(refUses, { nodes, edges, declaredNodeTypes, deriveId, errors });
-  nameUnnamedEdges(unnamedEdges, usedIds, declaredAt);
+  // References follow their declarations in sourceLines so a click returns to the definition.
+  resolveReferences(refUses, { nodes, edges, declaredNodeTypes, deriveId, fileLine, errors });
+  nameUnnamedEdges(unnamedEdges, usedIds, declaredAt, fileLine);
 
-  const doc: Doc = { perspectives, nodes, edges, notes: docNotes };
+  const doc: Doc = { perspectives, nodes, edges, notes: docNotes, sourceLines, perspectiveLines };
   const validated = validate(doc, declaredAt);
   errors.push(...validated.errors);
   warnings.push(...validated.warnings);
@@ -488,6 +501,7 @@ interface ResolveContext {
   edges: Edge[];
   declaredNodeTypes: Map<string, NodeType>;
   deriveId: (base: string, line: number) => string;
+  fileLine: (id: string, line: number) => void;
   errors: ParseError[];
 }
 
@@ -500,7 +514,7 @@ interface ResolveContext {
  * yet at this point, because it's derived from the endpoints being resolved here.
  */
 function resolveReferences(refUses: RefUse[], ctx: ResolveContext): void {
-  const { nodes, edges, declaredNodeTypes, deriveId, errors } = ctx;
+  const { nodes, edges, declaredNodeTypes, deriveId, fileLine, errors } = ctx;
   const edgeIds = new Set(edges.map((edge) => edge.id).filter((id) => id !== ""));
   const byId = new Map(nodes.map((node) => [node.id, node]));
   /** one implied claim per referent, however many blocks argue about it */
@@ -556,6 +570,7 @@ function resolveReferences(refUses: RefUse[], ctx: ResolveContext): void {
         byId.set(id, implied);
       }
       implied.notes.push(...use.notes);
+      fileLine(implied.id, use.line);
       resolved.set(use.sentinel, implied.id);
       continue;
     }
@@ -568,6 +583,7 @@ function resolveReferences(refUses: RefUse[], ctx: ResolveContext): void {
       });
     }
     byId.get(use.refId)?.notes.push(...use.notes);
+    fileLine(use.refId, use.line);
     resolved.set(use.sentinel, use.refId);
   }
 
@@ -587,11 +603,13 @@ function nameUnnamedEdges(
   unnamed: UnnamedEdge[],
   usedIds: Set<string>,
   declaredAt: Map<string, number>,
+  fileLine: (id: string, line: number) => void,
 ): void {
   for (const { edge, line } of unnamed) {
     const base = edgeIdBase(edge.sourceId, edgeTypeDef(edge.type).canonical, edge.targetId);
     const { id } = allocateId(usedIds, base);
     edge.id = id;
     declaredAt.set(id, line);
+    fileLine(id, line);
   }
 }

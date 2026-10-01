@@ -6,6 +6,7 @@ import type { KialoDoc } from "./model.ts";
 import { legend } from "./legend.ts";
 import { renderedNodeTypes } from "./renderedNodeTypes.ts";
 import { renderedEdgeTypes } from "./renderedEdgeTypes.ts";
+import minimalDaylightSavings from "./examples/minimal-daylight-savings.txt?raw";
 import sessionStorage from "./examples/session-storage.txt?raw";
 import buildAWall from "./examples/build-a-wall.txt?raw";
 import { defaultConfig } from "./defaultConfig.ts";
@@ -26,9 +27,8 @@ export const kialo = defineOntology<KialoDoc>({
   legendNote,
   renderedNodeTypes,
   renderedEdgeTypes,
-  // Session storage first: it's the minimal, syntax-teaching one, and the only example that
-  // shows a `?` question, which is the piece of Kialo the other two ontologies can't match.
   examples: [
+    { id: "minimal-daylight-savings", source: minimalDaylightSavings },
     { id: "session-storage", source: sessionStorage },
     { id: "build-a-wall", source: buildAWall },
   ],

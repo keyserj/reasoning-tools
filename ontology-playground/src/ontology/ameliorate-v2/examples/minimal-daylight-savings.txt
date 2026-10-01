@@ -1,0 +1,39 @@
+? What should the US do regarding Daylight Saving Time? &what-do-dst
+  ~ +allows Questions to guide discussion (not sure if this will be used for modeling discussion though, like IBIS)
+
+/ TODO: add criteria
+/ TODO: add option `answers` question relations
+/ TODO: add good/bad notes
+
+* Twice-yearly clock changes for Daylight Saving Time #action
+  > causes &changes-cause-disrupted
+    * Disrupted sleep schedules &disrupted
+  > reduces
+    * Darker winter mornings &darker-mornings
+
+* US establish permanent Daylight Saving Time #action
+  > causes
+    * No more routine clock changes
+      > reduces
+        * $disrupted
+        ~ +models reality, so "_how_ A affects B" can be structurally discussed
+  > causes
+    * $darker-mornings
+      > causes
+        * Reduced circadian alignment
+          > causes
+            * $disrupted
+
+/ what to do about this one
+= $disrupted
+  ~ -this "important to increase" wording disables the ability to critique "is important to decrease"
+  < critiques
+    ~ +can distinguish relevance arguments from truth arguments
+    = Twice a year isn't that much
+
+= $changes-cause-disrupted
+  < critiques
+    = My sleep adjusts perfectly fine enough
+  < clarifies
+    ? Are there any studies establishing that sleep disruption is common?
+      ~ +allows Questions to specify unknowns

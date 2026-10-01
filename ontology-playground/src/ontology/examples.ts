@@ -15,6 +15,8 @@ export interface ExampleDef {
 }
 
 export const EXAMPLES: ExampleDef[] = [
+  // Every ontology writes this one and lists it first, which makes it the default everywhere.
+  { id: "minimal-daylight-savings", label: "Minimal (daylight savings)" },
   { id: "session-storage", label: "Session storage" },
   { id: "build-a-wall", label: "Build a wall" },
 ];

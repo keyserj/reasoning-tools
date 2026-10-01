@@ -1,0 +1,16 @@
+~ -no Questions for specifying what is unknown
+~ -models arguments but does not model reality
+
+? What should the US do regarding Daylight Saving Time?
+  ~ +allows Questions to guide discussion
+    / bug: Note cannot be underneath Question in Kialo ontology?
+  = The US should establish permanent Daylight Saving Time
+    + The twice-yearly clock changes disrupt sleep schedules
+      - Twice a year isn't that much
+        ~ -cannot distinguish relevance arguments from truth arguments
+      - My sleep adjusts perfectly fine enough
+    - Darker winter mornings could worsen circadian alignment and sleep
+  = The US should keep the current process of shifting an hour twice a year
+    ~ +allows linking alternatives via parent Question
+    + Avoids darker winter mornings to improve circadian alignment and sleep
+      ~ -comparing alternatives still requires duplicating arguments and maintaining dupes

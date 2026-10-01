@@ -7,6 +7,7 @@ import { legend } from "./legend.ts";
 import { renderedNodeTypes } from "./renderedNodeTypes.ts";
 import { renderedEdgeTypes } from "./renderedEdgeTypes.ts";
 import { features } from "./features.ts";
+import minimalDaylightSavings from "./examples/minimal-daylight-savings.txt?raw";
 import sessionStorage from "./examples/session-storage.txt?raw";
 import buildAWall from "./examples/build-a-wall.txt?raw";
 import { defaultConfig } from "./defaultConfig.ts";
@@ -27,9 +28,8 @@ export const relevanceArgumentMap = defineOntology<RelevanceArgDoc>({
   legendNote,
   renderedNodeTypes,
   renderedEdgeTypes,
-  // Session storage first: it's the minimal, syntax-teaching one, and it's the example IBIS
-  // also ships, so both ontologies land on the same topic before anything is switched.
   examples: [
+    { id: "minimal-daylight-savings", source: minimalDaylightSavings },
     { id: "session-storage", source: sessionStorage },
     { id: "build-a-wall", source: buildAWall },
   ],

@@ -12,7 +12,7 @@ import { mermaidExport } from "./ontology/mermaidExport.ts";
 import type { Ontology, OntologyExample, Theme } from "./ontology/types.ts";
 import { type ShareState, decodeState, encodeState } from "./share/url.ts";
 import Toolbar, { type PaneView } from "./components/Toolbar.tsx";
-import EditorPane, { type EditorTab } from "./components/editor/EditorPane.tsx";
+import EditorPane from "./components/editor/EditorPane.tsx";
 import DiagramPane from "./components/DiagramPane.tsx";
 import DocumentPicker from "./components/DocumentPicker.tsx";
 import RenderingStrip from "./components/RenderingStrip.tsx";
@@ -56,7 +56,6 @@ function draftKey(ontologyId: string, exampleId: string): string {
 
 export default function App() {
   const [shared, setShared] = useState<ShareState>(readInitialShared);
-  const [activeTab, setActiveTab] = useState<EditorTab>("source");
   const [pane, setPane] = useState<PaneView>("edit");
   const [legendOpen, setLegendOpen] = useState(false);
   const [miscConfigOpen, setMiscConfigOpen] = useState(false);
@@ -104,11 +103,6 @@ export default function App() {
     () => ontology.toGraph(parseResult.doc, shared.config, shared.features),
     [ontology, parseResult, shared.config, shared.features],
   );
-  // Only built while the tab that shows it is open.
-  const mermaidText = useMemo(
-    () => (activeTab === "mermaid" ? mermaidExport(graph, shared.config, ontology, theme) : ""),
-    [activeTab, graph, shared.config, ontology, theme],
-  );
 
   // "Dirty" is derived rather than stored, so an edit that happens to restore the original
   // text stops counting as one.
@@ -123,12 +117,21 @@ export default function App() {
     return () => clearTimeout(handle);
   }, [shared]);
 
-  // The Mermaid tab is generated output the caret means nothing in.
   const pickLine = (line: number | null) => {
     setActiveLine(line);
     if (line === null) return;
-    setActiveTab("source");
     setCaretRequest((previous) => ({ line, nonce: (previous?.nonce ?? 0) + 1 }));
+  };
+
+  /** Built on click: nothing else needs mermaid. */
+  const copyMermaid = async () => {
+    try {
+      await navigator.clipboard.writeText(mermaidExport(graph, shared.config, ontology, theme));
+      return true;
+    } catch {
+      setNotice("Couldn't copy: the browser didn't allow access to the clipboard");
+      return false;
+    }
   };
 
   /** Stash the current source so switching away from an edited example isn't destructive. */
@@ -147,7 +150,7 @@ export default function App() {
     if (next.id === ontology.id) return;
     stashDraft();
     setActiveLine(null);
-    setCaretRequest(null); // a pick still waiting on the Mermaid tab
+    setCaretRequest(null); // a pick still waiting for the editor to show
 
     // The same example id in another ontology is the whole point: one click, same reasoning,
     // different lens. When it isn't there, say so — a silently swapped document is the main
@@ -224,9 +227,6 @@ export default function App() {
           <EditorPane
             source={shared.source}
             onSourceChange={(source) => setShared((d) => ({ ...d, source }))}
-            mermaidText={mermaidText}
-            activeTab={activeTab}
-            onTabChange={setActiveTab}
             ontologyLabel={ontology.label}
             placeholder={ontology.placeholder}
             errors={parseResult.errors}
@@ -247,6 +247,7 @@ export default function App() {
             state={shared.features}
             onChange={(features) => setShared((d) => ({ ...d, features }))}
             onOpenStyle={() => setConfigOpen(true)}
+            onCopyMermaid={copyMermaid}
           />
           <DiagramPane
             graph={graph}

@@ -14,8 +14,8 @@ import { paramApplies } from "../ontology/features.ts";
 //
 // One pill and one open panel per feature is what keeps the strip bounded.
 //
-// The strip renders even for an ontology declaring no features (IBIS today), because Style
-// lives here — the diagram column has the same chrome whichever ontology is loaded.
+// The strip renders even for an ontology declaring no features, because Style lives here — the
+// diagram column has the same chrome whichever ontology is loaded.
 
 interface Props {
   features: FeatureDef[];
@@ -57,6 +57,11 @@ export default function RenderingStrip({ features, state, onChange, onOpenStyle 
         {/* Names the controls in the row rather than the diagram below, which needs no label to
             be recognized as a diagram. */}
         <span className="section-header">Rendering options</span>
+
+        {/* "for this ontology" because Style still sits in the row. */}
+        {features.length === 0 && (
+          <span className="italic opacity-60">no rendering options for this ontology</span>
+        )}
 
         {features.map((feature) => {
           const isOpen = feature.id === openId;

@@ -25,8 +25,7 @@ export const ibis = defineOntology<IbisDoc>({
   renderedNodeTypes,
   renderedEdgeTypes,
   examples: [{ id: "session-storage", source: sessionStorage }],
-  // No rendering questions worth switching between yet, which is also the case the feature
-  // strip has to degrade to: it renders nothing at all for an ontology with no features.
+  // No rendering questions worth switching between yet.
   features: [],
   placeholder,
   defaultConfig,

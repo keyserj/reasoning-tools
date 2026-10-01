@@ -31,6 +31,7 @@ export interface Claim {
 export interface Question {
   id: string;
   text: string;
+  notes: Note[];
 }
 
 /**
@@ -75,7 +76,7 @@ export interface KialoDoc {
   claims: Claim[];
   theses: Thesis[];
   arguments: Argument[];
-  /** `~` lines with no claim above them: notes about the document rather than about a claim. */
+  /** `~` lines with nothing above them: notes about the document rather than about any one thing. */
   notes: Note[];
   /** Where each of the above was written, by id; the `%` lines file under the topic's. */
   sourceLines: SourceLines;

@@ -150,10 +150,12 @@ exports[`parse > matches the parsed-model snapshot for the session-storage examp
   "questions": [
     {
       "id": "q1",
+      "notes": [],
       "text": "How should we handle session storage?",
     },
     {
       "id": "q2",
+      "notes": [],
       "text": "How do we run background jobs?",
     },
   ],

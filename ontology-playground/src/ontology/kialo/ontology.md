@@ -40,7 +40,7 @@ A question is core to [IBIS](../ibis/ontology.md): a topic starts with one, and 
   - `=`: a thesis. Its children are arguments
   - `+` / `-`: a claim supporting or critiquing the claim above
   - `@ [url] [label]`: a source for the claim above. The label is optional
-  - `~`: a note on the claim above — an authoring aside, never voted on. With no claim above it, it annotates the document instead
+  - `~`: a note on the question or claim above — an authoring aside, never voted on. With nothing above it, it annotates the document instead
   - `/`: a meta comment about the example - not shown in the diagram
   - `%[key]: [value]`: document-level property (must be at column 0)
     - `%description`: what the discussion is about
@@ -61,4 +61,4 @@ Kialo attaches sources to the claim rather than to the thesis or pro/con that us
 
 ### Notes
 
-Kialo has no note in the map; it has per-claim comment threads beside it. `~` is the playground's own authoring affordance, kept because both other ontologies have it. It attaches to a claim, or to the document when nothing is above it.
+Kialo has no note in the map; it has per-claim comment threads beside it. `~` is the playground's own authoring affordance, kept because both other ontologies have it. It attaches to a question or a claim, or to the document when nothing is above it.

@@ -35,8 +35,8 @@ const BRACKETED_LIST = /^\[(.*)\]$/;
 
 /**
  * What the lines nested under this one attach to. The two frames accept different children — a
- * question takes theses, a claim takes arguments, sources and notes — which is where most of
- * this parser's errors come from.
+ * question takes theses, a claim takes arguments and sources, and either takes notes — which is
+ * where most of this parser's errors come from.
  */
 type Frame =
   | { kind: "question"; indent: number; questionId: string }
@@ -195,7 +195,7 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
 
       const id = takeId(explicitId, "q", lineNo);
       fileLine(id, lineNo);
-      questions.push({ id, text: body });
+      questions.push({ id, text: body, notes: [] });
       stack.push({ kind: "question", indent, questionId: id });
       continue;
     }
@@ -234,12 +234,16 @@ export function parse(text: string): { doc: KialoDoc; errors: ParseError[] } {
       }
       const id = takeId(explicitId, "n", lineNo);
       fileLine(id, lineNo);
-      if (parent?.kind !== "claim") {
-        // No claim above it: a note about the document rather than about any one claim.
-        docNotes.push({ id, text: body });
-        continue;
+      const note = { id, text: body };
+      if (parent?.kind === "question") {
+        // A question can't be referenced, so unlike a claim's, its note can be filed right away.
+        questions.find((question) => question.id === parent.questionId)?.notes.push(note);
+      } else if (parent?.kind === "claim") {
+        pendingNotes.push({ note, claimId: parent.claimId });
+      } else {
+        // Nothing above it: a note about the document rather than about any one thing.
+        docNotes.push(note);
       }
-      pendingNotes.push({ note: { id, text: body }, claimId: parent.claimId });
       // A note is a leaf too, so it never becomes a frame either.
       continue;
     }

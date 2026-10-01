@@ -3,7 +3,6 @@
 
 ? What should the US do regarding Daylight Saving Time?
   ~ +allows Questions to guide discussion
-    / bug: Note cannot be underneath Question in Kialo ontology?
   = The US should establish permanent Daylight Saving Time
     + The twice-yearly clock changes disrupt sleep schedules
       - Twice a year isn't that much

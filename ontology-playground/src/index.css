@@ -6,6 +6,7 @@
 @import "./ontology/highlight.css";
 @import "./components/editor/EditorPane.css";
 @import "./components/DiagramPane.css";
+@import "./diagram/label.css";
 
 @plugin "daisyui" {
   themes:

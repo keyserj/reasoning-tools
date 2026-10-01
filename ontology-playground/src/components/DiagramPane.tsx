@@ -22,6 +22,30 @@ type PanZoom = ReturnType<typeof svgPanZoom>;
 /** Pan vs tap: without this, a pan that ended on a box would jump the caret. */
 const TAP_SLOP = 6;
 
+/** Relative to the fit. */
+const MIN_ZOOM = 0.2;
+const MAX_ZOOM = 20;
+
+/** Uncapped, fitting a one-box map blows it up to fill the pane. 1 is mermaid's own size. */
+const MAX_FIT_SCALE = 1.5;
+
+/** The fit, capped, as a zoom relative to svg-pan-zoom's uncapped one. */
+function cappedFit(panZoom: PanZoom) {
+  const { width, height, viewBox } = panZoom.getSizes();
+  return Math.min(1, MAX_FIT_SCALE / Math.min(width / viewBox.width, height / viewBox.height));
+}
+
+/** svg-pan-zoom measures its limits against its own fit; re-measure them against the capped one. */
+function syncZoomLimits(panZoom: PanZoom) {
+  const fit = cappedFit(panZoom);
+  panZoom.setMinZoom(MIN_ZOOM * fit).setMaxZoom(MAX_ZOOM * fit);
+}
+
+function fitToPane(panZoom: PanZoom) {
+  panZoom.zoom(cappedFit(panZoom));
+  panZoom.center();
+}
+
 export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: Props) {
   const containerRef = useRef<HTMLDivElement>(null);
   const panZoomRef = useRef<PanZoom | null>(null);
@@ -87,15 +111,16 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
         svg.setAttribute("width", "100%");
         svg.setAttribute("height", "100%");
         svg.style.maxWidth = "none";
-        panZoomRef.current = svgPanZoom(svg, {
+        const panZoom = svgPanZoom(svg, {
           zoomEnabled: true,
           controlIconsEnabled: false,
           fit: true,
           center: true,
-          minZoom: 0.2,
-          maxZoom: 20,
           dblClickZoomEnabled: false,
         });
+        syncZoomLimits(panZoom);
+        fitToPane(panZoom);
+        panZoomRef.current = panZoom;
       }
     })();
 
@@ -110,8 +135,8 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
     markActive(activeLine);
   }, [activeLine, markActive]);
 
-  // svg-pan-zoom measures the SVG once at init and caches it, so without this every later
-  // `fit()`/`reset()` would scale to the pane's size at render time rather than its size now.
+  // svg-pan-zoom measures the SVG once at init and caches it, so without this every later fit
+  // would scale to the pane's size at render time rather than its size now.
   // Re-measuring leaves the current pan/zoom alone; it only refreshes what "fit" means.
   useEffect(() => {
     const container = containerRef.current;
@@ -120,7 +145,10 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
     const observer = new ResizeObserver(() => {
       // A zero-size measurement (hidden pane) would leave a garbage scale cached.
       if (container.clientWidth === 0 || container.clientHeight === 0) return;
-      panZoomRef.current?.resize();
+      const panZoom = panZoomRef.current;
+      if (!panZoom) return;
+      panZoom.resize();
+      syncZoomLimits(panZoom);
     });
     observer.observe(container);
 
@@ -189,8 +217,7 @@ export default function DiagramPane({ mermaid, theme, activeLine, onPickLine }: 
           aria-label="Fit to screen"
           title="Fit to screen"
           onClick={() => {
-            panZoomRef.current?.fit();
-            panZoomRef.current?.center();
+            if (panZoomRef.current) fitToPane(panZoomRef.current);
           }}
         >
           {/* Corner brackets rather than a glyph like ⤢ or ⛶: the neighbours can be one character

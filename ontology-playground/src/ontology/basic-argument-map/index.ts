@@ -14,9 +14,9 @@ const legendNote =
 
 const placeholder = "= Your claim here &claim1\n  + A supporting argument\n  - A critique";
 
-export const argMapBasic = defineOntology<BasicArgDoc>({
-  id: "arg-map-basic",
-  label: "Arg map: basic",
+export const basicArgumentMap = defineOntology<BasicArgDoc>({
+  id: "basic-argument-map",
+  label: "Basic argument map",
   parse,
   toGraph,
   highlightLine,

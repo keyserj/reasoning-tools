@@ -11,7 +11,7 @@ import {
 } from "./markers.ts";
 
 /**
- * Tokenize one line of Arg map: basic source for the editor's highlight overlay.
+ * Tokenize one line of Basic argument map source for the editor's highlight overlay.
  *
  * It reads a line the way ./parse.ts does, through the same ./markers.ts regexes, but only ever
  * *this* line: indentation is plain text here, since what a line is nested under changes nothing

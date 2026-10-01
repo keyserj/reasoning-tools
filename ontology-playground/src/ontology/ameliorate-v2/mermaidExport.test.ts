@@ -5,7 +5,7 @@ import { ameliorateV2 as ontology } from "./index.ts";
 import { defaultConfig } from "./defaultConfig.ts";
 import { VIEW, EDGE_CLAIMS } from "./features.ts";
 import { deriveTypeStyle } from "../typeColors.ts";
-import { defaultConfig as argMapConfig } from "../arg-map-truth-and-relevance/defaultConfig.ts";
+import { defaultConfig as relevanceMapConfig } from "../relevance-argument-map/defaultConfig.ts";
 import type { FeatureState, StyleConfig, Theme } from "../types.ts";
 
 const fullImplied: FeatureState = {};
@@ -42,9 +42,13 @@ describe("mermaidExport", () => {
     expect(text).toContain("r__implied ~~~ i");
   });
 
-  it("matches Arg map's support and critique default colors", () => {
-    expect(defaultConfig.typeColors["positive-relation"]).toBe(argMapConfig.typeColors.supports);
-    expect(defaultConfig.typeColors["negative-relation"]).toBe(argMapConfig.typeColors.critiques);
+  it("matches the argument maps' support and critique default colors", () => {
+    expect(defaultConfig.typeColors["positive-relation"]).toBe(
+      relevanceMapConfig.typeColors.supports,
+    );
+    expect(defaultConfig.typeColors["negative-relation"]).toBe(
+      relevanceMapConfig.typeColors.critiques,
+    );
   });
 
   it.each(

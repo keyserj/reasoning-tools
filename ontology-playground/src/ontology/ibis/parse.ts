@@ -73,7 +73,7 @@ export function parse(text: string): { doc: IbisDoc; errors: ParseError[] } {
     (sourceLines[id] ??= []).push(line);
   };
 
-  /** `l` for link, as arg-map's edges take. */
+  /** `l` for link, as the Relevance argument map's edges take. */
   const nextEdgeId = (): string => {
     let id: string;
     do {

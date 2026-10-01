@@ -21,4 +21,4 @@ Which lines map is a rendering question, so it is answered here rather than in t
 
 ## Why flattening sits on the render side
 
-`toGraph.ts` is part of rendering, not of the model, because how a model is drawn can depend on the feature lens it is drawn through: arg-map's edge claims are connectors under one option and boxes under another, from one unchanged `ArgDoc`. An ontology whose model already is a `RenderGraph` simply hands it through.
+`toGraph.ts` is part of rendering, not of the model, because how a model is drawn can depend on the feature lens it is drawn through: the Relevance argument map's edge claims are connectors under one option and boxes under another, from one unchanged `RelevanceArgDoc`. An ontology whose model already is a `RenderGraph` simply hands it through.

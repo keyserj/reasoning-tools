@@ -2,7 +2,7 @@ import { defineOntology } from "../types.ts";
 import { parse } from "./parse.ts";
 import { toGraph } from "./toGraph.ts";
 import { highlightLine } from "./highlight.ts";
-import type { ArgDoc } from "./model.ts";
+import type { RelevanceArgDoc } from "./model.ts";
 import { legend } from "./legend.ts";
 import { renderedNodeTypes } from "./renderedNodeTypes.ts";
 import { renderedEdgeTypes } from "./renderedEdgeTypes.ts";
@@ -17,9 +17,9 @@ const legendNote =
 const placeholder =
   "%perspectives: [you]\n= Your thesis here &thesis\n  < supports[8]\n    = A reason to believe it";
 
-export const argMapTruthAndRelevance = defineOntology<ArgDoc>({
-  id: "arg-map-truth-and-relevance",
-  label: "Arg map: truth & relevance",
+export const relevanceArgumentMap = defineOntology<RelevanceArgDoc>({
+  id: "relevance-argument-map",
+  label: "Relevance argument map",
   parse,
   toGraph: (doc, _config, lens) => toGraph(doc, lens),
   highlightLine,

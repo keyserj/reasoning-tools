@@ -9,7 +9,7 @@ import { paramApplies } from "../ontology/features.ts";
 // beside Style because it exports this diagram, drawn with the style and lenses chosen here.
 //
 // Nothing here knows what a feature *means* — an ontology declares the table (see
-// arg-map-truth-and-relevance/features.ts) and only its `toGraph` gives an option effect.
+// relevance-argument-map/features.ts) and only its `toGraph` gives an option effect.
 // Style is handed in by the shell rather than declared as a `FeatureDef`, which is what keeps
 // that true: an ontology can't reach it, and the features path never learns a second meaning.
 //

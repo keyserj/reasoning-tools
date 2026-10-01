@@ -30,7 +30,7 @@ export interface Edge {
   notes: Note[];
 }
 
-export interface ArgDoc {
+export interface RelevanceArgDoc {
   /** `%description` — why the topic is being discussed */
   description?: string;
   /** `%perspectives` — whose scores appear, and in what order the slots are read */

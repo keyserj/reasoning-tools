@@ -13,9 +13,10 @@ export default function Legend({ open, entries, note, onClose }: Props) {
     <div className="modal modal-open">
       {/* Wider than daisyUI's 32rem default, which is sized for confirm dialogs; the key's third
           column is prose, and at 32rem every row wraps enough to fill the screen vertically. 56rem
-          is where that stops paying: it leaves only 2 of 13 arg-map rows wrapped and fits an
-          800px-tall window without scrolling, where 64rem buys 20px more for 8rem more width.
-          Only affects desktop — below the cap, modal-box's width: 91.6667% still governs. */}
+          is where that stops paying: it leaves only 2 of 13 Relevance argument map rows wrapped and
+          fits an 800px-tall window without scrolling, where 64rem buys 20px more for 8rem more
+          width. Only affects desktop — below the cap, modal-box's width: 91.6667% still
+          governs. */}
       <div className="modal-box max-w-4xl">
         <div className="flex items-center justify-between mb-3">
           <h3 className="font-bold text-lg">Syntax</h3>

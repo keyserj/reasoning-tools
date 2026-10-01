@@ -1,17 +1,17 @@
 import { describe, expect, it } from "vitest";
 import { parse } from "./parse.ts";
-import { parse as parseArgMap } from "../arg-map-truth-and-relevance/parse.ts";
+import { parse as parseRelevanceMap } from "../relevance-argument-map/parse.ts";
 import sessionStorage from "./examples/session-storage.txt?raw";
-import argMapSessionStorage from "../arg-map-truth-and-relevance/examples/session-storage.txt?raw";
+import relevanceMapSessionStorage from "../relevance-argument-map/examples/session-storage.txt?raw";
 
 describe("session-storage parity", () => {
   it("preserves the wording with the document description written as a note", () => {
-    expect(sessionStorage).toBe(argMapSessionStorage.replace(/^%description: /, "~ "));
+    expect(sessionStorage).toBe(relevanceMapSessionStorage.replace(/^%description: /, "~ "));
   });
 
   it("preserves claims, relation meaning, scores, reuse, and notes", () => {
     const result = parse(sessionStorage);
-    const baseline = parseArgMap(argMapSessionStorage);
+    const baseline = parseRelevanceMap(relevanceMapSessionStorage);
     expect(result.errors).toEqual([]);
     expect(result.warnings).toEqual([]);
     expect(baseline.errors).toEqual([]);

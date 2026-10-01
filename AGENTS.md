@@ -68,7 +68,7 @@ When you need a server for testing, first check whether one is already running v
 
 There is no root `package.json`; run everything from `ontology-playground/`, whose [README](./ontology-playground/README.md) lists the scripts. Node version is pinned in `.nvmrc` (24.18.0).
 
-A single test file or case: `npx vitest run src/ontology/arg-map-truth-and-relevance/parse.test.ts`, `npx vitest run -t "resolves \`$ref\`"`. Snapshots live in `__snapshots__/`; after deliberately changing parser or Mermaid-export output, re-record with `npx vitest run -u` and read the diff rather than trusting it.
+A single test file or case: `npx vitest run src/ontology/relevance-argument-map/parse.test.ts`, `npx vitest run -t "resolves \`$ref\`"`. Snapshots live in `__snapshots__/`; after deliberately changing parser or Mermaid-export output, re-record with `npx vitest run -u` and read the diff rather than trusting it.
 
 Vitest only collects `src/**/*.test.ts` in a `node` environment — there's no DOM test setup, so components are covered by typecheck and manual checks, not tests.
 

@@ -1,7 +1,7 @@
 // The `[6,-,8]` score row: one slot per perspective, in `%perspectives` order. Two ontologies
 // write it identically and differ only in what range a slot may hold, so the lexing lives here
 // and each ontology's own `scores.ts` declares its range and what a number there *means* —
-// belief 0..8 in arg-map, a Kialo vote 0..4.
+// belief 0..8 in the Relevance argument map, a Kialo vote 0..4.
 
 /** One score per perspective, in `%perspectives` order. `null` = that person didn't score it. */
 export type Scores = (number | null)[];

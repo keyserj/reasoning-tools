@@ -37,9 +37,9 @@ interface PendingRef {
 }
 
 /**
- * Parse the Arg map: basic markdown-ish syntax into an {@link BasicArgDoc}: one node per non-blank line,
- * parented by indentation, read through the markers ./markers.ts defines. Edges point child ->
- * parent and hold nothing else, which is ./model.ts's business.
+ * Parse the Basic argument map markdown-ish syntax into an {@link BasicArgDoc}: one node per
+ * non-blank line, parented by indentation, read through the markers ./markers.ts defines. Edges
+ * point child -> parent and hold nothing else, which is ./model.ts's business.
  */
 export function parse(text: string): { doc: BasicArgDoc; errors: ParseError[] } {
   const nodes: BasicArgNode[] = [];
@@ -74,7 +74,7 @@ export function parse(text: string): { doc: BasicArgDoc; errors: ParseError[] } 
     (sourceLines[id] ??= []).push(line);
   };
 
-  /** `l` for link, as arg-map's edges take. */
+  /** `l` for link, as the Relevance argument map's edges take. */
   const nextEdgeId = (): string => {
     let id: string;
     do {

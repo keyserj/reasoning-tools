@@ -11,8 +11,9 @@ function rootNodeIds(doc: BasicArgDoc): string[] {
 /**
  * Flatten an {@link BasicArgDoc} into the shared {@link RenderGraph}.
  *
- * Two translations: naming each edge, which Arg map: basic does by the child the edge runs from, and
- * turning each node's notes into boxes of their own, which is what a note is only ever drawn as.
+ * Two translations: naming each edge, which the Basic argument map does by the child the edge runs
+ * from, and turning each node's notes into boxes of their own, which is what a note is only ever
+ * drawn as.
  */
 export function toGraph(doc: BasicArgDoc): RenderGraph {
   const typeById = new Map(doc.nodes.map((node) => [node.id, node.type]));

@@ -8,10 +8,10 @@ import type {
 } from "../ontology/types.ts";
 import { ontologyList } from "../ontology/registry.ts";
 import { defaultFeatureState } from "../ontology/features.ts";
-import { parse as parseBasic } from "../ontology/arg-map-basic/parse.ts";
-import { argMapBasic } from "../ontology/arg-map-basic/index.ts";
-import { argMapTruthAndRelevance } from "../ontology/arg-map-truth-and-relevance/index.ts";
-import { EDGE_CLAIMS, SPELLED_OUT } from "../ontology/arg-map-truth-and-relevance/features.ts";
+import { parse as parseBasic } from "../ontology/basic-argument-map/parse.ts";
+import { basicArgumentMap } from "../ontology/basic-argument-map/index.ts";
+import { relevanceArgumentMap } from "../ontology/relevance-argument-map/index.ts";
+import { EDGE_CLAIMS, SPELLED_OUT } from "../ontology/relevance-argument-map/features.ts";
 import {
   ARROW_INSET,
   type DiagramLayout,
@@ -114,7 +114,7 @@ describe.each(cases)("$name", ({ ontology, graph }) => {
 });
 
 describe("layoutDiagram", () => {
-  const types = argMapBasic;
+  const types = basicArgumentMap;
   const node = (id: string, text = id) => ({ id, type: "claim", text });
 
   it("returns the placeholder for an empty graph", () => {
@@ -236,7 +236,7 @@ describe("layoutDiagram", () => {
           nodes: [{ id: "a", type: "claim", text: "A" }],
           edges: [{ from: "a", to: "a", type: "supports", label: "loops" }],
         },
-        argMapTruthAndRelevance,
+        relevanceArgumentMap,
         config(),
         fakeMeasure,
       ),
@@ -282,7 +282,7 @@ describe("layoutDiagram", () => {
     const { doc, errors } = parseBasic("= A &a\n  + B &b\n  + $b");
     expect(errors).toEqual([]);
     const layout = laidOut(
-      layoutDiagram(argMapBasic.toGraph(doc, config(), {}), types, config(), fakeMeasure),
+      layoutDiagram(basicArgumentMap.toGraph(doc, config(), {}), types, config(), fakeMeasure),
     );
     expect(layout.edges.map((e) => [e.from, e.to, e.lines])).toEqual([
       ["b", "a", [2]],
@@ -301,7 +301,7 @@ describe("layoutDiagram", () => {
             { from: "c", to: "b", type: "edge-half" },
           ],
         },
-        argMapTruthAndRelevance,
+        relevanceArgumentMap,
         config(),
         fakeMeasure,
       ),
@@ -343,18 +343,18 @@ describe("picture key", () => {
   const source =
     "= Thesis &t\n  < supports[8] &sup\n    = Reason &r\n  < critiques &c\n    = Doubt &d\n      ~ aside";
   const spelledOut = { [EDGE_CLAIMS]: { option: SPELLED_OUT } };
-  const graph = argMapTruthAndRelevance.toGraph(
-    argMapTruthAndRelevance.parse(source).doc,
-    argMapTruthAndRelevance.defaultConfig,
+  const graph = relevanceArgumentMap.toGraph(
+    relevanceArgumentMap.parse(source).doc,
+    relevanceArgumentMap.defaultConfig,
     spelledOut,
   );
-  const keyOf = (g: RenderGraph, c = argMapTruthAndRelevance.defaultConfig) =>
-    laidOut(layoutDiagram(g, argMapTruthAndRelevance, c, fakeMeasure)).key;
+  const keyOf = (g: RenderGraph, c = relevanceArgumentMap.defaultConfig) =>
+    laidOut(layoutDiagram(g, relevanceArgumentMap, c, fakeMeasure)).key;
 
   it("ignores source lines moving, as an edit above the argument moves them", () => {
-    const shifted = argMapTruthAndRelevance.toGraph(
-      argMapTruthAndRelevance.parse(`\n${source}`).doc,
-      argMapTruthAndRelevance.defaultConfig,
+    const shifted = relevanceArgumentMap.toGraph(
+      relevanceArgumentMap.parse(`\n${source}`).doc,
+      relevanceArgumentMap.defaultConfig,
       spelledOut,
     );
     expect(shifted.nodes.find((n) => n.id === "t")?.lines).toEqual([2]);
@@ -362,7 +362,7 @@ describe("picture key", () => {
   });
 
   it("ignores a recolor", () => {
-    const style = argMapTruthAndRelevance.defaultConfig;
+    const style = relevanceArgumentMap.defaultConfig;
     const recolored = { ...style, typeColors: { ...style.typeColors, claim: "#123456" } };
     expect(keyOf(graph, recolored)).toBe(keyOf(graph));
   });
@@ -397,7 +397,7 @@ describe("picture key", () => {
       ],
     };
     const layoutOf = (g: RenderGraph) =>
-      laidOut(layoutDiagram(g, argMapTruthAndRelevance, config(), fakeMeasure));
+      laidOut(layoutDiagram(g, relevanceArgumentMap, config(), fakeMeasure));
     expect([layoutOf(one).width, layoutOf(one).height]).toEqual([
       layoutOf(both).width,
       layoutOf(both).height,

@@ -1,4 +1,4 @@
-import { type ReactNode, useId, useState } from "react";
+import { type ReactNode, useId, useLayoutEffect, useRef, useState } from "react";
 import type { Ontology } from "../ontology/types.ts";
 import {
   type ExampleDef,
@@ -36,6 +36,8 @@ interface SectionProps {
   label: string;
   /** the current selection, rendered parenthesised after the label */
   selection: string;
+  /** the selection's description, shown below the pills */
+  description?: string;
   options: PickerOption[];
   selectedId: string | null;
   onSelect: (id: string) => void;
@@ -44,10 +46,63 @@ interface SectionProps {
 }
 
 /**
- * One accordion section: a header that always names the current selection, over a pill list that
- * can be collapsed.
+ * Below the pills and held at exactly two lines until expanded, so picking a pill moves neither
+ * the pill nor anything under it.
  */
-function PickerSection({ label, selection, options, selectedId, onSelect, action }: SectionProps) {
+function Description({ text }: { text: string }) {
+  const [expanded, setExpanded] = useState(false);
+  const [overflows, setOverflows] = useState(false);
+  const ref = useRef<HTMLParagraphElement>(null);
+  const textId = useId();
+
+  // A clamped box still reports its full height as `scrollHeight`, so one comparison against two
+  // lines answers "is there more?" whether or not the text is clamped right now.
+  useLayoutEffect(() => {
+    const el = ref.current;
+    if (!el) return;
+    const measure = () =>
+      setOverflows(el.scrollHeight > 2 * parseFloat(getComputedStyle(el).lineHeight));
+    const observer = new ResizeObserver(measure);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [text, expanded]);
+
+  return (
+    <div className="mt-1.5 flex items-end gap-2 text-xs">
+      <p
+        ref={ref}
+        id={textId}
+        className={`flex-1 min-h-[2lh] opacity-70 ${expanded ? "" : "line-clamp-2"}`}
+      >
+        {text}
+      </p>
+      {/* `invisible` rather than unmounted: the toggle's width stays reserved, so a description
+          wraps the same whether or not it has more to show. */}
+      <button
+        className={`shrink-0 cursor-pointer opacity-70 hover:underline ${overflows ? "" : "invisible"}`}
+        onClick={() => setExpanded((v) => !v)}
+        aria-expanded={expanded}
+        aria-controls={textId}
+      >
+        {expanded ? "less ▴" : "more ▾"}
+      </button>
+    </div>
+  );
+}
+
+/**
+ * One accordion section: a header that always names the current selection, over the pills and the
+ * selection's description, which collapse together.
+ */
+function PickerSection({
+  label,
+  selection,
+  description,
+  options,
+  selectedId,
+  onSelect,
+  action,
+}: SectionProps) {
   // Desktop has room to show every option at once; a phone doesn't, and the collapsed header
   // naming the current selection is written for exactly that case. Read once at mount rather
   // than tracked across resizes: crossing the breakpoint mid-session is rare next to the cost of
@@ -96,47 +151,45 @@ function PickerSection({ label, selection, options, selectedId, onSelect, action
       </div>
 
       {open && (
-        <div
-          id={listId}
-          role="group"
-          aria-label={label}
-          className="flex flex-wrap gap-1 px-3 py-1.5"
-        >
-          {options.map((option) => {
-            const selected = option.id === selectedId;
-            const unavailable = option.unavailable !== undefined;
-            return (
-              <button
-                key={option.id}
-                // A border on the unselected pills too, so they read as pills rather than as loose
-                // text; `option-selected` doubles its weight and adds a fill, and `aria-pressed`
-                // says the same thing the toolbar's pane toggle does.
-                //
-                // The unavailable color is set here rather than left to daisyUI's `:disabled`,
-                // which is 20% alpha — barely legible against the page surface these pills sit
-                // on. A disabled control is normally allowed to be that faint, but this one
-                // carries a message, and an unreadable message is no message.
-                className={`btn btn-xs btn-ghost border ${
-                  selected
-                    ? "option option-selected font-medium"
-                    : unavailable
-                      ? "border-base-content/20 font-normal text-base-content/50 hover:bg-transparent cursor-not-allowed"
-                      : "option border-base-content/20 font-normal"
-                }`}
-                aria-pressed={selected}
-                // `aria-disabled`, not `disabled`: `disabled` sets `pointer-events: none`, so the
-                // `title` below can never appear, and drops the pill out of the tab order, so a
-                // keyboard or screen-reader user never learns the example exists. Clicking is
-                // still not a selection — `onSelect` explains itself instead (see App's
-                // switchExample), the only route a touch device has.
-                aria-disabled={unavailable}
-                title={option.unavailable}
-                onClick={() => onSelect(option.id)}
-              >
-                {option.label}
-              </button>
-            );
-          })}
+        <div id={listId} className="px-3 py-1.5">
+          <div role="group" aria-label={label} className="flex flex-wrap gap-1">
+            {options.map((option) => {
+              const selected = option.id === selectedId;
+              const unavailable = option.unavailable !== undefined;
+              return (
+                <button
+                  key={option.id}
+                  // A border on the unselected pills too, so they read as pills rather than as
+                  // loose text; `option-selected` doubles its weight and adds a fill, and
+                  // `aria-pressed` says the same thing the toolbar's pane toggle does.
+                  //
+                  // The unavailable color is set here rather than left to daisyUI's `:disabled`,
+                  // which is 20% alpha — barely legible against the page surface these pills sit
+                  // on. A disabled control is normally allowed to be that faint, but this one
+                  // carries a message, and an unreadable message is no message.
+                  className={`btn btn-xs btn-ghost border ${
+                    selected
+                      ? "option option-selected font-medium"
+                      : unavailable
+                        ? "border-base-content/20 font-normal text-base-content/50 hover:bg-transparent cursor-not-allowed"
+                        : "option border-base-content/20 font-normal"
+                  }`}
+                  aria-pressed={selected}
+                  // `aria-disabled`, not `disabled`: `disabled` sets `pointer-events: none`, so the
+                  // `title` below can never appear, and drops the pill out of the tab order, so a
+                  // keyboard or screen-reader user never learns the example exists. Clicking is
+                  // still not a selection — `onSelect` explains itself instead (see App's
+                  // switchExample), the only route a touch device has.
+                  aria-disabled={unavailable}
+                  title={option.unavailable}
+                  onClick={() => onSelect(option.id)}
+                >
+                  {option.label}
+                </button>
+              );
+            })}
+          </div>
+          {description && <Description text={description} />}
         </div>
       )}
     </div>
@@ -188,6 +241,7 @@ export default function DocumentPicker({
       <PickerSection
         label="Ontologies"
         selection={ontology.label}
+        description={ontology.description}
         options={ontologyList.map((o) => ({ id: o.id, label: o.label }))}
         selectedId={ontology.id}
         onSelect={onOntologyChange}
@@ -197,6 +251,7 @@ export default function DocumentPicker({
       <PickerSection
         label="Examples"
         selection={`${exampleLabel(exampleId) ?? "Custom"}${dirty ? " • edited" : ""}`}
+        description={examples.find((example) => example.id === exampleId)?.description}
         options={exampleOptions}
         selectedId={exampleId}
         onSelect={onExampleChange}

@@ -225,6 +225,8 @@ export type FeatureState = Record<string, { option: string; params?: Record<stri
 export interface Ontology {
   id: string;
   label: string;
+  /** shown below the picker's pills while this ontology is selected */
+  description: string;
   parse: (text: string) => ParseResult;
   toGraph: (doc: unknown, config: StyleConfig, features: FeatureState) => RenderGraph;
   /**

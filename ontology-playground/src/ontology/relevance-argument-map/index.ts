@@ -12,6 +12,9 @@ import sessionStorage from "./examples/session-storage.txt?raw";
 import buildAWall from "./examples/build-a-wall.txt?raw";
 import { defaultConfig } from "./defaultConfig.ts";
 
+const description =
+  'Similar to the "Basic argument map" ontology, except edges between Claims can have their own child Claims. This allows explicitly debating over the relevance (does A actually support B?) separate from truth (is A true?).';
+
 const legendNote =
   "Claims are the only node type; a supports/critiques edge makes a claim of its own, which the Edge claims feature draws as a labeled connector or as a box — nest a `< critiques` under a `= $edge-id` block to attack an edge's relevance rather than its claim. Every score is belief in some claim, 0-8.";
 
@@ -21,6 +24,7 @@ const placeholder =
 export const relevanceArgumentMap = defineOntology<RelevanceArgDoc>({
   id: "relevance-argument-map",
   label: "Relevance argument map",
+  description,
   parse,
   toGraph: (doc, _config, lens) => toGraph(doc, lens),
   highlightLine,

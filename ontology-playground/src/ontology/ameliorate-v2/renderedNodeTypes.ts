@@ -1,5 +1,39 @@
 import type { NodeTypeDef } from "../types.ts";
 import { noteNodeType } from "../notes.ts";
+import type { EdgeTypeName } from "./markers.ts";
+
+export function relationType(type: EdgeTypeName): string {
+  if (type === "supports" || type === "causes") return "positive-relation";
+  if (type === "critiques" || type === "reduces" || type === "impedes") return "negative-relation";
+  return "relation";
+}
+
+export const relationNodeTypes: NodeTypeDef[] = [
+  {
+    id: "positive-relation",
+    label: "Positive relation",
+    icon: "✅",
+    description: "Supports or causes, colored by wording regardless of score signs.",
+    shape: ['(["', '"])'],
+    defaultColor: "#2166ac",
+  },
+  {
+    id: "negative-relation",
+    label: "Negative relation",
+    icon: "⛔",
+    description: "Critiques, reduces, or impedes, colored by wording regardless of score signs.",
+    shape: ['(["', '"])'],
+    defaultColor: "#b2182b",
+  },
+  {
+    id: "relation",
+    label: "Other relation",
+    icon: "🔗",
+    description: "Other relations in their written phrasing, with any written scores.",
+    shape: ['(["', '"])'],
+    defaultColor: "#64748b",
+  },
+];
 
 export const renderedNodeTypes: NodeTypeDef[] = [
   {
@@ -34,14 +68,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     shape: ['[["', '"]]'],
     defaultColor: "#7c3aed",
   },
-  {
-    id: "relation",
-    label: "Relation",
-    icon: "🔗",
-    description: "A relation in its written phrasing, with any written scores.",
-    shape: ['(["', '"])'],
-    defaultColor: "#64748b",
-  },
+  ...relationNodeTypes,
   noteNodeType,
   {
     id: "context",

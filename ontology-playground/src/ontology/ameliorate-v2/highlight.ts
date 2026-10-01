@@ -1,5 +1,6 @@
 import { createTokenSink, pushBody, pushScores, type TokenSink } from "../highlight.ts";
 import type { HighlightKind, HighlightToken } from "../types.ts";
+import { relationType } from "./renderedNodeTypes.ts";
 import {
   ID_SUFFIX,
   LEADING_WS,
@@ -64,9 +65,9 @@ export function highlightLine(line: string): HighlightToken[] {
     if (type === null) {
       pushBody(sink, content, ID_SUFFIX);
     } else {
-      sink.type(marker, "relation");
+      sink.type(marker, relationType(type));
       sink.plain(gap);
-      sink.type(type, "relation");
+      sink.type(type, relationType(type));
       pushBody(sink, pushScores(sink, afterType), ID_SUFFIX);
     }
   } else sink.plain(content);

@@ -6,7 +6,9 @@ const markerByType: Record<string, string> = {
   question: "?",
   claim: "=",
   source: "@",
-  relation: "causes, supports, …",
+  "positive-relation": "supports, causes",
+  "negative-relation": "critiques, reduces, impedes",
+  relation: "has, guides, …",
   note: "~",
   context: "%perspectives",
 };

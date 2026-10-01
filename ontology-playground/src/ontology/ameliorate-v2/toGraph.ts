@@ -2,6 +2,7 @@ import { scoresOf, subtypesOf, type Doc, type Edge, type Node } from "./model.ts
 import { addDocumentNotes, addNotes, type NoteOwner } from "../notes.ts";
 import { formatScores, type Scores } from "../scores.ts";
 import { featureOption } from "../features.ts";
+import { relationType } from "./renderedNodeTypes.ts";
 import type { FeatureState, RenderGraph } from "../types.ts";
 import {
   VIEW,
@@ -65,7 +66,7 @@ export function toGraph(doc: Doc, features: FeatureState): RenderGraph {
   };
 
   function claimText(id: string, ancestors: readonly string[] = []): string {
-    if (ancestors.length >= 3 || ancestors.includes(id)) return id;
+    if (ancestors.includes(id)) return id;
     const path = [...ancestors, id];
     const node = nodeById.get(id);
     if (node) {
@@ -132,7 +133,7 @@ export function toGraph(doc: Doc, features: FeatureState): RenderGraph {
       ];
       graph.nodes.push({
         id: edge.id,
-        type: "relation",
+        type: relationType(edge.type),
         text: withScores(edge.type, edge.scores),
         lines,
       });
@@ -143,7 +144,7 @@ export function toGraph(doc: Doc, features: FeatureState): RenderGraph {
       if (id) {
         graph.nodes.push({
           id,
-          type: "relation",
+          type: relationType(edge.type),
           text: withScores(`${marks.get(edge.id)} ${claimText(edge.id)}`, edge.scores),
           lines: doc.sourceLines[edge.id],
         });
@@ -157,9 +158,10 @@ export function toGraph(doc: Doc, features: FeatureState): RenderGraph {
     const from = displayId(edge.sourceId);
     const to = displayId(edge.targetId);
     const lines = doc.sourceLines[edge.id];
+    const type = relationType(edge.type);
     if (display === IMPLIED) {
-      if (known.has(from)) graph.edges.push({ from, to: edge.id, type: "half", lines });
-      if (known.has(to)) graph.edges.push({ from: edge.id, to, type: "relation", lines });
+      if (known.has(from)) graph.edges.push({ from, to: edge.id, type: `${type}-half`, lines });
+      if (known.has(to)) graph.edges.push({ from: edge.id, to, type, lines });
     } else {
       if (!known.has(from) || !known.has(to)) continue;
       const mark = marks.get(edge.id);
@@ -167,7 +169,7 @@ export function toGraph(doc: Doc, features: FeatureState): RenderGraph {
       graph.edges.push({
         from,
         to,
-        type: "relation",
+        type,
         label: `${mark ? `${mark} ` : ""}${edge.type}${scores}`,
         lines,
       });

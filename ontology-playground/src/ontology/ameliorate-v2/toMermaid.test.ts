@@ -4,6 +4,7 @@ import { toMermaid } from "./toMermaid.ts";
 import { defaultConfig } from "./defaultConfig.ts";
 import { VIEW, EDGE_CLAIMS } from "./features.ts";
 import { deriveTypeStyle } from "../typeColors.ts";
+import { defaultConfig as argMapConfig } from "../arg-map-truth-and-relevance/defaultConfig.ts";
 import type { FeatureState, Theme } from "../types.ts";
 
 const fullImplied: FeatureState = {};
@@ -45,7 +46,7 @@ describe("toMermaid", () => {
     expect(output.sourceMap.nodes.r__implied).toEqual([5]);
     expect(output.sourceMap.nodes.r).toBeUndefined();
     expect(output.sourceMap.edges).toEqual({ e0: [3], e1: [6], e3: [8] });
-    expect(output.text).toContain('w e0@-->|"① reduces [3,-5]"| i');
+    expect(output.text).toContain('w e0@-->|"⛔ ① reduces [3,-5]"| i');
     expect(output.text).toContain("r__implied ~~~ i");
   });
 
@@ -55,21 +56,42 @@ describe("toMermaid", () => {
     expect(output.sourceMap.edges).toEqual({ e0: [3], e1: [3] });
   });
 
-  it.each(["light", "dark"] as const)(
-    "shares the configured relation color between boxes and connectors in %s",
-    (theme) => {
-      const color = "#9452a5";
+  it("matches Arg map's support and critique default colors", () => {
+    expect(defaultConfig.typeColors["positive-relation"]).toBe(argMapConfig.typeColors.supports);
+    expect(defaultConfig.typeColors["negative-relation"]).toBe(argMapConfig.typeColors.critiques);
+  });
+
+  it.each(
+    (["light", "dark"] as const).flatMap((theme) =>
+      ["implied", "spelled-out"].map((display) => ({ theme, display })),
+    ),
+  )(
+    "shares configured relation colors between boxes and connectors in $theme / $display",
+    ({ theme, display }) => {
+      const colors = {
+        "positive-relation": "#347891",
+        "negative-relation": "#9452a5",
+        relation: "#778899",
+      };
       const output = toMermaid(
-        parse(sample).doc,
-        { ...defaultConfig, typeColors: { ...defaultConfig.typeColors, relation: color } },
-        {},
+        parse(`${sample}\n* Whole &whole\n  > has\n    * Part &part`).doc,
+        { ...defaultConfig, typeColors: { ...defaultConfig.typeColors, ...colors } },
+        { [EDGE_CLAIMS]: { option: display } },
         theme,
       );
-      const style = deriveTypeStyle(color, theme);
-      expect(output.text).toContain(
-        `classDef relation fill:${style.fill},stroke:${style.border},color:${style.text}`,
-      );
-      expect(output.text).toContain(`linkStyle 0,1,2,3 stroke:${style.border}`);
+      for (const [id, color] of Object.entries(colors)) {
+        const style = deriveTypeStyle(color, theme);
+        expect(output.text).toContain(
+          `classDef ${id} fill:${style.fill},stroke:${style.border},color:${style.text}`,
+        );
+      }
+      const indices = display === "implied" ? ["0,1", "2,3", "4,5"] : ["0", "1", "2"];
+      for (const [i, id] of ["negative-relation", "positive-relation", "relation"].entries()) {
+        const color = colors[id as keyof typeof colors];
+        expect(output.text).toContain(
+          `linkStyle ${indices[i]} stroke:${deriveTypeStyle(color, theme).border}`,
+        );
+      }
     },
   );
 
@@ -99,7 +121,7 @@ describe("toMermaid", () => {
       "light",
     );
     expect(output.text.startsWith("flowchart TB")).toBe(true);
-    expect(output.text).not.toContain("🔗");
+    expect(output.text).not.toMatch(/🔗|✅|⛔/);
     expect(output.sourceMap).toEqual(render(sample).sourceMap);
   });
 

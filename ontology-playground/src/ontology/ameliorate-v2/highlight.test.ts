@@ -1,6 +1,5 @@
 import { describe, expect, it } from "vitest";
 import { highlightLine } from "./highlight.ts";
-import { EDGE_TYPES } from "./markers.ts";
 import { renderedNodeTypes } from "./renderedNodeTypes.ts";
 import source from "../../../../ameliorate-v2/examples/build-a-wall.txt?raw";
 
@@ -49,12 +48,33 @@ describe("highlightLine", () => {
     ]);
   });
 
-  it.each(Object.keys(EDGE_TYPES))("recognizes the entire %s relation", (name) => {
-    expect(highlightLine(`  < ${name}[4,-] &r`).filter((token) => token.kind === "type")).toEqual([
-      { text: "<", kind: "type", typeId: "relation" },
-      { text: name, kind: "type", typeId: "relation" },
-    ]);
-  });
+  it.each([
+    ["supports", "positive-relation"],
+    ["causes", "positive-relation"],
+    ["critiques", "negative-relation"],
+    ["reduces", "negative-relation"],
+    ["impedes", "negative-relation"],
+    ["positively correlates with", "relation"],
+    ["negatively correlates with", "relation"],
+    ["fulfills", "relation"],
+    ["guides", "relation"],
+    ["clarifies", "relation"],
+    ["answers", "relation"],
+    ["mentions", "relation"],
+    ["categorizes", "relation"],
+    ["has", "relation"],
+    ["criterion for", "relation"],
+  ])(
+    "recognizes and colors the entire %s relation independently of score signs",
+    (name, typeId) => {
+      expect(highlightLine(`  < ${name}[4,-] &r`).filter((token) => token.kind === "type")).toEqual(
+        [
+          { text: "<", kind: "type", typeId },
+          { text: name, kind: "type", typeId },
+        ],
+      );
+    },
+  );
 
   it("peels interleaved node tags and IDs while retaining their original order and spacing", () => {
     expect(highlightLine("* A #topic  &wall\t#action ")).toEqual([

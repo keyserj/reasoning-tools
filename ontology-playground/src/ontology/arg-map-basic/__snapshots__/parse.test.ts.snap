@@ -1,0 +1,141 @@
+// Vitest Snapshot v1, https://vitest.dev/guide/snapshot.html
+
+exports[`parse > matches the parsed-model snapshot for the session-storage example 1`] = `
+{
+  "edges": [
+    {
+      "from": "n1",
+      "id": "l1",
+      "to": "i1",
+    },
+    {
+      "from": "c1",
+      "id": "l2",
+      "to": "i1",
+    },
+    {
+      "from": "n2",
+      "id": "l3",
+      "to": "c1",
+    },
+    {
+      "from": "n3",
+      "id": "l4",
+      "to": "i2",
+    },
+    {
+      "from": "n4",
+      "id": "l5",
+      "to": "i2",
+    },
+    {
+      "from": "c1",
+      "id": "l6",
+      "to": "n5",
+    },
+  ],
+  "nodes": [
+    {
+      "id": "i1",
+      "notes": [],
+      "text": "Use Redis",
+      "type": "claim",
+    },
+    {
+      "id": "n1",
+      "notes": [],
+      "text": "Fast, battle-tested",
+      "type": "support",
+    },
+    {
+      "id": "c1",
+      "notes": [],
+      "text": "Another service to operate",
+      "type": "critique",
+    },
+    {
+      "id": "n2",
+      "notes": [],
+      "text": "We have many services already, we're efficient at setting up another one",
+      "type": "critique",
+    },
+    {
+      "id": "i2",
+      "notes": [],
+      "text": "Use Postgres rows",
+      "type": "claim",
+    },
+    {
+      "id": "n3",
+      "notes": [],
+      "text": "One less dependency",
+      "type": "support",
+    },
+    {
+      "id": "n4",
+      "notes": [],
+      "text": "Slower for hot reads",
+      "type": "critique",
+    },
+    {
+      "id": "n5",
+      "notes": [
+        {
+          "id": "n6",
+          "text": "worker queues hit the same operational cost",
+        },
+      ],
+      "text": "Use a worker queue",
+      "type": "claim",
+    },
+  ],
+  "notes": [],
+  "sourceLines": {
+    "c1": [
+      3,
+    ],
+    "i1": [
+      1,
+    ],
+    "i2": [
+      5,
+    ],
+    "l1": [
+      2,
+    ],
+    "l2": [
+      3,
+    ],
+    "l3": [
+      4,
+    ],
+    "l4": [
+      6,
+    ],
+    "l5": [
+      7,
+    ],
+    "l6": [
+      11,
+    ],
+    "n1": [
+      2,
+    ],
+    "n2": [
+      4,
+    ],
+    "n3": [
+      6,
+    ],
+    "n4": [
+      7,
+    ],
+    "n5": [
+      8,
+    ],
+    "n6": [
+      10,
+    ],
+  },
+}
+`;

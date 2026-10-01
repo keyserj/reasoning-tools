@@ -72,7 +72,7 @@ interface PendingEdge {
  * (`=[4,1,8]`, `supports[8,2,8]`), and `= $id` references a claim or edge instead of declaring
  * one, which is how an argument attaches to an *edge's* implied claim.
  *
- * This is the whole of parsing: turning the model into something mermaid can draw is a
+ * This is the whole of parsing: turning the model into something the diagram can draw is a
  * rendering decision, and lives in ./toGraph.ts behind the `Edge claims` feature.
  */
 export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {

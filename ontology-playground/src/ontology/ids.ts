@@ -1,11 +1,10 @@
 // The id space a document writes into: which ids it may claim, and the tables keyed by them.
 
 /**
- * The ids the renderer mints rather than reading off a line: the topic box (./topic.ts), mermaid's
- * empty-graph placeholder, and any id renamed to keep mermaid's own tables working
- * (./mermaidFlowchart.ts). A document writing one would put two boxes under a single id — mermaid
- * draws them as one, and the source map keys both their lines to it — so a parser refuses an
- * explicit `_id` and mints its own instead.
+ * The ids the renderer mints rather than reading off a line: the topic box (./topic.ts), and any id
+ * the Mermaid export renames to keep mermaid's own tables working (./mermaidExport.ts). A document
+ * writing one would put two boxes under a single id, which the diagram draws as one, so a parser
+ * refuses an explicit `_id` and mints its own instead.
  */
 export const RESERVED_ID_PREFIX = "_";
 

@@ -28,7 +28,7 @@ Kialo itself draws a four-bar impact meter showing the crowd's average, plus a g
 
 `%description` and `%perspectives` render as one `topic` box. It earns its place: a score row like `[3,1]` can't be decoded without knowing the slot order.
 
-Left unconnected it would be a graph component of its own, and dagre drops those in among the claims where they read like part of the argument. Every root — each question, plus any thesis with no question — is anchored to it by an `anchor` edge, which uses mermaid's invisible `~~~` connector so it draws nothing and only fixes rank.
+Left unconnected it would be a graph component of its own, and dagre drops those in among the claims where they read like part of the argument. Every root — each question, plus any thesis with no question — is anchored to it by an `anchor` edge, which uses an invisible connector so it draws nothing and only fixes rank.
 
 - direction is load-bearing and easy to get backwards: the default layout is `BT`, where an edge's **target** is ranked above its **source**. So the edge runs `root ~~~ _topic`, not the other way round
 - every root rather than the first, so a document with two questions gets a header above both instead of above one column. (Arg-map still anchors only its first root, and records that as an open question.)

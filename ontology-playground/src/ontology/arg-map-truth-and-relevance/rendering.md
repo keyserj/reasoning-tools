@@ -4,7 +4,7 @@ How the playground draws [this ontology](./ontology.md) — a separate question 
 
 ## Edge claims: two renderings, switchable
 
-Every supports/critiques edge makes a claim — `A supports B` — which can itself be scored and argued about, and mermaid can't point an arrow at another arrow. Both ways of drawing that are implemented, and the **Edge claims** feature ([features.ts](./features.ts)) switches between them live. Neither is obviously right, which is why this is a switch rather than a decision.
+Every supports/critiques edge makes a claim — `A supports B` — which can itself be scored and argued about, and a connector can't point at another connector. Both ways of drawing that are implemented, and the **Edge claims** feature ([features.ts](./features.ts)) switches between them live. Neither is obviously right, which is why this is a switch rather than a decision.
 
 **Spelled out.** An edge is a labeled connector, `source ──"✅ ① supports [8,2,8]"──▶ target`. An edge someone argued about — one that is another edge's endpoint, or that carries a note — _additionally_ gets a **detached** node whose text spells its claim out (`① "wall-reduces" supports "wall"`, each side quoted and truncated to ~40 chars), and the arguments hang off that node instead of off either endpoint.
 
@@ -26,7 +26,7 @@ Every supports/critiques edge makes a claim — `A supports B` — which can its
 
 Because edges can become nodes, `renderedNodeTypes.ts` lists `supports` and `critiques` even though the ontology calls them edge types; because they can also become connectors, `renderedEdgeTypes.ts` lists them too. That's the point of the "rendered" prefix: what can appear as a box is not the same set as what the ontology is made of, and it depends on the lens.
 
-Labeled connectors are colored, since without color a supports and a critiques connector differ only by the word in the label. The color is the one the document configures for the matching _node_ type: `EdgeTypeDef.colorTypeId` names that type rather than freezing a hex, so a connector and the box it is the other form of are one entry in the **Style** panel and always agree. It takes the same border role a node's outline does, so it lifts in dark mode instead of sinking into the canvas. (How mermaid's `linkStyle` indices are counted is a trap documented where it's handled, in `../mermaidFlowchart.ts`.)
+Labeled connectors are colored, since without color a supports and a critiques connector differ only by the word in the label. The color is the one the document configures for the matching _node_ type: `EdgeTypeDef.colorTypeId` names that type rather than freezing a hex, so a connector and the box it is the other form of are one entry in the **Style** panel and always agree. It takes the same border role a node's outline does, so it lifts in dark mode instead of sinking into the canvas. (In the Mermaid export, how `linkStyle` indices are counted is a trap documented where it's handled, in `../mermaidExport.ts`.)
 
 ### Questions - Unanswered
 
@@ -41,7 +41,7 @@ Scores render on a second line, in the same `[5,2,8]` form as the source, so a c
 
 `%description` and `%perspectives` render as one `topic` box. It earns its place: a score row like `[5,2,8]` can't be decoded without knowing the slot order.
 
-Left unconnected it was a graph component of its own, and dagre dropped it in among the claims where it read like part of the argument. It's now anchored to the first root claim by an `anchor` edge, which uses mermaid's invisible `~~~` connector so it draws nothing and only fixes rank.
+Left unconnected it was a graph component of its own, and dagre dropped it in among the claims where it read like part of the argument. It's now anchored to the first root claim by an `anchor` edge, which uses an invisible connector so it draws nothing and only fixes rank.
 
 - direction is load-bearing and easy to get backwards: the default layout is `BT`, where an edge's **target** is ranked above its **source**. So the edge runs `root ~~~ _topic`, not the other way round — verified in the browser, not assumed
 - "first root claim" means the first claim in document order that never appears as an edge's source. With several top-level claims the header attaches to just one of them
@@ -50,8 +50,7 @@ Left unconnected it was a graph component of its own, and dagre dropped it in am
 
 - is anchoring to only the first root right when a document has several unrelated top-level claims? The header will sit above one of them rather than above the whole diagram
   - [session-storage](./examples/session-storage.txt) makes this visible on a default example: its two competing root claims leave the header hanging above `redis` alone
-  - the alternative is mermaid frontmatter (`---\ntitle: "..."\n---`), a true caption outside the graph, which would need `title?: string` on the shared `RenderGraph`. Titles are single-line with no wrapping, so a long `%description` becomes one very wide line
-  - note a title would reach mermaid from the URL hash, so it would need newline-stripping and quote-escaping — same threat model as `src/share/url.ts`
+  - the alternative is a true caption outside the graph, which would need `title?: string` on the shared `RenderGraph` and a place in the layout to draw it
 
 ## Colors and icons
 

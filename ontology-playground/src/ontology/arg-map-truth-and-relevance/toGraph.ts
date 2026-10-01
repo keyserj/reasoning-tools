@@ -14,8 +14,8 @@ import {
 import { type Scores, formatScores } from "./scores.ts";
 
 // How this ontology gets drawn — the one file to rewrite if the rendering should change.
-// Every supports/critiques edge makes a claim that can itself be argued about, and mermaid
-// can't point an arrow at another arrow; the `Edge claims` feature switches between the two
+// Every supports/critiques edge makes a claim that can itself be argued about, and a
+// connector can't point at another connector; the `Edge claims` feature switches between the two
 // answers to that, which ./rendering.md lays out and compares.
 
 /** How much of an endpoint's text a spelled-out claim quotes before it stops being readable. */
@@ -27,7 +27,7 @@ function rootClaimIds(doc: ArgDoc): string[] {
   return doc.claims.filter((claim) => !sources.has(claim.id)).map((claim) => claim.id);
 }
 
-/** Scores go on their own line; ../mermaidFlowchart.ts turns the newline into a `<br/>`. */
+/** Scores go on their own line: a label breaks at the text's newlines. */
 function withScores(text: string, scores: Scores | null): string {
   return scores === null ? text : `${text}\n${formatScores(scores)}`;
 }

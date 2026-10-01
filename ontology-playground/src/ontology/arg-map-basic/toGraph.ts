@@ -30,7 +30,7 @@ export function toGraph(doc: BasicArgDoc): RenderGraph {
     const lines = [...own, ...refLines];
     nodes.push({ id, type, text, ...(lines.length > 0 ? { lines } : {}) });
     // Per node rather than in one pass at the end, so a note's box is declared next to the
-    // node it is about; mermaid draws boxes in the order they're emitted.
+    // node it is about; the layout keeps boxes in the order they're listed where it can.
     addNotes(nodes, edges, [{ id, notes }], doc.sourceLines);
   }
 

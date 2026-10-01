@@ -5,8 +5,8 @@ import type { NodeShape } from "../ontology/types.ts";
 // through it. Curves (a stadium's caps, a rounded corner) are points along the curve, as mermaid
 // does for its stadium; at these radii the facets are well under a pixel.
 //
-// Sizes follow mermaid's flowchart shapes at its `padding` of 15, so the boxes keep the
-// proportions they were drawn with.
+// Sizes follow mermaid's flowchart shapes at its `padding` of 15, so a copied export draws the
+// same boxes.
 
 export interface Point {
   x: number;

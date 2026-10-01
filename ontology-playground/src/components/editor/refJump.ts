@@ -63,7 +63,7 @@ export function refTargetAt(index: RefIndex, offset: number): Span | undefined {
 
 /**
  * Scroll a line into view, centered, when it isn't already visible. `line` is 0-based — an index
- * into the tokenized lines, not the 1-based number a `ParseError` or the source map speaks.
+ * into the tokenized lines, not the 1-based number a `ParseError` or a drawn element's lines speak.
  *
  * Only vertical, because what a caller wants visible is the line's own text: a jumped-to `&id`
  * sits at the end of its line, and scrolling sideways to it would push that text off-screen.

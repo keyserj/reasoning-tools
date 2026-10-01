@@ -27,8 +27,7 @@
    The ramp is matched to Mermaid Live Editor's dark chrome, sampled off the running site rather
    than guessed: its page is RGB(2,8,23) and its panels RGB(30,41,59) — Tailwind `slate-950` and
    `slate-800`. This lands on RGB(3,11,26) / RGB(35,46,63) / RGB(58,70,88), a shade wider than the
-   reference. Matching it is worth doing because the diagram is Mermaid's own dark theme, so the
-   chrome around the canvas and the canvas itself draw from one family.
+   reference.
 
    Two things carry that separation and dropping either loses it. **Lightness** steps 15 points
    against daisyUI's ~4 and the light ramp's ~4 below: equal *perceptual* steps aren't equal

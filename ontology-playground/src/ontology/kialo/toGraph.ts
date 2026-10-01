@@ -15,7 +15,7 @@ const SOURCE_ICON = "🔗";
 /** Marks every box of a claim that is used in more than one place. */
 const REUSE_ICON = "🔀";
 
-/** Scores go on their own line; ../mermaidFlowchart.ts turns the newline into a `<br/>`. */
+/** Scores go on their own line: a label breaks at the text's newlines. */
 function withScores(text: string, scores: Scores | null): string {
   return scores === null ? text : `${text}\n${formatScores(scores)}`;
 }
@@ -94,7 +94,7 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
       );
     }
     // Per claim rather than in one pass, so a note's box is declared next to the claim it is
-    // about; mermaid draws boxes in the order they're emitted. A claim whose declaring line was
+    // about; the layout keeps boxes in the order they're listed where it can. A claim whose declaring line was
     // rejected has no box for a note to hang off, and ../notes.ts asks callers to say so.
     addNotes(nodes, edges, usages.some((usage) => !usage.viaRef) ? [claim] : [], doc.sourceLines);
   }

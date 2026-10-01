@@ -71,7 +71,7 @@ export type DiagramLayout =
 
 export const EMPTY_PLACEHOLDER = "(nothing to show yet — start typing on the left)";
 
-/** Mermaid's flowchart spacing, so a layout keeps the proportions it had. */
+/** Mermaid's flowchart spacing, so a copied export comes out with the same proportions. */
 const NODE_SEP = 50;
 const RANK_SEP = 50;
 const MARGIN = 8;

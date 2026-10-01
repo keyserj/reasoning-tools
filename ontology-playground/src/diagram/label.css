@@ -1,7 +1,8 @@
 /* A diagram label, both where it's drawn and where ./measure.ts sizes it off-screen, so not scoped
    under `.diagram-pane`. The two places inherit different things, so whatever could change the
    label's size is pinned here rather than inherited, and its width doesn't depend on its
-   container's. Mermaid's label typography: its font at 16px, line-height 1.5, wrapping at 200px. */
+   container's. Mermaid's label typography, so a copied export reads the same: its font at 16px, line-height
+   1.5, wrapping at 200px. */
 @layer components {
   .diagram-label {
     display: block;

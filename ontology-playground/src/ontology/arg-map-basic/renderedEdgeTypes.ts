@@ -3,9 +3,9 @@ import { anchorEdgeType } from "../anchoring.ts";
 import { noteEdgeType } from "../notes.ts";
 
 export const renderedEdgeTypes: EdgeTypeDef[] = [
-  { id: "relatesTo", connector: "-->" },
-  { id: "supports", connector: "-->" },
-  { id: "critiques", connector: "-->" },
+  { id: "relatesTo", connector: "arrow" },
+  { id: "supports", connector: "arrow" },
+  { id: "critiques", connector: "arrow" },
   noteEdgeType,
   // Draws nothing; it only ranks a document note above the argument — see ./toGraph.ts.
   anchorEdgeType,
@@ -14,5 +14,3 @@ export const renderedEdgeTypes: EdgeTypeDef[] = [
 export const renderedEdgeTypesById: Record<string, EdgeTypeDef> = Object.fromEntries(
   renderedEdgeTypes.map((t) => [t.id, t]),
 );
-
-export const DEFAULT_CONNECTOR = "-->";

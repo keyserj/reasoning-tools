@@ -31,13 +31,13 @@ export const noteNodeType: NodeTypeDef = {
   icon: "📝",
   description: "An aside attached to its parent. Drawn in the diagram, but never argued with.",
   // A parallelogram, which is what makes it read as an aside rather than as part of the argument.
-  shape: ['[/"', '"/]'],
+  shape: "parallelogram",
   // Sticky-note yellow, on the warm-band split argued in arg-map-truth-and-relevance/rendering.md.
   defaultColor: "#d3ad20",
 };
 
 /** Dotted, so a note reads as attached to the argument rather than as a move within it. */
-export const noteEdgeType: EdgeTypeDef = { id: NOTE_TYPE_ID, connector: "-.->" };
+export const noteEdgeType: EdgeTypeDef = { id: NOTE_TYPE_ID, connector: "dotted-arrow" };
 
 /**
  * Draw each owner's notes: a box per note, on a dotted connector back to the thing it annotates.

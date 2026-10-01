@@ -3,7 +3,7 @@ import { flowchart } from "../mermaidFlowchart.ts";
 import type { Doc } from "./model.ts";
 import { toGraph } from "./toGraph.ts";
 import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
-import { DEFAULT_CONNECTOR, renderedEdgeTypesById } from "./renderedEdgeTypes.ts";
+import { renderedEdgeTypesById } from "./renderedEdgeTypes.ts";
 
 export function toMermaid(
   doc: Doc,
@@ -14,11 +14,7 @@ export function toMermaid(
   return flowchart(
     toGraph(doc, features),
     config,
-    {
-      renderedNodeTypesById,
-      renderedEdgeTypesById,
-      defaultConnector: DEFAULT_CONNECTOR,
-    },
+    { renderedNodeTypesById, renderedEdgeTypesById },
     theme,
   );
 }

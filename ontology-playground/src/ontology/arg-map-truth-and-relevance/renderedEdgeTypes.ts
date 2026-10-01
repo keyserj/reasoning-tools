@@ -17,21 +17,21 @@ import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 // color, and reads its icon off the same table, so the two forms of one concept can't drift
 // apart.
 export const renderedEdgeTypes: EdgeTypeDef[] = [
-  { id: "link", connector: "-->" },
+  { id: "link", connector: "arrow" },
   // Reified halves — see ./rendering.md. `edge-to-edge` stays plain: weight is the active mark's
   // channel, and a permanently thick connector would read as picked.
-  { id: "edge-half", connector: "---" },
-  { id: "edge-to-edge", connector: "-->" },
+  { id: "edge-half", connector: "line" },
+  { id: "edge-to-edge", connector: "arrow" },
   noteEdgeType,
   {
     id: "supports",
-    connector: "-->",
+    connector: "arrow",
     colorTypeId: "supports",
     icon: renderedNodeTypesById.supports.icon,
   },
   {
     id: "critiques",
-    connector: "-->",
+    connector: "arrow",
     colorTypeId: "critiques",
     icon: renderedNodeTypesById.critiques.icon,
   },
@@ -44,5 +44,3 @@ export const renderedEdgeTypes: EdgeTypeDef[] = [
 export const renderedEdgeTypesById: Record<string, EdgeTypeDef> = Object.fromEntries(
   renderedEdgeTypes.map((t) => [t.id, t]),
 );
-
-export const DEFAULT_CONNECTOR = "-->";

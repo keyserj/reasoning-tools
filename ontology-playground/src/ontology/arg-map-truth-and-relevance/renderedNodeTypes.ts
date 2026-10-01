@@ -1,7 +1,7 @@
 import type { NodeTypeDef } from "../types.ts";
 import { noteNodeType } from "../notes.ts";
 
-// The single place a *rendered* node type is defined: icons, mermaid shapes, style defaults,
+// The single place a *rendered* node type is defined: icons, shapes, style defaults,
 // style-panel labels and the legend's type rows all derive from this table. Syntax (which
 // marker produces which type) lives in ./markers.ts instead.
 //
@@ -19,7 +19,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Claim",
     icon: "💬",
     description: "A statement phrased so a reader can say how much they believe it.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#d97706",
   },
   {
@@ -27,7 +27,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Supports",
     icon: "✅",
     description: "An edge saying its source claim is a reason to believe its target.",
-    shape: ['(["', '"])'],
+    shape: "stadium",
     defaultColor: "#2166ac",
   },
   {
@@ -35,7 +35,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Critiques",
     icon: "⛔",
     description: "An edge saying its source claim is a reason to doubt its target.",
-    shape: ['(["', '"])'],
+    shape: "stadium",
     defaultColor: "#b2182b",
   },
   {
@@ -47,7 +47,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Topic",
     icon: "📋",
     description: "The header box: what this topic is and why it's worth discussing.",
-    shape: ['[["', '"]]'],
+    shape: "subroutine",
     defaultColor: "#7c3aed",
   },
 ];

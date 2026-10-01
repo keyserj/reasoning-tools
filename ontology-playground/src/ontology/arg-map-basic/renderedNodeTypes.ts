@@ -8,7 +8,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Claim",
     icon: "💡",
     description: "A statement without a supporting or critical stance toward its parent.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#d97706",
   },
   {
@@ -16,7 +16,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Support",
     icon: "✅",
     description: "An argument supporting its parent.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#2166ac",
   },
   {
@@ -24,7 +24,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Critique",
     icon: "⛔",
     description: "An argument objecting to its parent.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#b2182b",
   },
   {

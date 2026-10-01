@@ -6,7 +6,7 @@ const render = (edges: RenderEdge[]) =>
   flowchart(
     { nodes: [{ id: "a-b", type: "claim", text: "Claim", lines: [1] }], edges },
     { direction: "BT", showIcons: false, typeColors: {} },
-    { renderedNodeTypesById: {}, renderedEdgeTypesById: {}, defaultConnector: "-->" },
+    { renderedNodeTypesById: {}, renderedEdgeTypesById: {} },
     "light",
   );
 const loop = (lines?: number[]): RenderEdge => ({

@@ -95,6 +95,18 @@ export type LayoutDirection = (typeof LAYOUT_DIRECTIONS)[number];
 
 export type Theme = "light" | "dark";
 
+export type NodeShape =
+  | "rect"
+  | "rounded"
+  | "stadium"
+  | "subroutine"
+  | "hexagon"
+  | "diamond"
+  | "parallelogram";
+
+/** How a connector is drawn. `invisible` shapes the layout and draws nothing — see ./anchoring.ts. */
+export type Connector = "arrow" | "line" | "dotted-arrow" | "invisible";
+
 /** Everything an ontology declares about one of its node types, in one place. */
 export interface NodeTypeDef {
   id: string;
@@ -103,16 +115,14 @@ export interface NodeTypeDef {
   icon: string;
   /** legend prose */
   description: string;
-  /** mermaid wrapping delimiters: [open, close]. Text goes between them, quoted. */
-  shape: [string, string];
+  shape: NodeShape;
   /** `#rrggbb`; fill, border and text are derived from it — see ./typeColors.ts */
   defaultColor: string;
 }
 
 export interface EdgeTypeDef {
   id: string;
-  /** mermaid connector, e.g. "-->" or "-.->" */
-  connector: string;
+  connector: Connector;
   /**
    * Draw this connector in the color the document configures for that *node* type, derived per
    * theme like a node's border and emitted as a `linkStyle`. A connector and a box are two forms

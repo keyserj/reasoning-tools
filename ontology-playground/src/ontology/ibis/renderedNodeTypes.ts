@@ -1,7 +1,7 @@
 import type { NodeTypeDef } from "../types.ts";
 import { noteNodeType } from "../notes.ts";
 
-// The single place a *rendered* node type is defined: icons, mermaid shapes, style defaults,
+// The single place a *rendered* node type is defined: icons, shapes, style defaults,
 // style-panel labels and the legend's type rows all derive from this table. Syntax (which
 // marker produces which type) lives in ./markers.ts instead.
 //
@@ -15,7 +15,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Question / Issue",
     icon: "❓",
     description: "A question or issue to resolve.",
-    shape: ['{{"', '"}}'],
+    shape: "hexagon",
     defaultColor: "#71717a",
   },
   {
@@ -23,7 +23,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Idea / Position",
     icon: "💡",
     description: "A possible answer to its parent question.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#d97706",
   },
   {
@@ -31,7 +31,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Pro",
     icon: "✅",
     description: "An argument supporting its parent.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#2166ac",
   },
   {
@@ -39,7 +39,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Con",
     icon: "⛔",
     description: "An argument objecting to its parent.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#b2182b",
   },
   {

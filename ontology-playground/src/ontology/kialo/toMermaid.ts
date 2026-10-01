@@ -3,7 +3,7 @@ import { flowchart } from "../mermaidFlowchart.ts";
 import type { KialoDoc } from "./model.ts";
 import { toGraph } from "./toGraph.ts";
 import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
-import { DEFAULT_CONNECTOR, renderedEdgeTypesById } from "./renderedEdgeTypes.ts";
+import { renderedEdgeTypesById } from "./renderedEdgeTypes.ts";
 
 /**
  * Convert a {@link KialoDoc} + {@link StyleConfig} into a mermaid flowchart.
@@ -22,7 +22,7 @@ export function toMermaid(
   return flowchart(
     toGraph(doc, config.showIcons),
     config,
-    { renderedNodeTypesById, renderedEdgeTypesById, defaultConnector: DEFAULT_CONNECTOR },
+    { renderedNodeTypesById, renderedEdgeTypesById },
     theme,
   );
 }

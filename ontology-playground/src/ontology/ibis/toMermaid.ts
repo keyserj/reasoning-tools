@@ -3,7 +3,7 @@ import { flowchart } from "../mermaidFlowchart.ts";
 import type { IbisDoc } from "./model.ts";
 import { toGraph } from "./toGraph.ts";
 import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
-import { DEFAULT_CONNECTOR, renderedEdgeTypesById } from "./renderedEdgeTypes.ts";
+import { renderedEdgeTypesById } from "./renderedEdgeTypes.ts";
 
 /**
  * Convert an {@link IbisDoc} into mermaid: flatten it into a {@link RenderGraph}, then run the
@@ -18,10 +18,5 @@ export function toMermaid(
   _features: FeatureState,
   theme: Theme,
 ): MermaidOutput {
-  return flowchart(
-    toGraph(doc),
-    config,
-    { renderedNodeTypesById, renderedEdgeTypesById, defaultConnector: DEFAULT_CONNECTOR },
-    theme,
-  );
+  return flowchart(toGraph(doc), config, { renderedNodeTypesById, renderedEdgeTypesById }, theme);
 }

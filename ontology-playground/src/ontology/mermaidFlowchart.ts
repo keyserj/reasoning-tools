@@ -1,6 +1,8 @@
 import type {
+  Connector,
   EdgeTypeDef,
   MermaidOutput,
+  NodeShape,
   NodeTypeDef,
   RenderGraph,
   SourceMap,
@@ -17,7 +19,23 @@ import { deriveTypeStyle } from "./typeColors.ts";
 // A node's `text` may contain newlines: they become `<br/>`, which is how an ontology
 // puts a second line (scores, say) into a label without this file knowing what it means.
 
-const FALLBACK_SHAPE: [string, string] = ['["', '"]'];
+/** Wrapping delimiters: text goes between them, quoted. */
+const SHAPES: Record<NodeShape, [string, string]> = {
+  rect: ['["', '"]'],
+  rounded: ['("', '")'],
+  stadium: ['(["', '"])'],
+  subroutine: ['[["', '"]]'],
+  hexagon: ['{{"', '"}}'],
+  diamond: ['{"', '"}'],
+  parallelogram: ['[/"', '"/]'],
+};
+
+const CONNECTORS: Record<Connector, string> = {
+  arrow: "-->",
+  line: "---",
+  "dotted-arrow": "-.->",
+  invisible: "~~~",
+};
 
 /**
  * `RenderNode.dashed` rides on a second class rather than on the node's `:::type`, since a node
@@ -30,7 +48,6 @@ const DASHED_CLASS = "dashed";
 export interface FlowchartTables {
   renderedNodeTypesById: Record<string, NodeTypeDef>;
   renderedEdgeTypesById: Record<string, EdgeTypeDef>;
-  defaultConnector: string;
 }
 
 /**
@@ -101,14 +118,14 @@ export function flowchart(
     };
   }
 
-  const { renderedNodeTypesById, renderedEdgeTypesById, defaultConnector } = tables;
+  const { renderedNodeTypesById, renderedEdgeTypesById } = tables;
   const idMap = buildIdMap(graph);
   const lines: string[] = [`flowchart ${config.direction}`];
 
   const dashedIds: string[] = [];
   for (const node of graph.nodes) {
     const def = renderedNodeTypesById[node.type];
-    const [open, close] = def?.shape ?? FALLBACK_SHAPE;
+    const [open, close] = SHAPES[def?.shape ?? "rect"];
     const icon = config.showIcons && def ? `${def.icon} ` : "";
     const label = escapeLabel(`${icon}${node.text}`);
     const id = idMap.get(node.id);
@@ -129,7 +146,7 @@ export function flowchart(
     const to = idMap.get(edge.to);
     if (!from || !to) continue;
     const def = renderedEdgeTypesById[edge.type];
-    const connector = def?.connector ?? defaultConnector;
+    const connector = CONNECTORS[def?.connector ?? "arrow"];
     // The pipe form composes with any connector (including `-.->`) without having to take
     // the connector string apart, which the `-- "text" -->` form would need. An edge icon
     // rides on `showIcons` exactly as a node's does.

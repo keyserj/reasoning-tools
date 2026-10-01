@@ -162,8 +162,11 @@ export default function EditorPane({
       <div className="flex items-center h-10 bg-base-200 px-3 shrink-0">
         {/* "Code" rather than the ontology's name: the picker above already names the ontology,
             and a fixed-width label keeps this row from being at the mercy of how long an
-            ontology chose to call itself — the label plus both buttons has to fit 320px. */}
-        <span className="section-header">Code</span>
+            ontology chose to call itself — the label plus both buttons has to fit 320px.
+
+            Padded and bordered like the button that heads each band above, so all three titles
+            start at the same x. */}
+        <span className="section-header px-3 border border-transparent">Code</span>
 
         {/* Both sit with the editor they act on rather than in the page header. They travel as
             one group so a narrow row drops them together rather than splitting the pair. */}

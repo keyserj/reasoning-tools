@@ -1,6 +1,7 @@
-# Nothing under scripts/ or examples/ is deployed - a wireframe pastes the generated bundle in
-# rather than loading it - so these checks are their own workflow instead of a step in the deploy,
-# where a failing test would block a site that had nothing to change.
+# Nothing under scripts/ or examples/ is deployed except examples/build-a-wall.txt, which is
+# bundled in the playground. A wireframe pastes the generated bundle rather than loading it, so
+# these checks are their own workflow instead of a step in the deploy, where a failing test would
+# block a site that had nothing to change.
 name: Check ameliorate-v2 scripts
 
 on:

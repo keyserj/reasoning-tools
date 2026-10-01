@@ -39,9 +39,6 @@
 
   .editor-line {
     display: block;
-    /* Empty lines have no content; without this the overlay drifts from the textarea at the first
-       blank. */
-    min-height: 1lh;
   }
 
   /* Below the selection ladder in index.css: where you are, not what you chose. Dark 12% because

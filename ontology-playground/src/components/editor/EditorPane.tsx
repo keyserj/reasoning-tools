@@ -255,9 +255,16 @@ export default function EditorPane({
                     key={i}
                     className={`editor-line${i + 1 === activeLine ? " editor-line-active" : ""}`}
                   >
-                    {tokens.map((token, j) => (
-                      <Token key={j} token={token} config={config} />
-                    ))}
+                    {/* The `<br>` gives an empty line its line box, without which the overlay
+                        drifts from the textarea at the first blank. Not `min-height: 1lh`: in
+                        Chrome, an `lh` unit on the page makes every restyle that daisyUI's
+                        `:has()` rules trigger cover the whole page, so every DOM change costs a
+                        full restyle. */}
+                    {tokens.length === 0 ? (
+                      <br />
+                    ) : (
+                      tokens.map((token, j) => <Token key={j} token={token} config={config} />)
+                    )}
                   </span>
                 ))}
               </span>

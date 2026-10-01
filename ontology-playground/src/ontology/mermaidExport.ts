@@ -1,23 +1,29 @@
-import type {
-  EdgeTypeDef,
-  MermaidOutput,
-  NodeTypeDef,
-  RenderGraph,
-  SourceMap,
-  StyleConfig,
-  Theme,
-} from "./types.ts";
-import { RESERVED_ID_PREFIX, idTable } from "./ids.ts";
+import type { Connector, NodeShape, RenderGraph, StyleConfig, Theme, TypeTables } from "./types.ts";
+import { RESERVED_ID_PREFIX } from "./ids.ts";
 import { deriveTypeStyle } from "./typeColors.ts";
 
-// Shared mermaid-flowchart renderer. Every ontology's `toMermaid` is the same walk over
-// nodes and edges; only the lookup tables differ, so they live in the ontology and the
-// walk lives here.
+// The diagram as mermaid flowchart source, for pasting elsewhere. Nothing in the app renders it.
 //
 // A node's `text` may contain newlines: they become `<br/>`, which is how an ontology
 // puts a second line (scores, say) into a label without this file knowing what it means.
 
-const FALLBACK_SHAPE: [string, string] = ['["', '"]'];
+/** Wrapping delimiters: text goes between them, quoted. */
+const SHAPES: Record<NodeShape, [string, string]> = {
+  rect: ['["', '"]'],
+  rounded: ['("', '")'],
+  stadium: ['(["', '"])'],
+  subroutine: ['[["', '"]]'],
+  hexagon: ['{{"', '"}}'],
+  diamond: ['{"', '"}'],
+  parallelogram: ['[/"', '"/]'],
+};
+
+const CONNECTORS: Record<Connector, string> = {
+  arrow: "-->",
+  line: "---",
+  "dotted-arrow": "-.->",
+  invisible: "~~~",
+};
 
 /**
  * `RenderNode.dashed` rides on a second class rather than on the node's `:::type`, since a node
@@ -27,30 +33,13 @@ const FALLBACK_SHAPE: [string, string] = ['["', '"]'];
  */
 const DASHED_CLASS = "dashed";
 
-export interface FlowchartTables {
-  renderedNodeTypesById: Record<string, NodeTypeDef>;
-  renderedEdgeTypesById: Record<string, EdgeTypeDef>;
-  defaultConnector: string;
-}
-
 /**
  * Escape text for use inside a mermaid quoted label.
  *
- * Labels render as HTML (`flowchart.htmlLabels`), so unescaped markup in a node's text
- * renders as markup. Two reasons that matters, and the second is the load-bearing one:
- *
- * 1. Fidelity: someone writing `R&D` or `&lt;b&gt;` in a node should see what they typed.
- * 2. Documents arrive from other people, as a whole `ShareState` in the URL hash (see
- *    ../share/url.ts), so node text is untrusted. Before this escaping, a link you were
- *    sent could put `<img src=https://attacker.example/pixel.png>` in a node and your
- *    browser would fetch it on load — an IP/user-agent beacon firing with no interaction,
- *    from a diagram that looks ordinary. Styled `<div>`s could likewise overlay the
- *    diagram with content that isn't in the document.
- *
- * This is not the XSS defense: mermaid's `securityLevel: "strict"` (see ../../mermaidClient.ts)
- * DOMPurifies away scripts, event handlers, `javascript:` hrefs and iframes, and it still
- * would if this function were deleted. But DOMPurify deliberately allows `<img>`, so the
- * beacon above survived it — escaping here is what stops that, not defense in depth.
+ * Mermaid renders labels as HTML by default, so unescaped markup in a node's text renders as
+ * markup wherever the export is drawn. Someone writing `R&D` or `&lt;b&gt;` should see what they
+ * typed there, and a document can arrive from someone else as a shared link (../share/url.ts),
+ * which must not be able to slip an `<img>` beacon into whatever renders the export.
  *
  * Order matters: `&` first so the entities below aren't double-escaped, and the newline
  * `<br/>` last so it survives as the one tag this function does emit.
@@ -85,72 +74,51 @@ function buildIdMap(graph: RenderGraph): Map<string, string> {
   return map;
 }
 
-/** Convert a {@link RenderGraph} + {@link StyleConfig} into mermaid, and the way back to the text. */
-export function flowchart(
+/** Convert a {@link RenderGraph} + {@link StyleConfig} into mermaid flowchart source. */
+export function mermaidExport(
   graph: RenderGraph,
   config: StyleConfig,
-  tables: FlowchartTables,
+  types: TypeTables,
   theme: Theme,
-): MermaidOutput {
-  const sourceMap: SourceMap = { nodes: idTable(), edges: idTable() };
-
-  if (graph.nodes.length === 0) {
-    return {
-      text: `flowchart ${config.direction}\n  _empty["(nothing to show yet — start typing on the left)"]`,
-      sourceMap,
-    };
-  }
-
-  const { renderedNodeTypesById, renderedEdgeTypesById, defaultConnector } = tables;
-  const idMap = buildIdMap(graph);
+): string {
   const lines: string[] = [`flowchart ${config.direction}`];
+  if (graph.nodes.length === 0) return lines[0];
+
+  const nodeTypes = new Map(types.renderedNodeTypes.map((t) => [t.id, t]));
+  const edgeTypes = new Map(types.renderedEdgeTypes.map((t) => [t.id, t]));
+  const idMap = buildIdMap(graph);
 
   const dashedIds: string[] = [];
   for (const node of graph.nodes) {
-    const def = renderedNodeTypesById[node.type];
-    const [open, close] = def?.shape ?? FALLBACK_SHAPE;
+    const def = nodeTypes.get(node.type);
+    const [open, close] = SHAPES[def?.shape ?? "rect"];
     const icon = config.showIcons && def ? `${def.icon} ` : "";
     const label = escapeLabel(`${icon}${node.text}`);
     const id = idMap.get(node.id);
     if (node.dashed && id) dashedIds.push(id);
-    if (id && node.lines?.length) sourceMap.nodes[id] = node.lines;
     lines.push(`  ${id}${open}${label}${close}:::${node.type}`);
   }
 
   // `linkStyle` targets edges by the position they were *declared* in, so the indices are
   // collected as the lines are emitted. An edge whose endpoint is missing (a dropped half-edge
   // from an unresolved `$ref` — the normal state mid-typing) emits nothing, which is why this
-  // can't just be the index in `graph.edges`: that would paint the wrong edges, and shift the
-  // colors around as you type.
+  // can't just be the index in `graph.edges`: that would paint the wrong edges.
   const colorIndices = new Map<string, number[]>();
   let emitted = 0;
   for (const edge of graph.edges) {
     const from = idMap.get(edge.from);
     const to = idMap.get(edge.to);
     if (!from || !to) continue;
-    const def = renderedEdgeTypesById[edge.type];
-    const connector = def?.connector ?? defaultConnector;
+    const def = edgeTypes.get(edge.type);
+    const connector = CONNECTORS[def?.connector ?? "arrow"];
     // The pipe form composes with any connector (including `-.->`) without having to take
     // the connector string apart, which the `-- "text" -->` form would need. An edge icon
     // rides on `showIcons` exactly as a node's does.
     const icon = config.showIcons && def?.icon ? `${def.icon} ` : "";
     const label = edge.label ? `|"${escapeLabel(`${icon}${edge.label}`)}"|` : "";
-    // Named so the SVG can be asked which edge it is: mermaid's invented `L_<from>_<to>_<n>` is
-    // ambiguous because ids contain `_`. Anchors stay unnamed — nothing looks them up.
-    const name = edge.lines?.length ? `e${emitted}` : undefined;
-    if (from === to) {
-      // Mermaid's Dagre renderer replaces a self-loop with three node-keyed segments;
-      // another loop on that node overwrites them, including an unmapped layout anchor.
-      for (const part of ["1", "mid", "2"]) {
-        const key = `${from}-cyclic-special-${part}`;
-        if (name && edge.lines) sourceMap.edges[key] = edge.lines;
-        else delete sourceMap.edges[key];
-      }
-    } else if (name && edge.lines) sourceMap.edges[name] = edge.lines;
-    lines.push(`  ${from} ${name ? `${name}@` : ""}${connector}${label} ${to}`);
-    // A colored connector reads the same `StyleConfig` entry its node-type twin does, so the
-    // two forms of one concept can't be styled apart. Grouping by the resolved color means two
-    // edge types pointing at one node type share a `linkStyle`, which is what they should do.
+    lines.push(`  ${from} ${connector}${label} ${to}`);
+    // Grouping by the resolved color means two edge types pointing at one node type share a
+    // `linkStyle`, which is what they should do.
     const color = def?.colorTypeId ? config.typeColors[def.colorTypeId] : undefined;
     if (color) {
       const forColor = colorIndices.get(color) ?? [];
@@ -179,5 +147,5 @@ export function flowchart(
     lines.push(`  linkStyle ${indices.join(",")} stroke:${border},stroke-width:1.5px`);
   }
 
-  return { text: lines.join("\n"), sourceMap };
+  return lines.join("\n");
 }

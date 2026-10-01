@@ -13,8 +13,8 @@ import { defaultFeatureState, resolveFeatures } from "../ontology/features.ts";
 // The whole document lives in the URL hash so sharing needs no backend. We DEFLATE
 // the JSON (fflate) then base64url-encode it, mirroring how mermaid.live keeps links short.
 //
-// A hash is untrusted input that ends up inside generated mermaid source, so it is
-// validated on the way in. Every field carries a default, which is what keeps old and
+// A hash is untrusted input, and it ends up in Mermaid source when the diagram is exported, so
+// it is validated on the way in. Every field carries a default, which is what keeps old and
 // partial links working: anything missing or malformed degrades to the ontology's
 // default rather than rejecting the document.
 

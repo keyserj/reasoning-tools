@@ -51,7 +51,7 @@ App chrome is Tailwind v4 + daisyUI v5 (theme via `data-theme` on `<html>`). `in
 
 ## Layout
 
-- `ontology-playground/` — the only app. React + Vite + TypeScript: write a markdown-ish syntax, get a rendered mermaid diagram. Published to GitHub Pages.
+- `ontology-playground/` — the only app. React + Vite + TypeScript: write a markdown-ish syntax, get a rendered diagram. Published to GitHub Pages.
 - `ameliorate-v2/` — design docs for a "contested causal map" ontology and an app built on it, plus HTML wireframes of that UX.
 - `site/` — the published site's root `index.html`; it just redirects into the playground.
 - `.github/workflows/deploy.yml` — on pushes to `main` touching `ontology-playground/`, `site/`, the wireframes, `ameliorate-v2/examples/build-a-wall.txt`, or the workflow itself: tests, builds, and assembles `_site/` (playground and wireframes in subdirectories, `site/index.html` at root). The playground bundles the canonical build-a-wall text.
@@ -68,18 +68,18 @@ When you need a server for testing, first check whether one is already running v
 
 There is no root `package.json`; run everything from `ontology-playground/`, whose [README](./ontology-playground/README.md) lists the scripts. Node version is pinned in `.nvmrc` (24.18.0).
 
-A single test file or case: `npx vitest run src/ontology/arg-map-truth-and-relevance/parse.test.ts`, `npx vitest run -t "resolves \`$ref\`"`. Snapshots live in `__snapshots__/`; after deliberately changing parser or mermaid output, re-record with `npx vitest run -u` and read the diff rather than trusting it.
+A single test file or case: `npx vitest run src/ontology/arg-map-truth-and-relevance/parse.test.ts`, `npx vitest run -t "resolves \`$ref\`"`. Snapshots live in `__snapshots__/`; after deliberately changing parser or Mermaid-export output, re-record with `npx vitest run -u` and read the diff rather than trusting it.
 
 Vitest only collects `src/**/*.test.ts` in a `node` environment — there's no DOM test setup, so components are covered by typecheck and manual checks, not tests.
 
 ### Architecture
 
-Per keystroke: editor text → `ontology.parse` → the ontology's own model → `ontology.toMermaid` → mermaid source plus a source map → SVG injected into `DiagramPane`. Start at `src/ontology/types.ts`, which carries the whole shell↔ontology contract, and [`src/ontology/pipeline.md`](./ontology-playground/src/ontology/pipeline.md), which owns the division of labor between an ontology's four files; each other file's header comment owns the reasoning behind that file, so read it there.
+Per keystroke: editor text → `ontology.parse` → the ontology's own model → `ontology.toGraph` → `RenderGraph` → `layoutDiagram` (dagre) → SVG that `DiagramPane` renders. Mermaid is only an export (`src/ontology/mermaidExport.ts`). Start at `src/ontology/types.ts`, which carries the whole shell↔ontology contract, and [`src/ontology/pipeline.md`](./ontology-playground/src/ontology/pipeline.md), which owns the division of labor between an ontology's files and the shared drawing; each other file's header comment owns the reasoning behind that file, so read it there.
 
 Three invariants span files, so no one file owns them:
 
 - **Adding an ontology is a new `src/ontology/<id>/` plus one line in `registry.ts`, with no UI change.** If it seems to need one, the missing piece belongs in the contract, not in a component. The order that work goes in is [.claude/skills/add-ontology/SKILL.md](./.claude/skills/add-ontology/SKILL.md).
-- **A type carries one color, decided once in the document's `StyleConfig`**, and everything showing that type reads it from there: the diagram's `classDef`, the legend, and the editor. Restyling a type in the **Style** dialog has to move all three together.
+- **A type carries one color, decided once in the document's `StyleConfig`**, and everything showing that type reads it from there: the diagram, the legend, and the editor. Restyling a type in the **Style** dialog has to move all three together.
 - **A drawn element carries the source lines it was written on**, which is what links the caret's line to its box and back. An ontology that doesn't fill `sourceLines` loses that silently — `pipeline.md` has the rule and `registry.test.ts` the backstop.
 
 ## ameliorate-v2

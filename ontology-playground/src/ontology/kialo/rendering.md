@@ -16,7 +16,7 @@ A `= $id` thesis is no special case — it is a dashed `thesis`, which means it 
 
 ## Sources
 
-A claim with sources gets a `🔗` appended to its text and the URL never reaches the diagram. Sources are the one thing a real Kialo discussion has dozens of — the map this ontology was reviewed against carries 64 — so a box each would swamp the argument, and the useful fact at a glance is that evidence exists at all. It's an icon, so it rides on `showIcons` like every other; that's the one icon this ontology adds itself rather than leaving to the shared renderer, which is why `toMermaid` passes `showIcons` down into `toGraph`.
+A claim with sources gets a `🔗` appended to its text and the URL never reaches the diagram. Sources are the one thing a real Kialo discussion has dozens of — the map this ontology was reviewed against carries 64 — so a box each would swamp the argument, and the useful fact at a glance is that evidence exists at all. It's an icon, so it rides on `showIcons` like every other; that's the one icon this ontology adds itself rather than leaving to the shared renderer, which is why its `index.ts` passes `showIcons` down into `toGraph`.
 
 ## Scores
 
@@ -28,7 +28,7 @@ Kialo itself draws a four-bar impact meter showing the crowd's average, plus a g
 
 `%description` and `%perspectives` render as one `topic` box. It earns its place: a score row like `[3,1]` can't be decoded without knowing the slot order.
 
-Left unconnected it would be a graph component of its own, and dagre drops those in among the claims where they read like part of the argument. Every root — each question, plus any thesis with no question — is anchored to it by an `anchor` edge, which uses mermaid's invisible `~~~` connector so it draws nothing and only fixes rank.
+Left unconnected it would be a graph component of its own, and dagre drops those in among the claims where they read like part of the argument. Every root — each question, plus any thesis with no question — is anchored to it by an `anchor` edge, which uses an invisible connector so it draws nothing and only fixes rank.
 
 - direction is load-bearing and easy to get backwards: the default layout is `BT`, where an edge's **target** is ranked above its **source**. So the edge runs `root ~~~ _topic`, not the other way round
 - every root rather than the first, so a document with two questions gets a header above both instead of above one column. (Arg-map still anchors only its first root, and records that as an open question.)

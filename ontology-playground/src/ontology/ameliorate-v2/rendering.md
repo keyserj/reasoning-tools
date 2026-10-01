@@ -18,7 +18,7 @@ Scores display as written, including negative and missing values. An implied cla
 
 Relation boxes, connectors, and editor relation words share configurable colors by written relation: supports/causes use Arg map's support blue and ✅ icon; critiques/reduces/impedes use its critique red and ⛔ icon. Other relations remain neutral. Colors identify the wording, not the score signs: `supports[-5]` stays blue, and mixed perspectives never require a single aggregate sign. Node shapes and icons distinguish the base types; the shared style pipeline derives colors for each theme.
 
-A box's first source line is its click destination; all its source lines activate it from the editor. A merged relation box starts with the relation declaration, followed by its implied-claim references. A separate implied claim starts with its own reference. Notes and their attachment connectors point to note lines; invisible anchors have no targets. Mermaid replaces self-loops with three segments, which the shared emitter maps to the relation line. Mermaid draws only the last self-loop on a node.
+A box's first source line is its click destination; all its source lines activate it from the editor. A merged relation box starts with the relation declaration, followed by its implied-claim references. A separate implied claim starts with its own reference. Notes and their attachment connectors point to note lines; invisible anchors have no targets. A self-loop carries the relation line like any other connector.
 
 ## Examples and limits
 

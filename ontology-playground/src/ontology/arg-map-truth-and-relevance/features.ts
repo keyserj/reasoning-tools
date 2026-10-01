@@ -58,7 +58,7 @@ export const features: FeatureDef[] = [
             id: EDGE_DISPLAY_DISTINGUISH,
             label: "distinguish halves",
             description:
-              "One ontology edge is two mermaid connectors, so draw them as the halves they are: no arrowhead on the way into the edge box.",
+              "One ontology edge is drawn as two connectors, so draw them as the halves they are: no arrowhead on the way into the edge box.",
           },
           {
             id: EDGE_DISPLAY_SAME,

@@ -387,3 +387,54 @@ describe("build-a-wall rendering", () => {
     },
   );
 });
+
+describe("toGraph — source lines", () => {
+  /** Lines per box that has any, and the lines of each connector that has any, in order. */
+  const linesOf = (text: string, features: FeatureState = {}) => {
+    const graph = toGraph(parse(text).doc, features);
+    return {
+      nodes: Object.fromEntries(
+        graph.nodes.filter((n) => n.lines?.length).map((n) => [n.id, n.lines]),
+      ),
+      edges: graph.edges.filter((e) => e.lines?.length).map((e) => e.lines),
+    };
+  };
+  const relationSample =
+    "%perspectives: [alice, bob]\n* Wall &w #action\n  > reduces[3,-5] &r\n    * Immigration &i\n= $r\n  < supports[8,-] &s\n    = Evidence &e\n      ~ Note";
+
+  it("gives the merged relation box its declaration and implied references", () => {
+    expect(linesOf(relationSample)).toEqual({
+      nodes: {
+        w: [2],
+        i: [4],
+        e: [7],
+        r: [3, 5],
+        s: [6],
+        "note-note": [8],
+        _score_context: [1],
+      },
+      edges: [[3], [3], [6], [6], [8]],
+    });
+  });
+
+  it("gives a detached claim its reference and its labeled connector the relation", () => {
+    const { nodes, edges } = linesOf(relationSample, { [EDGE_CLAIMS]: { option: "spelled-out" } });
+    expect(nodes["r--implied"]).toEqual([5]);
+    expect(nodes.r).toBeUndefined();
+    expect(edges).toEqual([[3], [6], [8]]);
+  });
+
+  it("leaves filtered notes and claim references out of the causal view", () => {
+    expect(linesOf(relationSample, { [VIEW]: { option: "causal" } })).toEqual({
+      nodes: { w: [2], i: [4], r: [3], _score_context: [1] },
+      edges: [[3], [3]],
+    });
+  });
+
+  it("gives a cyclic implied relation's self-loop its declaration", () => {
+    expect(linesOf("= $loop\n  > supports &loop\n    = Claim &c")).toEqual({
+      nodes: { c: [3], loop: [2, 1] },
+      edges: [[2], [2]],
+    });
+  });
+});

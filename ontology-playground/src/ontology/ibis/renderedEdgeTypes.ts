@@ -6,10 +6,10 @@ import { noteEdgeType } from "../notes.ts";
 // edge runs from. Ontologies whose edges say something their endpoints don't (causes / reduces /
 // guides) declare them there and here independently of their node types.
 export const renderedEdgeTypes: EdgeTypeDef[] = [
-  { id: "questions", connector: "-->" },
-  { id: "respondsTo", connector: "-->" },
-  { id: "supports", connector: "-->" },
-  { id: "objectsTo", connector: "-->" },
+  { id: "questions", connector: "arrow" },
+  { id: "respondsTo", connector: "arrow" },
+  { id: "supports", connector: "arrow" },
+  { id: "objectsTo", connector: "arrow" },
   noteEdgeType,
   // Draws nothing; it only ranks a document note above the argument — see ./toGraph.ts.
   anchorEdgeType,
@@ -18,5 +18,3 @@ export const renderedEdgeTypes: EdgeTypeDef[] = [
 export const renderedEdgeTypesById: Record<string, EdgeTypeDef> = Object.fromEntries(
   renderedEdgeTypes.map((t) => [t.id, t]),
 );
-
-export const DEFAULT_CONNECTOR = "-->";

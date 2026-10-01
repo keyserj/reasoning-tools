@@ -9,29 +9,29 @@ import { renderedNodeTypesById } from "./renderedNodeTypes.ts";
 // two ontology edge types that ./renderedNodeTypes.ts also renders as boxes, since either
 // rendering is possible and the feature picks between them.
 //
-// `link` is mermaid's word on purpose: it's the one entry with no ontology content, drawn
-// only because mermaid needs *something* between a box and its endpoint. The `edge-` names
-// say something the ontology cares about, which is why they don't take it.
+// `link` is the one entry with no ontology content, drawn only because a connector can't end on
+// another connector, so a reified edge needs *something* between its box and each endpoint. The
+// `edge-` names say something the ontology cares about, which is why they don't take it.
 //
 // A connector names the node type it is the other form of (`colorTypeId`) rather than holding a
 // color, and reads its icon off the same table, so the two forms of one concept can't drift
 // apart.
 export const renderedEdgeTypes: EdgeTypeDef[] = [
-  { id: "link", connector: "-->" },
+  { id: "link", connector: "arrow" },
   // Reified halves — see ./rendering.md. `edge-to-edge` stays plain: weight is the active mark's
   // channel, and a permanently thick connector would read as picked.
-  { id: "edge-half", connector: "---" },
-  { id: "edge-to-edge", connector: "-->" },
+  { id: "edge-half", connector: "line" },
+  { id: "edge-to-edge", connector: "arrow" },
   noteEdgeType,
   {
     id: "supports",
-    connector: "-->",
+    connector: "arrow",
     colorTypeId: "supports",
     icon: renderedNodeTypesById.supports.icon,
   },
   {
     id: "critiques",
-    connector: "-->",
+    connector: "arrow",
     colorTypeId: "critiques",
     icon: renderedNodeTypesById.critiques.icon,
   },
@@ -44,5 +44,3 @@ export const renderedEdgeTypes: EdgeTypeDef[] = [
 export const renderedEdgeTypesById: Record<string, EdgeTypeDef> = Object.fromEntries(
   renderedEdgeTypes.map((t) => [t.id, t]),
 );
-
-export const DEFAULT_CONNECTOR = "-->";

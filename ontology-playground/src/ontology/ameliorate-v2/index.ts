@@ -1,6 +1,6 @@
 import { defineOntology } from "../types.ts";
 import { parse } from "./parse.ts";
-import { toMermaid } from "./toMermaid.ts";
+import { toGraph } from "./toGraph.ts";
 import { highlightLine } from "./highlight.ts";
 import type { Doc } from "./model.ts";
 import { legend } from "./legend.ts";
@@ -21,7 +21,7 @@ export const ameliorateV2 = defineOntology<Doc>({
   id: "ameliorate-v2",
   label: "Ameliorate v2",
   parse,
-  toMermaid,
+  toGraph: (doc, _config, lens) => toGraph(doc, lens),
   highlightLine,
   legend,
   legendNote,

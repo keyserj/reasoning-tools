@@ -18,13 +18,13 @@
     scrollbar-color: transparent transparent;
   }
 
-  /* The textarea over it. Its scrollbars are the ones you actually use, and on the Code tab they
-     are invisible without this: `scrollbar-color` is inherited, daisyUI sets it on `:root` as
+  /* The textarea over it. Its scrollbars are the ones you actually use, and they are invisible
+     without this: `scrollbar-color` is inherited, daisyUI sets it on `:root` as
      `color-mix(in oklch, currentcolor 35%, transparent)`, and `currentcolor` here is the
      *transparent* text that lets the overlay show through — so the thumb computes to a fully
      transparent color while the gutter still takes its 15px. Naming base-content directly is the
-     same 35% every other scroller in the app resolves to, this textarea on the Mermaid tab
-     included; it just no longer travels through a color that has been zeroed out. */
+     same 35% every other scroller in the app resolves to, without travelling through a color
+     that has been zeroed out. */
   .syntax-input {
     scrollbar-color: color-mix(in oklch, var(--color-base-content) 35%, transparent) transparent;
   }
@@ -39,9 +39,6 @@
 
   .editor-line {
     display: block;
-    /* Empty lines have no content; without this the overlay drifts from the textarea at the first
-       blank. */
-    min-height: 1lh;
   }
 
   /* Below the selection ladder in index.css: where you are, not what you chose. Dark 12% because

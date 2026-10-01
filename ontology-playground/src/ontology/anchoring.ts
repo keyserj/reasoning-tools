@@ -11,4 +11,4 @@ import type { EdgeTypeDef } from "./types.ts";
 
 export const ANCHOR_TYPE_ID = "anchor";
 
-export const anchorEdgeType: EdgeTypeDef = { id: ANCHOR_TYPE_ID, connector: "~~~" };
+export const anchorEdgeType: EdgeTypeDef = { id: ANCHOR_TYPE_ID, connector: "invisible" };

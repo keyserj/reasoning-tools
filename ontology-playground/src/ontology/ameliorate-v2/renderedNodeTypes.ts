@@ -14,7 +14,7 @@ export const relationNodeTypes: NodeTypeDef[] = [
     label: "Positive relation",
     icon: "✅",
     description: "Supports or causes, colored by wording regardless of score signs.",
-    shape: ['(["', '"])'],
+    shape: "stadium",
     defaultColor: "#2166ac",
   },
   {
@@ -22,7 +22,7 @@ export const relationNodeTypes: NodeTypeDef[] = [
     label: "Negative relation",
     icon: "⛔",
     description: "Critiques, reduces, or impedes, colored by wording regardless of score signs.",
-    shape: ['(["', '"])'],
+    shape: "stadium",
     defaultColor: "#b2182b",
   },
   {
@@ -30,7 +30,7 @@ export const relationNodeTypes: NodeTypeDef[] = [
     label: "Other relation",
     icon: "🔗",
     description: "Other relations in their written phrasing, with any written scores.",
-    shape: ['(["', '"])'],
+    shape: "stadium",
     defaultColor: "#64748b",
   },
 ];
@@ -41,7 +41,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Concept",
     icon: "🔎",
     description: "A thing or phenomenon, with its tags and relation-derived subtypes.",
-    shape: ['("', '")'],
+    shape: "rounded",
     defaultColor: "#2166ac",
   },
   {
@@ -49,7 +49,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Question",
     icon: "❓",
     description: "A guiding or clarifying question.",
-    shape: ['{"', '"}'],
+    shape: "diamond",
     defaultColor: "#7c3aed",
   },
   {
@@ -57,7 +57,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Claim",
     icon: "💬",
     description: "An explicit claim or the implied claim behind a concept or relation's score.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#d97706",
   },
   {
@@ -65,7 +65,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Source",
     icon: "📄",
     description: "A source mentioning a claim.",
-    shape: ['[["', '"]]'],
+    shape: "subroutine",
     defaultColor: "#7c3aed",
   },
   ...relationNodeTypes,
@@ -75,7 +75,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Score context",
     icon: "📋",
     description: "The order of perspectives in each score row.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#64748b",
   },
 ];

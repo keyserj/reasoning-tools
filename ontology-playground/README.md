@@ -2,12 +2,12 @@
 
 A playground for developing and comparing reasoning ontologies. Can also be used to visualize reasoning via any of the implemented ontologies. Try it out at https://keyserj.github.io/reasoning-tools/ontology-playground/.
 
-People wanting to visualize their reasoning: pick an ontology, write your reasoning in the ontology's markdown-like syntax, see a rendered [mermaid](https://mermaid.js.org) diagram. Everything is stored in the URL so you can easily share what you see.
+People wanting to visualize their reasoning: pick an ontology, write your reasoning in the ontology's markdown-like syntax, see it drawn as a diagram, which you can also copy as [Mermaid](https://mermaid.js.org). Everything is stored in the URL so you can easily share what you see.
 
 Ontology designers:
 
 - add your ontology — plug it in at `src/ontology/registry.ts`
-- add ontology-specific visualization features you'd like to try (e.g. algorithms for performing score calculations, plus adding calculated scores into generated mermaid nodes)
+- add ontology-specific visualization features you'd like to try (e.g. algorithms for performing score calculations, plus adding calculated scores into the diagram's nodes)
 - take an example written in another ontology and see how it looks in yours
 
 LLMs are pretty great at plugging into this playground, so trying out your ideas is cheap! Feel free to make an issue or pull request to suggest another ontology or improvements to an existing one.
@@ -35,7 +35,7 @@ Each ontology can declare features that change how the playground renders its mo
 ```bash
 npm install
 npm run dev        # start the dev server
-npm run test       # vitest (parser + mermaid generation)
+npm run test       # vitest (parsers, layout, Mermaid export)
 npm run typecheck  # tsc --noEmit
 npm run lint       # oxlint
 npm run format     # oxfmt (in place); format:check to verify
@@ -50,4 +50,4 @@ The app is served from a subpath, so `base` in `vite.config.ts` must stay in syn
 
 ## Tech
 
-React + Vite + TypeScript, Tailwind v4 + daisyUI v5 (app chrome), mermaid (rendering, lazy-loaded), svg-pan-zoom (pan/zoom), fflate (URL compression), oxlint + oxfmt.
+React + Vite + TypeScript, Tailwind v4 + daisyUI v5 (app chrome), dagre (layout), svg-pan-zoom (pan/zoom), fflate (URL compression), oxlint + oxfmt.

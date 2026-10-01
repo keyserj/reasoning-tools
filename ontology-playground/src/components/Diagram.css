@@ -1,0 +1,83 @@
+/* The diagram's paint, for ./Diagram.tsx. A type's fill, border and text arrive inline from
+   ../ontology/typeColors.ts; what's here is everything that isn't a type's. */
+@layer components {
+  .diagram-pane {
+    --diagram-line: color-mix(in oklab, var(--color-base-content) 85%, var(--color-base-100));
+  }
+
+  /* A type the document doesn't color still has to read as a box. */
+  .diagram-node path {
+    fill: var(--color-base-200);
+    stroke: var(--diagram-line);
+    stroke-width: 1.5px;
+  }
+
+  .diagram-node.is-dashed > path:first-child {
+    stroke-dasharray: 4 3;
+  }
+
+  .diagram-node .diagram-node-bars {
+    fill: none;
+  }
+
+  .diagram-label-slot {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    height: 100%;
+  }
+
+  .diagram-edge {
+    fill: none;
+    stroke: var(--diagram-line);
+    stroke-width: 1px;
+  }
+
+  .diagram-edge.is-colored {
+    stroke-width: 1.5px;
+  }
+
+  .diagram-edge.is-dotted-arrow {
+    stroke-dasharray: 2;
+  }
+
+  .diagram-arrow path {
+    fill: var(--diagram-line);
+  }
+
+  /* Paint only: ../diagram/measure.ts sizes a label without this class, so nothing here may change
+     its size. */
+  .diagram-edge-label-text {
+    background: color-mix(in oklab, var(--color-base-300) 85%, transparent);
+    color: var(--color-base-content);
+  }
+
+  /* Unmapped chrome (anchors' ends, a stale picture) must not look clickable. */
+  .diagram-pane .is-linked {
+    cursor: pointer;
+  }
+
+  /* Halo, on `filter` so it can't fight the inline fill and stroke a type paints with. Tight
+     rather than wide, or it reads as the box's own shadow. */
+  .diagram-node.is-active {
+    filter: drop-shadow(0 0 2px color-mix(in oklab, var(--color-base-content) 90%, transparent))
+      drop-shadow(0 0 5px color-mix(in oklab, var(--color-base-content) 60%, transparent));
+  }
+
+  /* `filter` replaces rather than accumulates, so hover would otherwise outrank the active mark. */
+  .diagram-node.is-linked:not(.is-active):hover {
+    filter: drop-shadow(0 0 2px color-mix(in oklab, var(--color-base-content) 35%, transparent));
+  }
+
+  /* A connector's color is inline but its width isn't, so unlike a box it's marked by weight. */
+  .diagram-edge.is-active {
+    stroke-width: 3.5px;
+  }
+
+  /* The label is a separate element from the path; both have to mark for a labeled connector to
+     read as one. */
+  .diagram-edge-label.is-active {
+    filter: drop-shadow(0 0 3px color-mix(in oklab, var(--color-base-content) 55%, transparent));
+  }
+}

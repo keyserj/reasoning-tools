@@ -5,8 +5,8 @@ import { toGraph } from "./toGraph.ts";
 
 // A box per usage, case by case. A score and a stance belong to one usage of a claim, so a `$id`
 // usage gets a copy of the box rather than another connector into one — see ./rendering.md. A
-// mermaid snapshot records what happened without saying what was meant, which is why these are
-// separate from ./toMermaid.test.ts.
+// Mermaid-export snapshot records what happened without saying what was meant, which is why these are
+// separate from ./mermaidExport.test.ts.
 
 // Shape only — the lines every box and connector also carries have their own block at the bottom.
 const graph = (source: string, showIcons = true) =>
@@ -132,6 +132,12 @@ describe("toGraph — source lines", () => {
     const source = "= T &t\n  ~ an aside &nt";
     expect(linedNode(source, "nt")?.lines).toEqual([2]);
     expect(lined(source).edges.find((e) => e.from === "nt")?.lines).toEqual([2]);
+  });
+
+  it("leaves the `@` source line and the header's anchors without one: neither draws a thing", () => {
+    const { nodes, edges } = lined("%description: D\n= T &t\n  @ https://e.example A study");
+    expect(nodes.flatMap((n) => n.lines ?? [])).not.toContain(3);
+    expect(edges.filter((e) => e.type === "anchor").map((e) => e.lines)).toEqual([undefined]);
   });
 
   it("gives the header every `%` line it was built from", () => {

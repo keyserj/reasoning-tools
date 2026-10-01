@@ -6,7 +6,7 @@ import type { Scores } from "./scores.ts";
 // The ontology's own model, which is richer than the shared `RenderGraph`: an edge is a
 // first-class thing with an id and a score, and an edge's source or target may be *another edge*
 // (that's what a `= $some-edge-id` block argues about). `RenderGraph` can't express that, so
-// ./toGraph.ts flattens this down to something mermaid can draw.
+// ./toGraph.ts flattens this down to something the diagram can draw.
 //
 // Where a thing was written stays off the entities and rides on the doc instead — see
 // ../pipeline.md.

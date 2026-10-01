@@ -74,7 +74,7 @@ export function parse(text: string): { doc: BasicArgDoc; errors: ParseError[] } 
     (sourceLines[id] ??= []).push(line);
   };
 
-  /** `l` for link, as arg-map's edges take, and not the `e<n>` mermaid names its own edges. */
+  /** `l` for link, as arg-map's edges take. */
   const nextEdgeId = (): string => {
     let id: string;
     do {

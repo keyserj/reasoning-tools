@@ -63,7 +63,7 @@ export function refTargetAt(index: RefIndex, offset: number): Span | undefined {
 
 /**
  * Scroll a line into view, centered, when it isn't already visible. `line` is 0-based — an index
- * into the tokenized lines, not the 1-based number a `ParseError` or the source map speaks.
+ * into the tokenized lines, not the 1-based number a `ParseError` or a drawn element's lines speak.
  *
  * Only vertical, because what a caller wants visible is the line's own text: a jumped-to `&id`
  * sits at the end of its line, and scrolling sideways to it would push that text off-screen.
@@ -79,16 +79,12 @@ export function revealLine(el: HTMLTextAreaElement, line: number) {
   el.scrollTop = top - (el.clientHeight - lineHeight) / 2;
 }
 
-/**
- * Wire the gesture onto a textarea whose `lines` are tokenized. `enabled` is the Code tab: the
- * Mermaid tab is someone else's language and has no ids to jump between.
- */
-export function useRefJump(lines: HighlightToken[][], enabled: boolean) {
+/** Wire the gesture onto a textarea whose `lines` are tokenized. */
+export function useRefJump(lines: HighlightToken[][]) {
   const [modifierHeld, setModifierHeld] = useState(false);
   const index = useMemo(() => indexRefs(lines), [lines]);
 
   useEffect(() => {
-    if (!enabled) return;
     // Read the event's modifier flags rather than its key, so a chord that releases in either
     // order still resolves; window blur clears a modifier held while tabbing away.
     const sync = (e: KeyboardEvent) => setModifierHeld(e.ctrlKey || e.metaKey);
@@ -101,7 +97,7 @@ export function useRefJump(lines: HighlightToken[][], enabled: boolean) {
       window.removeEventListener("keyup", sync);
       window.removeEventListener("blur", clear);
     };
-  }, [enabled]);
+  }, []);
 
   const onClick = (e: MouseEvent<HTMLTextAreaElement>) => {
     // ⌘ as well as ctrl: on a mac ctrl+click is the context menu, so ⌘ is the one that arrives.
@@ -118,7 +114,7 @@ export function useRefJump(lines: HighlightToken[][], enabled: boolean) {
 
   return {
     /** the overlay marks every jump target while the modifier is down */
-    linkable: enabled && modifierHeld,
+    linkable: modifierHeld,
     onClick,
   };
 }

@@ -1,14 +1,15 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FeatureDef, FeatureState } from "../ontology/types.ts";
 import { paramApplies } from "../ontology/features.ts";
 
 // The rendering-scope bar above the diagram: the controls that change how the document is
 // drawn without changing the document itself. Two kinds share it — an ontology's own rendering
 // lenses, one pill per feature reading `feature: current option` and opening a panel where that
-// feature's options get read and picked, plus the shell's own Style button.
+// feature's options get read and picked, plus the shell's own Style button. Copy as Mermaid sits
+// beside Style because it exports this diagram, drawn with the style and lenses chosen here.
 //
 // Nothing here knows what a feature *means* — an ontology declares the table (see
-// arg-map-truth-and-relevance/features.ts) and only its `toMermaid` gives an option effect.
+// arg-map-truth-and-relevance/features.ts) and only its `toGraph` gives an option effect.
 // Style is handed in by the shell rather than declared as a `FeatureDef`, which is what keeps
 // that true: an ontology can't reach it, and the features path never learns a second meaning.
 //
@@ -22,10 +23,28 @@ interface Props {
   state: FeatureState;
   onChange: (state: FeatureState) => void;
   onOpenStyle: () => void;
+  /** Resolves whether the copy succeeded; the shell reports a failure itself. */
+  onCopyMermaid: () => Promise<boolean>;
 }
 
-export default function RenderingStrip({ features, state, onChange, onOpenStyle }: Props) {
+export default function RenderingStrip({
+  features,
+  state,
+  onChange,
+  onOpenStyle,
+  onCopyMermaid,
+}: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
+  const [copied, setCopied] = useState(false);
+  const copiedTimer = useRef<number | undefined>(undefined);
+
+  // A second copy restarts the "Copied!" rather than inheriting the first one's countdown.
+  const copyMermaid = async () => {
+    window.clearTimeout(copiedTimer.current);
+    const ok = await onCopyMermaid();
+    setCopied(ok);
+    if (ok) copiedTimer.current = window.setTimeout(() => setCopied(false), 1500);
+  };
 
   const optionOf = (feature: FeatureDef) => state[feature.id]?.option ?? feature.defaultOption;
 
@@ -85,11 +104,19 @@ export default function RenderingStrip({ features, state, onChange, onOpenStyle 
           );
         })}
 
+        <button
+          className="btn btn-xs btn-ghost font-normal ml-auto"
+          onClick={copyMermaid}
+          title="Copy this diagram as Mermaid flowchart source"
+        >
+          <span>📋</span>
+          <span className="whitespace-nowrap">{copied ? "Copied!" : "Copy as Mermaid"}</span>
+        </button>
         {/* Deliberately not caret-suffixed like the feature pills: the caret is what marks a
             pill as expanding in place, and this one opens a dialog instead. Same row because
             it's the same scope; different affordance because it behaves differently. */}
         <button
-          className="btn btn-xs btn-ghost font-normal ml-auto"
+          className="btn btn-xs btn-ghost font-normal"
           onClick={onOpenStyle}
           title="Colors, layout direction and icons for the diagram"
         >

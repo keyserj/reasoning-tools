@@ -6,6 +6,6 @@
   + One less dependency
   - Slower for hot reads
 = Use a worker queue
-  / this line is a meta-comment that doesn't show up in mermaid; the next ~ line is a note
+  / this line is a meta-comment that doesn't show up in the diagram; the next ~ line is a note
   ~ worker queues hit the same operational cost
   - $c1

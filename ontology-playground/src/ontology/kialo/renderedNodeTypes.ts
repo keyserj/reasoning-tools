@@ -1,7 +1,7 @@
 import type { NodeTypeDef } from "../types.ts";
 import { noteNodeType } from "../notes.ts";
 
-// The single place a *rendered* node type is defined: icons, mermaid shapes, style defaults,
+// The single place a *rendered* node type is defined: icons, shapes, style defaults,
 // style-panel labels and the legend's type rows all derive from this table. Syntax (which
 // marker produces which type) lives in ./markers.ts instead.
 //
@@ -16,7 +16,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Question",
     icon: "❓",
     description: "What the theses under it are competing answers to.",
-    shape: ['{{"', '"}}'],
+    shape: "hexagon",
     defaultColor: "#71717a",
   },
   {
@@ -24,7 +24,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Thesis",
     icon: "💬",
     description: "An answer to the question above it, or the root of a question-less discussion.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#d97706",
   },
   // The neutral box, kept for the planned lens that moves stance onto the connectors: with no
@@ -35,7 +35,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
   //   label: "Claim",
   //   icon: "💬",
   //   description: "A claim reused in more than one spot, so its box can't take one stance.",
-  //   shape: ['["', '"]'],
+  //   shape: "rect",
   //   defaultColor: "#d97706",
   // },
   {
@@ -43,7 +43,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Pro",
     icon: "✅",
     description: "A reason to believe the claim above it.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#2166ac",
   },
   {
@@ -51,7 +51,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Con",
     icon: "⛔",
     description: "A reason to doubt the claim above it.",
-    shape: ['["', '"]'],
+    shape: "rect",
     defaultColor: "#b2182b",
   },
   {
@@ -63,7 +63,7 @@ export const renderedNodeTypes: NodeTypeDef[] = [
     label: "Topic",
     icon: "📋",
     description: "The header box: what this discussion is and whose scores the slots are.",
-    shape: ['[["', '"]]'],
+    shape: "subroutine",
     defaultColor: "#7c3aed",
   },
 ];

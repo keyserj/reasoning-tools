@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.1.0",
   "type": "module",
-  "description": "Write a markdown-like syntax, get a rendered mermaid diagram, in the reasoning ontology of your choice.",
+  "description": "Write a markdown-like syntax, get a rendered diagram, in the reasoning ontology of your choice.",
   "engines": {
     "node": ">=24.18.0"
   },
@@ -19,8 +19,8 @@
     "format:check": "oxfmt --check src"
   },
   "dependencies": {
+    "@dagrejs/dagre": "^2.0.4",
     "fflate": "^0.8.3",
-    "mermaid": "^11.15.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "svg-pan-zoom": "^3.6.2",

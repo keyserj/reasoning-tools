@@ -2,7 +2,7 @@ import type { ParseError, SourceLines } from "../types.ts";
 import { RESERVED_ID_MESSAGE, RESERVED_ID_PREFIX, idTable } from "../ids.ts";
 import { TOPIC_ID } from "../topic.ts";
 import type { Note } from "../notes.ts";
-import type { ArgDoc, Claim, Edge } from "./model.ts";
+import type { RelevanceArgDoc, Claim, Edge } from "./model.ts";
 import {
   DESCRIPTION_KEY,
   EDGE_TYPE_HEAD,
@@ -66,7 +66,7 @@ interface PendingEdge {
 }
 
 /**
- * Parse this ontology's syntax into its own {@link ArgDoc} model.
+ * Parse this ontology's syntax into its own {@link RelevanceArgDoc} model.
  *
  * Lines are read through the markers ./markers.ts defines. Scores follow their marker directly
  * (`=[4,1,8]`, `supports[8,2,8]`), and `= $id` references a claim or edge instead of declaring
@@ -75,7 +75,7 @@ interface PendingEdge {
  * This is the whole of parsing: turning the model into something the diagram can draw is a
  * rendering decision, and lives in ./toGraph.ts behind the `Edge claims` feature.
  */
-export function parse(text: string): { doc: ArgDoc; errors: ParseError[] } {
+export function parse(text: string): { doc: RelevanceArgDoc; errors: ParseError[] } {
   const claims: Claim[] = [];
   const edges: Edge[] = [];
   const errors: ParseError[] = [];

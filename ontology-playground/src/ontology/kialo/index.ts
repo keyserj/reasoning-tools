@@ -6,9 +6,13 @@ import type { KialoDoc } from "./model.ts";
 import { legend } from "./legend.ts";
 import { renderedNodeTypes } from "./renderedNodeTypes.ts";
 import { renderedEdgeTypes } from "./renderedEdgeTypes.ts";
+import minimalDaylightSavings from "./examples/minimal-daylight-savings.txt?raw";
 import sessionStorage from "./examples/session-storage.txt?raw";
 import buildAWall from "./examples/build-a-wall.txt?raw";
 import { defaultConfig } from "./defaultConfig.ts";
+
+const description =
+  'Similar to the "IBIS" ontology, except that Questions can only be used at the root. This makes the ontology more about representing an argument than a discussion, but with the advantage of being able to represent competing answers.';
 
 const legendNote =
   "Every claim is a pro or con of the claim above it, and its score is impact — how true it is and how much it bears on that parent, in one number 0-4. The score for a thesis is veracity, and the score for an argument is impact.";
@@ -19,6 +23,7 @@ const placeholder =
 export const kialo = defineOntology<KialoDoc>({
   id: "kialo",
   label: "Kialo",
+  description,
   parse,
   toGraph: (doc, config) => toGraph(doc, config.showIcons),
   highlightLine,
@@ -26,9 +31,8 @@ export const kialo = defineOntology<KialoDoc>({
   legendNote,
   renderedNodeTypes,
   renderedEdgeTypes,
-  // Session storage first: it's the minimal, syntax-teaching one, and the only example that
-  // shows a `?` question, which is the piece of Kialo the other two ontologies can't match.
   examples: [
+    { id: "minimal-daylight-savings", source: minimalDaylightSavings },
     { id: "session-storage", source: sessionStorage },
     { id: "build-a-wall", source: buildAWall },
   ],

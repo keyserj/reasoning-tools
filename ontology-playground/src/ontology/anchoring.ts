@@ -1,7 +1,7 @@
 // A node with nothing to connect it to the argument is a graph component of its own, and dagre
-// parks those wherever it likes — arg-map's topic header landed in among the claims, where it
-// read as part of the argument. An anchor is an invisible connector that draws nothing and only
-// fixes rank, which is what keeps such a node where it was meant to go.
+// parks those wherever it likes — the Relevance argument map's topic header landed in among the
+// claims, where it read as part of the argument. An anchor is an invisible connector that draws
+// nothing and only fixes rank, which is what keeps such a node where it was meant to go.
 //
 // Direction is the trap, and it is easy to get backwards: under the default `BT` layout an edge's
 // *target* is ranked above its *source*. So to put a floating node **above** the argument, the

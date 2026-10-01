@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { highlightLine } from "../../ontology/arg-map-truth-and-relevance/highlight.ts";
+import { highlightLine } from "../../ontology/relevance-argument-map/highlight.ts";
 import { indexRefs, refTargetAt } from "./refJump.ts";
 
 // Tokenized through a real ontology, the way EditorPane feeds the overlay: the offsets this

@@ -1,6 +1,6 @@
-# Arg map: basic
+# Basic argument map
 
-Ontology id: `arg-map-basic`. A subset of [IBIS](../ibis/ontology.md) with no Questions: Idea, Pro, and Con become Claim, Support, and Critique. See [rendering.md](./rendering.md) for how the playground draws it.
+Ontology id: `basic-argument-map`. A subset of [IBIS](../ibis/ontology.md) with no Questions: Idea, Pro, and Con become Claim, Support, and Critique. See [rendering.md](./rendering.md) for how the playground draws it.
 
 ## Structure
 

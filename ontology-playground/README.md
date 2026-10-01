@@ -17,8 +17,8 @@ LLMs are pretty great at plugging into this playground, so trying out your ideas
 Each lives in `src/ontology/<id>/` and documents itself: `ontology.md` for what it is, `rendering.md` for how the playground draws it, `ideal-ux-design.md` for what an ideal app might look like (not all ontologies have this one). The full syntax key is also in the app under **Syntax**.
 
 - **[IBIS](./src/ontology/ibis/ontology.md)** ([rendering](./src/ontology/ibis/rendering.md)) — the classic question / idea / pro / con argument map.
-- **[Argument map: truth and relevance](./src/ontology/arg-map-truth-and-relevance/ontology.md)** ([rendering](./src/ontology/arg-map-truth-and-relevance/rendering.md)) — claims joined by supports/critiques edges, where each edge is itself a claim that can be scored and argued about.
-- **[Arg map: basic](./src/ontology/arg-map-basic/ontology.md)** ([rendering](./src/ontology/arg-map-basic/rendering.md)) — claims, supports, and critiques using IBIS's nesting and references, without questions.
+- **[Relevance argument map](./src/ontology/relevance-argument-map/ontology.md)** ([rendering](./src/ontology/relevance-argument-map/rendering.md)) — claims joined by supports/critiques edges, where each edge is itself a claim that can be scored and argued about.
+- **[Basic argument map](./src/ontology/basic-argument-map/ontology.md)** ([rendering](./src/ontology/basic-argument-map/rendering.md)) — claims, supports, and critiques using IBIS's nesting and references, without questions.
 - **[Kialo](./src/ontology/kialo/ontology.md)** ([rendering](./src/ontology/kialo/rendering.md)) — pro/con claims under a thesis, each voted 0-4 on one number that folds how true it is together with how much it bears on its parent.
 - **[Ameliorate v2](./src/ontology/ameliorate-v2/ontology.md)** ([rendering](./src/ontology/ameliorate-v2/rendering.md)) — concepts, causal relations, and arguments about their scores, with Full structure and Causal only views.
 

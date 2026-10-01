@@ -1,4 +1,4 @@
-# Rendering: Arg map: basic
+# Rendering: Basic argument map
 
 Each node gets one rectangular box, including when references attach it to multiple parents. A node's box maps to its declaration and reference lines; each connector maps to the line that attaches its child.
 

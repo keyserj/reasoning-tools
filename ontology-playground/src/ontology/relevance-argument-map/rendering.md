@@ -1,4 +1,4 @@
-# Rendering: argument map (truth and relevance)
+# Rendering: Relevance argument map
 
 How the playground draws [this ontology](./ontology.md) — a separate question from what the ontology _is_, and a smaller one than an ideal app UX (this ontology has no equivalent of ameliorate-v2's `UX-design.md`). Nearly all of it lives in [toGraph.ts](./toGraph.ts), which flattens the parsed model into the shared `RenderGraph`.
 

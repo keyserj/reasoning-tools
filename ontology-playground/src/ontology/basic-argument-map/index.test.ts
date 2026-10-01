@@ -1,24 +1,24 @@
 import { describe, expect, it } from "vitest";
 import { type ShareState, decodeState, encodeState } from "../../share/url.ts";
-import { argMapBasic } from "./index.ts";
+import { basicArgumentMap } from "./index.ts";
 
-describe("Arg map: basic", () => {
+describe("Basic argument map", () => {
   it("advertises exactly Claim, Support, Critique, and the shared Note type", () => {
-    expect(argMapBasic.renderedNodeTypes.map((type) => type.label)).toEqual([
+    expect(basicArgumentMap.renderedNodeTypes.map((type) => type.label)).toEqual([
       "Claim",
       "Support",
       "Critique",
       "Note",
     ]);
-    expect(argMapBasic.legend.map((entry) => entry.marker)).not.toContain("?");
-    expect(argMapBasic.parse(argMapBasic.placeholder).errors).toEqual([]);
-    expect(argMapBasic.features).toEqual([]);
+    expect(basicArgumentMap.legend.map((entry) => entry.marker)).not.toContain("?");
+    expect(basicArgumentMap.parse(basicArgumentMap.placeholder).errors).toEqual([]);
+    expect(basicArgumentMap.features).toEqual([]);
   });
 
   it("round-trips its example and custom styling in a shared URL", () => {
-    const example = argMapBasic.examples[0];
+    const example = basicArgumentMap.examples[0];
     const state: ShareState = {
-      ontologyId: argMapBasic.id,
+      ontologyId: basicArgumentMap.id,
       exampleId: example.id,
       source: example.source,
       config: {

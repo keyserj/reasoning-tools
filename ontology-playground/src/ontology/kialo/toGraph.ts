@@ -79,6 +79,7 @@ export function toGraph(doc: KialoDoc, showIcons: boolean): RenderGraph {
       text: question.text,
       lines: doc.sourceLines[question.id],
     });
+    addNotes(nodes, edges, [question], doc.sourceLines);
   }
 
   for (const claim of doc.claims) {

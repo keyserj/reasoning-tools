@@ -6,8 +6,9 @@ import { toGraph } from "./toGraph.ts";
 // Shape only — the lines every box and connector also carries have their own block at the bottom.
 const graph = (source: string) => withoutLines(toGraph(parse(source).doc));
 
-// The link names are the only thing this file decides, and the diagram can't show them: Arg map: basic gives
-// every link the same `-->` and no color, so ./mermaidExport.test.ts would pass either way.
+// The link names are the only thing this file decides, and the diagram can't show them: the Basic
+// argument map gives every link the same `-->` and no color, so ./mermaidExport.test.ts would pass
+// either way.
 
 describe("toGraph", () => {
   it("names each edge after the child it runs from", () => {

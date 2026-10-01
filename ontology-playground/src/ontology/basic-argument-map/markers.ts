@@ -12,7 +12,10 @@ export const MARKER_TO_TYPE: Record<string, NodeType | undefined> = {
 /** Marker for a meta-comment: parsed but dropped from the diagram entirely. */
 export const META_MARKER = "/";
 
-/** Marker for a note: drawn in the diagram, but no part of Arg map: basic — see ../notes.ts. */
+/**
+ * Marker for a note: drawn in the diagram, but no part of the Basic argument map — see
+ * ../notes.ts.
+ */
 export const NOTE_MARKER = "~";
 
 /** Indentation, which is how a line says what it belongs to. */

@@ -31,12 +31,12 @@ Kialo itself draws a four-bar impact meter showing the crowd's average, plus a g
 Left unconnected it would be a graph component of its own, and dagre drops those in among the claims where they read like part of the argument. Every root — each question, plus any thesis with no question — is anchored to it by an `anchor` edge, which uses an invisible connector so it draws nothing and only fixes rank.
 
 - direction is load-bearing and easy to get backwards: the default layout is `BT`, where an edge's **target** is ranked above its **source**. So the edge runs `root ~~~ _topic`, not the other way round
-- every root rather than the first, so a document with two questions gets a header above both instead of above one column. (Arg-map still anchors only its first root, and records that as an open question.)
+- every root rather than the first, so a document with two questions gets a header above both instead of above one column. (The Relevance argument map still anchors only its first root, and records that as an open question.)
 
 ## Colors and icons
 
-The palette is the other ontologies', so the same topic stays comparable across lenses: `pro` blue and `con` red from ameliorate-v2's colorblind-safe `RB = { neg: "#b2182b", pos: "#2166ac" }`, `thesis` and `claim` amber and `note` yellow on the warm-band split argued in [the arg-map ontology's rendering.md](../arg-map-truth-and-relevance/rendering.md#colors-and-icons), `question` gray, `topic` violet.
+The palette is the other ontologies', so the same topic stays comparable across lenses: `pro` blue and `con` red from ameliorate-v2's colorblind-safe `RB = { neg: "#b2182b", pos: "#2166ac" }`, `thesis` and `claim` amber and `note` yellow on the warm-band split argued in [the Relevance argument map's rendering.md](../relevance-argument-map/rendering.md#colors-and-icons), `question` gray, `topic` violet.
 
 - `pro` vs `con` is the pair that _needs_ color, and a box is the only place it appears: no connector here is colored, since none of them carries a stance
 - `question` is gray because a question is a prompt rather than something to take a position on, and because gray is what is left once amber, yellow, red, blue and violet are spoken for
-- ✅ / ⛔ carry the same pair by silhouette, for the reason [arg-map's rendering.md](../arg-map-truth-and-relevance/rendering.md#colors-and-icons) gives
+- ✅ / ⛔ carry the same pair by silhouette, for the reason [the Relevance argument map's rendering.md](../relevance-argument-map/rendering.md#colors-and-icons) gives

@@ -1,0 +1,23 @@
+~ -no questions for guiding or specifying what is unknown
+~ -models arguments but does not model reality
+
+= The US should establish permanent Daylight Saving Time
+  < supports &disrupt-supports-dst
+    = The twice-yearly clock changes disrupt sleep schedules
+      < critiques
+        = My sleep adjusts perfectly fine enough
+  < critiques
+    = Darker winter mornings could worsen circadian alignment and sleep
+    ~ +modeling side via edge allows a Claim to act as both a Support _and_ a Critique if needed
+
+= $disrupt-supports-dst
+  < critiques
+    = Twice a year isn't that much
+    ~ +can distinguish relevance arguments from truth arguments
+
+
+= The US should keep the current process of shifting an hour twice a year
+  ~ -no way to link alternatives
+  < supports
+    = Avoids darker winter mornings to improve circadian alignment and sleep
+      ~ -comparing alternatives requires duplicating arguments and maintaining dupes

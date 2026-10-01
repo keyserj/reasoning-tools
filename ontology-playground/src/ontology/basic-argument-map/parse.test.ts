@@ -69,8 +69,9 @@ describe("parse", () => {
   });
 
   it("refuses an id in the renderer's `_` namespace, keeping the line", () => {
-    // Arg map: basic draws no box of the renderer's own today, but the namespace is the shared renderer's
-    // (../ids.ts), so a syntax that let a document in would be the one that collides later.
+    // The Basic argument map draws no box of the renderer's own today, but the namespace is the
+    // shared renderer's (../ids.ts), so a syntax that let a document in would be the one that
+    // collides later.
     const { doc, errors } = parse("= Claim &_topic");
     expect(errors.map((e) => e.message)).toEqual([
       'An id can\'t start with "_" — the diagram reserves that prefix',
@@ -82,7 +83,8 @@ describe("parse", () => {
     const { doc, errors } = parse("= Claim &i1\n  / hidden\n  ~ shown note");
     expect(errors).toEqual([]);
     expect(doc.nodes.some((n) => n.text === "hidden")).toBe(false);
-    // A note is no node of Arg map: basic's, so it adds neither a node nor an edge to the model.
+    // A note is no node of the Basic argument map's, so it adds neither a node nor an edge to the
+    // model.
     expect(doc.nodes).toHaveLength(1);
     expect(doc.edges).toEqual([]);
     expect(doc.nodes[0].notes.map((n) => n.text)).toEqual(["shown note"]);

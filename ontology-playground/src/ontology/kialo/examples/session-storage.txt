@@ -2,7 +2,7 @@
 %perspectives: [alice, bob]
 
 / Kialo allows one root question per discussion. Two are used here so this example can cover
-/ the same ground as the IBIS and arg-map versions of it.
+/ the same ground as the IBIS and argument map versions of it.
 
 ? How should we handle session storage?
 

@@ -1,6 +1,6 @@
-# Argument map: truth and relevance
+# Relevance argument map
 
-Ontology id: `arg-map-truth-and-relevance`. Implemented in the playground; this doc and [examples/build-a-wall.txt](./examples/build-a-wall.txt) are where the syntax gets settled, and the rest of this directory implements it. How the playground draws it is a separate question, kept in [rendering.md](./rendering.md).
+Ontology id: `relevance-argument-map`. Implemented in the playground; this doc and [examples/build-a-wall.txt](./examples/build-a-wall.txt) are where the syntax gets settled, and the rest of this directory implements it. How the playground draws it is a separate question, kept in [rendering.md](./rendering.md).
 
 This ontology is essentially a narrowing of [ameliorate-v2's contested causal map](../../../../ameliorate-v2/ontology.md) down to claims and supports/critiques edges.
 

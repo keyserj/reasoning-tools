@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { ibis } from "../ontology/ibis/index.ts";
-import { argMapTruthAndRelevance } from "../ontology/arg-map-truth-and-relevance/index.ts";
+import { relevanceArgumentMap } from "../ontology/relevance-argument-map/index.ts";
 import { ameliorateV2 } from "../ontology/ameliorate-v2/index.ts";
 import { defaultExample, findExample } from "../ontology/examples.ts";
 import { defaultFeatureState } from "../ontology/features.ts";
@@ -8,7 +8,7 @@ import { defaultOntologyId, getOntology } from "../ontology/registry.ts";
 import { type ShareState, decodeState, encodeState } from "./url.ts";
 
 const ibisExample = defaultExample(ibis);
-const argMapExample = defaultExample(argMapTruthAndRelevance);
+const relevanceMapExample = defaultExample(relevanceArgumentMap);
 
 // Read from the registry so which ontology is the default stays that file's business.
 const defaultOntology = getOntology(defaultOntologyId);
@@ -47,21 +47,21 @@ describe("share/url", () => {
 
   it("round-trips a document in the other ontology, keeping its own node types", () => {
     const other: ShareState = {
-      ontologyId: argMapTruthAndRelevance.id,
-      exampleId: argMapExample.id,
-      source: argMapExample.source,
-      config: structuredClone(argMapTruthAndRelevance.defaultConfig),
-      features: defaultFeatureState(argMapTruthAndRelevance),
+      ontologyId: relevanceArgumentMap.id,
+      exampleId: relevanceMapExample.id,
+      source: relevanceMapExample.source,
+      config: structuredClone(relevanceArgumentMap.defaultConfig),
+      features: defaultFeatureState(relevanceArgumentMap),
     };
     expect(decodeState(encodeState(other))).toEqual(other);
   });
 
   it("round-trips a non-default feature option and param", () => {
     const other: ShareState = {
-      ontologyId: argMapTruthAndRelevance.id,
-      exampleId: argMapExample.id,
-      source: argMapExample.source,
-      config: structuredClone(argMapTruthAndRelevance.defaultConfig),
+      ontologyId: relevanceArgumentMap.id,
+      exampleId: relevanceMapExample.id,
+      source: relevanceMapExample.source,
+      config: structuredClone(relevanceArgumentMap.defaultConfig),
       features: {
         "edge-claims": { option: "spelled-out", params: { "edge-display": "all-edges-same" } },
       },
@@ -100,7 +100,7 @@ describe("share/url", () => {
   it("falls back to feature defaults for an unknown feature, option or param", () => {
     const bad = {
       ...shared,
-      ontologyId: argMapTruthAndRelevance.id,
+      ontologyId: relevanceArgumentMap.id,
       features: {
         // `edge-label` is a param the ontology used to declare and dropped, which is the
         // realest version of this case: a link someone saved before the rename.
@@ -109,7 +109,7 @@ describe("share/url", () => {
       },
     };
     expect(decodeState(encodeState(bad as unknown as ShareState))?.features).toEqual(
-      defaultFeatureState(argMapTruthAndRelevance),
+      defaultFeatureState(relevanceArgumentMap),
     );
   });
 
@@ -119,7 +119,7 @@ describe("share/url", () => {
     // renders as unavailable, and leave the document permanently un-dirty (no Reset, no draft
     // stashed). Normalizing to null instead is what makes it read honestly as "Custom".
     const unshipped = "build-a-wall";
-    expect(findExample(argMapTruthAndRelevance, unshipped)).toBeDefined();
+    expect(findExample(relevanceArgumentMap, unshipped)).toBeDefined();
     expect(findExample(ibis, unshipped)).toBeUndefined();
 
     const decoded = decodeState(encodeState({ ...shared, exampleId: unshipped }));

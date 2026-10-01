@@ -128,6 +128,12 @@ describe("toGraph — source lines", () => {
     expect(lined(source).edges.find((e) => e.from === "a2")?.lines).toEqual([4]);
   });
 
+  it("hangs a question's note off the question", () => {
+    expect(edgesFrom("? Q &q\n  ~ an aside &nq", "nq")).toEqual([
+      { from: "nq", to: "q", type: "note" },
+    ]);
+  });
+
   it("points a note's box and connector at the `~` line that wrote both", () => {
     const source = "= T &t\n  ~ an aside &nt";
     expect(linedNode(source, "nt")?.lines).toEqual([2]);

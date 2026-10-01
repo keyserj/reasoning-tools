@@ -11,7 +11,10 @@ export interface Note {
   text: string;
 }
 
-/** Anything a note hangs off. Claims, arg-map's edges and IBIS's nodes all satisfy it. */
+/**
+ * Anything a note hangs off. Claims, the Relevance argument map's edges and IBIS's nodes all
+ * satisfy it.
+ */
 export interface NoteOwner {
   id: string;
   notes: Note[];
@@ -23,7 +26,7 @@ export const NOTE_TYPE_ID = "note";
 /**
  * The box a note is drawn in, spread into each ontology's `renderedNodeTypes` so the one-table
  * rule still holds. `description` is legend prose and the one field worth overriding, since what
- * a note is exempt from differs — a Kialo vote, an arg-map score.
+ * a note is exempt from differs — a Kialo vote, a Relevance argument map score.
  */
 export const noteNodeType: NodeTypeDef = {
   id: NOTE_TYPE_ID,
@@ -32,7 +35,7 @@ export const noteNodeType: NodeTypeDef = {
   description: "An aside attached to its parent. Drawn in the diagram, but never argued with.",
   // A parallelogram, which is what makes it read as an aside rather than as part of the argument.
   shape: "parallelogram",
-  // Sticky-note yellow, on the warm-band split argued in arg-map-truth-and-relevance/rendering.md.
+  // Sticky-note yellow, on the warm-band split argued in relevance-argument-map/rendering.md.
   defaultColor: "#d3ad20",
 };
 
@@ -42,9 +45,9 @@ export const noteEdgeType: EdgeTypeDef = { id: NOTE_TYPE_ID, connector: "dotted-
 /**
  * Draw each owner's notes: a box per note, on a dotted connector back to the thing it annotates.
  *
- * Callers pass the owners that actually have a node to attach to — arg-map has owners that don't,
- * since an un-argued edge under `spelled out` earns no box — which is what keeps this free of any
- * one ontology's rules.
+ * Callers pass the owners that actually have a node to attach to — the Relevance argument map has
+ * owners that don't, since an un-argued edge under `spelled out` earns no box — which is what keeps
+ * this free of any one ontology's rules.
  */
 export function addNotes(
   nodes: RenderNode[],

@@ -2,12 +2,12 @@ import { describe, expect, it } from "vitest";
 import type { BasicArgDoc } from "./model.ts";
 import { parse } from "./parse.ts";
 import { mermaidExport } from "../mermaidExport.ts";
-import { argMapBasic } from "./index.ts";
+import { basicArgumentMap } from "./index.ts";
 import { defaultConfig } from "./defaultConfig.ts";
 import example from "./examples/session-storage.txt?raw";
 
 const render = (doc: BasicArgDoc, config = defaultConfig) =>
-  mermaidExport(argMapBasic.toGraph(doc, config, {}), config, argMapBasic, "light");
+  mermaidExport(basicArgumentMap.toGraph(doc, config, {}), config, basicArgumentMap, "light");
 
 describe("mermaidExport", () => {
   it("emits a flowchart with shapes, classes and child -> parent edges", () => {

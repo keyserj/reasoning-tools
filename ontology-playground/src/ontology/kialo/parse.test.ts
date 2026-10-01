@@ -9,7 +9,7 @@ describe("parse", () => {
   it("uses a claim under a question as a thesis, scored on veracity", () => {
     const { doc, errors } = parse("? Q &q\n  =[3] Thesis &t");
     expect(errors).toEqual([]);
-    expect(doc.questions).toEqual([{ id: "q", text: "Q" }]);
+    expect(doc.questions).toEqual([{ id: "q", text: "Q", notes: [] }]);
     expect(doc.theses).toEqual([
       { id: "t1", claimId: "t", viaRef: false, questionId: "q", veracity: [3] },
     ]);
@@ -106,7 +106,14 @@ describe("parse", () => {
     expect(messages("= T\n  ~ first\n  ~ second")).toEqual([]);
   });
 
-  it("takes a `~` with no claim above it as a note on the document", () => {
+  it("attaches a `~` under a question to the question", () => {
+    const { doc, errors } = parse("? Q &q\n  ~ about the question\n  = T &t");
+    expect(errors).toEqual([]);
+    expect(doc.questions[0].notes).toMatchObject([{ text: "about the question" }]);
+    expect(doc.notes).toEqual([]);
+  });
+
+  it("takes a `~` with nothing above it as a note on the document", () => {
     const { doc, errors } = parse("~ about the map itself\n? Q &q1");
     expect(errors).toEqual([]);
     expect(doc.notes.map((n) => n.text)).toEqual(["about the map itself"]);

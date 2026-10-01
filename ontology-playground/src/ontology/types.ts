@@ -1,6 +1,6 @@
 // Shared, ontology-agnostic types: the renderer's data model plus the contract every ontology
 // implements. The UI shell only ever talks to these types + the registry, never to a concrete
-// ontology (IBIS and the truth-and-relevance argument map today, "Contested Causal
+// ontology (IBIS and the Relevance argument map today, "Contested Causal
 // Diagrams" later).
 //
 // Node and edge types are strings rather than a fixed union: each ontology declares its
@@ -8,7 +8,7 @@
 // criterion + causes/reduces/guides edges) via the tables below.
 //
 // `parse` produces the ontology's *own* semantic model, and `toGraph` flattens it into a
-// `RenderGraph` on the way out — see arg-map-truth-and-relevance/toGraph.ts, which turns edges
+// `RenderGraph` on the way out — see relevance-argument-map/toGraph.ts, which turns edges
 // into nodes because an edge there can be argued about like any other claim. Which layer may
 // know what, and why the flattening sits on the render side, is ./pipeline.md's.
 
@@ -225,6 +225,8 @@ export type FeatureState = Record<string, { option: string; params?: Record<stri
 export interface Ontology {
   id: string;
   label: string;
+  /** shown below the picker's pills while this ontology is selected */
+  description: string;
   parse: (text: string) => ParseResult;
   toGraph: (doc: unknown, config: StyleConfig, features: FeatureState) => RenderGraph;
   /**

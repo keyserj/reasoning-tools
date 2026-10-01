@@ -2,7 +2,7 @@ import { describe, expect, it } from "vitest";
 import type { FeatureState } from "../types.ts";
 import { parse } from "./parse.ts";
 import { mermaidExport } from "../mermaidExport.ts";
-import { argMapTruthAndRelevance as ontology } from "./index.ts";
+import { relevanceArgumentMap as ontology } from "./index.ts";
 import { defaultConfig } from "./defaultConfig.ts";
 import { EDGE_CLAIMS, IMPLIED, SPELLED_OUT } from "./features.ts";
 import sessionStorage from "./examples/session-storage.txt?raw";

@@ -2,8 +2,8 @@
 // another lens" a single click: switching ontology keeps the example id and loads that
 // ontology's own writing of it (see App.tsx's switchOntology).
 //
-// Labels live here rather than per ontology so the dropdown reads identically everywhere, and
-// so a substitution notice can name an example the current ontology doesn't have.
+// Labels and descriptions live here rather than per ontology so the picker reads identically
+// everywhere, and so a substitution notice can name an example the current ontology doesn't have.
 //
 // An ontology need not ship every example — it only has to write the ones it can express.
 
@@ -12,11 +12,29 @@ import type { Ontology, OntologyExample } from "./types.ts";
 export interface ExampleDef {
   id: string;
   label: string;
+  /** shown below the picker's pills while this example is selected */
+  description: string;
 }
 
 export const EXAMPLES: ExampleDef[] = [
-  { id: "session-storage", label: "Session storage" },
-  { id: "build-a-wall", label: "Build a wall" },
+  // Every ontology writes this one and lists it first, which makes it the default everywhere.
+  {
+    id: "minimal-daylight-savings",
+    label: "Minimal (daylight savings)",
+    description: "Minimal example to show the main structural differences between ontologies.",
+  },
+  {
+    id: "session-storage",
+    label: "Session storage",
+    description:
+      "WIP. Previously was minimal-ish but unfinished. Kept here because it shows some features the current minimal example doesn't show yet.",
+  },
+  {
+    id: "build-a-wall",
+    label: "Build a wall",
+    description:
+      'WIP. Supposed to be a more fleshed-out example that uses all features of Ameliorate v2, but it isn\'t added for most ontologies yet and still seems "just ok" for Ameliorate v2.',
+  },
 ];
 
 export const EXAMPLE_LABELS: Record<string, string> = Object.fromEntries(

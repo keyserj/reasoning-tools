@@ -3,7 +3,7 @@ import { ANCHOR_TYPE_ID } from "../anchoring.ts";
 import { addDocumentNotes, addNotes } from "../notes.ts";
 import { TOPIC_ID } from "../topic.ts";
 import { featureOption, featureParam } from "../features.ts";
-import type { ArgDoc, Claim, Edge } from "./model.ts";
+import type { RelevanceArgDoc, Claim, Edge } from "./model.ts";
 import {
   EDGE_CLAIMS,
   EDGE_DISPLAY,
@@ -22,7 +22,7 @@ import { type Scores, formatScores } from "./scores.ts";
 const SIDE_MAX = 40;
 
 /** Claims nothing argues *for* — the thesis, in a document with one. */
-function rootClaimIds(doc: ArgDoc): string[] {
+function rootClaimIds(doc: RelevanceArgDoc): string[] {
   const sources = new Set(doc.edges.map((edge) => edge.sourceId));
   return doc.claims.filter((claim) => !sources.has(claim.id)).map((claim) => claim.id);
 }
@@ -37,7 +37,7 @@ function withScores(text: string, scores: Scores | null): string {
  * the bracketed, comma-separated shape of a score row (and of the `%perspectives` line they come
  * from), so `[5,2,8]` can be read off the header slot by slot instead of by inference.
  */
-function topicText(doc: ArgDoc): string {
+function topicText(doc: RelevanceArgDoc): string {
   const parts: string[] = [];
   if (doc.description) parts.push(doc.description);
   if (doc.perspectives.length > 0) {
@@ -47,7 +47,7 @@ function topicText(doc: ArgDoc): string {
 }
 
 /** Topic header + one node per claim: the part both renderings share. */
-function claimNodes(doc: ArgDoc): { nodes: RenderNode[]; known: Set<string> } {
+function claimNodes(doc: RelevanceArgDoc): { nodes: RenderNode[]; known: Set<string> } {
   const nodes: RenderNode[] = [];
   const known = new Set<string>();
 
@@ -74,7 +74,7 @@ function claimNodes(doc: ArgDoc): { nodes: RenderNode[]; known: Set<string> } {
  * where the note is what would have earned it a node in the first place.
  */
 function addNotesAndAnchor(
-  doc: ArgDoc,
+  doc: RelevanceArgDoc,
   nodes: RenderNode[],
   edges: RenderEdge[],
   known: Set<string>,
@@ -99,8 +99,11 @@ function addNotesAndAnchor(
   addDocumentNotes(nodes, edges, doc.notes, roots, doc.sourceLines);
 }
 
-/** Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, reifying every edge into a node. */
-function impliedClaims(doc: ArgDoc, distinguish: boolean): RenderGraph {
+/**
+ * Flatten a {@link RelevanceArgDoc} into the shared {@link RenderGraph}, reifying every edge into a
+ * node.
+ */
+function impliedClaims(doc: RelevanceArgDoc, distinguish: boolean): RenderGraph {
   const { nodes, known } = claimNodes(doc);
   const graphEdges: RenderEdge[] = [];
   const edgeIds = new Set(doc.edges.map((edge) => edge.id));
@@ -172,10 +175,10 @@ function marker(n: number): string {
 }
 
 /**
- * Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, drawing edges as labeled connectors
- * and giving only the argued-about ones a detached node that spells their claim out.
+ * Flatten a {@link RelevanceArgDoc} into the shared {@link RenderGraph}, drawing edges as labeled
+ * connectors and giving only the argued-about ones a detached node that spells their claim out.
  */
-function spelledOutClaims(doc: ArgDoc): RenderGraph {
+function spelledOutClaims(doc: RelevanceArgDoc): RenderGraph {
   const { nodes, known } = claimNodes(doc);
   const graphEdges: RenderEdge[] = [];
   const claimTextById = new Map(doc.claims.map((claim) => [claim.id, claim.text]));
@@ -233,8 +236,11 @@ function spelledOutClaims(doc: ArgDoc): RenderGraph {
   return { nodes, edges: graphEdges };
 }
 
-/** Flatten an {@link ArgDoc} into the shared {@link RenderGraph}, per the `Edge claims` feature. */
-export function toGraph(doc: ArgDoc, features: FeatureState): RenderGraph {
+/**
+ * Flatten a {@link RelevanceArgDoc} into the shared {@link RenderGraph}, per the `Edge claims`
+ * feature.
+ */
+export function toGraph(doc: RelevanceArgDoc, features: FeatureState): RenderGraph {
   const option = featureOption(features, EDGE_CLAIMS, DEFAULT_EDGE_CLAIMS);
   if (option !== IMPLIED) return spelledOutClaims(doc);
   const display = featureParam(features, EDGE_CLAIMS, EDGE_DISPLAY, EDGE_DISPLAY_DISTINGUISH);

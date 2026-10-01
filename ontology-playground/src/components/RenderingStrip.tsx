@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { FeatureDef, FeatureState } from "../ontology/types.ts";
 import { paramApplies } from "../ontology/features.ts";
 
@@ -36,11 +36,14 @@ export default function RenderingStrip({
 }: Props) {
   const [openId, setOpenId] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
+  const copiedTimer = useRef<number | undefined>(undefined);
 
+  // A second copy restarts the "Copied!" rather than inheriting the first one's countdown.
   const copyMermaid = async () => {
-    if (!(await onCopyMermaid())) return;
-    setCopied(true);
-    setTimeout(() => setCopied(false), 1500);
+    window.clearTimeout(copiedTimer.current);
+    const ok = await onCopyMermaid();
+    setCopied(ok);
+    if (ok) copiedTimer.current = window.setTimeout(() => setCopied(false), 1500);
   };
 
   const optionOf = (feature: FeatureDef) => state[feature.id]?.option ?? feature.defaultOption;
@@ -101,9 +104,6 @@ export default function RenderingStrip({
           );
         })}
 
-        {/* Deliberately not caret-suffixed like the feature pills: the caret is what marks a
-            pill as expanding in place, and this one opens a dialog instead. Same row because
-            it's the same scope; different affordance because it behaves differently. */}
         <button
           className="btn btn-xs btn-ghost font-normal ml-auto"
           onClick={copyMermaid}
@@ -112,6 +112,9 @@ export default function RenderingStrip({
           <span>📋</span>
           <span className="whitespace-nowrap">{copied ? "Copied!" : "Copy as Mermaid"}</span>
         </button>
+        {/* Deliberately not caret-suffixed like the feature pills: the caret is what marks a
+            pill as expanding in place, and this one opens a dialog instead. Same row because
+            it's the same scope; different affordance because it behaves differently. */}
         <button
           className="btn btn-xs btn-ghost font-normal"
           onClick={onOpenStyle}

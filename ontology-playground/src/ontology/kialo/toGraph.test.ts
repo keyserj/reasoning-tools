@@ -134,6 +134,12 @@ describe("toGraph — source lines", () => {
     expect(lined(source).edges.find((e) => e.from === "nt")?.lines).toEqual([2]);
   });
 
+  it("leaves the `@` source line and the header's anchors without one: neither draws a thing", () => {
+    const { nodes, edges } = lined("%description: D\n= T &t\n  @ https://e.example A study");
+    expect(nodes.flatMap((n) => n.lines ?? [])).not.toContain(3);
+    expect(edges.filter((e) => e.type === "anchor").map((e) => e.lines)).toEqual([undefined]);
+  });
+
   it("gives the header every `%` line it was built from", () => {
     const source = "%description: D\n%perspectives: [a]\n= T &t";
     expect(linedNode(source, "_topic")?.lines).toEqual([1, 2]);

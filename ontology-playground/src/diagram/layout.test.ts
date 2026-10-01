@@ -210,6 +210,25 @@ describe("layoutDiagram", () => {
     },
   );
 
+  it("keeps two self-loops on one box apart, each with its own lines", () => {
+    const layout = laidOut(
+      layoutDiagram(
+        {
+          nodes: [node("a")],
+          edges: [
+            { from: "a", to: "a", type: "supports", lines: [2] },
+            { from: "a", to: "a", type: "supports", lines: [3] },
+          ],
+        },
+        types,
+        config(),
+        fakeMeasure,
+      ),
+    );
+    expect(layout.edges.map((e) => e.lines)).toEqual([[2], [3]]);
+    expect(layout.edges[0].path).not.toEqual(layout.edges[1].path);
+  });
+
   it("labels a self-loop on its own curve", () => {
     const layout = laidOut(
       layoutDiagram(

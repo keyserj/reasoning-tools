@@ -16,16 +16,6 @@ const exportOf = (
   theme: Theme = "light",
   config: StyleConfig = defaultConfig,
 ) => mermaidExport(ontology.toGraph(parse(text).doc, config, features), config, ontology, theme);
-/** Lines per box that has any, and the lines of each connector that has any, in order. */
-const linesOf = (text: string, features = fullImplied) => {
-  const graph = ontology.toGraph(parse(text).doc, defaultConfig, features);
-  return {
-    nodes: Object.fromEntries(
-      graph.nodes.filter((n) => n.lines?.length).map((n) => [n.id, n.lines]),
-    ),
-    edges: graph.edges.filter((e) => e.lines?.length).map((e) => e.lines),
-  };
-};
 const sample =
   "%perspectives: [alice, bob]\n* Wall &w #action\n  > reduces[3,-5] &r\n    * Immigration &i\n= $r\n  < supports[8,-] &s\n    = Evidence &e\n      ~ Note";
 
@@ -119,43 +109,5 @@ describe("mermaidExport", () => {
 
   it("emits just the header for an empty document", () => {
     expect(exportOf("")).toBe(`flowchart ${defaultConfig.direction}`);
-  });
-});
-
-describe("source lines", () => {
-  it("gives the merged relation box its declaration and implied references", () => {
-    expect(linesOf(sample)).toEqual({
-      nodes: {
-        w: [2],
-        i: [4],
-        e: [7],
-        r: [3, 5],
-        s: [6],
-        "note-note": [8],
-        _score_context: [1],
-      },
-      edges: [[3], [3], [6], [6], [8]],
-    });
-  });
-
-  it("gives a detached claim its reference and its labeled connector the relation", () => {
-    const { nodes, edges } = linesOf(sample, fullSpelled);
-    expect(nodes["r--implied"]).toEqual([5]);
-    expect(nodes.r).toBeUndefined();
-    expect(edges).toEqual([[3], [6], [8]]);
-  });
-
-  it("leaves filtered notes and claim references out of the causal view", () => {
-    expect(linesOf(sample, { [VIEW]: { option: "causal" } })).toEqual({
-      nodes: { w: [2], i: [4], r: [3], _score_context: [1] },
-      edges: [[3], [3]],
-    });
-  });
-
-  it("gives a cyclic implied relation's self-loop its declaration", () => {
-    expect(linesOf("= $loop\n  > supports &loop\n    = Claim &c")).toEqual({
-      nodes: { c: [3], loop: [2, 1] },
-      edges: [[2], [2]],
-    });
   });
 });

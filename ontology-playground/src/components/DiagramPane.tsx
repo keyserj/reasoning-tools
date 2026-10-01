@@ -1,4 +1,4 @@
-import { type PointerEvent, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { type PointerEvent, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import svgPanZoom from "svg-pan-zoom";
 import type { RenderGraph, StyleConfig, Theme, TypeTables } from "../ontology/types.ts";
 import { type DiagramLayout, layoutDiagram } from "../diagram/layout.ts";
@@ -81,22 +81,30 @@ export default function DiagramPane({
   const layout = attempt.layout ?? lastGood.current;
   const picture = layout && !layout.empty ? layout : null;
 
+  const pictureRef = useRef(picture);
+
   // Refit when the picture's structure changes, and only then: a recolor, the theme or a caret
   // move keeps the reader's pan and zoom. svg-pan-zoom folds the viewBox into its own transform
   // and deletes the attribute, so it's written here on every refit rather than left to React,
   // which wouldn't restore a value it thinks is unchanged.
-  useLayoutEffect(() => {
+  const fit = useCallback(() => {
+    const container = containerRef.current;
     const svg = svgRef.current;
     const viewport = viewportRef.current;
-    if (!svg || !viewport) return;
-    const key = picture?.key ?? null;
+    const current = pictureRef.current;
+    if (!container || !svg || !viewport) return;
+    const key = current?.key ?? null;
     if (key === fittedKey.current) return;
-    fittedKey.current = key;
+    // svg-pan-zoom scales by the pane's size, and at zero it builds a matrix it can't invert and
+    // throws. A pane squeezed shut (a tall feature panel in a short window) waits for the resize
+    // that opens it back up.
+    if (current && (container.clientWidth === 0 || container.clientHeight === 0)) return;
     panZoomRef.current?.destroy();
     panZoomRef.current = null;
-    if (!picture) return;
+    fittedKey.current = key;
+    if (!current) return;
 
-    svg.setAttribute("viewBox", `0 0 ${picture.width} ${picture.height}`);
+    svg.setAttribute("viewBox", `0 0 ${current.width} ${current.height}`);
     const panZoom = svgPanZoom(svg, {
       viewportSelector: viewport,
       zoomEnabled: true,
@@ -108,11 +116,17 @@ export default function DiagramPane({
     syncZoomLimits(panZoom);
     fitToPane(panZoom);
     panZoomRef.current = panZoom;
-  }, [picture]);
+  }, []);
+
+  useLayoutEffect(() => {
+    pictureRef.current = picture;
+    fit();
+  }, [picture, fit]);
 
   // svg-pan-zoom measures the SVG once at init and caches it, so without this every later fit
   // would scale to the pane's size at render time rather than its size now.
-  // Re-measuring leaves the current pan/zoom alone; it only refreshes what "fit" means.
+  // Re-measuring leaves the current pan/zoom alone; it only refreshes what "fit" means, or fits a
+  // picture that arrived while the pane had no size.
   useEffect(() => {
     const container = containerRef.current;
     if (!container) return;
@@ -120,6 +134,7 @@ export default function DiagramPane({
     const observer = new ResizeObserver(() => {
       // A zero-size measurement (hidden pane) would leave a garbage scale cached.
       if (container.clientWidth === 0 || container.clientHeight === 0) return;
+      fit();
       const panZoom = panZoomRef.current;
       if (!panZoom) return;
       panZoom.resize();
@@ -128,7 +143,7 @@ export default function DiagramPane({
     observer.observe(container);
 
     return () => observer.disconnect();
-  }, []);
+  }, [fit]);
 
   // Forgetting the fit too, so a remount (StrictMode's, in development) sets svg-pan-zoom up again.
   useEffect(
@@ -144,7 +159,8 @@ export default function DiagramPane({
   const handlePointerUp = (e: PointerEvent<HTMLDivElement>) => {
     const pressed = pressedAt.current;
     pressedAt.current = null;
-    if (pressed === null) return;
+    // A picture kept up past a layout error is out of date: its lines no longer point anywhere.
+    if (pressed === null || attempt.error !== null) return;
     if (Math.hypot(e.clientX - pressed.x, e.clientY - pressed.y) > TAP_SLOP) return;
     const target = e.target instanceof Element ? e.target.closest("[data-line]") : null;
     onPickLine(target === null ? null : Number(target.getAttribute("data-line")));

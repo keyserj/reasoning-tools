@@ -66,7 +66,7 @@
 
 /* A band's type, the counterpart to its surface above: every section header names itself in the
    same 14px/600, so the eye finds the pane's sections without reading them. It goes on the
-   element holding the text — daisyUI's `.btn` and `.tab` set a font-size on the control itself,
+   element holding the text — daisyUI's `.btn` sets a font-size on the control itself,
    which an inherited size from a parent can't outrank. Being a utility, it lands unlayered in
    Tailwind's `utilities` layer and so wins over daisyUI's nested `daisyui.*` sublayers without
    an `!`; don't put a competing `font-*` utility on the same element, since which one wins is

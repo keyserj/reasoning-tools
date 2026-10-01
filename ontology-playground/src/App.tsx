@@ -125,8 +125,9 @@ export default function App() {
 
   /** Built on click: nothing else needs mermaid. */
   const copyMermaid = async () => {
+    const text = mermaidExport(graph, shared.config, ontology, theme);
     try {
-      await navigator.clipboard.writeText(mermaidExport(graph, shared.config, ontology, theme));
+      await navigator.clipboard.writeText(text);
       return true;
     } catch {
       setNotice("Couldn't copy: the browser didn't allow access to the clipboard");

@@ -46,6 +46,8 @@
     fill: var(--diagram-line);
   }
 
+  /* Paint only: ../diagram/measure.ts sizes a label without this class, so nothing here may change
+     its size. */
   .diagram-edge-label-text {
     background: color-mix(in oklab, var(--color-base-300) 85%, transparent);
     color: var(--color-base-content);

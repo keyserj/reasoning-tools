@@ -251,7 +251,9 @@ export default function App() {
             onCopyMermaid={copyMermaid}
           />
           <DiagramPane
+            key={draftKey(shared.ontologyId, shared.exampleId ?? "custom")}
             graph={graph}
+            source={shared.source}
             types={ontology}
             config={shared.config}
             theme={theme}

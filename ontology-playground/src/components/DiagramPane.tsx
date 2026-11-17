@@ -1,12 +1,30 @@
-import { type PointerEvent, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import {
+  type PointerEvent,
+  useCallback,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import svgPanZoom from "svg-pan-zoom";
 import type { RenderGraph, StyleConfig, Theme, TypeTables } from "../ontology/types.ts";
 import { type DiagramLayout, layoutDiagram } from "../diagram/layout.ts";
 import { measureLabels } from "../diagram/measure.ts";
+import {
+  elementsInBox,
+  hiddenItems,
+  restoreItem,
+  selectableDiagram,
+  selectionBox,
+  type SelectionBox,
+} from "../diagram/selection.ts";
 import Diagram from "./Diagram.tsx";
 
 interface Props {
   graph: RenderGraph;
+  source: string;
   types: TypeTables;
   config: StyleConfig;
   theme: Theme;
@@ -45,8 +63,18 @@ function fitToPane(panZoom: PanZoom) {
 
 type Attempt = { layout: DiagramLayout; error: null } | { layout: null; error: string };
 
+interface Press {
+  x: number;
+  y: number;
+  pointerId: number;
+  moved: boolean;
+  selectionKey: string | null;
+  line: number | null;
+}
+
 export default function DiagramPane({
   graph,
+  source,
   types,
   config,
   theme,
@@ -57,9 +85,23 @@ export default function DiagramPane({
   const svgRef = useRef<SVGSVGElement>(null);
   const viewportRef = useRef<SVGGElement>(null);
   const panZoomRef = useRef<PanZoom | null>(null);
-  const pressedAt = useRef<{ x: number; y: number } | null>(null);
+  const pressedAt = useRef<Press | null>(null);
+  const boxDrag = useRef<(Press & { additive: boolean }) | null>(null);
+  const [box, setBox] = useState<SelectionBox | null>(null);
+  const [selected, setSelected] = useState(new Set<string>());
+  const [hidden, setHidden] = useState(new Set<string>());
+  const [hiddenOpen, setHiddenOpen] = useState(false);
+  const hiddenPanelRef = useRef<HTMLDivElement>(null);
+  const hiddenPanelId = useId();
   /** The picture key svg-pan-zoom was last fitted to. */
   const fittedKey = useRef<string | null>(null);
+
+  // Parsers can reassign automatic IDs after edits, so hidden items belong to one source revision.
+  useLayoutEffect(() => {
+    setSelected(new Set());
+    setHidden(new Set());
+    setHiddenOpen(false);
+  }, [source]);
 
   // Accepted compromise: `measureLabels` reads the DOM, which a render isn't supposed to do. It is
   // idempotent and cached, so StrictMode's double render and a render React throws away both cost
@@ -80,6 +122,30 @@ export default function DiagramPane({
   }, [attempt]);
   const layout = attempt.layout ?? lastGood.current;
   const picture = layout && !layout.empty ? layout : null;
+
+  const selectable = useMemo(
+    () => selectableDiagram(picture?.nodes ?? [], picture?.edges ?? []),
+    [picture],
+  );
+  const hiddenKeys = useMemo(() => hiddenItems(selectable.items, hidden), [selectable, hidden]);
+  const hiddenList = selectable.items.filter((item) => hiddenKeys.has(item.key));
+  const selectedCount = selectable.items.filter(
+    (item) => selected.has(item.key) && !hiddenKeys.has(item.key),
+  ).length;
+  const visibleNodes = useMemo(
+    () => selectable.nodes.filter((node) => !hiddenKeys.has(node.selectionKey)),
+    [selectable, hiddenKeys],
+  );
+  const visibleEdges = useMemo(
+    () => selectable.edges.filter((edge) => !hiddenKeys.has(edge.selectionKey)),
+    [selectable, hiddenKeys],
+  );
+
+  useEffect(() => {
+    const keys = new Set(selectable.items.map((item) => item.key));
+    setSelected((previous) => new Set([...previous].filter((key) => keys.has(key))));
+    setHidden((previous) => new Set([...previous].filter((key) => keys.has(key))));
+  }, [selectable]);
 
   const pictureRef = useRef(picture);
 
@@ -155,15 +221,108 @@ export default function DiagramPane({
     [],
   );
 
+  const cancelDrag = useCallback(() => {
+    const drag = boxDrag.current;
+    boxDrag.current = null;
+    pressedAt.current = null;
+    setBox(null);
+    if (drag) {
+      if (containerRef.current?.hasPointerCapture(drag.pointerId)) {
+        containerRef.current.releasePointerCapture(drag.pointerId);
+      }
+      panZoomRef.current?.enablePan();
+      panZoomRef.current?.enableZoom();
+    }
+  }, []);
+
+  useEffect(cancelDrag, [source, selectable, cancelDrag]);
+
+  useEffect(() => {
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== "Escape") return;
+      cancelDrag();
+      setSelected(new Set());
+      setHiddenOpen(false);
+    };
+    const onPointerDown = (event: globalThis.PointerEvent) => {
+      if (event.target instanceof Node && !hiddenPanelRef.current?.contains(event.target)) {
+        setHiddenOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKeyDown);
+    document.addEventListener("pointerdown", onPointerDown);
+    window.addEventListener("blur", cancelDrag);
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.removeEventListener("pointerdown", onPointerDown);
+      window.removeEventListener("blur", cancelDrag);
+    };
+  }, [cancelDrag]);
+
+  const handlePointerDown = (e: PointerEvent<HTMLDivElement>) => {
+    if (!e.isPrimary || e.button !== 0 || attempt.error !== null) return;
+    // svg-pan-zoom prevents the mousedown that would normally blur the editor.
+    if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
+    const target = e.target instanceof Element ? e.target.closest("[data-selection-key]") : null;
+    const line = target?.getAttribute("data-line");
+    const press: Press = {
+      x: e.clientX,
+      y: e.clientY,
+      pointerId: e.pointerId,
+      moved: false,
+      selectionKey: target?.getAttribute("data-selection-key") ?? null,
+      line: line == null ? null : Number(line),
+    };
+    pressedAt.current = press;
+    if (!e.shiftKey) return;
+    e.preventDefault();
+    boxDrag.current = { ...press, additive: e.ctrlKey || e.metaKey };
+    panZoomRef.current?.disablePan();
+    panZoomRef.current?.disableZoom();
+    e.currentTarget.setPointerCapture(e.pointerId);
+    setBox(selectionBox(press, press));
+  };
+
+  const handlePointerMove = (e: PointerEvent<HTMLDivElement>) => {
+    const pressed = pressedAt.current;
+    if (!pressed || pressed.pointerId !== e.pointerId) return;
+    if (Math.hypot(e.clientX - pressed.x, e.clientY - pressed.y) > TAP_SLOP) pressed.moved = true;
+    if (!boxDrag.current) return;
+    boxDrag.current.moved = pressed.moved;
+    setBox(selectionBox(pressed, { x: e.clientX, y: e.clientY }));
+  };
+
   // Pointer events: svg-pan-zoom preventDefaults `touchstart`, so a phone never fires a click.
   const handlePointerUp = (e: PointerEvent<HTMLDivElement>) => {
     const pressed = pressedAt.current;
+    if (!pressed || pressed.pointerId !== e.pointerId) return;
+    const drag = boxDrag.current;
+    const moved =
+      pressed.moved || Math.hypot(e.clientX - pressed.x, e.clientY - pressed.y) > TAP_SLOP;
+    if (drag) {
+      if (attempt.error === null && viewportRef.current) {
+        const hits = moved
+          ? elementsInBox(viewportRef.current, selectionBox(drag, { x: e.clientX, y: e.clientY }))
+          : new Set(drag.selectionKey ? [drag.selectionKey] : []);
+        setSelected((previous) => (drag.additive ? new Set([...previous, ...hits]) : hits));
+        onPickLine(null);
+      }
+      cancelDrag();
+      return;
+    }
     pressedAt.current = null;
     // A picture kept up past a layout error is out of date: its lines no longer point anywhere.
-    if (pressed === null || attempt.error !== null) return;
-    if (Math.hypot(e.clientX - pressed.x, e.clientY - pressed.y) > TAP_SLOP) return;
-    const target = e.target instanceof Element ? e.target.closest("[data-line]") : null;
-    onPickLine(target === null ? null : Number(target.getAttribute("data-line")));
+    if (attempt.error !== null || moved) return;
+    const target = e.target instanceof Element ? e.target.closest("[data-selection-key]") : null;
+    const key = target?.getAttribute("data-selection-key") ?? null;
+    if (key !== pressed.selectionKey) return;
+    if (e.ctrlKey || e.metaKey) {
+      if (key) setSelected((previous) => new Set([...previous, key]));
+      onPickLine(null);
+    } else {
+      setSelected(new Set(key ? [key] : []));
+      onPickLine(pressed.line);
+    }
   };
 
   return (
@@ -173,30 +332,146 @@ export default function DiagramPane({
       {/* touch-none hands drag/pinch to svg-pan-zoom instead of the browser panning the page. */}
       <div
         ref={containerRef}
-        className="absolute inset-0 overflow-hidden touch-none"
-        onPointerDown={(e) => {
-          // svg-pan-zoom preventDefaults `mousedown`, which is where the browser would have
-          // blurred the editor.
-          if (document.activeElement instanceof HTMLElement) document.activeElement.blur();
-          pressedAt.current = e.button === 0 ? { x: e.clientX, y: e.clientY } : null;
-        }}
+        className={`absolute inset-0 overflow-hidden touch-none select-none ${box ? "cursor-crosshair" : ""}`}
+        onPointerDown={handlePointerDown}
+        onPointerMove={handlePointerMove}
         onPointerUp={handlePointerUp}
+        onPointerCancel={cancelDrag}
+        onLostPointerCapture={cancelDrag}
+        onPointerLeave={() => {
+          if (!boxDrag.current) pressedAt.current = null;
+        }}
+        onMouseDownCapture={(e) => {
+          if (boxDrag.current) {
+            e.preventDefault();
+            e.stopPropagation();
+          }
+        }}
       >
         <svg ref={svgRef} className="diagram" width="100%" height="100%">
           <g ref={viewportRef}>
             {picture && (
               <Diagram
-                nodes={picture.nodes}
-                edges={picture.edges}
+                nodes={visibleNodes}
+                edges={visibleEdges}
                 types={types}
                 typeColors={config.typeColors}
                 theme={theme}
                 activeLine={activeLine}
+                selected={selected}
                 linked={attempt.error === null}
               />
             )}
           </g>
         </svg>
+        {box && (
+          <div
+            className="absolute border border-primary bg-primary/15 pointer-events-none"
+            style={{
+              left: box.left - (containerRef.current?.getBoundingClientRect().left ?? 0),
+              top: box.top - (containerRef.current?.getBoundingClientRect().top ?? 0),
+              width: box.right - box.left,
+              height: box.bottom - box.top,
+            }}
+          />
+        )}
+      </div>
+
+      {selectedCount > 0 && (
+        <div className="absolute top-3 left-3 flex flex-wrap items-center gap-2 rounded-lg border border-base-content/20 bg-base-100 p-2 shadow-sm max-w-[calc(100%-1.5rem)]">
+          <span className="text-xs" role="status">
+            {selectedCount} selected
+          </span>
+          <button
+            className="btn btn-sm"
+            disabled={attempt.error !== null}
+            onClick={() => {
+              setHidden((previous) => new Set([...previous, ...selected]));
+              setSelected(new Set());
+              onPickLine(null);
+              setHiddenOpen(false);
+            }}
+          >
+            Hide these
+          </button>
+          <button
+            className="btn btn-sm btn-ghost"
+            onClick={() => {
+              setSelected(new Set());
+              onPickLine(null);
+            }}
+          >
+            Clear
+          </button>
+        </div>
+      )}
+
+      {picture && visibleNodes.length === 0 && hiddenList.length > 0 && (
+        <div className="absolute inset-0 flex items-center justify-center p-6 pointer-events-none text-sm opacity-60">
+          All nodes are hidden. Use the hidden-items list to show them again.
+        </div>
+      )}
+
+      <div className="absolute bottom-3 left-3 flex flex-col items-start gap-2 max-w-[calc(100%-4.5rem)]">
+        {hiddenList.length > 0 && (
+          <div ref={hiddenPanelRef} className="relative max-w-full">
+            <button
+              className="btn btn-sm rounded-full border-base-content/20 shadow-sm"
+              aria-expanded={hiddenOpen}
+              aria-controls={hiddenPanelId}
+              onClick={() => setHiddenOpen((open) => !open)}
+            >
+              {hiddenList.length} nodes/edges hidden
+            </button>
+            {hiddenOpen && (
+              <section
+                id={hiddenPanelId}
+                aria-label="Hidden nodes and edges"
+                className="absolute bottom-full left-0 mb-2 w-80 max-w-[calc(100vw-5rem)] rounded-lg border border-base-content/20 bg-base-100 shadow-lg"
+              >
+                <div className="flex items-center justify-between gap-2 border-b border-base-content/20 p-3">
+                  <h2 className="text-sm font-semibold">Hidden nodes and edges</h2>
+                  <button
+                    className="btn btn-xs btn-ghost"
+                    onClick={() => {
+                      setHidden(new Set());
+                      setHiddenOpen(false);
+                    }}
+                  >
+                    Show all
+                  </button>
+                </div>
+                <ul className="max-h-[min(50vh,24rem)] overflow-y-auto p-2">
+                  {hiddenList.map((item) => (
+                    <li key={item.key} className="flex items-start gap-3 p-2">
+                      <div className="flex-1 min-w-0">
+                        <span className="text-xs opacity-60 capitalize">{item.kind}</span>
+                        <p className="text-sm whitespace-pre-wrap break-words">{item.label}</p>
+                      </div>
+                      <button
+                        className="btn btn-xs shrink-0"
+                        aria-label={`Show ${item.kind}: ${item.label}`}
+                        title={
+                          item.kind === "edge"
+                            ? "Show this edge and its endpoints"
+                            : "Show this node"
+                        }
+                        onClick={() => setHidden((previous) => restoreItem(item, previous))}
+                      >
+                        Show
+                      </button>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+          </div>
+        )}
+        {picture && (
+          <p className="hidden sm:block text-xs bg-base-100/90 rounded px-2 py-1 pointer-events-none">
+            Shift-drag to select · Ctrl/Cmd-click to add · Esc to clear
+          </p>
+        )}
       </div>
 
       {layout?.empty && (

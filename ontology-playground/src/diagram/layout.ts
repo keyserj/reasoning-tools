@@ -74,6 +74,7 @@ export const EMPTY_PLACEHOLDER = "(nothing to show yet — start typing on the l
 /** Mermaid's flowchart spacing, so a copied export comes out with the same proportions. */
 const NODE_SEP = 50;
 const RANK_SEP = 50;
+const COMPONENT_SEP = 100;
 const MARGIN = 8;
 
 /**
@@ -195,7 +196,24 @@ export function layoutDiagram(
     );
   });
 
-  dagre.layout(g);
+  // Dagre reduces crossings within a connected graph, but can interleave unrelated islands.
+  // Invisible anchors still connect components: they keep headers and notes with their owners.
+  const components = dagre.graphlib.alg.components(g).map((ids) => ({
+    ids: new Set(ids),
+    minX: Infinity,
+    minY: Infinity,
+    maxX: -Infinity,
+    maxY: -Infinity,
+    x: 0,
+    y: 0,
+  }));
+  const componentOf = new Map(components.flatMap((c) => [...c.ids].map((id) => [id, c] as const)));
+  for (const component of components) {
+    // filterNodes shares node and edge labels, so layout writes positions back into g.
+    const island = g.filterNodes((id) => component.ids.has(id));
+    island.setGraph({ ...g.graph() });
+    dagre.layout(island);
+  }
 
   const center = nodes.map((node) => {
     const { x, y } = g.node(keyOf.get(node.id)!);
@@ -258,30 +276,44 @@ export function layoutDiagram(
     routes.push({ edge, connector, points, drawn, label });
   });
 
-  // dagre's own bounds leave out edge points, which a self-loop reaches past. Everything moves so
-  // the picture starts at the origin: svg-pan-zoom centers a viewBox that doesn't by its offset
-  // twice over.
-  let minX = Infinity;
-  let minY = Infinity;
-  let maxX = -Infinity;
-  let maxY = -Infinity;
-  const include = (x: number, y: number, halfWidth = 0, halfHeight = 0) => {
-    minX = Math.min(minX, x - halfWidth);
-    maxX = Math.max(maxX, x + halfWidth);
-    minY = Math.min(minY, y - halfHeight);
-    maxY = Math.max(maxY, y + halfHeight);
+  // Dagre's bounds omit self-loop routing points and our labels move onto the curves, so
+  // component spacing must use the final geometry. A B-spline stays inside its points' hull.
+  const include = (id: string, x: number, y: number, halfWidth = 0, halfHeight = 0) => {
+    const c = componentOf.get(keyOf.get(id)!)!;
+    c.minX = Math.min(c.minX, x - halfWidth);
+    c.maxX = Math.max(c.maxX, x + halfWidth);
+    c.minY = Math.min(c.minY, y - halfHeight);
+    c.maxY = Math.max(c.maxY, y + halfHeight);
   };
   shapes.forEach(({ size }, i) =>
-    include(center[i].x, center[i].y, size.width / 2, size.height / 2),
+    include(nodes[i].id, center[i].x, center[i].y, size.width / 2, size.height / 2),
   );
-  for (const { points, label } of routes) {
-    // A B-spline stays inside the hull of its points.
-    for (const p of points) include(p.x, p.y);
-    if (label) include(label.x, label.y, label.width / 2, label.height / 2);
+  for (const { edge, points, label } of routes) {
+    for (const p of points) include(edge.from, p.x, p.y);
+    if (label) include(edge.from, label.x, label.y, label.width / 2, label.height / 2);
   }
-  const shift = (p: Point) => ({ x: p.x - minX + MARGIN, y: p.y - minY + MARGIN });
+
+  const vertical = config.direction === "TB" || config.direction === "BT";
+  let width = 0;
+  let height = 0;
+  for (const c of components) {
+    c.x = vertical ? width : 0;
+    c.y = vertical ? 0 : height;
+    const w = c.maxX - c.minX;
+    const h = c.maxY - c.minY;
+    width = vertical ? c.x + w + COMPONENT_SEP : Math.max(width, w);
+    height = vertical ? Math.max(height, h) : c.y + h + COMPONENT_SEP;
+  }
+  if (vertical) width -= COMPONENT_SEP;
+  else height -= COMPONENT_SEP;
+
+  const shiftFor = (id: string) => {
+    const c = componentOf.get(keyOf.get(id)!)!;
+    return (p: Point) => ({ x: p.x - c.minX + c.x + MARGIN, y: p.y - c.minY + c.y + MARGIN });
+  };
 
   const laidOutNodes: LaidOutNode[] = nodes.map((node, i) => {
+    const shift = shiftFor(node.id);
     const { x, y } = shift(center[i]);
     return {
       id: node.id,
@@ -297,23 +329,26 @@ export function layoutDiagram(
     };
   });
 
-  const laidOutEdges: LaidOutEdge[] = routes.map(({ edge, connector, points, drawn, label }) => ({
-    from: edge.from,
-    to: edge.to,
-    type: edge.type,
-    connector,
-    points: points.map(shift),
-    path: basisPath(drawn.map(shift)),
-    ...(label ? { label: { ...label, ...shift(label) } } : {}),
-    lines: edge.lines ?? [],
-  }));
+  const laidOutEdges: LaidOutEdge[] = routes.map(({ edge, connector, points, drawn, label }) => {
+    const shift = shiftFor(edge.from);
+    return {
+      from: edge.from,
+      to: edge.to,
+      type: edge.type,
+      connector,
+      points: points.map(shift),
+      path: basisPath(drawn.map(shift)),
+      ...(label ? { label: { ...label, ...shift(label) } } : {}),
+      lines: edge.lines ?? [],
+    };
+  });
 
   return {
     empty: false,
     nodes: laidOutNodes,
     edges: laidOutEdges,
-    width: maxX - minX + 2 * MARGIN,
-    height: maxY - minY + 2 * MARGIN,
+    width: width + 2 * MARGIN,
+    height: height + 2 * MARGIN,
     key: JSON.stringify([
       laidOutNodes.map((n) => [n.shape, n.path, n.label.text, n.dashed]),
       laidOutEdges.map((e) => [e.connector, e.path, e.label?.text, e.label?.x, e.label?.y]),

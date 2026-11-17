@@ -1,0 +1,47 @@
+? Should a city freeze rents?
+  ~ for discussion, a question should _always_ be selected as a "current focus"
+  < clarifies
+    ? Under what conditions should a city freeze rents?
+      < criterion for &criterion-condition
+        * Landlords have more financial slack than current tenants
+      < criterion for
+        * Economy is so drastic that many existing tenants are uncertain about being able to fulfill basic needs
+          ~ these criterion should really be "conditions", each with a "situation _fulfills_ condition" score, where the sum of these scores imply "how much should this city freeze rents?"
+  < clarifies
+    ? What would a rent freeze do?
+      ~ filters to cause-effect stemming from "Concept: rent freeze"
+        / perhaps "Concept: rent freeze" has a "answers" relation to the question
+  < clarifies
+    ? Why might we want or not want a rent freeze?
+      ~ filters to argument map of "A city should freeze rents"
+
+* rent freeze
+  / rent freeze: when a board/committee decides not to change rents for rent-standardized housing
+  / e.g. NYC has ~50% rent-standardized housing, Chicago has none
+  > causes
+    * financial burden moved from current tenants to their landlords
+      > causes
+        * financial relief for current tenants &relief-tenants
+      > causes
+        * financial burden on current landlords
+
+* current tenants are uncertain about being able to fulfill basic needs
+  ~ concepts are user-scored "how important + good is this Concept?" to convey motivation, determining that e.g. this is a core problem, or generally which Concepts are benefits vs detriments
+  ~ I guess this means scores should be based on a context. maybe?: score: {contextListId, meaningId, userId, value}
+  < reduces
+    * $relief-tenants
+  < clarifies
+    ? How to measure this?
+      ~ measurement becomes a Support, Critique, or Fact
+
+* prospective tenants are uncertain about being able to fulfill basic needs
+  < reduces
+    * $relief-tenants
+    ~ this would be scored a 0 to explicitly convey that "rent freeze" does not address this concern (better way to represent?)
+
+= A city should freeze rents
+  ~ "reasons for" / "against" generated based on positive effects vs negative effects downstream of "rent freeze"
+  < supports
+    = 'rent freeze' reduces 'current tenants are uncertain about being able to fulfill basic needs'
+  < critiques
+    = 'rent freeze' causes 'financial burden on current landlords'

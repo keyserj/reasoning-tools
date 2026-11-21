@@ -42,6 +42,30 @@
     stroke-dasharray: 2;
   }
 
+  .diagram-edge-hit {
+    fill: none;
+    stroke: transparent;
+    stroke-width: 12px;
+    pointer-events: stroke;
+  }
+
+  .diagram-node .diagram-selection-outline {
+    fill: none;
+    stroke: var(--color-primary);
+    stroke-width: 3px;
+    stroke-dasharray: 6 3;
+    pointer-events: none;
+  }
+
+  .diagram-edge.is-selected {
+    stroke-width: 4px;
+    filter: drop-shadow(0 0 2px var(--color-primary));
+  }
+
+  .diagram-edge-label.is-selected {
+    filter: drop-shadow(0 0 3px var(--color-primary));
+  }
+
   .diagram-arrow path {
     fill: var(--diagram-line);
   }
@@ -54,7 +78,7 @@
   }
 
   /* Unmapped chrome (anchors' ends, a stale picture) must not look clickable. */
-  .diagram-pane .is-linked {
+  .diagram-pane .is-selectable {
     cursor: pointer;
   }
 

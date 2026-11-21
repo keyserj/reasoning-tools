@@ -30,6 +30,8 @@ Each ontology has a set of examples that show off its syntax and features. The p
 
 Each ontology can declare features that change how the playground renders its model. These just help you play around with different ways of displaying the same underlying model.
 
+Shift-drag in the diagram to box-select nodes and edges; Ctrl-click (Cmd-click on Mac) adds to the selection. **Hide these** hides the selection without moving the remaining diagram. The corner pill lists all hidden nodes and edges, with **Show** beside each and **Show all**. Hiding a node also hides its incident edges; showing an edge restores its endpoints if needed. Escape clears the selection. Selection and hiding are temporary view state, reset when the source is edited or the ontology/example changes, and are not included in shared links or Mermaid exports.
+
 ## Develop
 
 ```bash

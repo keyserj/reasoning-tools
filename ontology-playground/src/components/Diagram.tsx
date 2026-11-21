@@ -1,5 +1,6 @@
-import { memo, useId, useMemo } from "react";
-import type { Label, LaidOutEdge, LaidOutNode } from "../diagram/layout.ts";
+import { Fragment, memo, useId, useMemo } from "react";
+import type { Label, LaidOutEdge } from "../diagram/layout.ts";
+import type { SelectableEdge, SelectableNode } from "../diagram/selection.ts";
 import { LABEL_CLASS } from "../diagram/measure.ts";
 import { type TypeStyle, deriveTypeStyle } from "../ontology/typeColors.ts";
 import type { Theme, TypeTables } from "../ontology/types.ts";
@@ -8,12 +9,13 @@ import type { Theme, TypeTables } from "../ontology/types.ts";
 // sit under what they end on. Paint that doesn't depend on a type lives in ./Diagram.css.
 
 interface Props {
-  nodes: LaidOutNode[];
-  edges: LaidOutEdge[];
+  nodes: SelectableNode[];
+  edges: SelectableEdge[];
   types: TypeTables;
   typeColors: Record<string, string>;
   theme: Theme;
   activeLine: number | null;
+  selected: ReadonlySet<string>;
   /** Off while the picture is out of date with the text: its lines no longer point anywhere. */
   linked: boolean;
 }
@@ -36,7 +38,7 @@ function LabelBox({ label, className = "" }: { label: Label; className?: string 
   );
 }
 
-function Diagram({ nodes, edges, types, typeColors, theme, activeLine, linked }: Props) {
+function Diagram({ nodes, edges, types, typeColors, theme, activeLine, selected, linked }: Props) {
   const markerPrefix = `arrow-${useId().replace(/[^A-Za-z0-9_-]/g, "")}`;
 
   const styles = useMemo(() => {
@@ -66,12 +68,13 @@ function Diagram({ nodes, edges, types, typeColors, theme, activeLine, linked }:
   };
 
   /** Classes and the click target shared by everything an element of the document drew. */
-  const linking = (base: string, lines: number[]) => {
+  const linking = (base: string, lines: number[], selectionKey: string) => {
     const isLinked = linked && lines.length > 0;
     const isActive = isLinked && activeLine !== null && lines.includes(activeLine);
     return {
-      className: `${base}${isLinked ? " is-linked" : ""}${isActive ? " is-active" : ""}`,
+      className: `${base}${linked ? " is-selectable" : ""}${isLinked ? " is-linked" : ""}${isActive ? " is-active" : ""}${selected.has(selectionKey) ? " is-selected" : ""}`,
       "data-line": isLinked ? lines[0] : undefined,
+      "data-selection-key": linked ? selectionKey : undefined,
     };
   };
 
@@ -96,38 +99,52 @@ function Diagram({ nodes, edges, types, typeColors, theme, activeLine, linked }:
         ))}
       </defs>
 
-      {edges.map((edge, i) => {
+      {edges.map((edge) => {
         const color = edgeColor.get(edge.type);
         return (
-          <path
-            key={i}
-            {...linking(
-              `diagram-edge is-${edge.connector}${color ? " is-colored" : ""}`,
-              edge.lines,
-            )}
-            d={edge.path}
-            style={color ? { stroke: color } : undefined}
-            markerEnd={markerFor(edge)}
-          />
+          <Fragment key={edge.selectionKey}>
+            <path
+              {...linking("diagram-edge-hit", edge.lines, edge.selectionKey)}
+              d={edge.path}
+              vectorEffect="non-scaling-stroke"
+            />
+            <path
+              {...linking(
+                `diagram-edge is-${edge.connector}${color ? " is-colored" : ""}`,
+                edge.lines,
+                edge.selectionKey,
+              )}
+              d={edge.path}
+              style={color ? { stroke: color } : undefined}
+              markerEnd={markerFor(edge)}
+            />
+          </Fragment>
         );
       })}
 
       {/* A labeled connector's midpoint is its label, not the 1.5px path, so the label links too. */}
       {edges.map(
-        (edge, i) =>
+        (edge) =>
           edge.label && (
-            <g key={i} {...linking("diagram-edge-label", edge.lines)}>
+            <g
+              key={edge.selectionKey}
+              {...linking("diagram-edge-label", edge.lines, edge.selectionKey)}
+            >
               <LabelBox label={edge.label} className="diagram-edge-label-text" />
             </g>
           ),
       )}
 
-      {nodes.map((node, i) => {
+      {nodes.map((node) => {
         const style = styles.get(node.type);
         return (
           <g
-            key={i}
-            {...linking(`diagram-node${node.dashed ? " is-dashed" : ""}`, node.lines)}
+            key={node.selectionKey}
+            {...linking(
+              `diagram-node${node.dashed ? " is-dashed" : ""}`,
+              node.lines,
+              node.selectionKey,
+            )}
             style={style ? { color: style.text } : undefined}
           >
             <path
@@ -139,6 +156,13 @@ function Diagram({ nodes, edges, types, typeColors, theme, activeLine, linked }:
                 className="diagram-node-bars"
                 d={node.bars}
                 style={style ? { stroke: style.border } : undefined}
+              />
+            )}
+            {selected.has(node.selectionKey) && (
+              <path
+                className="diagram-selection-outline"
+                d={node.path}
+                vectorEffect="non-scaling-stroke"
               />
             )}
             <LabelBox label={node.label} />
